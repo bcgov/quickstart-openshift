@@ -1,4 +1,3 @@
-warning: Cannot check if git requires authentication.
 apiVersion: v1
 items:
 - apiVersion: image.openshift.io/v1
@@ -63,7 +62,7 @@ items:
     source:
       git:
         ref: main
-        uri: git@github.com:bcgov-nr/greenfield-pipeline
+        uri: https://github.com/bcgov-nr/greenfield-pipeline
       type: Git
     strategy:
       dockerStrategy:
@@ -72,12 +71,6 @@ items:
           name: node:14
       type: Docker
     triggers:
-    - github:
-        secret: sAUdG6h0B3uTouezDBGb
-      type: GitHub
-    - generic:
-        secret: QvNxDXcCgArsYSy3GyQr
-      type: Generic
     - type: ConfigChange
     - imageChange: {}
       type: ImageChange
