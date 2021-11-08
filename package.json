@@ -1,0 +1,30 @@
+{
+  "name": "greenfield-pipeline",
+  "version": "0.0.1",
+  "description": "OneTeam greenfield pipeline. For testing and demonstration purposes.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bcgov-nr/greenfield-pipeline.git"
+  },
+  "keywords": [
+    "openshift",
+    "pipeline",
+    "node",
+    "node",
+    "js",
+    "devops"
+  ],
+  "author": "Derek Roberts",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/bcgov-nr/greenfield-pipeline/issues"
+  },
+  "homepage": "https://github.com/bcgov-nr/greenfield-pipeline#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
