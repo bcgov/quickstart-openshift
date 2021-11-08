@@ -1,7 +1,6 @@
-FROM node:10
+FROM node:14
 WORKDIR /app
-COPY package.json /app
+COPY . .
 RUN npm install
-COPY . /app
-CMD node index.js
 EXPOSE 8080
+CMD node index.js
