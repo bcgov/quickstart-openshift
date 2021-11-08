@@ -1,0 +1,162 @@
+warning: Cannot check if git requires authentication.
+apiVersion: v1
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: greenfield-pipeline
+      component: hello-world
+    name: node
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: node:14
+      from:
+        kind: DockerImage
+        name: node:14
+      generation: null
+      importPolicy: {}
+      name: "14"
+      referencePolicy:
+        type: ""
+  status:
+    dockerImageRepository: ""
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: greenfield-pipeline
+      component: hello-world
+    name: greenfield-pipeline
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: greenfield-pipeline
+      component: hello-world
+    name: greenfield-pipeline
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: greenfield-pipeline:latest
+    postCommit: {}
+    resources: {}
+    source:
+      git:
+        ref: main
+        uri: git@github.com:bcgov-nr/greenfield-pipeline
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: node:14
+      type: Docker
+    triggers:
+    - github:
+        secret: sAUdG6h0B3uTouezDBGb
+      type: GitHub
+    - generic:
+        secret: QvNxDXcCgArsYSy3GyQr
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: greenfield-pipeline
+      component: hello-world
+    name: greenfield-pipeline
+  spec:
+    replicas: 1
+    selector:
+      app: greenfield-pipeline
+      component: hello-world
+      deploymentconfig: greenfield-pipeline
+    strategy:
+      resources: {}
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: greenfield-pipeline
+          component: hello-world
+          deploymentconfig: greenfield-pipeline
+      spec:
+        containers:
+        - image: greenfield-pipeline:latest
+          name: greenfield-pipeline
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - greenfield-pipeline
+        from:
+          kind: ImageStreamTag
+          name: greenfield-pipeline:latest
+      type: ImageChange
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: greenfield-pipeline
+      component: hello-world
+    name: greenfield-pipeline
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: greenfield-pipeline
+      component: hello-world
+      deploymentconfig: greenfield-pipeline
+  status:
+    loadBalancer: {}
+kind: List
+metadata: {}
