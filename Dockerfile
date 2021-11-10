@@ -1,6 +1,7 @@
-FROM image-registry.apps.silver.devops.gov.bc.ca/openshift/nodejs:14-ubi8
+FROM registry.access.redhat.com/ubi8/ubi
+RUN dnf module install -y nodejs:14
 WORKDIR /app
-COPY ./index.js ./package.json ./package-lock.json ./
+COPY . .
 RUN npm ci
 EXPOSE 8080
 CMD node index.js
