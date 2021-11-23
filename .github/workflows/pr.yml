@@ -15,16 +15,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: OpenShift Init
+        run: |
+          set -ex
+
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc process -f ./.pipeline/build.yml -p SUFFIX=${{ github.event.number }} -p GIT_BRANCH=${GITHUB_HEAD_REF} | oc apply -f -
+          
       - name: OpenShift Build
         run: |
           set -ex
 
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc cancel-build bc/greenfield-pipeline
-          oc start-build bc/greenfield-pipeline --follow
-          LATEST=$(oc get bc/greenfield-pipeline -o 'jsonpath={.status.lastVersion}')
-          RESULT=$(oc get build/greenfield-pipeline-${LATEST})
-          if [ "${RESULT}" != "Success" ]; then
+          oc cancel-build bc/gfp-${{ github.event.number }}
+          oc start-build bc/gfp-${{ github.event.number }} --follow
+          LATEST=$(oc get bc/gfp-${{ github.event.number }} -o 'jsonpath={.status.lastVersion}')
+          RESULT=$(oc get build/gfp-${{ github.event.number }}-${LATEST} -o 'jsonpath={.status.phase}')
+          if [ "${RESULT}" != "Complete" ]; then
             echo "Build failed or cancelled"
             exit 1
           fi
