@@ -9,7 +9,7 @@ items:
             "name": "",
             "interface": "eth0",
             "ips": [
-                "10.97.92.39"
+                "10.97.153.120"
             ],
             "default": true,
             "dns": {}
@@ -19,25 +19,23 @@ items:
             "name": "",
             "interface": "eth0",
             "ips": [
-                "10.97.92.39"
+                "10.97.153.120"
             ],
             "default": true,
             "dns": {}
         }]
       kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu, memory request for
-        container greenfield-pipeline; cpu, memory limit for container greenfield-pipeline'
-      openshift.io/deployment-config.latest-version: "2"
-      openshift.io/deployment-config.name: greenfield-pipeline
-      openshift.io/deployment.name: greenfield-pipeline-2
-      openshift.io/generated-by: OpenShiftNewApp
+        container gfp; cpu, memory limit for container gfp'
+      openshift.io/deployment-config.latest-version: "1"
+      openshift.io/deployment-config.name: gfp
+      openshift.io/deployment.name: gfp-1
       openshift.io/scc: restricted
-    creationTimestamp: "2021-11-08T22:38:23Z"
-    generateName: greenfield-pipeline-2-
+    creationTimestamp: "2021-11-22T20:17:01Z"
+    generateName: gfp-1-
     labels:
-      app: greenfield-pipeline
-      component: hello-world
-      deployment: greenfield-pipeline-2
-      deploymentconfig: greenfield-pipeline
+      app: gfp
+      deployment: gfp-1
+      deploymentconfig: gfp
     managedFields:
     - apiVersion: v1
       fieldsType: FieldsV1
@@ -48,17 +46,15 @@ items:
             f:openshift.io/deployment-config.latest-version: {}
             f:openshift.io/deployment-config.name: {}
             f:openshift.io/deployment.name: {}
-            f:openshift.io/generated-by: {}
           f:generateName: {}
           f:labels:
             .: {}
             f:app: {}
-            f:component: {}
             f:deployment: {}
             f:deploymentconfig: {}
           f:ownerReferences:
             .: {}
-            k:{"uid":"d0cf37d4-393f-447c-84c3-9a8cbd0e5944"}:
+            k:{"uid":"5f04d16d-6c99-4db2-83b1-0ec547e4225e"}:
               .: {}
               f:apiVersion: {}
               f:blockOwnerDeletion: {}
@@ -68,17 +64,11 @@ items:
               f:uid: {}
         f:spec:
           f:containers:
-            k:{"name":"greenfield-pipeline"}:
+            k:{"name":"gfp"}:
               .: {}
               f:image: {}
               f:imagePullPolicy: {}
               f:name: {}
-              f:ports:
-                .: {}
-                k:{"containerPort":8080,"protocol":"TCP"}:
-                  .: {}
-                  f:containerPort: {}
-                  f:protocol: {}
               f:resources: {}
               f:terminationMessagePath: {}
               f:terminationMessagePolicy: {}
@@ -90,7 +80,7 @@ items:
           f:terminationGracePeriodSeconds: {}
       manager: kube-controller-manager
       operation: Update
-      time: "2021-11-08T22:38:23Z"
+      time: "2021-11-22T20:17:01Z"
     - apiVersion: v1
       fieldsType: FieldsV1
       fieldsV1:
@@ -100,7 +90,7 @@ items:
             f:k8s.v1.cni.cncf.io/networks-status: {}
       manager: multus
       operation: Update
-      time: "2021-11-08T22:38:25Z"
+      time: "2021-11-22T20:17:03Z"
     - apiVersion: v1
       fieldsType: FieldsV1
       fieldsV1:
@@ -130,33 +120,30 @@ items:
           f:podIP: {}
           f:podIPs:
             .: {}
-            k:{"ip":"10.97.92.39"}:
+            k:{"ip":"10.97.153.120"}:
               .: {}
               f:ip: {}
           f:startTime: {}
       manager: kubelet
       operation: Update
-      time: "2021-11-08T22:38:28Z"
-    name: greenfield-pipeline-2-xltwr
+      time: "2021-11-22T20:17:14Z"
+    name: gfp-1-sd8gj
     namespace: 245e18-dev
     ownerReferences:
     - apiVersion: v1
       blockOwnerDeletion: true
       controller: true
       kind: ReplicationController
-      name: greenfield-pipeline-2
-      uid: d0cf37d4-393f-447c-84c3-9a8cbd0e5944
-    resourceVersion: "2043317992"
-    selfLink: /api/v1/namespaces/245e18-dev/pods/greenfield-pipeline-2-xltwr
-    uid: 2633486f-66d8-4e07-b20d-3e3d9ce7b24f
+      name: gfp-1
+      uid: 5f04d16d-6c99-4db2-83b1-0ec547e4225e
+    resourceVersion: "2152184136"
+    selfLink: /api/v1/namespaces/245e18-dev/pods/gfp-1-sd8gj
+    uid: ab1cc7d8-44f9-44f0-a508-ea86ba02afbf
   spec:
     containers:
-    - image: image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:a74f0ac3fc32260569ada49c255e0eba4a8a30ebcdbc672722762b57b7b74f60
+    - image: image-registry.openshift-image-registry.svc:5000/245e18-dev/gfp@sha256:9370952c368477accdebe838b2591f03a410fca869245ae2860d5e8f859c0da4
       imagePullPolicy: Always
-      name: greenfield-pipeline
-      ports:
-      - containerPort: 8080
-        protocol: TCP
+      name: gfp
       resources:
         limits:
           cpu: 250m
@@ -182,7 +169,7 @@ items:
     enableServiceLinks: true
     imagePullSecrets:
     - name: default-dockercfg-wm4xb
-    nodeName: mcs-silver-app-19.dmz
+    nodeName: mcs-silver-app-27.dmz
     nodeSelector:
       node-role.kubernetes.io/worker: ""
     preemptionPolicy: PreemptLowerPriority
@@ -216,232 +203,62 @@ items:
   status:
     conditions:
     - lastProbeTime: null
-      lastTransitionTime: "2021-11-08T22:38:23Z"
+      lastTransitionTime: "2021-11-22T20:17:01Z"
       status: "True"
       type: Initialized
     - lastProbeTime: null
-      lastTransitionTime: "2021-11-08T22:38:28Z"
+      lastTransitionTime: "2021-11-22T20:17:14Z"
       status: "True"
       type: Ready
     - lastProbeTime: null
-      lastTransitionTime: "2021-11-08T22:38:28Z"
+      lastTransitionTime: "2021-11-22T20:17:14Z"
       status: "True"
       type: ContainersReady
     - lastProbeTime: null
-      lastTransitionTime: "2021-11-08T22:38:23Z"
+      lastTransitionTime: "2021-11-22T20:17:01Z"
       status: "True"
       type: PodScheduled
     containerStatuses:
-    - containerID: cri-o://4a19dddc980c0c0b9aed6bfdd43bc6616e0c1f38d39d482a2f156f7a9edb8289
-      image: image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:a74f0ac3fc32260569ada49c255e0eba4a8a30ebcdbc672722762b57b7b74f60
-      imageID: image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:a74f0ac3fc32260569ada49c255e0eba4a8a30ebcdbc672722762b57b7b74f60
+    - containerID: cri-o://d4d72561e8d036109dd21cb86bbd628ff180f01a43ecac71a74d5de2c7f9fa5a
+      image: image-registry.openshift-image-registry.svc:5000/245e18-dev/gfp@sha256:9370952c368477accdebe838b2591f03a410fca869245ae2860d5e8f859c0da4
+      imageID: image-registry.openshift-image-registry.svc:5000/245e18-dev/gfp@sha256:9370952c368477accdebe838b2591f03a410fca869245ae2860d5e8f859c0da4
       lastState: {}
-      name: greenfield-pipeline
+      name: gfp
       ready: true
       restartCount: 0
       started: true
       state:
         running:
-          startedAt: "2021-11-08T22:38:27Z"
-    hostIP: 142.34.151.173
+          startedAt: "2021-11-22T20:17:14Z"
+    hostIP: 142.34.151.188
     phase: Running
-    podIP: 10.97.92.39
+    podIP: 10.97.153.120
     podIPs:
-    - ip: 10.97.92.39
+    - ip: 10.97.153.120
     qosClass: Burstable
-    startTime: "2021-11-08T22:38:23Z"
+    startTime: "2021-11-22T20:17:01Z"
 - apiVersion: v1
   kind: ReplicationController
   metadata:
     annotations:
-      kubectl.kubernetes.io/original-replicas: "1"
-      openshift.io/deployer-pod.completed-at: 2021-11-08 22:30:02 +0000 UTC
-      openshift.io/deployer-pod.created-at: 2021-11-08 22:29:52 +0000 UTC
-      openshift.io/deployer-pod.name: greenfield-pipeline-1-deploy
+      openshift.io/deployer-pod.completed-at: 2021-11-22 20:17:14 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2021-11-22 20:16:55 +0000 UTC
+      openshift.io/deployer-pod.name: gfp-1-deploy
       openshift.io/deployment-config.latest-version: "1"
-      openshift.io/deployment-config.name: greenfield-pipeline
+      openshift.io/deployment-config.name: gfp
       openshift.io/deployment.phase: Complete
       openshift.io/deployment.replicas: "1"
       openshift.io/deployment.status-reason: config change
       openshift.io/encoded-deployment-config: |
-        {"kind":"DeploymentConfig","apiVersion":"apps.openshift.io/v1","metadata":{"name":"greenfield-pipeline","namespace":"245e18-dev","uid":"75d00cad-2129-4d2b-a7f7-ce864a752543","resourceVersion":"2043269790","generation":2,"creationTimestamp":"2021-11-08T22:22:27Z","labels":{"app":"greenfield-pipeline","component":"hello-world"},"annotations":{"kubectl.kubernetes.io/last-applied-configuration":"{\"apiVersion\":\"apps.openshift.io/v1\",\"kind\":\"DeploymentConfig\",\"metadata\":{\"annotations\":{\"openshift.io/generated-by\":\"OpenShiftNewApp\"},\"creationTimestamp\":null,\"labels\":{\"app\":\"greenfield-pipeline\",\"component\":\"hello-world\"},\"name\":\"greenfield-pipeline\",\"namespace\":\"245e18-dev\"},\"spec\":{\"replicas\":1,\"selector\":{\"app\":\"greenfield-pipeline\",\"component\":\"hello-world\",\"deploymentconfig\":\"greenfield-pipeline\"},\"strategy\":{\"resources\":{}},\"template\":{\"metadata\":{\"annotations\":{\"openshift.io/generated-by\":\"OpenShiftNewApp\"},\"creationTimestamp\":null,\"labels\":{\"app\":\"greenfield-pipeline\",\"component\":\"hello-world\",\"deploymentconfig\":\"greenfield-pipeline\"}},\"spec\":{\"containers\":[{\"image\":\"greenfield-pipeline:latest\",\"name\":\"greenfield-pipeline\",\"ports\":[{\"containerPort\":8080,\"protocol\":\"TCP\"}],\"resources\":{}}]}},\"test\":false,\"triggers\":[{\"type\":\"ConfigChange\"},{\"imageChangeParams\":{\"automatic\":true,\"containerNames\":[\"greenfield-pipeline\"],\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"greenfield-pipeline:latest\"}},\"type\":\"ImageChange\"}]},\"status\":{\"availableReplicas\":0,\"latestVersion\":0,\"observedGeneration\":0,\"replicas\":0,\"unavailableReplicas\":0,\"updatedReplicas\":0}}\n","openshift.io/generated-by":"OpenShiftNewApp"},"managedFields":[{"manager":"oc","operation":"Update","apiVersion":"apps.openshift.io/v1","time":"2021-11-08T22:22:27Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:annotations":{".":{},"f:kubectl.kubernetes.io/last-applied-configuration":{},"f:openshift.io/generated-by":{}},"f:labels":{".":{},"f:app":{},"f:component":{}}},"f:spec":{"f:replicas":{},"f:selector":{".":{},"f:app":{},"f:component":{},"f:deploymentconfig":{}},"f:strategy":{"f:activeDeadlineSeconds":{},"f:rollingParams":{".":{},"f:intervalSeconds":{},"f:maxSurge":{},"f:maxUnavailable":{},"f:timeoutSeconds":{},"f:updatePeriodSeconds":{}},"f:type":{}},"f:template":{".":{},"f:metadata":{".":{},"f:annotations":{".":{},"f:openshift.io/generated-by":{}},"f:creationTimestamp":{},"f:labels":{".":{},"f:app":{},"f:component":{},"f:deploymentconfig":{}}},"f:spec":{".":{},"f:containers":{".":{},"k:{\"name\":\"greenfield-pipeline\"}":{".":{},"f:imagePullPolicy":{},"f:name":{},"f:ports":{".":{},"k:{\"containerPort\":8080,\"protocol\":\"TCP\"}":{".":{},"f:containerPort":{},"f:protocol":{}}},"f:resources":{},"f:terminationMessagePath":{},"f:terminationMessagePolicy":{}}},"f:dnsPolicy":{},"f:restartPolicy":{},"f:schedulerName":{},"f:securityContext":{},"f:terminationGracePeriodSeconds":{}}}}}},{"manager":"openshift-controller-manager","operation":"Update","apiVersion":"apps.openshift.io/v1","time":"2021-11-08T22:29:52Z","fieldsType":"FieldsV1","fieldsV1":{"f:spec":{"f:template":{"f:spec":{"f:containers":{"k:{\"name\":\"greenfield-pipeline\"}":{"f:image":{}}}}},"f:triggers":{}},"f:status":{"f:conditions":{".":{},"k:{\"type\":\"Available\"}":{".":{},"f:lastTransitionTime":{},"f:lastUpdateTime":{},"f:message":{},"f:status":{},"f:type":{}}},"f:details":{".":{},"f:causes":{},"f:message":{}},"f:latestVersion":{},"f:observedGeneration":{}}}}]},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[{"type":"ConfigChange"},{"type":"ImageChange","imageChangeParams":{"automatic":true,"containerNames":["greenfield-pipeline"],"from":{"kind":"ImageStreamTag","namespace":"245e18-dev","name":"greenfield-pipeline:latest"},"lastTriggeredImage":"image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:1331fafabd2797c87aa3549ec0e6a3d556a0132d3bf27a159ce3627f0d96d50d"}}],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"greenfield-pipeline","component":"hello-world","deploymentconfig":"greenfield-pipeline"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"greenfield-pipeline","component":"hello-world","deploymentconfig":"greenfield-pipeline"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"containers":[{"name":"greenfield-pipeline","image":"image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:1331fafabd2797c87aa3549ec0e6a3d556a0132d3bf27a159ce3627f0d96d50d","ports":[{"containerPort":8080,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"Always"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":1,"observedGeneration":1,"replicas":0,"updatedReplicas":0,"availableReplicas":0,"unavailableReplicas":0,"details":{"message":"config change","causes":[{"type":"ConfigChange"}]},"conditions":[{"type":"Available","status":"False","lastUpdateTime":"2021-11-08T22:22:27Z","lastTransitionTime":"2021-11-08T22:22:27Z","message":"Deployment config does not have minimum availability."}]}}
-    creationTimestamp: "2021-11-08T22:29:52Z"
-    generation: 3
-    labels:
-      app: greenfield-pipeline
-      component: hello-world
-      openshift.io/deployment-config.name: greenfield-pipeline
-    managedFields:
-    - apiVersion: v1
-      fieldsType: FieldsV1
-      fieldsV1:
-        f:metadata:
-          f:annotations:
-            .: {}
-            f:openshift.io/deployer-pod.completed-at: {}
-            f:openshift.io/deployer-pod.created-at: {}
-            f:openshift.io/deployer-pod.name: {}
-            f:openshift.io/deployment-config.latest-version: {}
-            f:openshift.io/deployment-config.name: {}
-            f:openshift.io/deployment.phase: {}
-            f:openshift.io/deployment.replicas: {}
-            f:openshift.io/deployment.status-reason: {}
-            f:openshift.io/encoded-deployment-config: {}
-          f:labels:
-            .: {}
-            f:app: {}
-            f:component: {}
-            f:openshift.io/deployment-config.name: {}
-          f:ownerReferences:
-            .: {}
-            k:{"uid":"75d00cad-2129-4d2b-a7f7-ce864a752543"}:
-              .: {}
-              f:apiVersion: {}
-              f:blockOwnerDeletion: {}
-              f:controller: {}
-              f:kind: {}
-              f:name: {}
-              f:uid: {}
-        f:spec:
-          f:replicas: {}
-          f:selector:
-            .: {}
-            f:app: {}
-            f:component: {}
-            f:deployment: {}
-            f:deploymentconfig: {}
-          f:template:
-            .: {}
-            f:metadata:
-              .: {}
-              f:annotations:
-                .: {}
-                f:openshift.io/deployment-config.latest-version: {}
-                f:openshift.io/deployment-config.name: {}
-                f:openshift.io/deployment.name: {}
-                f:openshift.io/generated-by: {}
-              f:creationTimestamp: {}
-              f:labels:
-                .: {}
-                f:app: {}
-                f:component: {}
-                f:deployment: {}
-                f:deploymentconfig: {}
-            f:spec:
-              .: {}
-              f:containers:
-                .: {}
-                k:{"name":"greenfield-pipeline"}:
-                  .: {}
-                  f:image: {}
-                  f:imagePullPolicy: {}
-                  f:name: {}
-                  f:ports:
-                    .: {}
-                    k:{"containerPort":8080,"protocol":"TCP"}:
-                      .: {}
-                      f:containerPort: {}
-                      f:protocol: {}
-                  f:resources: {}
-                  f:terminationMessagePath: {}
-                  f:terminationMessagePolicy: {}
-              f:dnsPolicy: {}
-              f:restartPolicy: {}
-              f:schedulerName: {}
-              f:securityContext: {}
-              f:terminationGracePeriodSeconds: {}
-      manager: openshift-controller-manager
-      operation: Update
-      time: "2021-11-08T22:30:03Z"
-    - apiVersion: v1
-      fieldsType: FieldsV1
-      fieldsV1:
-        f:metadata:
-          f:annotations:
-            f:kubectl.kubernetes.io/original-replicas: {}
-      manager: openshift-deploy
-      operation: Update
-      time: "2021-11-08T22:38:23Z"
-    - apiVersion: v1
-      fieldsType: FieldsV1
-      fieldsV1:
-        f:status:
-          f:observedGeneration: {}
-          f:replicas: {}
-      manager: kube-controller-manager
-      operation: Update
-      time: "2021-11-08T22:38:29Z"
-    name: greenfield-pipeline-1
-    namespace: 245e18-dev
-    ownerReferences:
-    - apiVersion: apps.openshift.io/v1
-      blockOwnerDeletion: true
-      controller: true
-      kind: DeploymentConfig
-      name: greenfield-pipeline
-      uid: 75d00cad-2129-4d2b-a7f7-ce864a752543
-    resourceVersion: "2043318077"
-    selfLink: /api/v1/namespaces/245e18-dev/replicationcontrollers/greenfield-pipeline-1
-    uid: 7e82c85d-c23f-45dd-ae34-43547b195ff1
-  spec:
-    replicas: 0
-    selector:
-      app: greenfield-pipeline
-      component: hello-world
-      deployment: greenfield-pipeline-1
-      deploymentconfig: greenfield-pipeline
-    template:
-      metadata:
-        annotations:
-          openshift.io/deployment-config.latest-version: "1"
-          openshift.io/deployment-config.name: greenfield-pipeline
-          openshift.io/deployment.name: greenfield-pipeline-1
-          openshift.io/generated-by: OpenShiftNewApp
-        creationTimestamp: null
-        labels:
-          app: greenfield-pipeline
-          component: hello-world
-          deployment: greenfield-pipeline-1
-          deploymentconfig: greenfield-pipeline
-      spec:
-        containers:
-        - image: image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:1331fafabd2797c87aa3549ec0e6a3d556a0132d3bf27a159ce3627f0d96d50d
-          imagePullPolicy: Always
-          name: greenfield-pipeline
-          ports:
-          - containerPort: 8080
-            protocol: TCP
-          resources: {}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-        dnsPolicy: ClusterFirst
-        restartPolicy: Always
-        schedulerName: default-scheduler
-        securityContext: {}
-        terminationGracePeriodSeconds: 30
-  status:
-    observedGeneration: 3
-    replicas: 0
-- apiVersion: v1
-  kind: ReplicationController
-  metadata:
-    annotations:
-      openshift.io/deployer-pod.completed-at: 2021-11-08 22:38:31 +0000 UTC
-      openshift.io/deployer-pod.created-at: 2021-11-08 22:38:18 +0000 UTC
-      openshift.io/deployer-pod.name: greenfield-pipeline-2-deploy
-      openshift.io/deployment-config.latest-version: "2"
-      openshift.io/deployment-config.name: greenfield-pipeline
-      openshift.io/deployment.phase: Complete
-      openshift.io/deployment.replicas: ""
-      openshift.io/deployment.status-reason: image change
-      openshift.io/encoded-deployment-config: |
-        {"kind":"DeploymentConfig","apiVersion":"apps.openshift.io/v1","metadata":{"name":"greenfield-pipeline","namespace":"245e18-dev","uid":"75d00cad-2129-4d2b-a7f7-ce864a752543","resourceVersion":"2043317138","generation":5,"creationTimestamp":"2021-11-08T22:22:27Z","labels":{"app":"greenfield-pipeline","component":"hello-world"},"annotations":{"kubectl.kubernetes.io/last-applied-configuration":"{\"apiVersion\":\"apps.openshift.io/v1\",\"kind\":\"DeploymentConfig\",\"metadata\":{\"annotations\":{\"openshift.io/generated-by\":\"OpenShiftNewApp\"},\"creationTimestamp\":null,\"labels\":{\"app\":\"greenfield-pipeline\",\"component\":\"hello-world\"},\"name\":\"greenfield-pipeline\",\"namespace\":\"245e18-dev\"},\"spec\":{\"replicas\":1,\"selector\":{\"app\":\"greenfield-pipeline\",\"component\":\"hello-world\",\"deploymentconfig\":\"greenfield-pipeline\"},\"strategy\":{\"resources\":{}},\"template\":{\"metadata\":{\"annotations\":{\"openshift.io/generated-by\":\"OpenShiftNewApp\"},\"creationTimestamp\":null,\"labels\":{\"app\":\"greenfield-pipeline\",\"component\":\"hello-world\",\"deploymentconfig\":\"greenfield-pipeline\"}},\"spec\":{\"containers\":[{\"image\":\"greenfield-pipeline:latest\",\"name\":\"greenfield-pipeline\",\"ports\":[{\"containerPort\":8080,\"protocol\":\"TCP\"}],\"resources\":{}}]}},\"test\":false,\"triggers\":[{\"type\":\"ConfigChange\"},{\"imageChangeParams\":{\"automatic\":true,\"containerNames\":[\"greenfield-pipeline\"],\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"greenfield-pipeline:latest\"}},\"type\":\"ImageChange\"}]},\"status\":{\"availableReplicas\":0,\"latestVersion\":0,\"observedGeneration\":0,\"replicas\":0,\"unavailableReplicas\":0,\"updatedReplicas\":0}}\n","openshift.io/generated-by":"OpenShiftNewApp"},"managedFields":[{"manager":"oc","operation":"Update","apiVersion":"apps.openshift.io/v1","time":"2021-11-08T22:30:33Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:annotations":{".":{},"f:kubectl.kubernetes.io/last-applied-configuration":{},"f:openshift.io/generated-by":{}},"f:labels":{".":{},"f:app":{},"f:component":{}}},"f:spec":{"f:replicas":{},"f:selector":{".":{},"f:app":{},"f:component":{},"f:deploymentconfig":{}},"f:strategy":{"f:activeDeadlineSeconds":{},"f:rollingParams":{".":{},"f:intervalSeconds":{},"f:maxSurge":{},"f:maxUnavailable":{},"f:timeoutSeconds":{},"f:updatePeriodSeconds":{}},"f:type":{}},"f:template":{".":{},"f:metadata":{".":{},"f:annotations":{".":{},"f:openshift.io/generated-by":{}},"f:creationTimestamp":{},"f:labels":{".":{},"f:app":{},"f:component":{},"f:deploymentconfig":{}}},"f:spec":{".":{},"f:containers":{".":{},"k:{\"name\":\"greenfield-pipeline\"}":{".":{},"f:imagePullPolicy":{},"f:name":{},"f:ports":{".":{},"k:{\"containerPort\":8080,\"protocol\":\"TCP\"}":{".":{},"f:containerPort":{},"f:protocol":{}}},"f:resources":{},"f:terminationMessagePath":{},"f:terminationMessagePolicy":{}}},"f:dnsPolicy":{},"f:restartPolicy":{},"f:schedulerName":{},"f:securityContext":{},"f:terminationGracePeriodSeconds":{}}}},"f:status":{"f:availableReplicas":{},"f:replicas":{},"f:updatedReplicas":{}}}},{"manager":"openshift-controller-manager","operation":"Update","apiVersion":"apps.openshift.io/v1","time":"2021-11-08T22:38:18Z","fieldsType":"FieldsV1","fieldsV1":{"f:spec":{"f:template":{"f:spec":{"f:containers":{"k:{\"name\":\"greenfield-pipeline\"}":{"f:image":{}}}}},"f:triggers":{}},"f:status":{"f:conditions":{".":{},"k:{\"type\":\"Available\"}":{".":{},"f:lastTransitionTime":{},"f:lastUpdateTime":{},"f:message":{},"f:status":{},"f:type":{}},"k:{\"type\":\"Progressing\"}":{".":{},"f:lastTransitionTime":{},"f:lastUpdateTime":{},"f:message":{},"f:reason":{},"f:status":{},"f:type":{}}},"f:details":{".":{},"f:causes":{},"f:message":{}},"f:latestVersion":{},"f:observedGeneration":{},"f:readyReplicas":{},"f:unavailableReplicas":{}}}}]},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[{"type":"ConfigChange"},{"type":"ImageChange","imageChangeParams":{"automatic":true,"containerNames":["greenfield-pipeline"],"from":{"kind":"ImageStreamTag","namespace":"245e18-dev","name":"greenfield-pipeline:latest"},"lastTriggeredImage":"image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:a74f0ac3fc32260569ada49c255e0eba4a8a30ebcdbc672722762b57b7b74f60"}}],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"greenfield-pipeline","component":"hello-world","deploymentconfig":"greenfield-pipeline"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"greenfield-pipeline","component":"hello-world","deploymentconfig":"greenfield-pipeline"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"containers":[{"name":"greenfield-pipeline","image":"image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:a74f0ac3fc32260569ada49c255e0eba4a8a30ebcdbc672722762b57b7b74f60","ports":[{"containerPort":8080,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"Always"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":2,"observedGeneration":4,"replicas":1,"updatedReplicas":1,"availableReplicas":1,"unavailableReplicas":0,"details":{"message":"image change","causes":[{"type":"ImageChange","imageTrigger":{"from":{"kind":"DockerImage","name":"image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:a74f0ac3fc32260569ada49c255e0eba4a8a30ebcdbc672722762b57b7b74f60"}}}]},"conditions":[{"type":"Available","status":"True","lastUpdateTime":"2021-11-08T22:30:02Z","lastTransitionTime":"2021-11-08T22:30:02Z","message":"Deployment config has minimum availability."},{"type":"Progressing","status":"True","lastUpdateTime":"2021-11-08T22:30:03Z","lastTransitionTime":"2021-11-08T22:29:56Z","reason":"NewReplicationControllerAvailable","message":"replication controller \"greenfield-pipeline-1\" successfully rolled out"}],"readyReplicas":1}}
-    creationTimestamp: "2021-11-08T22:38:18Z"
+        {"kind":"DeploymentConfig","apiVersion":"apps.openshift.io/v1","metadata":{"name":"gfp","namespace":"245e18-dev","uid":"3c403d74-9e2a-49ea-bde8-80239649464f","resourceVersion":"2152182291","generation":2,"creationTimestamp":"2021-11-22T20:13:23Z","labels":{"app":"gfp","app.kubernetes.io/component":"gfp","app.kubernetes.io/instance":"gfp","app.kubernetes.io/part-of":"gfp"},"annotations":{"app.openshift.io/vcs-ref":"main","app.openshift.io/vcs-uri":"https://github.com/bcgov-nr/greenfield-pipeline","openshift.io/generated-by":"OpenShiftWebConsole"},"managedFields":[{"manager":"Mozilla","operation":"Update","apiVersion":"apps.openshift.io/v1","time":"2021-11-22T20:13:23Z","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:annotations":{".":{},"f:app.openshift.io/vcs-ref":{},"f:app.openshift.io/vcs-uri":{},"f:openshift.io/generated-by":{}},"f:labels":{".":{},"f:app":{},"f:app.kubernetes.io/component":{},"f:app.kubernetes.io/instance":{},"f:app.kubernetes.io/part-of":{}}},"f:spec":{"f:replicas":{},"f:selector":{".":{},"f:app":{},"f:deploymentconfig":{}},"f:strategy":{"f:activeDeadlineSeconds":{},"f:rollingParams":{".":{},"f:intervalSeconds":{},"f:maxSurge":{},"f:maxUnavailable":{},"f:timeoutSeconds":{},"f:updatePeriodSeconds":{}},"f:type":{}},"f:template":{".":{},"f:metadata":{".":{},"f:creationTimestamp":{},"f:labels":{".":{},"f:app":{},"f:deploymentconfig":{}}},"f:spec":{".":{},"f:containers":{".":{},"k:{\"name\":\"gfp\"}":{".":{},"f:imagePullPolicy":{},"f:name":{},"f:resources":{},"f:terminationMessagePath":{},"f:terminationMessagePolicy":{}}},"f:dnsPolicy":{},"f:restartPolicy":{},"f:schedulerName":{},"f:securityContext":{},"f:terminationGracePeriodSeconds":{}}}}}},{"manager":"openshift-controller-manager","operation":"Update","apiVersion":"apps.openshift.io/v1","time":"2021-11-22T20:16:54Z","fieldsType":"FieldsV1","fieldsV1":{"f:spec":{"f:template":{"f:spec":{"f:containers":{"k:{\"name\":\"gfp\"}":{"f:image":{}}}}},"f:triggers":{}},"f:status":{"f:conditions":{".":{},"k:{\"type\":\"Available\"}":{".":{},"f:lastTransitionTime":{},"f:lastUpdateTime":{},"f:message":{},"f:status":{},"f:type":{}}},"f:details":{".":{},"f:causes":{},"f:message":{}},"f:latestVersion":{},"f:observedGeneration":{}}}}]},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[{"type":"ImageChange","imageChangeParams":{"automatic":true,"containerNames":["gfp"],"from":{"kind":"ImageStreamTag","namespace":"245e18-dev","name":"gfp:latest"},"lastTriggeredImage":"image-registry.openshift-image-registry.svc:5000/245e18-dev/gfp@sha256:9370952c368477accdebe838b2591f03a410fca869245ae2860d5e8f859c0da4"}},{"type":"ConfigChange"}],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"gfp","deploymentconfig":"gfp"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"gfp","deploymentconfig":"gfp"}},"spec":{"containers":[{"name":"gfp","image":"image-registry.openshift-image-registry.svc:5000/245e18-dev/gfp@sha256:9370952c368477accdebe838b2591f03a410fca869245ae2860d5e8f859c0da4","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"Always"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":1,"observedGeneration":1,"replicas":0,"updatedReplicas":0,"availableReplicas":0,"unavailableReplicas":0,"details":{"message":"config change","causes":[{"type":"ConfigChange"}]},"conditions":[{"type":"Available","status":"False","lastUpdateTime":"2021-11-22T20:13:24Z","lastTransitionTime":"2021-11-22T20:13:24Z","message":"Deployment config does not have minimum availability."}]}}
+    creationTimestamp: "2021-11-22T20:16:55Z"
     generation: 2
     labels:
-      app: greenfield-pipeline
-      component: hello-world
-      openshift.io/deployment-config.name: greenfield-pipeline
+      app: gfp
+      app.kubernetes.io/component: gfp
+      app.kubernetes.io/instance: gfp
+      app.kubernetes.io/part-of: gfp
+      openshift.io/deployment-config.name: gfp
     managedFields:
     - apiVersion: v1
       fieldsType: FieldsV1
@@ -454,7 +271,7 @@ items:
           f:replicas: {}
       manager: kube-controller-manager
       operation: Update
-      time: "2021-11-08T22:38:28Z"
+      time: "2021-11-22T20:17:14Z"
     - apiVersion: v1
       fieldsType: FieldsV1
       fieldsV1:
@@ -473,11 +290,13 @@ items:
           f:labels:
             .: {}
             f:app: {}
-            f:component: {}
+            f:app.kubernetes.io/component: {}
+            f:app.kubernetes.io/instance: {}
+            f:app.kubernetes.io/part-of: {}
             f:openshift.io/deployment-config.name: {}
           f:ownerReferences:
             .: {}
-            k:{"uid":"75d00cad-2129-4d2b-a7f7-ce864a752543"}:
+            k:{"uid":"3c403d74-9e2a-49ea-bde8-80239649464f"}:
               .: {}
               f:apiVersion: {}
               f:blockOwnerDeletion: {}
@@ -490,7 +309,6 @@ items:
           f:selector:
             .: {}
             f:app: {}
-            f:component: {}
             f:deployment: {}
             f:deploymentconfig: {}
           f:template:
@@ -502,29 +320,21 @@ items:
                 f:openshift.io/deployment-config.latest-version: {}
                 f:openshift.io/deployment-config.name: {}
                 f:openshift.io/deployment.name: {}
-                f:openshift.io/generated-by: {}
               f:creationTimestamp: {}
               f:labels:
                 .: {}
                 f:app: {}
-                f:component: {}
                 f:deployment: {}
                 f:deploymentconfig: {}
             f:spec:
               .: {}
               f:containers:
                 .: {}
-                k:{"name":"greenfield-pipeline"}:
+                k:{"name":"gfp"}:
                   .: {}
                   f:image: {}
                   f:imagePullPolicy: {}
                   f:name: {}
-                  f:ports:
-                    .: {}
-                    k:{"containerPort":8080,"protocol":"TCP"}:
-                      .: {}
-                      f:containerPort: {}
-                      f:protocol: {}
                   f:resources: {}
                   f:terminationMessagePath: {}
                   f:terminationMessagePolicy: {}
@@ -535,47 +345,41 @@ items:
               f:terminationGracePeriodSeconds: {}
       manager: openshift-controller-manager
       operation: Update
-      time: "2021-11-08T22:38:32Z"
-    name: greenfield-pipeline-2
+      time: "2021-11-22T20:17:15Z"
+    name: gfp-1
     namespace: 245e18-dev
     ownerReferences:
     - apiVersion: apps.openshift.io/v1
       blockOwnerDeletion: true
       controller: true
       kind: DeploymentConfig
-      name: greenfield-pipeline
-      uid: 75d00cad-2129-4d2b-a7f7-ce864a752543
-    resourceVersion: "2043318294"
-    selfLink: /api/v1/namespaces/245e18-dev/replicationcontrollers/greenfield-pipeline-2
-    uid: d0cf37d4-393f-447c-84c3-9a8cbd0e5944
+      name: gfp
+      uid: 3c403d74-9e2a-49ea-bde8-80239649464f
+    resourceVersion: "2152184230"
+    selfLink: /api/v1/namespaces/245e18-dev/replicationcontrollers/gfp-1
+    uid: 5f04d16d-6c99-4db2-83b1-0ec547e4225e
   spec:
     replicas: 1
     selector:
-      app: greenfield-pipeline
-      component: hello-world
-      deployment: greenfield-pipeline-2
-      deploymentconfig: greenfield-pipeline
+      app: gfp
+      deployment: gfp-1
+      deploymentconfig: gfp
     template:
       metadata:
         annotations:
-          openshift.io/deployment-config.latest-version: "2"
-          openshift.io/deployment-config.name: greenfield-pipeline
-          openshift.io/deployment.name: greenfield-pipeline-2
-          openshift.io/generated-by: OpenShiftNewApp
+          openshift.io/deployment-config.latest-version: "1"
+          openshift.io/deployment-config.name: gfp
+          openshift.io/deployment.name: gfp-1
         creationTimestamp: null
         labels:
-          app: greenfield-pipeline
-          component: hello-world
-          deployment: greenfield-pipeline-2
-          deploymentconfig: greenfield-pipeline
+          app: gfp
+          deployment: gfp-1
+          deploymentconfig: gfp
       spec:
         containers:
-        - image: image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:a74f0ac3fc32260569ada49c255e0eba4a8a30ebcdbc672722762b57b7b74f60
+        - image: image-registry.openshift-image-registry.svc:5000/245e18-dev/gfp@sha256:9370952c368477accdebe838b2591f03a410fca869245ae2860d5e8f859c0da4
           imagePullPolicy: Always
-          name: greenfield-pipeline
-          ports:
-          - containerPort: 8080
-            protocol: TCP
+          name: gfp
           resources: {}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
@@ -594,13 +398,15 @@ items:
   kind: Service
   metadata:
     annotations:
-      kubectl.kubernetes.io/last-applied-configuration: |
-        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"},"creationTimestamp":null,"labels":{"app":"greenfield-pipeline","component":"hello-world"},"name":"greenfield-pipeline","namespace":"245e18-dev"},"spec":{"ports":[{"name":"8080-tcp","port":8080,"protocol":"TCP","targetPort":8080}],"selector":{"app":"greenfield-pipeline","component":"hello-world","deploymentconfig":"greenfield-pipeline"}},"status":{"loadBalancer":{}}}
-      openshift.io/generated-by: OpenShiftNewApp
-    creationTimestamp: "2021-11-08T22:22:27Z"
+      app.openshift.io/vcs-ref: main
+      app.openshift.io/vcs-uri: https://github.com/bcgov-nr/greenfield-pipeline
+      openshift.io/generated-by: OpenShiftWebConsole
+    creationTimestamp: "2021-11-22T20:13:24Z"
     labels:
-      app: greenfield-pipeline
-      component: hello-world
+      app: gfp
+      app.kubernetes.io/component: gfp
+      app.kubernetes.io/instance: gfp
+      app.kubernetes.io/part-of: gfp
     managedFields:
     - apiVersion: v1
       fieldsType: FieldsV1
@@ -608,56 +414,50 @@ items:
         f:metadata:
           f:annotations:
             .: {}
-            f:kubectl.kubernetes.io/last-applied-configuration: {}
+            f:app.openshift.io/vcs-ref: {}
+            f:app.openshift.io/vcs-uri: {}
             f:openshift.io/generated-by: {}
           f:labels:
             .: {}
             f:app: {}
-            f:component: {}
-        f:spec:
-          f:ports: {}
-          f:selector:
-            .: {}
-            f:app: {}
-            f:component: {}
-            f:deploymentconfig: {}
-          f:sessionAffinity: {}
-          f:type: {}
-      manager: oc
-      operation: Update
-      time: "2021-11-08T22:22:27Z"
-    - apiVersion: v1
-      fieldsType: FieldsV1
-      fieldsV1:
+            f:app.kubernetes.io/component: {}
+            f:app.kubernetes.io/instance: {}
+            f:app.kubernetes.io/part-of: {}
         f:spec:
           f:ports:
-            k:{"port":3000,"protocol":"TCP"}:
+            .: {}
+            k:{"port":8080,"protocol":"TCP"}:
               .: {}
               f:name: {}
               f:port: {}
               f:protocol: {}
               f:targetPort: {}
+          f:selector:
+            .: {}
+            f:app: {}
+            f:deploymentconfig: {}
+          f:sessionAffinity: {}
+          f:type: {}
       manager: Mozilla
       operation: Update
-      time: "2021-11-08T22:34:49Z"
-    name: greenfield-pipeline
+      time: "2021-11-22T20:13:24Z"
+    name: gfp
     namespace: 245e18-dev
-    resourceVersion: "2043298404"
-    selfLink: /api/v1/namespaces/245e18-dev/services/greenfield-pipeline
-    uid: 26ba5924-b646-4de0-ba19-7a90b4768f89
+    resourceVersion: "2152246082"
+    selfLink: /api/v1/namespaces/245e18-dev/services/gfp
+    uid: f7585b43-9395-423b-9e24-88a7d8d6a713
   spec:
-    clusterIP: 10.98.159.115
+    clusterIP: 10.98.61.219
     clusterIPs:
-    - 10.98.159.115
+    - 10.98.61.219
     ports:
-    - name: 8080-tcp
-      port: 3000
+    - name: 3000-tcp
+      port: 8080
       protocol: TCP
-      targetPort: 8080
+      targetPort: 3000
     selector:
-      app: greenfield-pipeline
-      component: hello-world
-      deploymentconfig: greenfield-pipeline
+      app: gfp
+      deploymentconfig: gfp
     sessionAffinity: None
     type: ClusterIP
   status:
@@ -666,14 +466,16 @@ items:
   kind: DeploymentConfig
   metadata:
     annotations:
-      kubectl.kubernetes.io/last-applied-configuration: |
-        {"apiVersion":"apps.openshift.io/v1","kind":"DeploymentConfig","metadata":{"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"},"creationTimestamp":null,"labels":{"app":"greenfield-pipeline","component":"hello-world"},"name":"greenfield-pipeline","namespace":"245e18-dev"},"spec":{"replicas":1,"selector":{"app":"greenfield-pipeline","component":"hello-world","deploymentconfig":"greenfield-pipeline"},"strategy":{"resources":{}},"template":{"metadata":{"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"},"creationTimestamp":null,"labels":{"app":"greenfield-pipeline","component":"hello-world","deploymentconfig":"greenfield-pipeline"}},"spec":{"containers":[{"image":"greenfield-pipeline:latest","name":"greenfield-pipeline","ports":[{"containerPort":8080,"protocol":"TCP"}],"resources":{}}]}},"test":false,"triggers":[{"type":"ConfigChange"},{"imageChangeParams":{"automatic":true,"containerNames":["greenfield-pipeline"],"from":{"kind":"ImageStreamTag","name":"greenfield-pipeline:latest"}},"type":"ImageChange"}]},"status":{"availableReplicas":0,"latestVersion":0,"observedGeneration":0,"replicas":0,"unavailableReplicas":0,"updatedReplicas":0}}
-      openshift.io/generated-by: OpenShiftNewApp
-    creationTimestamp: "2021-11-08T22:22:27Z"
-    generation: 5
+      app.openshift.io/vcs-ref: main
+      app.openshift.io/vcs-uri: https://github.com/bcgov-nr/greenfield-pipeline
+      openshift.io/generated-by: OpenShiftWebConsole
+    creationTimestamp: "2021-11-22T20:13:23Z"
+    generation: 2
     labels:
-      app: greenfield-pipeline
-      component: hello-world
+      app: gfp
+      app.kubernetes.io/component: gfp
+      app.kubernetes.io/instance: gfp
+      app.kubernetes.io/part-of: gfp
     managedFields:
     - apiVersion: apps.openshift.io/v1
       fieldsType: FieldsV1
@@ -681,18 +483,20 @@ items:
         f:metadata:
           f:annotations:
             .: {}
-            f:kubectl.kubernetes.io/last-applied-configuration: {}
+            f:app.openshift.io/vcs-ref: {}
+            f:app.openshift.io/vcs-uri: {}
             f:openshift.io/generated-by: {}
           f:labels:
             .: {}
             f:app: {}
-            f:component: {}
+            f:app.kubernetes.io/component: {}
+            f:app.kubernetes.io/instance: {}
+            f:app.kubernetes.io/part-of: {}
         f:spec:
           f:replicas: {}
           f:selector:
             .: {}
             f:app: {}
-            f:component: {}
             f:deploymentconfig: {}
           f:strategy:
             f:activeDeadlineSeconds: {}
@@ -708,29 +512,19 @@ items:
             .: {}
             f:metadata:
               .: {}
-              f:annotations:
-                .: {}
-                f:openshift.io/generated-by: {}
               f:creationTimestamp: {}
               f:labels:
                 .: {}
                 f:app: {}
-                f:component: {}
                 f:deploymentconfig: {}
             f:spec:
               .: {}
               f:containers:
                 .: {}
-                k:{"name":"greenfield-pipeline"}:
+                k:{"name":"gfp"}:
                   .: {}
                   f:imagePullPolicy: {}
                   f:name: {}
-                  f:ports:
-                    .: {}
-                    k:{"containerPort":8080,"protocol":"TCP"}:
-                      .: {}
-                      f:containerPort: {}
-                      f:protocol: {}
                   f:resources: {}
                   f:terminationMessagePath: {}
                   f:terminationMessagePolicy: {}
@@ -739,9 +533,9 @@ items:
               f:schedulerName: {}
               f:securityContext: {}
               f:terminationGracePeriodSeconds: {}
-      manager: oc
+      manager: Mozilla
       operation: Update
-      time: "2021-11-08T22:30:33Z"
+      time: "2021-11-22T20:13:23Z"
     - apiVersion: apps.openshift.io/v1
       fieldsType: FieldsV1
       fieldsV1:
@@ -749,7 +543,7 @@ items:
           f:template:
             f:spec:
               f:containers:
-                k:{"name":"greenfield-pipeline"}:
+                k:{"name":"gfp"}:
                   f:image: {}
           f:triggers: {}
         f:status:
@@ -783,18 +577,17 @@ items:
           f:updatedReplicas: {}
       manager: openshift-controller-manager
       operation: Update
-      time: "2021-11-08T22:38:28Z"
-    name: greenfield-pipeline
+      time: "2021-11-22T20:17:14Z"
+    name: gfp
     namespace: 245e18-dev
-    resourceVersion: "2043318297"
-    uid: 75d00cad-2129-4d2b-a7f7-ce864a752543
+    resourceVersion: "2152184231"
+    uid: 3c403d74-9e2a-49ea-bde8-80239649464f
   spec:
     replicas: 1
     revisionHistoryLimit: 10
     selector:
-      app: greenfield-pipeline
-      component: hello-world
-      deploymentconfig: greenfield-pipeline
+      app: gfp
+      deploymentconfig: gfp
     strategy:
       activeDeadlineSeconds: 21600
       resources: {}
@@ -807,21 +600,15 @@ items:
       type: Rolling
     template:
       metadata:
-        annotations:
-          openshift.io/generated-by: OpenShiftNewApp
         creationTimestamp: null
         labels:
-          app: greenfield-pipeline
-          component: hello-world
-          deploymentconfig: greenfield-pipeline
+          app: gfp
+          deploymentconfig: gfp
       spec:
         containers:
-        - image: image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:a74f0ac3fc32260569ada49c255e0eba4a8a30ebcdbc672722762b57b7b74f60
+        - image: image-registry.openshift-image-registry.svc:5000/245e18-dev/gfp@sha256:9370952c368477accdebe838b2591f03a410fca869245ae2860d5e8f859c0da4
           imagePullPolicy: Always
-          name: greenfield-pipeline
-          ports:
-          - containerPort: 8080
-            protocol: TCP
+          name: gfp
           resources: {}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
@@ -832,398 +619,55 @@ items:
         terminationGracePeriodSeconds: 30
     test: false
     triggers:
-    - type: ConfigChange
     - imageChangeParams:
         automatic: true
         containerNames:
-        - greenfield-pipeline
+        - gfp
         from:
           kind: ImageStreamTag
-          name: greenfield-pipeline:latest
+          name: gfp:latest
           namespace: 245e18-dev
-        lastTriggeredImage: image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:a74f0ac3fc32260569ada49c255e0eba4a8a30ebcdbc672722762b57b7b74f60
+        lastTriggeredImage: image-registry.openshift-image-registry.svc:5000/245e18-dev/gfp@sha256:9370952c368477accdebe838b2591f03a410fca869245ae2860d5e8f859c0da4
       type: ImageChange
+    - type: ConfigChange
   status:
     availableReplicas: 1
     conditions:
-    - lastTransitionTime: "2021-11-08T22:30:02Z"
-      lastUpdateTime: "2021-11-08T22:30:02Z"
+    - lastTransitionTime: "2021-11-22T20:17:14Z"
+      lastUpdateTime: "2021-11-22T20:17:14Z"
       message: Deployment config has minimum availability.
       status: "True"
       type: Available
-    - lastTransitionTime: "2021-11-08T22:38:29Z"
-      lastUpdateTime: "2021-11-08T22:38:32Z"
-      message: replication controller "greenfield-pipeline-2" successfully rolled
-        out
+    - lastTransitionTime: "2021-11-22T20:17:01Z"
+      lastUpdateTime: "2021-11-22T20:17:15Z"
+      message: replication controller "gfp-1" successfully rolled out
       reason: NewReplicationControllerAvailable
       status: "True"
       type: Progressing
     details:
       causes:
-      - imageTrigger:
-          from:
-            kind: DockerImage
-            name: image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:a74f0ac3fc32260569ada49c255e0eba4a8a30ebcdbc672722762b57b7b74f60
-        type: ImageChange
-      message: image change
-    latestVersion: 2
-    observedGeneration: 5
+      - type: ConfigChange
+      message: config change
+    latestVersion: 1
+    observedGeneration: 2
     readyReplicas: 1
     replicas: 1
     unavailableReplicas: 0
     updatedReplicas: 1
-- apiVersion: build.openshift.io/v1
-  kind: BuildConfig
-  metadata:
-    annotations:
-      kubectl.kubernetes.io/last-applied-configuration: |
-        {"apiVersion":"build.openshift.io/v1","kind":"BuildConfig","metadata":{"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"},"creationTimestamp":null,"labels":{"app":"greenfield-pipeline","component":"hello-world"},"name":"greenfield-pipeline","namespace":"245e18-dev"},"spec":{"nodeSelector":null,"output":{"to":{"kind":"ImageStreamTag","name":"greenfield-pipeline:latest"}},"postCommit":{},"resources":{},"source":{"git":{"ref":"main","uri":"https://github.com/bcgov-nr/greenfield-pipeline"},"type":"Git"},"strategy":{"dockerStrategy":{"from":{"kind":"ImageStreamTag","name":"node:14"}},"type":"Docker"},"triggers":[{"type":"ConfigChange"},{"imageChange":{},"type":"ImageChange"}]},"status":{"lastVersion":0}}
-      openshift.io/generated-by: OpenShiftNewApp
-    creationTimestamp: "2021-11-08T22:22:27Z"
-    generation: 4
-    labels:
-      app: greenfield-pipeline
-      component: hello-world
-    managedFields:
-    - apiVersion: build.openshift.io/v1
-      fieldsType: FieldsV1
-      fieldsV1:
-        f:metadata:
-          f:annotations:
-            .: {}
-            f:kubectl.kubernetes.io/last-applied-configuration: {}
-            f:openshift.io/generated-by: {}
-          f:labels:
-            .: {}
-            f:app: {}
-            f:component: {}
-        f:spec:
-          f:output:
-            f:to:
-              .: {}
-              f:kind: {}
-              f:name: {}
-          f:runPolicy: {}
-          f:source:
-            f:git:
-              .: {}
-              f:ref: {}
-              f:uri: {}
-            f:type: {}
-          f:strategy:
-            f:dockerStrategy:
-              .: {}
-              f:from:
-                .: {}
-                f:kind: {}
-                f:name: {}
-            f:type: {}
-      manager: oc
-      operation: Update
-      time: "2021-11-08T22:30:33Z"
-    - apiVersion: build.openshift.io/v1
-      fieldsType: FieldsV1
-      fieldsV1:
-        f:spec:
-          f:triggers: {}
-        f:status:
-          f:lastVersion: {}
-      manager: openshift-apiserver
-      operation: Update
-      time: "2021-11-08T22:34:13Z"
-    name: greenfield-pipeline
-    namespace: 245e18-dev
-    resourceVersion: "2043295232"
-    uid: 22437ca0-c98c-4603-9a26-1f907976099b
-  spec:
-    failedBuildsHistoryLimit: 5
-    nodeSelector: null
-    output:
-      to:
-        kind: ImageStreamTag
-        name: greenfield-pipeline:latest
-    postCommit: {}
-    resources: {}
-    runPolicy: Serial
-    source:
-      git:
-        ref: main
-        uri: https://github.com/bcgov-nr/greenfield-pipeline
-      type: Git
-    strategy:
-      dockerStrategy:
-        from:
-          kind: ImageStreamTag
-          name: node:14
-      type: Docker
-    successfulBuildsHistoryLimit: 5
-    triggers:
-    - type: ConfigChange
-    - imageChange:
-        lastTriggeredImageID: node@sha256:e0dd89382d4f7da3b2be5d5fb74c65bfa1836deecae3c5f88919f44b469025f9
-      type: ImageChange
-  status:
-    lastVersion: 2
-- apiVersion: build.openshift.io/v1
-  kind: Build
-  metadata:
-    annotations:
-      openshift.io/build-config.name: greenfield-pipeline
-      openshift.io/build.number: "1"
-      openshift.io/build.pod-name: greenfield-pipeline-1-build
-    creationTimestamp: "2021-11-08T22:22:28Z"
-    generation: 2
-    labels:
-      app: greenfield-pipeline
-      buildconfig: greenfield-pipeline
-      component: hello-world
-      openshift.io/build-config.name: greenfield-pipeline
-      openshift.io/build.start-policy: Serial
-    name: greenfield-pipeline-1
-    namespace: 245e18-dev
-    ownerReferences:
-    - apiVersion: build.openshift.io/v1
-      controller: true
-      kind: BuildConfig
-      name: greenfield-pipeline
-      uid: 22437ca0-c98c-4603-9a26-1f907976099b
-    resourceVersion: "2043269836"
-    uid: 96840a55-cb4b-434b-afea-975fd102e730
-  spec:
-    nodeSelector: null
-    output:
-      pushSecret:
-        name: builder-dockercfg-v67dx
-      to:
-        kind: ImageStreamTag
-        name: greenfield-pipeline:latest
-    postCommit: {}
-    resources: {}
-    revision:
-      git:
-        author:
-          email: derek.roberts@gmail.com
-          name: Derek Roberts
-        commit: 326bfcabc01572d9b27fb31056b7d9fa3ae02798
-        committer:
-          email: derek.roberts@gmail.com
-          name: Derek Roberts
-        message: 'refactor: git cleanup'
-      type: Git
-    serviceAccount: builder
-    source:
-      git:
-        ref: main
-        uri: https://github.com/bcgov-nr/greenfield-pipeline
-      type: Git
-    strategy:
-      dockerStrategy:
-        from:
-          kind: DockerImage
-          name: node@sha256:e0dd89382d4f7da3b2be5d5fb74c65bfa1836deecae3c5f88919f44b469025f9
-      type: Docker
-    triggeredBy:
-    - imageChangeBuild:
-        fromRef:
-          kind: ImageStreamTag
-          name: node:14
-        imageID: node@sha256:e0dd89382d4f7da3b2be5d5fb74c65bfa1836deecae3c5f88919f44b469025f9
-      message: Image change
-  status:
-    completionTimestamp: "2021-11-08T22:29:52Z"
-    conditions:
-    - lastTransitionTime: "2021-11-08T22:22:29Z"
-      lastUpdateTime: "2021-11-08T22:22:29Z"
-      status: "False"
-      type: New
-    - lastTransitionTime: "2021-11-08T22:22:35Z"
-      lastUpdateTime: "2021-11-08T22:22:35Z"
-      status: "False"
-      type: Pending
-    - lastTransitionTime: "2021-11-08T22:29:52Z"
-      lastUpdateTime: "2021-11-08T22:29:52Z"
-      status: "False"
-      type: Running
-    - lastTransitionTime: "2021-11-08T22:29:52Z"
-      lastUpdateTime: "2021-11-08T22:29:52Z"
-      status: "True"
-      type: Complete
-    config:
-      kind: BuildConfig
-      name: greenfield-pipeline
-      namespace: 245e18-dev
-    duration: 443000000000
-    output:
-      to:
-        imageDigest: sha256:1331fafabd2797c87aa3549ec0e6a3d556a0132d3bf27a159ce3627f0d96d50d
-    outputDockerImageReference: image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline:latest
-    phase: Complete
-    stages:
-    - durationMilliseconds: 573
-      name: FetchInputs
-      startTime: "2021-11-08T22:22:38Z"
-      steps:
-      - durationMilliseconds: 573
-        name: FetchGitSource
-        startTime: "2021-11-08T22:22:38Z"
-    - durationMilliseconds: 367908
-      name: PullImages
-      startTime: "2021-11-08T22:22:52Z"
-      steps:
-      - durationMilliseconds: 367908
-        name: PullBaseImage
-        startTime: "2021-11-08T22:22:52Z"
-    - durationMilliseconds: 49714
-      name: Build
-      startTime: "2021-11-08T22:29:00Z"
-      steps:
-      - durationMilliseconds: 49714
-        name: DockerBuild
-        startTime: "2021-11-08T22:29:00Z"
-    - durationMilliseconds: 1493
-      name: PushImage
-      startTime: "2021-11-08T22:29:50Z"
-      steps:
-      - durationMilliseconds: 1493
-        name: PushDockerImage
-        startTime: "2021-11-08T22:29:50Z"
-    startTimestamp: "2021-11-08T22:22:29Z"
-- apiVersion: build.openshift.io/v1
-  kind: Build
-  metadata:
-    annotations:
-      openshift.io/build-config.name: greenfield-pipeline
-      openshift.io/build.number: "2"
-      openshift.io/build.pod-name: greenfield-pipeline-2-build
-    creationTimestamp: "2021-11-08T22:34:13Z"
-    generation: 2
-    labels:
-      app: greenfield-pipeline
-      buildconfig: greenfield-pipeline
-      component: hello-world
-      openshift.io/build-config.name: greenfield-pipeline
-      openshift.io/build.start-policy: Serial
-    name: greenfield-pipeline-2
-    namespace: 245e18-dev
-    ownerReferences:
-    - apiVersion: build.openshift.io/v1
-      controller: true
-      kind: BuildConfig
-      name: greenfield-pipeline
-      uid: 22437ca0-c98c-4603-9a26-1f907976099b
-    resourceVersion: "2043317178"
-    uid: 0ce380b2-f2b6-4ac6-af08-0f213fe7956e
-  spec:
-    nodeSelector: null
-    output:
-      pushSecret:
-        name: builder-dockercfg-v67dx
-      to:
-        kind: ImageStreamTag
-        name: greenfield-pipeline:latest
-    postCommit: {}
-    resources: {}
-    revision:
-      git:
-        author:
-          email: derek.roberts@gmail.com
-          name: Derek Roberts
-        commit: 326bfcabc01572d9b27fb31056b7d9fa3ae02798
-        committer:
-          email: derek.roberts@gmail.com
-          name: Derek Roberts
-        message: 'refactor: git cleanup'
-      type: Git
-    serviceAccount: builder
-    source:
-      git:
-        ref: main
-        uri: https://github.com/bcgov-nr/greenfield-pipeline
-      type: Git
-    strategy:
-      dockerStrategy:
-        from:
-          kind: DockerImage
-          name: node@sha256:e0dd89382d4f7da3b2be5d5fb74c65bfa1836deecae3c5f88919f44b469025f9
-      type: Docker
-    triggeredBy:
-    - imageChangeBuild:
-        fromRef:
-          kind: ImageStreamTag
-          name: node:14
-        imageID: node@sha256:e0dd89382d4f7da3b2be5d5fb74c65bfa1836deecae3c5f88919f44b469025f9
-      message: Image change
-  status:
-    completionTimestamp: "2021-11-08T22:38:18Z"
-    conditions:
-    - lastTransitionTime: "2021-11-08T22:34:13Z"
-      lastUpdateTime: "2021-11-08T22:34:13Z"
-      status: "False"
-      type: New
-    - lastTransitionTime: "2021-11-08T22:34:17Z"
-      lastUpdateTime: "2021-11-08T22:34:17Z"
-      status: "False"
-      type: Pending
-    - lastTransitionTime: "2021-11-08T22:38:18Z"
-      lastUpdateTime: "2021-11-08T22:38:18Z"
-      status: "False"
-      type: Running
-    - lastTransitionTime: "2021-11-08T22:38:18Z"
-      lastUpdateTime: "2021-11-08T22:38:18Z"
-      status: "True"
-      type: Complete
-    config:
-      kind: BuildConfig
-      name: greenfield-pipeline
-      namespace: 245e18-dev
-    duration: 245000000000
-    output:
-      to:
-        imageDigest: sha256:a74f0ac3fc32260569ada49c255e0eba4a8a30ebcdbc672722762b57b7b74f60
-    outputDockerImageReference: image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline:latest
-    phase: Complete
-    stages:
-    - durationMilliseconds: 516
-      name: FetchInputs
-      startTime: "2021-11-08T22:34:18Z"
-      steps:
-      - durationMilliseconds: 516
-        name: FetchGitSource
-        startTime: "2021-11-08T22:34:18Z"
-    - durationMilliseconds: 201744
-      name: PullImages
-      startTime: "2021-11-08T22:34:26Z"
-      steps:
-      - durationMilliseconds: 201744
-        name: PullBaseImage
-        startTime: "2021-11-08T22:34:26Z"
-    - durationMilliseconds: 28347
-      name: Build
-      startTime: "2021-11-08T22:37:48Z"
-      steps:
-      - durationMilliseconds: 28347
-        name: DockerBuild
-        startTime: "2021-11-08T22:37:48Z"
-    - durationMilliseconds: 890
-      name: PushImage
-      startTime: "2021-11-08T22:38:17Z"
-      steps:
-      - durationMilliseconds: 890
-        name: PushDockerImage
-        startTime: "2021-11-08T22:38:17Z"
-    startTimestamp: "2021-11-08T22:34:13Z"
 - apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
     annotations:
-      kubectl.kubernetes.io/last-applied-configuration: |
-        {"apiVersion":"image.openshift.io/v1","kind":"ImageStream","metadata":{"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"},"creationTimestamp":null,"labels":{"app":"greenfield-pipeline","component":"hello-world"},"name":"greenfield-pipeline","namespace":"245e18-dev"},"spec":{"lookupPolicy":{"local":false}},"status":{"dockerImageRepository":""}}
-      openshift.io/generated-by: OpenShiftNewApp
-    creationTimestamp: "2021-11-08T22:22:27Z"
+      app.openshift.io/vcs-ref: main
+      app.openshift.io/vcs-uri: https://github.com/bcgov-nr/greenfield-pipeline
+      openshift.io/generated-by: OpenShiftWebConsole
+    creationTimestamp: "2021-11-22T20:13:23Z"
     generation: 1
     labels:
-      app: greenfield-pipeline
-      component: hello-world
+      app: gfp
+      app.kubernetes.io/component: gfp
+      app.kubernetes.io/instance: gfp
+      app.kubernetes.io/part-of: gfp
     managedFields:
     - apiVersion: image.openshift.io/v1
       fieldsType: FieldsV1
@@ -1231,124 +675,46 @@ items:
         f:metadata:
           f:annotations:
             .: {}
-            f:kubectl.kubernetes.io/last-applied-configuration: {}
+            f:app.openshift.io/vcs-ref: {}
+            f:app.openshift.io/vcs-uri: {}
             f:openshift.io/generated-by: {}
           f:labels:
             .: {}
             f:app: {}
-            f:component: {}
-        f:status:
-          f:dockerImageRepository: {}
-      manager: oc
+            f:app.kubernetes.io/component: {}
+            f:app.kubernetes.io/instance: {}
+            f:app.kubernetes.io/part-of: {}
+      manager: Mozilla
       operation: Update
-      time: "2021-11-08T22:30:33Z"
-    name: greenfield-pipeline
+      time: "2021-11-22T20:13:23Z"
+    name: gfp
     namespace: 245e18-dev
-    resourceVersion: "2043317118"
-    uid: 6e4c1a27-da63-4ff0-ade8-49f687fd3421
+    resourceVersion: "2152182248"
+    uid: f8d9de56-7182-45e5-a037-71986b155a27
   spec:
     lookupPolicy:
       local: false
   status:
-    dockerImageRepository: image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline
-    publicDockerImageRepository: image-registry.apps.silver.devops.gov.bc.ca/245e18-dev/greenfield-pipeline
+    dockerImageRepository: image-registry.openshift-image-registry.svc:5000/245e18-dev/gfp
+    publicDockerImageRepository: image-registry.apps.silver.devops.gov.bc.ca/245e18-dev/gfp
     tags:
     - items:
-      - created: "2021-11-08T22:38:17Z"
-        dockerImageReference: image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:a74f0ac3fc32260569ada49c255e0eba4a8a30ebcdbc672722762b57b7b74f60
+      - created: "2021-11-22T20:16:54Z"
+        dockerImageReference: image-registry.openshift-image-registry.svc:5000/245e18-dev/gfp@sha256:9370952c368477accdebe838b2591f03a410fca869245ae2860d5e8f859c0da4
         generation: 1
-        image: sha256:a74f0ac3fc32260569ada49c255e0eba4a8a30ebcdbc672722762b57b7b74f60
-      - created: "2021-11-08T22:29:51Z"
-        dockerImageReference: image-registry.openshift-image-registry.svc:5000/245e18-dev/greenfield-pipeline@sha256:1331fafabd2797c87aa3549ec0e6a3d556a0132d3bf27a159ce3627f0d96d50d
-        generation: 1
-        image: sha256:1331fafabd2797c87aa3549ec0e6a3d556a0132d3bf27a159ce3627f0d96d50d
+        image: sha256:9370952c368477accdebe838b2591f03a410fca869245ae2860d5e8f859c0da4
       tag: latest
-- apiVersion: image.openshift.io/v1
-  kind: ImageStream
-  metadata:
-    annotations:
-      kubectl.kubernetes.io/last-applied-configuration: |
-        {"apiVersion":"image.openshift.io/v1","kind":"ImageStream","metadata":{"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"},"creationTimestamp":null,"labels":{"app":"greenfield-pipeline","component":"hello-world"},"name":"node","namespace":"245e18-dev"},"spec":{"lookupPolicy":{"local":false},"tags":[{"annotations":{"openshift.io/imported-from":"node:14"},"from":{"kind":"DockerImage","name":"node:14"},"generation":null,"importPolicy":{},"name":"14","referencePolicy":{"type":""}}]},"status":{"dockerImageRepository":""}}
-      openshift.io/generated-by: OpenShiftNewApp
-      openshift.io/image.dockerRepositoryCheck: "2021-11-08T22:22:28Z"
-    creationTimestamp: "2021-11-08T22:22:27Z"
-    generation: 2
-    labels:
-      app: greenfield-pipeline
-      component: hello-world
-    managedFields:
-    - apiVersion: image.openshift.io/v1
-      fieldsType: FieldsV1
-      fieldsV1:
-        f:metadata:
-          f:annotations:
-            .: {}
-            f:kubectl.kubernetes.io/last-applied-configuration: {}
-            f:openshift.io/generated-by: {}
-          f:labels:
-            .: {}
-            f:app: {}
-            f:component: {}
-        f:spec:
-          f:tags:
-            .: {}
-            k:{"name":"14"}:
-              .: {}
-              f:annotations:
-                .: {}
-                f:openshift.io/imported-from: {}
-              f:from:
-                .: {}
-                f:kind: {}
-                f:name: {}
-              f:generation: {}
-              f:importPolicy: {}
-              f:name: {}
-              f:referencePolicy:
-                .: {}
-                f:type: {}
-        f:status:
-          f:dockerImageRepository: {}
-      manager: oc
-      operation: Update
-      time: "2021-11-08T22:30:33Z"
-    name: node
-    namespace: 245e18-dev
-    resourceVersion: "2043274789"
-    uid: 5802898b-9a44-45a9-bdfe-31b93d7ec4b2
-  spec:
-    lookupPolicy:
-      local: false
-    tags:
-    - annotations:
-        openshift.io/imported-from: node:14
-      from:
-        kind: DockerImage
-        name: node:14
-      generation: 2
-      importPolicy: {}
-      name: "14"
-      referencePolicy:
-        type: Source
-  status:
-    dockerImageRepository: image-registry.openshift-image-registry.svc:5000/245e18-dev/node
-    publicDockerImageRepository: image-registry.apps.silver.devops.gov.bc.ca/245e18-dev/node
-    tags:
-    - items:
-      - created: "2021-11-08T22:22:28Z"
-        dockerImageReference: node@sha256:e0dd89382d4f7da3b2be5d5fb74c65bfa1836deecae3c5f88919f44b469025f9
-        generation: 2
-        image: sha256:e0dd89382d4f7da3b2be5d5fb74c65bfa1836deecae3c5f88919f44b469025f9
-      tag: "14"
 - apiVersion: route.openshift.io/v1
   kind: Route
   metadata:
     annotations:
       openshift.io/host.generated: "true"
-    creationTimestamp: "2021-11-08T22:35:28Z"
+    creationTimestamp: "2021-11-22T20:13:24Z"
     labels:
-      app: greenfield-pipeline
-      component: hello-world
+      app: gfp
+      app.kubernetes.io/component: gfp
+      app.kubernetes.io/instance: gfp
+      app.kubernetes.io/part-of: gfp
     managedFields:
     - apiVersion: route.openshift.io/v1
       fieldsType: FieldsV1
@@ -1357,7 +723,9 @@ items:
           f:labels:
             .: {}
             f:app: {}
-            f:component: {}
+            f:app.kubernetes.io/component: {}
+            f:app.kubernetes.io/instance: {}
+            f:app.kubernetes.io/part-of: {}
         f:spec:
           f:port:
             .: {}
@@ -1369,7 +737,7 @@ items:
           f:wildcardPolicy: {}
       manager: Mozilla
       operation: Update
-      time: "2021-11-08T22:35:28Z"
+      time: "2021-11-22T20:13:24Z"
     - apiVersion: route.openshift.io/v1
       fieldsType: FieldsV1
       fieldsV1:
@@ -1377,27 +745,27 @@ items:
           f:ingress: {}
       manager: openshift-router
       operation: Update
-      time: "2021-11-08T22:35:29Z"
-    name: greenfield-pipeline
+      time: "2021-11-22T20:13:24Z"
+    name: gfp
     namespace: 245e18-dev
-    resourceVersion: "2043302330"
-    uid: 8205c7cc-0783-45fa-bbf7-0ea2646657f0
+    resourceVersion: "2152230967"
+    uid: 61dfa50a-c951-4203-9147-a27232ba90ed
   spec:
-    host: greenfield-pipeline-245e18-dev.apps.silver.devops.gov.bc.ca
+    host: gfp-245e18-dev.apps.silver.devops.gov.bc.ca
     port:
-      targetPort: 8080-tcp
+      targetPort: 3000-tcp
     to:
       kind: Service
-      name: greenfield-pipeline
+      name: gfp
       weight: 100
     wildcardPolicy: None
   status:
     ingress:
     - conditions:
-      - lastTransitionTime: "2021-11-08T22:35:29Z"
+      - lastTransitionTime: "2021-11-22T20:13:24Z"
         status: "True"
         type: Admitted
-      host: greenfield-pipeline-245e18-dev.apps.silver.devops.gov.bc.ca
+      host: gfp-245e18-dev.apps.silver.devops.gov.bc.ca
       routerCanonicalHostname: apps.silver.devops.gov.bc.ca
       routerName: default
       wildcardPolicy: None
