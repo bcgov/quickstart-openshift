@@ -21,6 +21,10 @@ parameters:
   - name: GIT_BRANCH
     description: PR branch
     required: true
+  - name: ENV
+    value: dev
+  - name: DOMAIN
+    value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
     value: 250m
   - name: MEMORY_REQUEST
@@ -92,25 +96,20 @@ objects:
           targetPort: 8080
       selector:
         name: ${NAME}-${SUFFIX}
-  # - apiVersion: route.openshift.io/v1
-  #   kind: Route
-  #   metadata:
-  #     labels:
-  #       app: ${NAME}-${SUFFIX}
-  #     name: ${NAME}-${SUFFIX}
-  #     annotations:
-  #       # Enable HTTP Strict Transport Security:
-  #       haproxy.router.openshift.io/hsts_header: max-age=31536000;includeSubDomains;preload
-  #       # Use roundrobin load balancing strategy
-  #       haproxy.router.openshift.io/balance: roundrobin
-  #       haproxy.router.openshift.io/disable_cookies: "true"
-  #   spec:
-  #     host: ${NAME}-${SUFFIX}${ENVIRONMENT}.${SECOND_LEVEL_DOMAIN}
-  #     port:
-  #       targetPort: 8080-tcp
-  #     to:
-  #       kind: Service
-  #       name: ${NAME}-${SUFFIX}
-  #     tls:
-  #       termination: edge
-  #       insecureEdgeTerminationPolicy: Redirect
+  - apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      labels:
+        app: ${NAME}-${SUFFIX}
+      name: ${NAME}-${SUFFIX}
+    spec:
+      host: ${NAME}-${SUFFIX}-${ENV}.${DOMAIN}
+      port:
+        targetPort: 8080-tcp
+      to:
+        kind: Service
+        name: ${NAME}-${SUFFIX}
+        weight: 100
+      tls:
+        termination: edge
+        insecureEdgeTerminationPolicy: Redirect
