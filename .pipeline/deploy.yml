@@ -21,10 +21,10 @@ parameters:
   - name: GIT_BRANCH
     description: PR branch
     required: true
-  - name: DOCKER_FILE
-    description: Dockerfile to use
-    required: true
-    value: Dockerfile
+  - name: CPU_REQUEST
+    value: 250m
+  - name: MEMORY_REQUEST
+    value: 1Gi
 objects:
   - apiVersion: v1
     kind: DeploymentConfig
@@ -49,181 +49,17 @@ objects:
             - image: image-registry.openshift-image-registry.svc:5000/245e18-dev/${NAME}-${SUFFIX}:${SUFFIX}
               imagePullPolicy: Always
               name: ${NAME}
-                - name: KEYCLOAK_PUBLIC_KEY
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.keycloak-public-key
-                - name: POSTGRES_READ_USER
-                  value: ${POSTGRES_USER}
-                - name: POSTGRES_WRITE_USER
-                  value: ${POSTGRES_USER}
-                - name: POSTGRES_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-global
-                      key: app-db-password
-                - name: POSTGRES_WRITE_HOST
-                  value: ${POSTGRES_WRITE_HOST}
-                - name: POSTGRES_READ_HOST
-                  value: ${POSTGRES_READ_HOST}
-                - name: POSTGRES_PORT
-                  value: "5432"
-                - name: POSTGRES_DATABASE
-                  value: ${POSTGRES_DATABASE}
-                - name: STATUS_CHECKER_SECRET
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-global
-                      key: status-checker-sa-secret
-                - name: OPENSHIFT_BASE_URI
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.openshift-base-uri
-                - name: OPENSHIFT_NAMESPACE_API
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.openshift-namespace-api
-                - name: PATRONI_CLUSTER_NAME
-                  value: patroni-wps-${SUFFIX}
-                - name: PROJECT_NAMESPACE
-                  value: ${PROJECT_NAMESPACE}
-                - name: ROCKET_URL_POST_MESSAGE
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: rocket.chat-url-post-message
-                - name: ROCKET_CHANNEL
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: rocket.chat-channel
-                - name: ROCKET_USER_ID
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-global
-                      key: rocket.chat-user-id-secret
-                - name: ROCKET_AUTH_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-global
-                      key: rocket.chat-auth-token-secret
-                - name: REACT_APP_KEYCLOAK_AUTH_URL
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.keycloak-auth-url
-                - name: REACT_APP_KEYCLOAK_REALM
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.keycloak-realm
-                - name: REACT_APP_KEYCLOAK_CLIENT
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.keycloak-client
-                - name: REACT_APP_MATOMO_URL
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.matomo-url
-                - name: REACT_APP_MATOMO_SITE_ID
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.matomo-site-id
-                - name: REACT_APP_MATOMO_CONTAINER
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.matomo-container
-                - name: OBJECT_STORE_SERVER
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-global
-                      key: object-store-server
-                - name: OBJECT_STORE_USER_ID
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-global
-                      key: object-store-user-id
-                - name: OBJECT_STORE_SECRET
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-global
-                      key: object-store-secret
-                - name: OBJECT_STORE_BUCKET
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-global
-                      key: object-store-bucket
-                - name: REDIS_HOST
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.redis-host
-                - name: REDIS_PORT
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.redis-port
-                - name: REDIS_USE
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.redis-use
-                - name: REDIS_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-redis
-                      key: database-password
-                - name: REDIS_STATION_CACHE_EXPIRY
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.redis-station-cache-expiry
-                - name: REDIS_HOURLIES_BY_STATION_CODE_CACHE_EXPIRY
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.redis-hourlies-by-station-code-cache-expiry
-                - name: REDIS_AUTH_CACHE_EXPIRY
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.redis-auth-cache-expiry
-                - name: REDIS_DAILIES_BY_STATION_CODE_CACHE_EXPIRY
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.redis-dailies-by-station-code-expiry
-                - name: REDIS_CACHE_ENV_CANADA
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.redis-cache-env-canada
-                - name: REDIS_ENV_CANADA_CACHE_EXPIRY
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${NAME}-global
-                      key: env.redis-env-canada-cache-expiry
               ports:
                 - containerPort: 8080
                   protocol: TCP
               resources:
-                limits:
-                  cpu: ${CPU_LIMIT}
-                  memory: ${MEMORY_LIMIT}
                 requests:
                   cpu: ${CPU_REQUEST}
                   memory: ${MEMORY_REQUEST}
               readinessProbe:
                 httpGet:
-                  path: /api/ready
-                  port: 8080
+                  path: /api/
+                  port: 3000
                   scheme: HTTP
                 # first probe will fire some time between:
                 # initialDelaySeconds and initialDelaySeconds + periodSeconds
@@ -234,8 +70,8 @@ objects:
                 successThreshold: 1
                 failureThreshold: 3
                 httpGet:
-                  path: /api/health
-                  port: 8080
+                  path: /api/
+                  port: 3000
                   scheme: HTTP
                 # first probe will fire some time between:
                 # initialDelaySeconds and initialDelaySeconds + periodSeconds

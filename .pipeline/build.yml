@@ -51,7 +51,7 @@ objects:
       output:
         to:
           kind: ImageStreamTag
-          name: ${NAME}-${SUFFIX}:${SUFFIX}
+          name: ${NAME}-${SUFFIX}:latest
       source:
         type: Git
         git:
