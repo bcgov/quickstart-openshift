@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: OpenShift Init
+      - name: Build Init
         run: |
           set -ex
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
@@ -24,8 +24,8 @@ jobs:
           oc process -f .pipeline/build.yml \
             -p SUFFIX=${{ github.event.number }} -p GIT_BRANCH=${GITHUB_HEAD_REF} \
           | oc apply -f -
-          
-      - name: OpenShift Build
+
+      - name: Build Start
         run: |
           set -ex
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
@@ -41,3 +41,39 @@ jobs:
             exit 1
           fi
           echo "Build successful"
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Deploy Init
+        run: |
+          set -ex
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.NAMESPACE }}
+
+          oc process -f .pipeline/deploy.yml \
+            -p SUFFIX=${{ github.event.number }} -p ENV=${ secrets.ENV } \
+          | oc apply -f -
+
+      # - name: Deploy Rollout
+      #   run: |
+      #     set -ex
+      #     oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+      #     oc project ${{ secrets.NAMESPACE }}
+
+      #     oc rollout dc/gfp-${{ github.event.number }}
+      #     oc start-build bc/gfp-${{ github.event.number }} --follow
+      #     LATEST=$(oc get bc/gfp-${{ github.event.number }} -o 'jsonpath={.status.lastVersion}')
+      #     RESULT=$(oc get build/gfp-${{ github.event.number }}-${LATEST} -o 'jsonpath={.status.phase}')
+      #     if [ "${RESULT}" != "Complete" ]; then
+      #       echo -e "\n--- ERROR ---\n"
+      #       echo -e "Build status: ${RESULT}"
+      #       exit 1
+      #     fi
+      #     echo "Build successful"

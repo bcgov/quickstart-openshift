@@ -16,13 +16,9 @@ parameters:
   - name: SUFFIX
     description: Deployment suffix, e.g. pr-### or prod
     required: true
-  - name: GIT_URL
-    value: https://github.com/bcgov-nr/greenfield-pipeline.git
-  - name: GIT_BRANCH
-    description: PR branch
-    required: true
   - name: ENV
-    value: dev
+    description: Environment, e.g. dev, test, prod
+    required: true
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
@@ -43,7 +39,6 @@ objects:
         name: ${NAME}-${SUFFIX}
       strategy:
         type: Rolling
-      triggers: []
       template:
         metadata:
           labels:
@@ -92,8 +87,8 @@ objects:
       ports:
         - name: 3000-tcp
           protocol: TCP
-          port: 3000
-          targetPort: 8080
+          port: 8080
+          targetPort: 3000
       selector:
         name: ${NAME}-${SUFFIX}
   - apiVersion: route.openshift.io/v1
