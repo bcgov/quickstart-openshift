@@ -44,6 +44,7 @@ jobs:
 
   deploy:
     name: Deploy
+    needs: Build
     runs-on: ubuntu-latest
     environment:
       name: dev
