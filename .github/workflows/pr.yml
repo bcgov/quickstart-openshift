@@ -58,7 +58,7 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           oc process -f .pipeline/deploy.yml \
-            -p SUFFIX=${{ github.event.number }} -p ENV=${ secrets.ENV } \
+            -p SUFFIX=${{ github.event.number }} -p ENV=${{ secrets.ENV }} \
           | oc apply -f -
 
       # - name: Deploy Rollout
