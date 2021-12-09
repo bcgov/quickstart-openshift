@@ -13,7 +13,8 @@ jobs:
       name: dev
     steps: 
       - uses: actions/checkout@v2
-      - run: |
+      - name: Build
+        run: |
           set -ex
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
@@ -41,7 +42,8 @@ jobs:
       name: dev
     steps:
       - uses: actions/checkout@v2
-      - run: |
+      - name: Deploy
+        run: |
           set -ex
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
