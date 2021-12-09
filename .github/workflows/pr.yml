@@ -12,11 +12,8 @@ jobs:
     environment:
       name: dev
     steps: 
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Build Init
-        run: |
+      - uses: actions/checkout@v2
+      - run: |
           set -ex
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
@@ -24,12 +21,6 @@ jobs:
           oc process -f .pipeline/build.yml \
             -p SUFFIX=${{ github.event.number }} -p GIT_BRANCH=${GITHUB_HEAD_REF} \
           | oc apply -f -
-
-      - name: Build Start
-        run: |
-          set -ex
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
 
           oc cancel-build bc/gfp-${{ github.event.number }}
           oc start-build bc/gfp-${{ github.event.number }} --follow
@@ -49,38 +40,28 @@ jobs:
     environment:
       name: dev
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Deploy Init
-        run: |
+      - uses: actions/checkout@v2
+      - run: |
           set -ex
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
-
-          # Cancel any previous rollouts
-          oc rollout cancel dc/gfp-${{ github.event.number }}
 
           # Process and apply deployment config
           oc process -f .pipeline/deploy.yml \
             -p SUFFIX=${{ github.event.number }} -p ENV=${{ secrets.ENV }} \
           | oc apply -f -
 
-      - name: Deploy Rollout
-        run: |
-          set -ex
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
+          # Cancel any rollouts in progress (TODO: think of something less clunky)
+          oc rollout cancel dc/gfp-${{ github.event.number }}
 
-          # Follow rollout
+          # Start new rollout and follow it
+          oc rollout latest dc/gfp-${{ github.event.number }}
           oc logs -f dc/gfp-${{ github.event.number }}
 
-          # Rollout status
+          # Get rollout status and process result
           STATUS=$(oc rollout history dc/gfp-${{ github.event.number }} \
             | grep -v -e '^[[:space:]]*$' | tail -n1 | awk '{print $2}' \
           )
-
-          # Process result
           if [ "${STATUS}" == "Complete" ]
           then
             echo "Build successful"
