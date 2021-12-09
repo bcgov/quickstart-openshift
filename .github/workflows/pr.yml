@@ -72,3 +72,24 @@ jobs:
             echo -e "Deployment status: ${STATUS}"
             exit 1
           fi
+
+  cleanup:
+    name: Cleanup
+    needs: Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cleanup
+        run: |
+          set -ex
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.NAMESPACE }}
+
+          # Get rollout status and process result
+          JUNK=$(oc get pods | grep '0/1' | awk '{print $1}' | \
+            grep -E 'gfp-${{ github.event.number }}-[[:digit:]]*-((build)|(deploy))'
+          )
+          oc delete pods "${JUNK}"
+          oc delete builds -l app=gfp-${{ github.event.number }}
