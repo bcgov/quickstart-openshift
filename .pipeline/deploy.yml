@@ -45,7 +45,7 @@ objects:
             name: ${NAME}-${SUFFIX}
         spec:
           containers:
-            - image: image-registry.openshift-image-registry.svc:5000/245e18-dev/${NAME}-${SUFFIX}:${SUFFIX}
+            - image: image-registry.openshift-image-registry.svc:5000/245e18-dev/${NAME}-${SUFFIX}:latest
               imagePullPolicy: Always
               name: ${NAME}
               ports:
