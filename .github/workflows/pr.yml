@@ -88,8 +88,9 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Get rollout status and process result
-          JUNK=$(oc get pods | grep '0/1' | awk '{print $1}' | \
-            grep -E 'gfp-${{ github.event.number }}-[[:digit:]]*-((build)|(deploy))'
+          JUNK=$(oc get pods | grep '0/1' | awk '{print $1}' \
+            | grep -E "gfp-${{ github.event.number }}-[[:digit:]]*-((build)|(deploy))" \
+            | tr '\r\n' ' \
           )
           oc delete pods "${JUNK}"
           oc delete builds -l app=gfp-${{ github.event.number }}
