@@ -49,7 +49,7 @@ objects:
               imagePullPolicy: Always
               name: ${NAME}
               ports:
-                - containerPort: 8080
+                - containerPort: 3000
                   protocol: TCP
               resources:
                 requests:
@@ -57,7 +57,7 @@ objects:
                   memory: ${MEMORY_REQUEST}
               readinessProbe:
                 httpGet:
-                  path: /api/
+                  path: /
                   port: 3000
                   scheme: HTTP
                 # first probe will fire some time between:
@@ -69,7 +69,7 @@ objects:
                 successThreshold: 1
                 failureThreshold: 3
                 httpGet:
-                  path: /api/
+                  path: /
                   port: 3000
                   scheme: HTTP
                 # first probe will fire some time between:
@@ -87,7 +87,7 @@ objects:
       ports:
         - name: 3000-tcp
           protocol: TCP
-          port: 8080
+          port: 80
           targetPort: 3000
       selector:
         name: ${NAME}-${SUFFIX}
@@ -100,7 +100,7 @@ objects:
     spec:
       host: ${NAME}-${SUFFIX}-${ENV}.${DOMAIN}
       port:
-        targetPort: 8080-tcp
+        targetPort: 3000-tcp
       to:
         kind: Service
         name: ${NAME}-${SUFFIX}
