@@ -87,10 +87,8 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
 
-          # Remove old build pods, deployment pods and build runs
-          JUNK=$(oc get pods | grep '0/1' | awk '{print $1}' \
-            | grep -E "gfp-${{ github.event.number }}-[[:digit:]]*-((build)|(deploy))" \
-            | tr '\r\n' ' ' \
-          )
-          oc delete pods "${JUNK}"
+          # Remove old build runs, build pods and deployment pods
           oc delete builds -l app=gfp-${{ github.event.number }}
+          oc get pods | grep '0/1' | awk '{print $1}' \
+            | grep -E "gfp-${{ github.event.number }}-[[:digit:]]*-((build)|(deploy))" \
+            | xargs -I {} oc delete pod {}
