@@ -29,8 +29,6 @@ objects:
   - apiVersion: v1
     kind: ImageStream
     metadata:
-      annotations:
-        openshift.io/generated-by: OpenShiftNewBuild
       labels:
         app: ${NAME}-${SUFFIX}
         common: "true"
@@ -41,8 +39,6 @@ objects:
   - apiVersion: v1
     kind: BuildConfig
     metadata:
-      annotations:
-        openshift.io/generated-by: OpenShiftNewBuild
       labels:
         app: ${NAME}-${SUFFIX}
       name: ${NAME}-${SUFFIX}
@@ -51,7 +47,7 @@ objects:
       output:
         to:
           kind: ImageStreamTag
-          name: ${NAME}-${SUFFIX}:${SUFFIX}
+          name: ${NAME}-${SUFFIX}:latest
       source:
         type: Git
         git:

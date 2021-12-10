@@ -12,24 +12,16 @@ jobs:
     environment:
       name: dev
     steps: 
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: OpenShift Init
+      - uses: actions/checkout@v2
+      - name: Build
         run: |
           set -ex
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
 
-          oc process -f ./.pipeline/build.yml \
+          oc process -f .pipeline/build.yml \
             -p SUFFIX=${{ github.event.number }} -p GIT_BRANCH=${GITHUB_HEAD_REF} \
           | oc apply -f -
-          
-      - name: OpenShift Build
-        run: |
-          set -ex
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
 
           oc cancel-build bc/gfp-${{ github.event.number }}
           oc start-build bc/gfp-${{ github.event.number }} --follow
@@ -41,3 +33,62 @@ jobs:
             exit 1
           fi
           echo "Build successful"
+
+  deploy:
+    name: Deploy
+    needs: Build
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy
+        run: |
+          set -ex
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.NAMESPACE }}
+
+          # Process and apply deployment config
+          oc process -f .pipeline/deploy.yml \
+            -p SUFFIX=${{ github.event.number }} -p ENV=${{ secrets.ENV }} \
+          | oc apply -f -
+
+          # Cancel any rollouts in progress (TODO: think of something less clunky)
+          oc rollout cancel dc/gfp-${{ github.event.number }}
+
+          # Start new rollout and follow it
+          oc rollout latest dc/gfp-${{ github.event.number }}
+          oc logs -f dc/gfp-${{ github.event.number }}
+
+          # Get rollout status and process result
+          STATUS=$(oc rollout history dc/gfp-${{ github.event.number }} \
+            | grep -v -e '^[[:space:]]*$' | tail -n1 | awk '{print $2}' \
+          )
+          if [ "${STATUS}" == "Complete" ]
+          then
+            echo "Build successful"
+          else
+            echo -e "\n--- ERROR ---\n"
+            echo -e "Deployment status: ${STATUS}"
+            exit 1
+          fi
+
+  cleanup:
+    name: Cleanup
+    needs: Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cleanup
+        run: |
+          set -ex
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.NAMESPACE }}
+
+          # Remove old build runs, build pods and deployment pods
+          oc delete builds -l app=gfp-${{ github.event.number }}
+          oc get pods | grep '0/1' | awk '{print $1}' \
+            | grep -E "gfp-${{ github.event.number }}-[[:digit:]]*-((build)|(deploy))" \
+            | xargs -I {} oc delete pod {}
