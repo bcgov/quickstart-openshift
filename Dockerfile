@@ -3,4 +3,4 @@ RUN dnf module install -y nodejs:14
 WORKDIR /app
 COPY . .
 RUN npm ci
-CMD node index.js
+CMD npm start
