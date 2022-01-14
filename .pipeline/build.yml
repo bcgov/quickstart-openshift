@@ -7,54 +7,28 @@ metadata:
     tags: "gfp"
     iconClass: icon-js
 labels:
-  app.kubernetes.io/part-of: "${NAME}"
   app: ${NAME}-${SUFFIX}
 parameters:
   - name: NAME
-    description: Module name
+    description: App name
     value: gfp
   - name: SUFFIX
-    description: Deployment suffix, e.g. pr-### or prod
+    description: Deployment suffix, e.g. pr number or prod
     required: true
-  - name: GIT_URL
-    value: https://github.com/bcgov-nr/greenfield-pipeline.git
-  - name: GIT_BRANCH
-    description: PR branch
-    required: true
-  - name: DOCKER_FILE
-    description: Dockerfile to use
-    required: true
-    value: Dockerfile
 objects:
   - apiVersion: v1
     kind: ImageStream
     metadata:
       labels:
         app: ${NAME}-${SUFFIX}
-        common: "true"
       name: ${NAME}-${SUFFIX}
     spec:
       lookupPolicy:
         local: false
-  - apiVersion: v1
-    kind: BuildConfig
-    metadata:
-      labels:
-        app: ${NAME}-${SUFFIX}
-      name: ${NAME}-${SUFFIX}
-    spec:
-      completionDeadlineSeconds: 1200 # 20 minutes
-      output:
-        to:
-          kind: ImageStreamTag
-          name: ${NAME}-${SUFFIX}:latest
-      source:
-        type: Git
-        git:
-          uri: ${GIT_URL}
-          ref: origin/${GIT_BRANCH}
-        contextDir: ./
-      strategy:
-        dockerStrategy:
-          dockerfilePath: ${DOCKER_FILE}
-      triggers: []
+      tags:
+      - name: pr-${SUFFIX}
+        from:
+          kind: DockerImage
+          name: ghcr.io/bcgov-nr/greenfield-pipeline:pr-${SUFFIX}
+        referencePolicy:
+          type: Local
