@@ -27,6 +27,22 @@ parameters:
     value: 1Gi
 objects:
   - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      labels:
+        app: ${NAME}-${SUFFIX}
+      name: ${NAME}-${SUFFIX}
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+      - name: pr-${SUFFIX}
+        from:
+          kind: DockerImage
+          name: ghcr.io/bcgov-nr/greenfield-pipeline:pr-${SUFFIX}
+        referencePolicy:
+          type: Local
+  - apiVersion: v1
     kind: DeploymentConfig
     metadata:
       labels:

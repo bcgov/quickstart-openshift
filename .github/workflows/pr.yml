@@ -42,26 +42,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-    
-      - uses: actions/checkout@v2
-      - name: Build
-        run: |
-          set -ex
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
-
-          oc process -f .pipeline/build.yml -p SUFFIX=${{ github.event.number }} | oc apply -f -
-
-          oc cancel-build bc/gfp-${{ github.event.number }}
-          oc start-build bc/gfp-${{ github.event.number }} --follow
-          LATEST=$(oc get bc/gfp-${{ github.event.number }} -o 'jsonpath={.status.lastVersion}')
-          RESULT=$(oc get build/gfp-${{ github.event.number }}-${LATEST} -o 'jsonpath={.status.phase}')
-          if [ "${RESULT}" != "Complete" ]; then
-            echo -e "\n--- ERROR ---\n"
-            echo -e "Build status: ${RESULT}"
-            exit 1
-          fi
-          echo "Build successful"
 
   deploy:
     name: Deploy
