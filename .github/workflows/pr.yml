@@ -50,9 +50,7 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
 
-          oc process -f .pipeline/build.yml \
-            -p SUFFIX=${{ github.event.number }} -p GIT_BRANCH=${GITHUB_HEAD_REF} \
-          | oc apply -f -
+          oc process -f .pipeline/build.yml -p SUFFIX=${{ github.event.number }} | oc apply -f -
 
           oc cancel-build bc/gfp-${{ github.event.number }}
           oc start-build bc/gfp-${{ github.event.number }} --follow
