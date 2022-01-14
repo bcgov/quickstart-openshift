@@ -10,12 +10,14 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-and-push-image:
+  build:
+    name: Build
     runs-on: ubuntu-latest
+    environment:
+      name: dev
     permissions:
       contents: read
       packages: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -41,12 +43,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
     
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    environment:
-      name: dev
-    steps: 
       - uses: actions/checkout@v2
       - name: Build
         run: |
