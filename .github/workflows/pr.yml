@@ -22,26 +22,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
       - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        uses: docker/login-action@v1
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
       - name: Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v2
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ghcr.io/bcgov-nr/greenfield-pipeline:pr-${{ github.pull_request.number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy:
     name: Deploy
@@ -58,15 +64,17 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Cancel any rollouts in progress
-          oc rollout cancel dc/gfp-${{ github.event.number }}
+          oc rollout cancel dc/gfp-${{ github.event.number }} 2> /dev/null \
+            || true && echo "No rollout in progress"
 
           # Process and apply deployment template
           oc process -f .pipeline/deploy.yml \
             -p SUFFIX=${{ github.event.number }} -p ENV=${{ secrets.ENV }} \
               | oc apply -f -
 
-          # Start rollout (if one hasn't started) and follow it
-          oc rollout latest dc/gfp-${{ github.event.number }} || true
+          # Start rollout (if necessary) and follow it
+          oc rollout latest dc/gfp-${{ github.event.number }} 2> /dev/null \
+            || true && echo "Rollout in progress"
           oc logs -f dc/gfp-${{ github.event.number }}
 
           # Get status, returns 0 if rollout is successful
@@ -80,7 +88,7 @@ jobs:
       name: dev
     steps:
       - uses: actions/checkout@v2
-      - name: Cleanup
+      - name: Remove OpenShift artifacts
         run: |
           set -ex
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
