@@ -46,8 +46,8 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/bcgov-nr/greenfield-pipeline:pr-${{ github.pull_request.number }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Move Docker cache
         run: |
