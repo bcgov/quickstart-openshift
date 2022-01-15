@@ -62,6 +62,9 @@ jobs:
             -p SUFFIX=${{ github.event.number }} -p ENV=${{ secrets.ENV }} \
           | oc apply -f -
 
+          # Check rollout status, with timeout
+          timeout 5s oc rollout status dc/gfp-${{ github.event.number }}
+
           # Cancel any rollouts in progress (TODO: think of something less clunky)
           oc rollout cancel dc/gfp-${{ github.event.number }}
 
