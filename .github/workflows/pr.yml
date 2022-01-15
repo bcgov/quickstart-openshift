@@ -57,33 +57,20 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
 
-          # Process and apply deployment config
-          oc process -f .pipeline/deploy.yml \
-            -p SUFFIX=${{ github.event.number }} -p ENV=${{ secrets.ENV }} \
-          | oc apply -f -
-
-          # Check rollout status, with timeout
-          timeout 5s oc rollout status dc/gfp-${{ github.event.number }}
-
-          # Cancel any rollouts in progress (TODO: think of something less clunky)
+          # Cancel any rollouts in progress
           oc rollout cancel dc/gfp-${{ github.event.number }}
 
-          # Start new rollout and follow it
-          oc rollout latest dc/gfp-${{ github.event.number }}
+          # Process and apply deployment template
+          oc process -f .pipeline/deploy.yml \
+            -p SUFFIX=${{ github.event.number }} -p ENV=${{ secrets.ENV }} \
+              | oc apply -f -
+
+          # Start rollout (if one hasn't started) and follow it
+          oc rollout latest dc/gfp-${{ github.event.number }} || true
           oc logs -f dc/gfp-${{ github.event.number }}
 
-          # Get rollout status and process result
-          STATUS=$(oc rollout history dc/gfp-${{ github.event.number }} \
-            | grep -v -e '^[[:space:]]*$' | tail -n1 | awk '{print $2}' \
-          )
-          if [ "${STATUS}" == "Complete" ]
-          then
-            echo "Build successful"
-          else
-            echo -e "\n--- ERROR ---\n"
-            echo -e "Deployment status: ${STATUS}"
-            exit 1
-          fi
+          # Get status, returns 0 if rollout is successful
+          oc rollout status dc/gfp-${{ github.event.number }}
 
   cleanup:
     name: Cleanup
