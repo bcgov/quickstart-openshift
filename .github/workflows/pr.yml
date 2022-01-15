@@ -56,6 +56,11 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
+      - name: Move Docker cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
   deploy:
     name: Deploy
     needs: Build
@@ -101,8 +106,3 @@ jobs:
 
           # Remove old build runs, build pods and deployment pods
           oc delete all -l app=gfp-${{ github.event.number }}
-
-      - name: Remove Docker cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
