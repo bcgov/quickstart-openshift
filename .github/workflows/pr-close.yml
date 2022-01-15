@@ -1,0 +1,26 @@
+name: Cleanup
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  cleanup:
+    name: Cleanup
+    needs: Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
+      - uses: actions/checkout@v2
+      - name: Remove OpenShift artifacts
+        run: |
+          set -ex
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.NAMESPACE }}
+
+          # Remove old build runs, build pods and deployment pods
+          oc delete all -l app=gfp-${{ github.event.number }}
