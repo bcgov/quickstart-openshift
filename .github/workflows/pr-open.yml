@@ -45,7 +45,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/bcgov-nr/greenfield-pipeline:pr-${{ github.pull_request.number }}
+          tags: ghcr.io/bcgov-nr/greenfield-pipeline:pr-${{ github.event.number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -79,20 +79,3 @@ jobs:
 
           # Get status, returns 0 if rollout is successful
           oc rollout status dc/gfp-${{ github.event.number }}
-
-  cleanup:
-    name: Cleanup
-    needs: Deploy
-    runs-on: ubuntu-latest
-    environment:
-      name: dev
-    steps:
-      - uses: actions/checkout@v2
-      - name: Remove OpenShift artifacts
-        run: |
-          set -ex
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
-
-          # Remove old build runs, build pods and deployment pods
-          oc delete all -l app=gfp-${{ github.event.number }}
