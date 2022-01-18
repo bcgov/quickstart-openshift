@@ -23,6 +23,5 @@ COPY --from=builder /app/package*.json ./
 # Expose port - mostly a convention, for readability
 EXPOSE 3000
 
-# Command - ENTRYPOINT persists, CMD can be overridden
-ENTRYPOINT ["npm"]
-CMD ["run", "prod"]
+# Start up command
+ENTRYPOINT ["npm", "run", "start:prod"]
