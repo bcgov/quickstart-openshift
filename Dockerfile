@@ -10,7 +10,6 @@ RUN npm ci && \
     npm run build && \
     rm -rf ./node_modules && \
     NODE_ENV=production npm ci --only=production
-RUN which npm
 
 # Deployment container
 FROM registry.access.redhat.com/ubi8/ubi-micro
