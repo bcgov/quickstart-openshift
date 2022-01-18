@@ -16,7 +16,8 @@ RUN mkdir /.npm /.config; \
 USER 1001
 
 # Install packages by consuming package-lock.json
-RUN npm ci
+RUN npm ci && \
+    npm run build
 
 # Expose port - mostly a convention, for readability
 EXPOSE 3000
