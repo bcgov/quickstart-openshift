@@ -66,6 +66,10 @@ jobs:
           # Cancel any rollouts in progress
           oc rollout cancel dc/gfp-${{ github.event.number }} 2> /dev/null \
             || true && echo "No rollout in progress"
+          
+          # Remove any stale imagestreams
+          oc delete is/gfp-${{ github.event.number }} 2> /dev/null \
+            || true && echo "No stale imagestreams"
 
           # Process and apply deployment template
           oc process -f .pipeline/deploy.yml \
