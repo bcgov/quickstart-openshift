@@ -7,20 +7,18 @@ WORKDIR /app
 COPY package*.json tsconfig.* ./
 COPY ./src /app/src
 RUN npm ci && \
-    npm run build
+    npm run build && \
+    rm -rf ./node_modules && \
+    NODE_ENV=production npm ci --only=production
 
 # Fresh image
-FROM registry.access.redhat.com/ubi8/ubi
-RUN dnf module install -y nodejs:14
+FROM registry.access.redhat.com/ubi8/ubi-minimal
 
 # Copy over /app/dist
 WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-
-# Install prod packages
-ENV NODE_ENV=production
-COPY package*.json ./
-RUN npm ci --only=production
+COPY --from=builder /app/package*.json ./
 
 # Expose port - mostly a convention, for readability
 EXPOSE 3000
