@@ -12,7 +12,7 @@ RUN npm ci && \
     NODE_ENV=production npm ci --only=production
 
 # Fresh image
-FROM registry.access.redhat.com/ubi8/ubi-minimal
+FROM registry.access.redhat.com/ubi8/nodejs-14-minimal
 
 # Copy over /app/dist
 WORKDIR /app
