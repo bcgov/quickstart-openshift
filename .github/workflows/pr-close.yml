@@ -10,7 +10,6 @@ on:
 jobs:
   cleanup:
     name: Cleanup
-    needs: Deploy
     runs-on: ubuntu-latest
     environment:
       name: dev
