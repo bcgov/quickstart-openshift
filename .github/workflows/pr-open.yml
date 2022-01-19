@@ -11,6 +11,18 @@ env:
   TRIGGERS: ('package.json' 'package-lock.json' 'Dockerfile' 'src/' '.github/')
 
 jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Tests
+        run: |
+          npm ci
+          npm test
+
   check:
     name: Check
     outputs:
