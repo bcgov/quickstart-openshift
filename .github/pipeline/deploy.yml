@@ -16,9 +16,6 @@ parameters:
   - name: SUFFIX
     description: Deployment suffix, e.g. pr-### or prod
     required: true
-  - name: ENV
-    description: Environment, e.g. dev, test, prod
-    required: true
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
@@ -114,7 +111,7 @@ objects:
         app: ${NAME}-${SUFFIX}
       name: ${NAME}-${SUFFIX}
     spec:
-      host: ${NAME}-${SUFFIX}-${ENV}.${DOMAIN}
+      host: ${NAME}-${SUFFIX}.${DOMAIN}
       port:
         targetPort: 3000-tcp
       to:

@@ -8,8 +8,21 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  TRIGGERS: ('package.json' 'package-lock.json' 'Dockerfile' 'src/' '.github/')
 
 jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Tests
+        run: |
+          npm ci
+          npm test
+
   check:
     name: Check
     outputs:
@@ -25,14 +38,7 @@ jobs:
           # Check git diff against build triggers
           git fetch origin main:refs/remotes/origin/master
 
-          TRIGGERS=(
-              'package.json'
-              'package-lock.json'
-              'Dockerfile'
-              '.src/'
-              '.github/workflows/'
-          )
-
+          TRIGGERS=${{ env.TRIGGERS }}
           while read -r check
           do
               for t in "${TRIGGERS[@]}"; do
@@ -48,11 +54,10 @@ jobs:
 
   build:
     name: Build
-    needs: check
+    needs:
+      - check
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
-    environment:
-      name: dev
     permissions:
       contents: read
       packages: write
@@ -92,6 +97,7 @@ jobs:
     needs: 
       - check
       - build
+      - tests
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     environment:
@@ -113,9 +119,8 @@ jobs:
             || true && echo "No stale imagestreams"
 
           # Process and apply deployment template
-          oc process -f .pipeline/deploy.yml \
-            -p SUFFIX=${{ github.event.number }} -p ENV=${{ secrets.ENV }} \
-              | oc apply -f -
+          oc process -f .github/pipeline/deploy.yml -p SUFFIX=${{ github.event.number }} \
+            | oc apply -f -
 
           # Start rollout (if necessary) and follow it
           oc rollout latest dc/gfp-${{ github.event.number }} 2> /dev/null \
@@ -124,26 +129,3 @@ jobs:
 
           # Get status, returns 0 if rollout is successful
           oc rollout status dc/gfp-${{ github.event.number }}
-
-  trivvy:
-    name: Trivvy
-    needs: 
-      - check
-      - build
-    if: needs.check.outputs.build == 'true'
-    runs-on: ubuntu-latest
-    environment:
-      name: dev
-    steps:
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ghcr.io/bcgov-nr/greenfield-pipeline:pr-${{ github.event.number }}
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: 'trivy-results.sarif'
