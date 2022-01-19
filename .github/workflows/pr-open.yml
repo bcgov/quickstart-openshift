@@ -10,8 +10,44 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  check:
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          # https://github.com/actions/checkout
+          fetch-depth: 2
+
+      - name: Check and process modified files
+        id: check
+        run: |
+          # Check git diff against build triggers
+          TRIGGERS=(
+              'package.json'
+              'package-lock.json'
+              'Dockerfile'
+              '.src/'
+          )
+
+          while read -r check
+          do
+              for t in "${TRIGGERS[@]}"; do
+                  if [[ "${check}" =~ "${t}" ]]
+                  then
+                      echo -e "${t}\n --> ${check}\n"
+                      echo "::set-output name=build::true"
+                      exit 0
+                  fi
+              done
+          done < <(git diff --name-only)
+
   build:
     name: Build
+    needs: check
+    if: needs.build-checks.outputs.build == 'true'
     runs-on: ubuntu-latest
     environment:
       name: dev
@@ -51,7 +87,10 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: Build
+    needs: 
+      - check
+      - build
+    if: needs.build-checks.outputs.build == 'true'
     runs-on: ubuntu-latest
     environment:
       name: dev
