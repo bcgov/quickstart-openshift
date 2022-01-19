@@ -51,8 +51,6 @@ jobs:
     needs: check
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
-    environment:
-      name: dev
     permissions:
       contents: read
       packages: write
@@ -125,6 +123,7 @@ jobs:
           # Get status, returns 0 if rollout is successful
           oc rollout status dc/gfp-${{ github.event.number }}
 
+  # https://github.com/aquasecurity/trivy
   trivvy:
     name: Trivvy
     needs: 
