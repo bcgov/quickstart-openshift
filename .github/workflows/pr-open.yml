@@ -43,7 +43,8 @@ jobs:
                       exit 0
                   fi
               done
-          done < <(git diff --name-only)
+          done < <(git diff HEAD main --name-only)
+          echo "Build and deploy workflows not triggered"
 
   build:
     name: Build
