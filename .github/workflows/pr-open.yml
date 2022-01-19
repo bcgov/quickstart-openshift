@@ -11,6 +11,18 @@ env:
   TRIGGERS: ('package.json' 'package-lock.json' 'Dockerfile' 'src/' '.github/')
 
 jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Tests
+        run: |
+          npm ci
+          npm test
+
   check:
     name: Check
     outputs:
@@ -42,7 +54,8 @@ jobs:
 
   build:
     name: Build
-    needs: check
+    needs:
+      - check
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -115,22 +128,3 @@ jobs:
 
           # Get status, returns 0 if rollout is successful
           oc rollout status dc/gfp-${{ github.event.number }}
-
-  # https://github.com/aquasecurity/trivy
-  trivvy:
-    name: Trivvy
-    needs: 
-      - check
-      - build
-    if: needs.check.outputs.build == 'true'
-    runs-on: ubuntu-latest
-    environment:
-      name: dev
-    steps:
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ghcr.io/bcgov-nr/greenfield-pipeline:pr-${{ github.event.number }}
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
-          output: 'trivy-results.sarif'
