@@ -18,9 +18,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          # https://github.com/actions/checkout
-          fetch-depth: 0
 
       - name: Check and process modified files
         id: check
