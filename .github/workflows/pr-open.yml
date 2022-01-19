@@ -52,7 +52,7 @@ jobs:
   build:
     name: Build
     needs: check
-    if: needs.build-checks.outputs.build == 'true'
+    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     environment:
       name: dev
@@ -95,7 +95,7 @@ jobs:
     needs: 
       - check
       - build
-    if: needs.build-checks.outputs.build == 'true'
+    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     environment:
       name: dev
