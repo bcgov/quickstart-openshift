@@ -30,6 +30,7 @@ jobs:
               'package-lock.json'
               'Dockerfile'
               '.src/'
+              '.github/workflows/'
           )
 
           while read -r check
