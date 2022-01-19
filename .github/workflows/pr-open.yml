@@ -10,8 +10,46 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  check:
+    name: Check
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check and process modified files
+        id: check
+        run: |
+          # Check git diff against build triggers
+          git fetch origin main:refs/remotes/origin/master
+
+          TRIGGERS=(
+              'package.json'
+              'package-lock.json'
+              'Dockerfile'
+              '.src/'
+              '.github/workflows/'
+          )
+
+          while read -r check
+          do
+              for t in "${TRIGGERS[@]}"; do
+                  if [[ "${check}" =~ "${t}" ]]
+                  then
+                      echo -e "${t}\n --> ${check}\n"
+                      echo "::set-output name=build::true"
+                      exit 0
+                  fi
+              done
+          done < <(git diff origin/main --name-only)
+          echo "Build and deploy workflows not triggered"
+
   build:
     name: Build
+    needs: check
+    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     environment:
       name: dev
@@ -51,7 +89,10 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: Build
+    needs: 
+      - check
+      - build
+    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     environment:
       name: dev
