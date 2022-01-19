@@ -8,6 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  TRIGGERS: ('package.json' 'package-lock.json' 'Dockerfile' 'src/' '.github/')
 
 jobs:
   check:
@@ -25,14 +26,7 @@ jobs:
           # Check git diff against build triggers
           git fetch origin main:refs/remotes/origin/master
 
-          TRIGGERS=(
-              'package.json'
-              'package-lock.json'
-              'Dockerfile'
-              'src/'
-              '.github/'
-          )
-
+          TRIGGERS=${{ env.TRIGGERS }}
           while read -r check
           do
               for t in "${TRIGGERS[@]}"; do
