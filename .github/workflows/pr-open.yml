@@ -8,21 +8,9 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  TRIGGERS: ('package.json' 'package-lock.json' 'Dockerfile' 'src/' '.github/')
+  TRIGGERS: ('package.json' 'package-lock.json' 'Dockerfile' 'src/' 'test/' '.github/')
 
 jobs:
-  tests:
-    name: Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Tests
-        run: |
-          npm ci
-          npm test
-
   check:
     name: Check
     outputs:
@@ -51,6 +39,42 @@ jobs:
               done
           done < <(git diff origin/main --name-only)
           echo "Build and deploy workflows not triggered"
+
+  tests:
+    name: Tests
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Tests
+        run: |
+          npm ci
+          npm test
+
+  codeql:
+    name: CodeQL
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Initialize
+        uses: github/codeql-action/init@v1
+        with:
+          languages: javascript
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v1
+
+      - name: Analysis
+        uses: github/codeql-action/analyze@v1
 
   build:
     name: Build
@@ -98,6 +122,7 @@ jobs:
       - check
       - build
       - tests
+      - codeql
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     environment:
