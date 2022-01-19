@@ -11,6 +11,7 @@ env:
 
 jobs:
   check:
+    name: Check
     outputs:
       build: ${{ steps.check.outputs.build }}
     runs-on: ubuntu-latest
@@ -43,7 +44,7 @@ jobs:
                       exit 0
                   fi
               done
-          done < <(git diff HEAD main --name-only)
+          done < <(git diff HEAD origin/main --name-only)
           echo "Build and deploy workflows not triggered"
 
   build:
