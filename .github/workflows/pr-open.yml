@@ -111,9 +111,8 @@ jobs:
             || true && echo "No stale imagestreams"
 
           # Process and apply deployment template
-          oc process -f .github/pipeline/deploy.yml \
-            -p SUFFIX=${{ github.event.number }} -p ENV=${{ secrets.ENV }} \
-              | oc apply -f -
+          oc process -f .github/pipeline/deploy.yml -p SUFFIX=${{ github.event.number }} \
+            | oc apply -f -
 
           # Start rollout (if necessary) and follow it
           oc rollout latest dc/gfp-${{ github.event.number }} 2> /dev/null \
