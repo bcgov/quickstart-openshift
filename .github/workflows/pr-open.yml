@@ -26,6 +26,8 @@ jobs:
         id: check
         run: |
           # Check git diff against build triggers
+          git fetch origin main:refs/remotes/origin/master
+
           TRIGGERS=(
               'package.json'
               'package-lock.json'
@@ -44,7 +46,7 @@ jobs:
                       exit 0
                   fi
               done
-          done < <(git diff origin --name-only)
+          done < <(git diff origin/main --name-only)
           echo "Build and deploy workflows not triggered"
 
   build:
