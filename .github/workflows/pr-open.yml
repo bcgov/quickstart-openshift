@@ -97,6 +97,7 @@ jobs:
     needs: 
       - check
       - build
+      - tests
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     environment:
