@@ -131,6 +131,16 @@ jobs:
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+  trivy:
+    name: Trivy
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    uses: bcgov/pipeline-templates/.github/workflows/trivy-container.yaml@main
+    with:
+      IMAGE: gregnrobinson/bcgov-nginx-demo
+      TAG: latest
+
   zap:
     name: Zap
     needs:
