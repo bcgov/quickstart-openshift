@@ -123,13 +123,20 @@ jobs:
     needs:
       - check
     if: needs.check.outputs.build == 'true'
-    uses: bcgov/pipeline-templates/.github/workflows/sonar-scanner.yaml@main
-    with:
-      ORG: bcgov-nr
-      PROJECT_KEY: greenfield-pipeline
-      URL: https://sonarcloud.io
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup
+        uses: warchant/setup-sonar-scanner@v3
+      - name: Run Sonar Scanner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: sonar-scanner
+             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+             -Dsonar.organization=bcgov-nr
+             -Dsonar.host.url=${{ inputs.URL }}
+             -Dsonar.projectKey=greenfield-pipeline
+             -Dsonar.exclusions=**/*.java
+             -Dsonar.sourceEncoding=UTF-8
 
   trivy:
     name: Trivy
