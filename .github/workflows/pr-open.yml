@@ -138,8 +138,8 @@ jobs:
     if: needs.check.outputs.build == 'true'
     uses: bcgov/pipeline-templates/.github/workflows/trivy-container.yaml@main
     with:
-      IMAGE: gregnrobinson/bcgov-nginx-demo
-      TAG: latest
+      IMAGE: ghcr.io/bcgov-nr/greenfield-pipeline
+      TAG: pr-${{ github.event.number }}
 
   zap:
     name: Zap
