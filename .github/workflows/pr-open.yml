@@ -56,6 +56,9 @@ jobs:
           npm test
 
   sonar-repo-scan:
+    name: Sonar analysis
+    needs:
+      - check
     uses: bcgov/pipeline-templates/.github/workflows/sonar-scanner.yaml@main
     with:
       ORG: bcgov-nr
