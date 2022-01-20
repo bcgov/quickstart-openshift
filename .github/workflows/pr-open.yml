@@ -131,10 +131,7 @@ jobs:
   deploy:
     name: Deploy
     needs: 
-      - check
       - build
-      - tests
-      - codeql
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     environment:
