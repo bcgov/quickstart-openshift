@@ -97,18 +97,6 @@ jobs:
           npm ci
           npm test
 
-  sonarcloud:
-    name: SonarCloud
-    needs:
-      - check
-    uses: bcgov/pipeline-templates/.github/workflows/sonar-scanner.yaml@main
-    with:
-      ORG: bcgov-nr
-      PROJECT_KEY: greenfield-pipeline
-      URL: https://sonarcloud.io
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
   codeql:
     name: CodeQL
     needs:
@@ -129,6 +117,32 @@ jobs:
 
       - name: Analysis
         uses: github/codeql-action/analyze@v1
+
+  sonarcloud:
+    name: SonarCloud
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    uses: bcgov/pipeline-templates/.github/workflows/sonar-scanner.yaml@main
+    with:
+      ORG: bcgov-nr
+      PROJECT_KEY: greenfield-pipeline
+      URL: https://sonarcloud.io
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  zap-owasp:
+    name: Zap Owasp
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    uses: bcgov/pipeline-templates/.github/workflows/owasp-scan.yaml@main
+    with:
+      ZAP_SCAN_TYPE: 'base' # Accepted values are base and full.
+      ZAP_TARGET_URL: http://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca
+      ZAP_DURATION: '2'
+      ZAP_MAX_DURATION: '5'
+      ZAP_GCP_PUBLISH: true
 
   deploy:
     name: Deploy
