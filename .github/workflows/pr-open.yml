@@ -136,10 +136,18 @@ jobs:
     needs:
       - check
     if: needs.check.outputs.build == 'true'
-    uses: bcgov/pipeline-templates/.github/workflows/trivy-container.yaml@main
-    with:
-      IMAGE: ghcr.io/bcgov-nr/greenfield-pipeline
-      TAG: pr-${{ github.event.number }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - name: Trivy Vulnerability Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ghcr.io/bcgov-nr/greenfield-pipeline:pr-${{ github.event.number }}
+        format: table
+        exit-code: '1'
+        ignore-unfixed: true
+        vuln-type: os,library
+        severity: CRITICAL
 
   zap:
     name: Zap
