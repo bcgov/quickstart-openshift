@@ -123,13 +123,38 @@ jobs:
     needs:
       - check
     if: needs.check.outputs.build == 'true'
-    uses: bcgov/pipeline-templates/.github/workflows/sonar-scanner.yaml@main
-    with:
-      ORG: bcgov-nr
-      PROJECT_KEY: greenfield-pipeline
-      URL: https://sonarcloud.io
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup
+        uses: warchant/setup-sonar-scanner@v3
+      - name: Run Sonar Scanner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: sonar-scanner
+             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+             -Dsonar.organization=bcgov-nr
+             -Dsonar.host.url=https://sonarcloud.io
+             -Dsonar.projectKey=greenfield-pipeline
+             -Dsonar.exclusions=**/*.java
+             -Dsonar.sourceEncoding=UTF-8
+
+  trivy:
+    name: Trivy
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - name: Trivy Vulnerability Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ghcr.io/bcgov-nr/greenfield-pipeline:pr-${{ github.event.number }}
+        format: table
+        exit-code: '1'
+        ignore-unfixed: true
+        vuln-type: os,library
+        severity: CRITICAL
 
   zap:
     name: Zap
