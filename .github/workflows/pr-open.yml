@@ -23,70 +23,24 @@ jobs:
       - name: Check and process modified files
         id: check
         run: |
-          # Check git diff against build triggers
+          # Fetch main to diff against
           git fetch origin main:refs/remotes/origin/master
 
+          # Trigger build if diff matches any triggers
           TRIGGERS=${{ env.TRIGGERS }}
           while read -r check
           do
               for t in "${TRIGGERS[@]}"; do
                   if [[ "${check}" =~ "${t}" ]]
                   then
-                      echo -e "${t}\n --> ${check}\n"
+                      # Output build=true for next steps
                       echo "::set-output name=build::true"
+                      echo -e "${t}\n --> ${check}\n"
                       exit 0
                   fi
               done
           done < <(git diff origin/main --name-only)
           echo "Build and deploy workflows not triggered"
-
-  tests:
-    name: Tests
-    needs:
-      - check
-    if: needs.check.outputs.build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Tests
-        run: |
-          npm ci
-          npm test
-
-  sonar-repo-scan:
-    name: Sonar analysis
-    needs:
-      - check
-    uses: bcgov/pipeline-templates/.github/workflows/sonar-scanner.yaml@main
-    with:
-      ORG: bcgov-nr
-      PROJECT_KEY: greenfield-pipeline
-      URL: https://sonarcloud.io
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-  codeql:
-    name: CodeQL
-    needs:
-      - check
-    if: needs.check.outputs.build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Initialize
-        uses: github/codeql-action/init@v1
-        with:
-          languages: javascript
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v1
-
-      - name: Analysis
-        uses: github/codeql-action/analyze@v1
 
   build:
     name: Build
@@ -128,6 +82,54 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  tests:
+    name: Tests
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Tests
+        run: |
+          npm ci
+          npm test
+
+  sonarcloud:
+    name: SonarCloud
+    needs:
+      - check
+    uses: bcgov/pipeline-templates/.github/workflows/sonar-scanner.yaml@main
+    with:
+      ORG: bcgov-nr
+      PROJECT_KEY: greenfield-pipeline
+      URL: https://sonarcloud.io
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  codeql:
+    name: CodeQL
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Initialize
+        uses: github/codeql-action/init@v1
+        with:
+          languages: javascript
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v1
+
+      - name: Analysis
+        uses: github/codeql-action/analyze@v1
+
   deploy:
     name: Deploy
     needs: 
@@ -140,7 +142,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: Deploy
         run: |
-          set -ex
+          set -eux
+
+          # Login to OpenShift and select project
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
 
