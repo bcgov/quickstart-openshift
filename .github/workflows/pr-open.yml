@@ -131,18 +131,23 @@ jobs:
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  zap-owasp:
-    name: Zap Owasp
+  zap:
+    name: Zap
     needs:
       - check
     if: needs.check.outputs.build == 'true'
-    uses: bcgov/pipeline-templates/.github/workflows/owasp-scan.yaml@main
-    with:
-      ZAP_SCAN_TYPE: 'base' # Accepted values are base and full.
-      ZAP_TARGET_URL: http://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca
-      ZAP_DURATION: '2'
-      ZAP_MAX_DURATION: '5'
-      ZAP_GCP_PUBLISH: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          docker_name: 'owasp/zap2docker-stable'
+          target: https://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/
+          cmd_options: '-a'
 
   deploy:
     name: Deploy
