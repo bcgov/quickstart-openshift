@@ -1,7 +1,7 @@
 name: Issue move-on-assign
 
 on:
-  pull_request:
+  issues:
     types:
       - assigned
 
