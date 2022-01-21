@@ -7,12 +7,13 @@ WORKDIR /app
 COPY . ./
 RUN npm ci && \
     npm run build && \
-    npm ci --only=production
+    rm -rf ./node_modules && \
+    npm ci --only=prod
 
 # Deployment container
 FROM registry.access.redhat.com/ubi8/ubi-micro
 
-# Set node to production
+# Set node to production 
 ENV NODE_ENV production
 
 # Node packages and dependencies
