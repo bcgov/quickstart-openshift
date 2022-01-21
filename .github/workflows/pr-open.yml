@@ -118,6 +118,24 @@ jobs:
       - name: Analysis
         uses: github/codeql-action/analyze@v1
 
+  # https://github.com/snyk/snyk
+  snyk:
+    name: Snyk
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+
   sonarcloud:
     name: SonarCloud
     needs:
