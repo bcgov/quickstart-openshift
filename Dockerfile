@@ -2,17 +2,18 @@
 FROM registry.access.redhat.com/ubi8/ubi as builder
 RUN dnf module install -y nodejs:14
 
-# Install dev packages and build js in /app/dist
+# Install packages, build and keep only prod packages
 WORKDIR /app
-COPY package*.json tsconfig.* ./
-COPY ./src /app/src
+COPY . ./
 RUN npm ci && \
     npm run build && \
-    rm -rf ./node_modules && \
-    NODE_ENV=production npm ci --only=production
+    npm ci --only=production
 
 # Deployment container
 FROM registry.access.redhat.com/ubi8/ubi-micro
+
+# Set node to production
+ENV NODE_ENV production
 
 # Node packages and dependencies
 COPY --from=builder /usr/bin/node /usr/bin/
