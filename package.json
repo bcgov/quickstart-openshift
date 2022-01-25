@@ -12,6 +12,8 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "make-badges": "istanbul-badges-readme --logo=jest --exitCode=1",
+    "make-badges:ci": "npm run make-badges -- --ci",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -58,6 +60,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-prettier": "^3.4.1",
+    "istanbul-badges-readme": "^1.8.1",
     "jest": "^27.3.0",
     "prettier": "^2.4.1",
     "rimraf": "^3.0.2",
@@ -84,6 +87,11 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "jest-badges"
+    ],
     "testEnvironment": "node"
   }
 }
