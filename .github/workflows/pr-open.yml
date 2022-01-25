@@ -92,10 +92,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Tests
-        run: |
-          npm ci
-          npm test
+      - name: Jest coverage report
+        uses: ArtiomTr/jest-coverage-report-action@v2
 
   codeql:
     name: CodeQL
