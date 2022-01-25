@@ -216,6 +216,15 @@ jobs:
           # Get status, returns 0 if rollout is successful
           oc rollout status dc/gfp-${{ github.event.number }}
 
+      - name: Deployment update
+        uses: mshick/add-pr-comment@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          message: |
+            **Hello UPDATE!**
+          allow-repeats: false
+
   # trivy:
   #   name: Trivy
   #   needs:
