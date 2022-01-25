@@ -19,5 +19,3 @@ describe('AppController', () => {
     });
   });
 });
-
-// Junk commit
