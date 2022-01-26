@@ -121,3 +121,87 @@ objects:
       tls:
         termination: edge
         insecureEdgeTerminationPolicy: Redirect
+
+  - kind: DeploymentConfig
+    apiVersion: apps.openshift.io/v1
+    metadata:
+      labels:
+        app: ${NAME}-${SUFFIX}
+      name: ${NAME}-${SUFFIX}-postgres
+    spec:
+      strategy:
+        type: Recreate
+        recreateParams:
+          timeoutSeconds: 600
+        activeDeadlineSeconds: 21600
+      replicas: 1
+      revisionHistoryLimit: 10
+      selector:
+        name: ${NAME}-${SUFFIX}-postgres
+      template:
+        metadata:
+          labels:
+            name: ${NAME}-${SUFFIX}-postgres
+        spec:
+          volumes:
+            - name: postgresql-data
+              persistentVolumeClaim:
+                claimName: ${NAME}-${SUFFIX}-postgres
+          containers:
+            - resources:
+                limits:
+                  memory: 512Mi
+              readinessProbe:
+                exec:
+                  command:
+                    - /usr/libexec/check-container
+                initialDelaySeconds: 5
+                timeoutSeconds: 1
+                periodSeconds: 10
+                successThreshold: 1
+                failureThreshold: 3
+              terminationMessagePath: /dev/termination-log
+              name: postgresql
+              livenessProbe:
+                exec:
+                  command:
+                    - /usr/libexec/check-container
+                    - '--live'
+                initialDelaySeconds: 120
+                timeoutSeconds: 10
+                periodSeconds: 10
+                successThreshold: 1
+                failureThreshold: 3
+              env:
+                - name: POSTGRESQL_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgresql
+                      key: database-user
+                - name: POSTGRESQL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgresql
+                      key: database-password
+                - name: POSTGRESQL_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgresql
+                      key: database-name
+              securityContext:
+                capabilities: {}
+                privileged: false
+              ports:
+                - containerPort: 5432
+                  protocol: TCP
+              imagePullPolicy: IfNotPresent
+              volumeMounts:
+                - name: postgresql-data
+                  mountPath: /var/lib/pgsql/data
+              terminationMessagePolicy: File
+              image: >-
+                image-registry.openshift-image-registry.svc:5000/openshift/postgresql@sha256:c51c2456d92ce71905d72088fa14379eb27ec123860bc3b0d4564b7221eb9ca9
+          restartPolicy: Always
+          terminationGracePeriodSeconds: 30
+          dnsPolicy: ClusterFirst
+          schedulerName: default-scheduler
