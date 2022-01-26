@@ -36,7 +36,7 @@ objects:
       - name: pr-${SUFFIX}
         from:
           kind: DockerImage
-          name: ghcr.io/bcgov-nr/greenfield-pipeline:pr-${SUFFIX}
+          name: ghcr.io/bcgov/greenfield-pipeline:pr-${SUFFIX}
         referencePolicy:
           type: Local
   - apiVersion: v1
