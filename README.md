@@ -16,6 +16,7 @@ Currently, our most exciting offering is the [GitHub Actions](https://github.com
 
 * [Pull Request](https://github.com/bcgov/greenfield-pipeline/pulls)-based ephemeral, sandboxed environments.
 * [Docker](https://github.com/marketplace/actions/build-and-push-docker-images)(/Podman) container building.
+* [Build caching](https://github.com/marketplace/actions/cache) to save time and bandwidth.
 * [GitHub Container Registry](https://github.com/bcgov/greenfield-pipeline/pkgs/container/greenfield-pipeline) image publishing.
 * [RedHat OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) deployment, with other options under consideration.
 * [OpenShift artifact](https://github.com/bcgov/greenfield-pipeline/blob/main/.github/workflows/pr-close.yml) pruning on PR completion.
