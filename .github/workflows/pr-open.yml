@@ -160,7 +160,7 @@ jobs:
              -Dsonar.login=${{ secrets.SONAR_TOKEN }}
              -Dsonar.organization=bcgov
              -Dsonar.host.url=https://sonarcloud.io
-             -Dsonar.projectKey=greenfield-pipeline
+             -Dsonar.projectKey=bcgov_greenfield-pipeline
              -Dsonar.exclusions=**/*.java
              -Dsonar.sourceEncoding=UTF-8
 
