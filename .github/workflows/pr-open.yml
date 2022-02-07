@@ -158,10 +158,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: sonar-scanner
              -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-             -Dsonar.organization=bcgov
+             -Dsonar.organization=bcgov-sonarcloud
              -Dsonar.host.url=https://sonarcloud.io
              -Dsonar.projectKey=bcgov_greenfield-pipeline
-             -Dsonar.exclusions=**/*.java
              -Dsonar.sourceEncoding=UTF-8
 
   zap:
