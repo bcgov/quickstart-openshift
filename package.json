@@ -1,7 +1,7 @@
 {
-  "name": "greenfield-pipeline",
+  "name": "greenfield-template",
   "version": "0.0.1",
-  "description": "OneTeam greenfield pipeline. For testing and demonstration purposes.",
+  "description": "BCGov greenfield template. For reference, testing and new projects.",
   "main": "index.js",
   "scripts": {
     "prebuild": "rimraf dist",
@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bcgov/greenfield-pipeline.git"
+    "url": "git+https://github.com/bcgov/greenfield-template.git"
   },
   "keywords": [
     "openshift",
@@ -36,9 +36,9 @@
   "author": "Derek Roberts",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/bcgov/greenfield-pipeline/issues"
+    "url": "https://github.com/bcgov/greenfield-template/issues"
   },
-  "homepage": "https://github.com/bcgov/greenfield-pipeline#readme",
+  "homepage": "https://github.com/bcgov/greenfield-template#readme",
   "dependencies": {
     "@nestjs/cli": "^8.2.0",
     "@nestjs/common": "^8.2.6",
