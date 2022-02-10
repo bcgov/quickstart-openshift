@@ -78,7 +78,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/bcgov/greenfield-pipeline:pr-${{ github.event.number }}
+          tags: ghcr.io/bcgov/greenfield-template:pr-${{ github.event.number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -160,7 +160,7 @@ jobs:
              -Dsonar.login=${{ secrets.SONAR_TOKEN }}
              -Dsonar.organization=bcgov-sonarcloud
              -Dsonar.host.url=https://sonarcloud.io
-             -Dsonar.projectKey=bcgov_greenfield-pipeline
+             -Dsonar.projectKey=bcgov_greenfield-template
              -Dsonar.sourceEncoding=UTF-8
 
   zap:
@@ -239,7 +239,7 @@ jobs:
   #   - name: Trivy Vulnerability Scan
   #     uses: aquasecurity/trivy-action@master
   #     with:
-  #       image-ref: ghcr.io/bcgov/greenfield-pipeline:pr-${{ github.event.number }}
+  #       image-ref: ghcr.io/bcgov/greenfield-template:pr-${{ github.event.number }}
   #       format: table
   #       exit-code: '1'
   #       ignore-unfixed: true
