@@ -17,7 +17,7 @@ ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jb
 COPY --from=build ${DEPENDENCY}/target/lib/* /deployments/lib/
 COPY --from=build ${DEPENDENCY}/target/*-runner.jar /deployments/quarkus-run.jar
 
-EXPOSE 8080
+EXPOSE 8000
 USER 185
 
 ENTRYPOINT [ "java", "-jar", "/deployments/quarkus-run.jar" ]
