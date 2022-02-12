@@ -78,7 +78,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/bcgov/greenfield-pipeline:pr-${{ github.event.number }}
+          tags: ghcr.io/bcgov/greenfield-template:pr-${{ github.event.number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -144,24 +144,24 @@ jobs:
       with:
         sarif_file: snyk.sarif
 
-  sonarcloud:
-    name: SonarCloud
-    needs:
-      - check
-    if: needs.check.outputs.build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup
-        uses: warchant/setup-sonar-scanner@v3
-      - name: Run Sonar Scanner
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: sonar-scanner
-             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-             -Dsonar.organization=bcgov-sonarcloud
-             -Dsonar.host.url=https://sonarcloud.io
-             -Dsonar.projectKey=bcgov_greenfield-pipeline
-             -Dsonar.sourceEncoding=UTF-8
+  # sonarcloud:
+  #   name: SonarCloud
+  #   needs:
+  #     - check
+  #   if: needs.check.outputs.build == 'true'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Setup
+  #       uses: warchant/setup-sonar-scanner@v3
+  #     - name: Run Sonar Scanner
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       run: sonar-scanner
+  #            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+  #            -Dsonar.organization=bcgov-sonarcloud
+  #            -Dsonar.host.url=https://sonarcloud.io
+  #            -Dsonar.projectKey=bcgov_greenfield-pipeline
+  #            -Dsonar.sourceEncoding=UTF-8
 
   zap:
     name: Zap
@@ -239,7 +239,7 @@ jobs:
   #   - name: Trivy Vulnerability Scan
   #     uses: aquasecurity/trivy-action@master
   #     with:
-  #       image-ref: ghcr.io/bcgov/greenfield-pipeline:pr-${{ github.event.number }}
+  #       image-ref: ghcr.io/bcgov/greenfield-template:pr-${{ github.event.number }}
   #       format: table
   #       exit-code: '1'
   #       ignore-unfixed: true
