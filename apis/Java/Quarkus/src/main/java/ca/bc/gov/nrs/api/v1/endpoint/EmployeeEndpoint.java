@@ -32,6 +32,6 @@ public class EmployeeEndpoint {
       return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\" employee Id is not allowed in POST.\"}").build();
     }
     employeeEntity.persist();
-    return Response.created(URI.create("/api/v1/employee" + employeeEntity.getEmployeeId())).build();
+    return Response.created(URI.create("/api/v1/employee/" + employeeEntity.getEmployeeId())).build();
   }
 }

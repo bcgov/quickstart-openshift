@@ -2,10 +2,10 @@ version: "2.3"
 
 services:
   quarkus-service:
-    cpus: 0.25
+    cpus: 0.1
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.native
     image: quarkus-service:latest
     mem_limit: 128m
     environment:
@@ -15,6 +15,7 @@ services:
       - QUARKUS_DATASOURCE_JDBC_PASSWORD=quarkus123
       - CONSOLE_LOG_LEVEL=INFO
       - FILE_LOG_LEVEL=INFO
+      - TZ=America/Vancouver
     ports:
       - "8000:8000"  # the HTTP endpoint
     depends_on:

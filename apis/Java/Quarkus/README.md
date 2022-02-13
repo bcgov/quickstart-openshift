@@ -2,11 +2,12 @@
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
 
-To Run this in local, 
-1. if you have maven run: mvn clean package -Dquarkus.package.type=legacy-jar after that just run the docker-compose up command.
-3. if you dont have maven just uncomment line 8 and comment line#7 in Dockerfile and run docker-compose up command.
+To Run this in JVM mode on local, 
+1. if you have maven run: `mvn clean package -Dquarkus.package.type=legacy-jar` after that just run the `docker-compose up` command.
+3. if you dont have maven just uncomment line 8 and comment line#7 in Dockerfile and run `docker-compose up` command.
 
-
+To Run this in Native mode on local,
+1. run ` docker-compose  -f docker-compose-native.yaml up --build`
 
 ## Running the application in dev mode
 
