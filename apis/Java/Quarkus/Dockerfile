@@ -5,7 +5,7 @@ WORKDIR /workspace/app
 COPY pom.xml .
 COPY src ./src
 COPY target ./target
-#RUN mvn clean package -DskipTests
+#RUN mvn clean package -DskipTests -Dquarkus.package.type=legacy-jar
 
 FROM registry.access.redhat.com/ubi8/openjdk-11-runtime:1.11
 
