@@ -151,17 +151,11 @@ jobs:
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Setup
-        uses: warchant/setup-sonar-scanner@v3
-      - name: Run Sonar Scanner
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: sonar-scanner
-             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-             -Dsonar.organization=bcgov-sonarcloud
-             -Dsonar.host.url=https://sonarcloud.io
-             -Dsonar.projectKey=bcgov_greenfield-template
-             -Dsonar.sourceEncoding=UTF-8
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   deploy:
     name: Deploy
