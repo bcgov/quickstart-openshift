@@ -16,6 +16,9 @@ parameters:
   - name: SUFFIX
     description: Deployment suffix, e.g. pr-### or prod
     required: true
+  - name: NAMESPACE
+    description: Namespace to deploy to
+    value: 32d13a-dev
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
@@ -58,7 +61,7 @@ objects:
             name: ${NAME}-${SUFFIX}
         spec:
           containers:
-            - image: image-registry.openshift-image-registry.svc:5000/245e18-dev/${NAME}-${SUFFIX}:pr-${SUFFIX}
+            - image: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${NAME}-${SUFFIX}:pr-${SUFFIX}
               imagePullPolicy: Always
               name: ${NAME}
               ports:
