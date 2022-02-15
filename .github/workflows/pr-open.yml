@@ -163,24 +163,6 @@ jobs:
   #            -Dsonar.projectKey=bcgov_greenfield-pipeline
   #            -Dsonar.sourceEncoding=UTF-8
 
-  zap:
-    name: Zap
-    needs:
-      - check
-    if: needs.check.outputs.build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.3.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          docker_name: 'owasp/zap2docker-stable'
-          target: https://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/
-          cmd_options: '-a'
-
   deploy:
     name: Deploy
     needs: 
@@ -228,6 +210,25 @@ jobs:
           message: |
             [${{ secrets.ENV }} deployment](https://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
+
+  zap:
+    name: Zap
+    needs:
+      - check
+      - deploy
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          docker_name: 'owasp/zap2docker-stable'
+          target: https://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/
+          cmd_options: '-a'
 
   # trivy:
   #   name: Trivy
