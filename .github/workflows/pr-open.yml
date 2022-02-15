@@ -156,6 +156,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: sonar-scanner
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          -Dsonar.organization=bcgov-sonarcloud
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.projectKey=bcgov_greenfield-template
+          -Dsonar.sourceEncoding=UTF-8
 
   deploy:
     name: Deploy
