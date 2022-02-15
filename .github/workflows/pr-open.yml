@@ -163,14 +163,8 @@ jobs:
         with:
           args: >
             -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=greenfield-template
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.projectKey=${{ github.event.repository.name }}
             -Dsonar.projectVersion=pr-${{ github.event.number }}
-            -Dsonar.projectName=greenfield-template
-            -Dsonar.sources=src
-            -Dsonar.tests=test
             -Dsonar.verbose=true
 
   deploy:
