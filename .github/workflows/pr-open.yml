@@ -229,7 +229,7 @@ jobs:
           target: https://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/
           cmd_options: '-a'
           allow_issue_writing: false
-          fail_action: true
+          fail_action: false
 
   # trivy:
   #   name: Trivy
