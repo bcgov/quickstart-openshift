@@ -92,8 +92,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # - name: Jest coverage report
-      #   uses: ArtiomTr/jest-coverage-report-action@v2
       - name: Tests
         run: |
           npm ci
@@ -144,24 +142,28 @@ jobs:
       with:
         sarif_file: snyk.sarif
 
-  # sonarcloud:
-  #   name: SonarCloud
-  #   needs:
-  #     - check
-  #   if: needs.check.outputs.build == 'true'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Setup
-  #       uses: warchant/setup-sonar-scanner@v3
-  #     - name: Run Sonar Scanner
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: sonar-scanner
-  #            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-  #            -Dsonar.organization=bcgov-sonarcloud
-  #            -Dsonar.host.url=https://sonarcloud.io
-  #            -Dsonar.projectKey=bcgov_greenfield-pipeline
-  #            -Dsonar.sourceEncoding=UTF-8
+  sonarcloud:
+    name: SonarCloud
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=${{ github.event.repository.name }}
+            -Dsonar.projectVersion=pr-${{ github.event.number }}
+          # -Dsonar.verbose=true
 
   deploy:
     name: Deploy
