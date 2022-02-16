@@ -92,8 +92,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # - name: Jest coverage report
-      #   uses: ArtiomTr/jest-coverage-report-action@v2
       - name: Tests
         run: |
           npm ci
@@ -158,14 +156,14 @@ jobs:
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.projectKey=${{ github.event.repository.name }}
             -Dsonar.projectVersion=pr-${{ github.event.number }}
-            -Dsonar.verbose=true
+          # -Dsonar.verbose=true
 
   deploy:
     name: Deploy
