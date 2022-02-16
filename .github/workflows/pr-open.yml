@@ -103,6 +103,11 @@ jobs:
       - check
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - javascript
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -110,7 +115,7 @@ jobs:
       - name: Initialize
         uses: github/codeql-action/init@v1
         with:
-          languages: javascript
+          languages: ${{ matrix.language }}
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v1
