@@ -231,10 +231,9 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          docker_name: 'owasp/zap2docker-stable'
           target: https://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/
           cmd_options: '-a'
+          allow_issue_writing: false
 
   # trivy:
   #   name: Trivy
