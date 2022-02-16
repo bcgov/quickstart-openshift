@@ -92,8 +92,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # - name: Jest coverage report
-      #   uses: ArtiomTr/jest-coverage-report-action@v2
       - name: Tests
         run: |
           npm ci
@@ -105,6 +103,11 @@ jobs:
       - check
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - javascript
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -112,7 +115,7 @@ jobs:
       - name: Initialize
         uses: github/codeql-action/init@v1
         with:
-          languages: javascript
+          languages: ${{ matrix.language }}
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v1
@@ -144,42 +147,27 @@ jobs:
       with:
         sarif_file: snyk.sarif
 
-  # sonarcloud:
-  #   name: SonarCloud
-  #   needs:
-  #     - check
-  #   if: needs.check.outputs.build == 'true'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Setup
-  #       uses: warchant/setup-sonar-scanner@v3
-  #     - name: Run Sonar Scanner
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: sonar-scanner
-  #            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-  #            -Dsonar.organization=bcgov-sonarcloud
-  #            -Dsonar.host.url=https://sonarcloud.io
-  #            -Dsonar.projectKey=bcgov_greenfield-pipeline
-  #            -Dsonar.sourceEncoding=UTF-8
-
-  zap:
-    name: Zap
+  sonarcloud:
+    name: SonarCloud
     needs:
       - check
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.3.0
+      - uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          docker_name: 'owasp/zap2docker-stable'
-          target: https://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/
-          cmd_options: '-a'
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=${{ github.event.repository.name }}
+          # -Dsonar.verbose=true
 
   deploy:
     name: Deploy
@@ -208,8 +196,9 @@ jobs:
             || true && echo "No stale imagestreams"
 
           # Process and apply deployment template
-          oc process -f .github/pipeline/deploy.yml -p SUFFIX=${{ github.event.number }} \
-            | oc apply -f -
+          oc process -f .github/pipeline/deploy.yml \
+            -p SUFFIX=${{ github.event.number }} -p NAMESPACE=${{ secrets.NAMESPACE }} \
+              | oc apply -f -
 
           # Start rollout (if necessary) and follow it
           oc rollout latest dc/gfp-${{ github.event.number }} 2> /dev/null \
@@ -227,6 +216,25 @@ jobs:
           message: |
             [${{ secrets.ENV }} deployment](https://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
+
+  zap:
+    name: Zap
+    needs:
+      - check
+      - deploy
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          docker_name: 'owasp/zap2docker-stable'
+          target: https://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/
+          cmd_options: '-a'
 
   # trivy:
   #   name: Trivy
