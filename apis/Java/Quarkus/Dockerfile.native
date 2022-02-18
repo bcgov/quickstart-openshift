@@ -10,17 +10,11 @@ COPY src /code/src
 RUN ./mvnw package -Pnative
 
 ## Stage 2 : create the docker final image
-FROM quay.io/quarkus/quarkus-micro-image:1.0
+FROM quay.io/quarkus/quarkus-distroless-image:1.0
 WORKDIR /work/
 COPY --from=build /code/target/*-runner /work/application
 
-# set up permissions for user `1001`
-RUN chmod 775 /work /work/application \
-  && chown -R 1001 /work \
-  && chmod -R "g+rwX" /work \
-  && chown -R 1001:root /work
-
-EXPOSE 8080
-USER 1001
+EXPOSE 8000
+USER nonroot
 
 CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]

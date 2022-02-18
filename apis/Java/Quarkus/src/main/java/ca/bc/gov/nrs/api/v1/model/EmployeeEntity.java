@@ -37,6 +37,8 @@ public class EmployeeEntity extends PanacheEntityBase {
   @Column(name = "SALARY")
   Double salary;
 
+
+
   public UUID getEmployeeId() {
     return employeeId;
   }
@@ -90,6 +92,18 @@ public class EmployeeEntity extends PanacheEntityBase {
   }
 
   public void setSalary(Double salary) {
+    this.salary = salary;
+  }
+  public EmployeeEntity() {
+  }
+
+  public EmployeeEntity(UUID employeeId, String firstName, String lastName, String email, String phone, LocalDate hireDate, Double salary) {
+    this.employeeId = employeeId;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
+    this.phone = phone;
+    this.hireDate = hireDate;
     this.salary = salary;
   }
 }

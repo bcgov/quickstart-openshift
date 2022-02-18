@@ -15,6 +15,7 @@ services:
       - QUARKUS_DATASOURCE_JDBC_PASSWORD=quarkus123
       - CONSOLE_LOG_LEVEL=INFO
       - FILE_LOG_LEVEL=INFO
+      - OIDC_AUTH_SERVER_URL=http://quarkus-keycloak:8190/auth/realms/master #secret
     ports:
       - "8000:8000"  # the HTTP endpoint
     depends_on:
