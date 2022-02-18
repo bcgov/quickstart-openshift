@@ -103,11 +103,6 @@ jobs:
       - check
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        language:
-          - javascript
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -115,7 +110,7 @@ jobs:
       - name: Initialize
         uses: github/codeql-action/init@v1
         with:
-          languages: ${{ matrix.language }}
+          languages: javascript
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v1
@@ -231,10 +226,10 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          docker_name: 'owasp/zap2docker-stable'
           target: https://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/
           cmd_options: '-a'
+          allow_issue_writing: false
+          fail_action: false
 
   # trivy:
   #   name: Trivy
