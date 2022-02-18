@@ -30,4 +30,4 @@ Currently, our most exciting offering is the [GitHub Actions](https://github.com
 
 ...and more [on the way](https://github.com/bcgov/greenfield-template/issues)!
 
-![Pipeline Action](.github/graphics/pr2022-01-30.png)
+![Pipeline Action](.github/graphics/pr.png)
