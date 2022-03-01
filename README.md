@@ -82,13 +82,14 @@ The following are required:
     - Amazon Web Services coming soon
 
 
-## Create a Repository
+## Consuming This Template
 
-The following steps show how to create a new repository and application using this repo as a template.
+![image](./.github/graphics/newRepo.png)
 
-- Create a new repository using the Greenfield template and grant access the Codecov marketplace application:
-
-    ![image](https://user-images.githubusercontent.com/77364706/155819028-0096d3ae-d08a-44f4-b0d4-203029b46449.png)
+Create a new repository using this repository as a template.
+- Select bcgov/greenfield-template under Repository template
+- Check Codecov | Code Coverage to grant access
+- Jira cannot be unchecked (I try every time!)
 
   
 - Add a new environment variable “dev” to the repository through Settings -> Environments, with the following secrets:  
