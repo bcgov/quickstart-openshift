@@ -7,8 +7,11 @@
 [![MIT License](https://img.shields.io/github/license/bcgov/greenfield-template.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
-# greenfield-template
-Forestry Client Services' greenfield template.  For testing and demonstration purposes.
+
+Forestry Client Services' greenfield starter template and pull request based pipeline.  For new and migrating products.  Currently supports OpenShift with plans for Amazon Web Services.
+
+
+# Overview
 
 The Greenfield-template is a node.js application built with [nestJS](https://docs.nestjs.com), and the main purpose is to provide a [GitHub Actions](https://docs.github.com/en/actions/quickstart) template to automate the process for testing, security scanning, code quality checking, image building and deploying for an application.  
 
@@ -34,8 +37,54 @@ Currently, our most exciting offering is the [GitHub Actions](https://github.com
 
 ![Pipeline Action](.github/graphics/pr.png)
 
-### **Apply the template to a new project**:
-The following steps show an example of how to create a new repository with the greenfield-template, and how github actions workflow runs in the case of creating a pull request (pr_close.yml), closing a pull request (pr_close.yml), and merging into the main branch (main.yml). We will deploy a simple "Hello World" application to a shared namespace. **Pre-request**: Github account needs to have access to bcgov organization.   
+
+# Getting Started
+
+Initial setup can be completed in around half a business day.  Please keep reading for directions.
+
+Included:
+
+- Documentation:
+    - *.md
+- Workflows:
+    - Pull Request-based (.github/workflows/pr-open.yml)
+    - On Close (.github/workflows/pr-close.yml)
+    - Main Merge (.github/workflows/main-merge.yml)
+- Hello World! starter application
+    - TypeScript source in src/
+    - One Jest test in test/
+    - JavaScript container in Dockerfile
+- Misc:
+    - nestjs
+    - eslint
+    - lint-staged
+
+Not included:
+
+- Repository secrets
+- Environment secrets
+- Issues
+- Pull requests
+- JavaScript (transpiled/created to dist/)
+
+
+## Prerequisites
+
+The following are required:
+
+- BC Government IDIR accounts for anyone submitting requests
+- GitHub accounts for all participating team members
+    - [Sign Up is free](https://github.com/signup)
+- Membership in the BCGov GitHub organization
+    - Provide GitHub IDs to [BCGov's Just Ask](https://just-ask.developer.gov.bc.ca/)
+- Project namespaces (pick one):
+    - OpenShift - [Register a New Project](https://registry.developer.gov.bc.ca/public-landing)
+    - Amazon Web Services coming soon
+
+
+## Create a Repository
+
+The following steps show how to create a new repository and application using this repo as a template.
 
 - Create a new repository using the Greenfield template and grant access the Codecov marketplace application:
 
@@ -76,11 +125,11 @@ The following steps show an example of how to create a new repository with the g
 
 When merging the pull request, the jobs in the pr_close file will do the cleanup  
 
-### **Troubleshooting**:
+## **Troubleshooting**:
 - If failed to get authentication at the build docker image stage, check if updated to use the secrets [GHCR token and username](https://github.com/marketplace/actions/docker-build-push-action), the default GitHub token might not work
 - If failed to authenticate to openshfit at the deploy stage, check if the service account “pipeline” has the right ability to get project and do deploy
 
-### **Additional settings**:
+## **Additional settings**:
 - Add branch protection rule, for example adding one for “main” branch:    
 
         Select repo settings -> branches -> add rule, select first 2, and for the 2nd one, add “TESTS” so it requires to pass the GitHub Actions tests step. You         could customize it based on your needs.
