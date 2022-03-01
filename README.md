@@ -156,11 +156,41 @@ Provide these tokens or comment their jobs out:
 
 ## Environment Secrets
 
-They are available as GitHub Actions Secrets, which are available at any time to pipelines/workflows. Environments are used to gatekeep secrets
-From your repo visit Settings > Secrets > Actions to create the following:
+Secrets can be grouped into and protected by Environments.  [Features include](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment):
+
+- Required reviewers
+- Wait timer
+- Deployment branches
+
+Manage Environments and their Secrets from your Repo > Settings > Environments.
+
+**Environment: dev**
+
+Create a new Environment to hold the keys to our development deployment.
+
+Environment name: `dev`
+
+No  protection rules are required yet:
+
+ - [`unchecked`] Required reviewers
+ - [`unchecked`] Wait timer
+ - Deployment branches: `All branches`
 
 
-- Add a new environment variable “dev” to the repository through Settings -> Environments, with the following secrets:  
+### Required
+
+**NAMESPACE**
+
+- OpenShift Development namespace (see **Prerequisites**)
+- Variable: `{{ secrets.NAMESPACE }}`
+
+**OC_TOKEN**
+
+- OpenShift pipeline account token
+- Variable: `{{ secrets.OC_TOKEN }}`
+
+#### Getting a Pipeline Account Token
+
     ```
     ENV: dev
 
