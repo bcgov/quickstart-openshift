@@ -91,6 +91,22 @@ Create a new repository using this repository as a template.
 - Check Codecov | Code Coverage to grant access
 - Jira cannot be unchecked (I try every time!)
 
+## Closing Repo-Mountie Issues
+
+repo-mountie is a BCGov bot that likes to spam us.  Here are a few issues to expect.
+
+Lets use common phrasing
+ - Includes examples of inappropriate and preferred phrasing
+ - The default branch should be named `main`
+ - Close the issue
+
+Add missing topics
+ - Topics improve discoverability
+ - Directions will be included
+ - Close the issue
+
+
+## Creating Secrets
   
 - Add a new environment variable “dev” to the repository through Settings -> Environments, with the following secrets:  
     ```
