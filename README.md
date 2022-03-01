@@ -106,17 +106,14 @@ Add missing topics
  - Close the issue
 
 
-## Repository Secrets
+## Action Secrets
 
-Secrets are required to access the GitHub API and BCGov services, like OpenShift or SonarCloud. There are two kinds, both of which are consumed by this template.
+Action Secrets are consumed by workflows, including 3rd party Actions.  Please use Environment secrets for highly sensitive content.
 
-### Action Secrets
+Manage Action Secrets from your Repo > Settings > Secrets > Actions.
 
-Action Secrets can be accessed at any time by GitHub Actions.  Common uses include server addresses or low-level tokens, like for commenting on Pull Requests.
 
-Create or manage action secrets from your Repo > Settings > Secrets > Actions.
-
-#### Required
+### Required
 
 **GHTOKEN**
 
@@ -136,7 +133,8 @@ Create or manage action secrets from your Repo > Settings > Secrets > Actions.
     - `https://api.gold.devops.gov.bc.ca:6443`
     - `https://api.silver.devops.gov.bc.ca:6443`
 
-#### Optional
+
+### Optional
 
 Provide these tokens or comment their jobs out:
 
@@ -145,18 +143,18 @@ Provide these tokens or comment their jobs out:
 
 **SNYK_TOKEN**
 
-- Vulnerability scanning
-- Acquire a token for free at [Snyk.io](https://snyk.io/)
+- Vulnerability, dependency and infrastructure code scanning
+- Acquire a free token at [Snyk.io](https://snyk.io/)
 - Variable: `{{ secrets.SNYK_TOKEN }}`
 
 **SONAR_TOKEN**
 
-- Code quality and security
-- Sign up and acquire a token at [Snyk.io](https://snyk.io/)
+- Code quality and security scanning
+- Request to [import a GitHub repository](https://github.com/BCDevOps/devops-requests/issues/new/choose)
 - Variable: `{{ secrets.SNYK_TOKEN }}`
 
 
-### Environment Secrets
+## Environment Secrets
 
 They are available as GitHub Actions Secrets, which are available at any time to pipelines/workflows. Environments are used to gatekeep secrets
 From your repo visit Settings > Secrets > Actions to create the following:
