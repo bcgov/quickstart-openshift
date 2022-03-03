@@ -91,6 +91,23 @@ Create a new repository using this repository as a template.
 - Check Codecov | Code Coverage to grant access
 - Jira cannot be unchecked (I try every time!)
 
+
+## Setting Up the GitHub Repository
+
+
+### Pull Request Handling
+
+Squash merging is recommended for simplified histories ad ease of rollback.
+
+Cleaning up merged branches is recommended for your DevOps Specialist's fragile sanity.
+
+From GitHub:
+1. Select Settings (gear, top right) -> General (selected automatically)
+2. Scroll to Pull Requests
+    - `[check] Allow squash merging`
+    - `[check] Automatically delete head branches`
+
+
 ## Closing Repo-Mountie Issues
 
 repo-mountie is a BCGov bot that likes to spam us.  Here are a few issues to expect.
@@ -189,6 +206,7 @@ No  protection rules are required yet:
 - OpenShift pipeline account token (see **Getting an OpenShift Account Token**)
 - Variable: `{{ secrets.OC_TOKEN }}`
 
+
 #### Getting an OpenShift Account Token
 
 Please assume that your OpenShift platform team has provisioned a pipeline account.
@@ -216,9 +234,11 @@ From GitHub:
 3. Paste into the GitHub Action Secret `GHCR_TOKEN` (see above)
 
 
-## Your First Pipeline Run
+## First Pipeline Run
 
-- Create a new branch and switch to that branch
+By now all tokens should be provided or their corresponding workflow jobs commented out.  We are going to assume that Synk and SonarCloud tokens have not been obtained yet, so they are being commented out.
+
+1. Create a new branch and switch to that branch
 
 - Comment out the Snyk and SonarCloud part of the `.github/workflows/pr_open.yml` file as those need additional access tokens that need to apply for. Also, comment out the SonarCloud part in the `.github/workflows/main.yml` as well.
 
@@ -233,11 +253,42 @@ From GitHub:
 
 When merging the pull request, the jobs in the pr_close file will do the cleanup  
 
+
+### Branch Protection
+
+This is required to prevent direct pushes and merges to the default branch.  One full pipeline run must be completed before Make sure that `main` is the default branch.
+
+From GitHub:
+1. Select Settings (gear, top right) -> Branches (under Code and Automation)
+2. Click `Add Rule` or edit an existing rule
+3. Under `Protect matching branches` specify the following:
+    - Branch name pattern: `main`
+    - `[check] Require a pull request before merging`
+        - `[check] Require approvals` (default = 1)
+        - `[check] Dismiss stale pull request approvals when new commits are pushed`
+        - `[check] Require review from Code Owners`
+    - `[check] Require status checks to pass before merging`
+        - `[check] Require branches to be up to date before merging`
+        - `Status checks that are required` requires to the search box to select:
+            - `Build`
+            - `Check`
+            - `CodeQL`
+            - `Deploy`
+            - `Tests`
+            - `Zap`
+            - `Snyk` (optional)
+            - `SonarCloud` (optional)
+    - `[check] Require conversation resolution before merging`
+    - `[check] Include administrators` (optional)
+
+
 ## **Troubleshooting**:
+
 - If failed to get authentication at the build docker image stage, check if updated to use the secrets [GHCR token and username](https://github.com/marketplace/actions/docker-build-push-action), the default GitHub token might not work
 - If failed to authenticate to openshfit at the deploy stage, check if the service account “pipeline” has the right ability to get project and do deploy
 
 ## **Additional settings**:
+
 - Add branch protection rule, for example adding one for “main” branch:    
 
         Select repo settings -> branches -> add rule, select first 2, and for the 2nd one, add “TESTS” so it requires to pass the GitHub Actions tests step. You         could customize it based on your needs.
