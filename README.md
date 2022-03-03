@@ -356,14 +356,6 @@ From GitHub:
 - If failed to authenticate to openshfit at the deploy stage, check if the service account “pipeline” has the right ability to get project and do deploy
 
 
-## **Additional settings**:
+## Notes
 
-
-
-- To check the image registry:  
-
-    You could see a list of images within bcgov organization -> select packages -> search greenfield-template.   
-
-
-
-**Note**: This greenfield-template repo provides a basic template to start up a new project. It needs to be customized based on the project, for example, run tests for a different language and what secrets to be cleaned up in the cleanup stage or so.
+This repo provides a basic template to start up a new project using nodejs. It needs to be customized based on the project, for example, run tests for a different language and revised whatever secrets required.
