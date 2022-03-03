@@ -294,6 +294,14 @@ From your GitHub repository:
     - Body: `Pipeline: comment out snyk and sonarcloud`
     - Target Branch: `<new-branch-name>`
     - Source Branch: `main`
+3. Proceed according the the pipeline's directions!
+
+
+## Packages
+
+Packages are available from your repository (link on right) or your organization's package lists.
+
+E.g. https://github.com/orgs/bcgov/packages?repo_name=greenfield-template
 
 
 ### Branch Protection
