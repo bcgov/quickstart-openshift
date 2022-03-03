@@ -324,6 +324,23 @@ From GitHub:
     - `[check] Include administrators` (optional)
 
 
+## Adding Team Members
+
+Don't forget to add your team members!  
+
+From GitHub:
+1. Select Settings (gear, top right) -> Collaborators and teams (under Access)
+2. Click `Add people` or `Add teams`
+3. Use the search box to find people or teams
+4. Choose a role (one of)
+    - `Read`
+    - `Triage`
+    - `Write`
+    - `Maintain`
+    - `Admin`
+5. Click *Add <person-or-team>*
+
+
 ## Troubleshooting
 
 - If failed to get authentication at the build docker image stage, check if updated to use the secrets [GHCR token and username](https://github.com/marketplace/actions/docker-build-push-action), the default GitHub token might not work
@@ -333,9 +350,7 @@ From GitHub:
 
 ## **Additional settings**:
 
-- Add team members to the repositroy:  
-  
-    Select repo settings -> collaborators and teams
+
 
 - To check the image registry:  
 
