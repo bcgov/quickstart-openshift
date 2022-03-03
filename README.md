@@ -222,7 +222,7 @@ Please assume that your OpenShift platform team has provisioned a pipeline accou
 
 #### Getting a Personal Access Token
 
-TODO: verify still in use
+TODO: verify still required
 
 Generate a Personal Access Token in a GitHub account of your choosing.  Personal or shared Service accounts can be used.
 
@@ -232,26 +232,68 @@ From GitHub:
     - `workflow`
     - `write:packages`
 3. Paste into the GitHub Action Secret `GHCR_TOKEN` (see above)
+4. Update the “Log in to the Container registry” step in `pr_open.yml` as follows:
+    ```
+    - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
+    ```
 
 
 ## First Pipeline Run
 
-By now all tokens should be provided or their corresponding workflow jobs commented out.  We are going to assume that Synk and SonarCloud tokens have not been obtained yet, so they are being commented out.
+By now all relevant tokens should be provided.  We are going to assume that Synk and SonarCloud aren't on hand yet, so let's comment themout.  Please revise as appropriate.
 
-1. Create a new branch and switch to that branch
+Steps in this section use a terminal.  Several GUIs alternatives are avilable, but out of scope.
 
-- Comment out the Snyk and SonarCloud part of the `.github/workflows/pr_open.yml` file as those need additional access tokens that need to apply for. Also, comment out the SonarCloud part in the `.github/workflows/main.yml` as well.
+Required:
+- Git CLI installed and configured
+- Access to a command prompt:
+    - Linux command terminal
+    - MacOS command terminal
+    - Windows Subsystem for Linux (WSL)
 
-- Update the “Log in to the Container registry” step in the `.github/workflows/pr_open.yml` file, and update the username to be `${{ secrets.GHCR_USERNAME }}`, and password to be `${{ secrets.GHCR_TOKEN }}`
 
-- Try to create a pull request and watch the pipeline running
+### Create a Branch and Make Changes
 
-- If all steps passed, you should be able to access the web page. 
-    The host, service and route section are defined in the `.github/pipeline/deploy.yml` file. 
-    You could also access the web page through OpenShift topology as follows:
-    ![image](https://user-images.githubusercontent.com/77364706/155819645-23b66bfc-0a83-45d2-a1c6-8742a784a391.png)
+1. Create and switch to a new branch
+    ```
+    git checkout -b <new-branch-name>
+    ```
+2. Edit the following workflows
+    - Pull Requests: `.github/workflows/pr-open.yml`
+    - Main Merge: `.github/workflows/main.yml`
+3. Comment out the following jobs
+    - `snyk` (PR only)
+    - `sonarcloud` (both)
+3. Stage changes and create commits (repeat as necessary)
+    ```
+    git add .github/workflows/
+    git commit -m "Pipeline: comment out snyk and sonarcloud"
+    ```
+4. Push the commits
+    ```
+    # First time only
+    git push -u origin <new-branch-name>
 
-When merging the pull request, the jobs in the pr_close file will do the cleanup  
+    # Subsequent times
+    git push origin
+    ```
+
+### Create a Pull Request
+
+This is where things start to get exciting!
+
+From your GitHub repository:
+1. Select *Pull Requests*
+2. Click *New pull request* (big green button)
+    - Title: `Pipeline: comment out snyk and sonarcloud`
+    - Body: `Pipeline: comment out snyk and sonarcloud`
+    - Target Branch: `<new-branch-name>`
+    - Source Branch: `main`
 
 
 ### Branch Protection
@@ -282,20 +324,14 @@ From GitHub:
     - `[check] Include administrators` (optional)
 
 
-## **Troubleshooting**:
+## Troubleshooting
 
 - If failed to get authentication at the build docker image stage, check if updated to use the secrets [GHCR token and username](https://github.com/marketplace/actions/docker-build-push-action), the default GitHub token might not work
+
 - If failed to authenticate to openshfit at the deploy stage, check if the service account “pipeline” has the right ability to get project and do deploy
 
+
 ## **Additional settings**:
-
-- Add branch protection rule, for example adding one for “main” branch:    
-
-        Select repo settings -> branches -> add rule, select first 2, and for the 2nd one, add “TESTS” so it requires to pass the GitHub Actions tests step. You         could customize it based on your needs.
-
-- Set auto delete merged branch:    
-
-    Select repo settings -> general, check “Automatically delete head branches” 
 
 - Add team members to the repositroy:  
   
