@@ -1,0 +1,45 @@
+version: "2.3"
+
+services:
+  quarkus-service:
+    cpus: 0.25
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: quarkus-service:latest
+    mem_limit: 128m
+    environment:
+      - QUARKUS_DB_KIND=postgresql
+      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://quarkus-db:5432/quarkus
+      - QUARKUS_DATASOURCE_JDBC_USERNAME=quarkus
+      - QUARKUS_DATASOURCE_JDBC_PASSWORD=quarkus123
+      - CONSOLE_LOG_LEVEL=INFO
+      - FILE_LOG_LEVEL=INFO
+      - OIDC_AUTH_SERVER_URL=http://quarkus-keycloak:8190/auth/realms/master #secret
+    ports:
+      - "8000:8000"  # the HTTP endpoint
+    depends_on:
+      quarkus-db:
+        condition: service_healthy
+    networks:
+      - quarkus
+
+  quarkus-db:
+    image: postgres
+    mem_limit: 128m
+    environment:
+      - POSTGRES_USER=quarkus
+      - POSTGRES_PASSWORD=quarkus123
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quarkus"]
+      interval: 5s
+      timeout: 5s
+      retries: 6
+    ports:
+      - "5431:5432"
+    networks:
+      - quarkus
+
+networks:
+  quarkus:
+    driver: bridge

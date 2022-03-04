@@ -1,0 +1,45 @@
+version: "2.3"
+
+services:
+  nest-database:
+    image: postgres
+    mem_limit: 128m
+    environment:
+      - POSTGRES_USER=nest
+      - POSTGRES_PASSWORD=nest123
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nest"]
+      interval: 5s
+      timeout: 5s
+      retries: 6
+    ports:
+      - "5430:5432"
+    networks:
+      - nest
+  nest-keycloak:
+    image: quay.io/keycloak/keycloak:14.0.0
+    environment:
+      DB_VENDOR: postgres
+      DB_ADDR: nest-database:5432
+      DB_DATABASE: nest
+      DB_SCHEMA: public
+      DB_USER: nest
+      DB_PASSWORD: nest123
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:8080/auth/realms/master" ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 1m
+    ports:
+      - "8191:8080"  # the HTTP endpoint
+      - "9190:9990"  # the admin HTTP endpoint
+    networks:
+      - nest
+networks:
+  nest:
+    driver: bridge

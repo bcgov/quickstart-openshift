@@ -1,0 +1,32 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog
+    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+  <changeSet author="quarkus-example-api" id="1">
+    <createTable tableName="EMPLOYEE">
+      <column name="EMPLOYEE_ID" type="UUID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="EMPLOYEE_PK"/>
+      </column>
+      <column name="FIRST_NAME" type="VARCHAR(200)"/>
+      <column name="LAST_NAME" type="VARCHAR(200)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="EMAIL" type="VARCHAR(200)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="PHONE_NUMBER" type="VARCHAR(15)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="HIRE_DATE" type="date">
+        <constraints nullable="false"/>
+      </column>
+      <column name="SALARY" type="number">
+      </column>
+    </createTable>
+  </changeSet>
+</databaseChangeLog>
