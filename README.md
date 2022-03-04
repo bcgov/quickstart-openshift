@@ -7,8 +7,11 @@
 [![MIT License](https://img.shields.io/github/license/bcgov/greenfield-template.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
-# greenfield-template
-Forestry Client Services' greenfield template.  For testing and demonstration purposes.
+
+Forestry Client Services' greenfield starter template and pull request based pipeline.  For new and migrating products.  Currently supports OpenShift with plans for Amazon Web Services.
+
+
+# Overview
 
 The Greenfield-template is a node.js application built with [nestJS](https://docs.nestjs.com), and the main purpose is to provide a [GitHub Actions](https://docs.github.com/en/actions/quickstart) template to automate the process for testing, security scanning, code quality checking, image building and deploying for an application.  
 
@@ -34,69 +37,325 @@ Currently, our most exciting offering is the [GitHub Actions](https://github.com
 
 ![Pipeline Action](.github/graphics/pr.png)
 
-### **Apply the template to a new project**:
-The following steps show an example of how to create a new repository with the greenfield-template, and how github actions workflow runs in the case of creating a pull request (pr_close.yml), closing a pull request (pr_close.yml), and merging into the main branch (main.yml). We will deploy a simple "Hello World" application to a shared namespace. **Pre-request**: Github account needs to have access to bcgov organization.   
 
-- Create a new repository using the Greenfield template and grant access the Codecov marketplace application:
+# Getting Started
 
-    ![image](https://user-images.githubusercontent.com/77364706/155819028-0096d3ae-d08a-44f4-b0d4-203029b46449.png)
+Initial setup can be completed in around half a business day.  Please keep reading for directions.
 
-  
-- Add a new environment variable “dev” to the repository through Settings -> Environments, with the following secrets:  
+Included:
+
+- Documentation:
+    - *.md
+- Workflows:
+    - Pull Request-based (.github/workflows/pr-open.yml)
+    - On Close (.github/workflows/pr-close.yml)
+    - Main Merge (.github/workflows/main-merge.yml)
+- Hello World! starter application
+    - TypeScript source in src/
+    - One Jest test in test/
+    - JavaScript container in Dockerfile
+- Misc:
+    - nestjs
+    - eslint
+    - lint-staged
+
+Not included:
+
+- Repository secrets
+- Environment secrets
+- Issues
+- Pull requests
+- JavaScript (transpiled/created to dist/)
+
+
+## Prerequisites
+
+The following are required:
+
+- BC Government IDIR accounts for anyone submitting requests
+- GitHub accounts for all participating team members
+    - [Sign Up is free](https://github.com/signup)
+- Membership in the BCGov GitHub organization
+    - Provide GitHub IDs to [BCGov's Just Ask](https://just-ask.developer.gov.bc.ca/)
+- Project namespaces (pick one):
+    - OpenShift - [Register a New Project](https://registry.developer.gov.bc.ca/public-landing)
+    - Amazon Web Services coming soon
+
+
+## Consuming This Template
+
+![image](./.github/graphics/newRepo.png)
+
+Create a new repository using this repository as a template.
+- Select bcgov/greenfield-template under Repository template
+- Check Codecov | Code Coverage to grant access
+- Jira cannot be unchecked (I try every time!)
+
+
+## Setting Up the GitHub Repository
+
+
+### Pull Request Handling
+
+Squash merging is recommended for simplified histories ad ease of rollback.
+
+Cleaning up merged branches is recommended for your DevOps Specialist's fragile sanity.
+
+From GitHub:
+1. Select Settings (gear, top right) -> General (selected automatically)
+2. Scroll to Pull Requests
+    - `[check] Allow squash merging`
+    - `[check] Automatically delete head branches`
+
+
+## Closing Repo-Mountie Issues
+
+repo-mountie is a BCGov bot that likes to spam us.  Here are a few issues to expect.
+
+Lets use common phrasing
+ - Includes examples of inappropriate and preferred phrasing
+ - The default branch should be named `main`
+ - Close the issue
+
+Add missing topics
+ - Topics improve discoverability
+ - Directions will be included
+ - Close the issue
+
+
+## Action Secrets
+
+Action Secrets are consumed by workflows, including 3rd party Actions.  Please use Environment secrets for highly sensitive content.
+
+Manage Action Secrets from your Repo > Settings > Secrets > Actions.
+
+
+### Required
+
+**GHTOKEN**
+
+- Default token, not viewable, common to all repositories
+- Variable: `{{ secrets.GHTOKEN }}`
+
+**GHPROJECT_TOKEN** (TODO: check that this is still in use)
+
+- Personal Access Token for writing to Pull Requests
+- Variable: `{{ secrets.GHPROJECT_TOKEN }}`
+
+**OC_SERVER**
+
+- OpenShift server address
+- Variable: `{{ secrets.OC_SERVER }}`
+- Value (pick one of):
+    - `https://api.gold.devops.gov.bc.ca:6443`
+    - `https://api.silver.devops.gov.bc.ca:6443`
+
+
+### Optional
+
+Provide these tokens or comment their jobs out:
+
+- ./github/workflows/pr-open.yml
+- ./github/workflows/main.yml
+
+**SNYK_TOKEN**
+
+- Vulnerability, dependency and infrastructure code scanning
+- Acquire a free token at [Snyk.io](https://snyk.io/)
+- Variable: `{{ secrets.SNYK_TOKEN }}`
+
+**SONAR_TOKEN**
+
+- Code quality and security scanning
+- Request to [import a GitHub repository](https://github.com/BCDevOps/devops-requests/issues/new/choose)
+- Variable: `{{ secrets.SNYK_TOKEN }}`
+
+
+## Environment Secrets
+
+Secrets can be grouped into and protected by Environments.  [Features include](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment):
+
+- Required reviewers
+- Wait timer
+- Deployment branches
+
+Manage Environments and their Secrets from your Repo > Settings > Environments.
+
+**Environment: dev**
+
+Create a new Environment to hold the keys to our development deployment.
+
+Environment name: `dev`
+
+No  protection rules are required yet:
+
+ - [`unchecked`] Required reviewers
+ - [`unchecked`] Wait timer
+ - Deployment branches: `All branches`
+
+
+### Required
+
+**NAMESPACE**
+
+- OpenShift Development namespace (see **Prerequisites**)
+- Variable: `{{ secrets.NAMESPACE }}`
+
+**OC_TOKEN**
+
+- OpenShift pipeline account token (see **Getting an OpenShift Account Token**)
+- Variable: `{{ secrets.OC_TOKEN }}`
+
+
+#### Getting an OpenShift Account Token
+
+Please assume that your OpenShift platform team has provisioned a pipeline account.
+
+1. Login to your OpenShift cluster
+    - E.g. BCGov [Gold](https://console.apps.silver.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/)
+2. Select your DEV namespace (provided by the OpenShift platform team)
+3. Select Secrets (under Workloads for Administrator view)
+4. Select `pipeline-token-...` or a similarly privileged token
+5. Under Data, copy `token`
+6. Paste into the GitHub Environment Secret `OC_TOKEN` (see above)
+
+
+#### Getting a Personal Access Token
+
+TODO: verify still required
+
+Generate a Personal Access Token in a GitHub account of your choosing.  Personal or shared Service accounts can be used.
+
+From GitHub:
+1. Select Settings (gear, top right) -> Developer settings -> Personal access tokens
+2. Create a new token with the following rights:
+    - `workflow`
+    - `write:packages`
+3. Paste into the GitHub Action Secret `GHCR_TOKEN` (see above)
+4. Update the “Log in to the Container registry” step in `pr_open.yml` as follows:
     ```
-    ENV: dev
-
-    NAMESPACE: 245e18-dev (this is a shared namespace for learning purpose, and for real project should use a real namespace)
-
-    OC_TOKEN: get from openshift namespace -> administer view -> user management -> service account -> pipeline token (use the deployer token here for this specific 245e18-dev namespace, normally should use the pipeline token, and they are auto generated by the namespace)
-    ```
-    
-- Add following Repository Secrets through Settings -> Secrets -> Actions:  
-    ```
-    OC_SERVER:  OpenShift cluster URL
-
-    GHCR_TOKEN: Personal GitHub access token generated through Settings -> Developer settings -> Personal access tokens with the following scopes:
-                ![image](https://user-images.githubusercontent.com/77364706/155819254-988e3a8c-6812-4ecd-89ec-fbc4175b6eb7.png)
-
-    GHCR_USERNAME: GitHub username
+    - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
     ```
 
-- Create a new branch and switch to that branch
 
-- Comment out the Snyk and SonarCloud part of the `.github/workflows/pr_open.yml` file as those need additional access tokens that need to apply for. Also, comment out the SonarCloud part in the `.github/workflows/main.yml` as well.
+## First Pipeline Run
 
-- Update the “Log in to the Container registry” step in the `.github/workflows/pr_open.yml` file, and update the username to be `${{ secrets.GHCR_USERNAME }}`, and password to be `${{ secrets.GHCR_TOKEN }}`
+By now all relevant tokens should be provided.  We are going to assume that Synk and SonarCloud aren't on hand yet, so let's comment themout.  Please revise as appropriate.
 
-- Try to create a pull request and watch the pipeline running
+Steps in this section use a terminal.  Several GUIs alternatives are avilable, but out of scope.
 
-- If all steps passed, you should be able to access the web page. 
-    The host, service and route section are defined in the `.github/pipeline/deploy.yml` file. 
-    You could also access the web page through OpenShift topology as follows:
-    ![image](https://user-images.githubusercontent.com/77364706/155819645-23b66bfc-0a83-45d2-a1c6-8742a784a391.png)
+Required:
+- Git CLI installed and configured
+- Access to a command prompt:
+    - Linux command terminal
+    - MacOS command terminal
+    - Windows Subsystem for Linux (WSL)
 
-When merging the pull request, the jobs in the pr_close file will do the cleanup  
 
-### **Troubleshooting**:
+### Create a Branch and Make Changes
+
+1. Create and switch to a new branch
+    ```
+    git checkout -b <new-branch-name>
+    ```
+2. Edit the following workflows
+    - Pull Requests: `.github/workflows/pr-open.yml`
+    - Main Merge: `.github/workflows/main.yml`
+3. Comment out the following jobs
+    - `snyk` (PR only)
+    - `sonarcloud` (both)
+3. Stage changes and create commits (repeat as necessary)
+    ```
+    git add .github/workflows/
+    git commit -m "Pipeline: comment out snyk and sonarcloud"
+    ```
+4. Push the commits
+    ```
+    # First time only
+    git push -u origin <new-branch-name>
+
+    # Subsequent times
+    git push origin
+    ```
+
+### Create a Pull Request
+
+This is where things start to get exciting!
+
+From your GitHub repository:
+1. Select *Pull Requests*
+2. Click *New pull request* (big green button)
+    - Title: `Pipeline: comment out snyk and sonarcloud`
+    - Body: `Pipeline: comment out snyk and sonarcloud`
+    - Target Branch: `<new-branch-name>`
+    - Source Branch: `main`
+3. Proceed according the the pipeline's directions!
+
+
+## Packages
+
+Packages are available from your repository (link on right) or your organization's package lists.
+
+E.g. https://github.com/orgs/bcgov/packages?repo_name=greenfield-template
+
+
+### Branch Protection
+
+This is required to prevent direct pushes and merges to the default branch.  One full pipeline run must be completed before Make sure that `main` is the default branch.
+
+From GitHub:
+1. Select Settings (gear, top right) -> Branches (under Code and Automation)
+2. Click `Add Rule` or edit an existing rule
+3. Under `Protect matching branches` specify the following:
+    - Branch name pattern: `main`
+    - `[check] Require a pull request before merging`
+        - `[check] Require approvals` (default = 1)
+        - `[check] Dismiss stale pull request approvals when new commits are pushed`
+        - `[check] Require review from Code Owners`
+    - `[check] Require status checks to pass before merging`
+        - `[check] Require branches to be up to date before merging`
+        - `Status checks that are required` requires to the search box to select:
+            - `Build`
+            - `Check`
+            - `CodeQL`
+            - `Deploy`
+            - `Tests`
+            - `Zap`
+            - `Snyk` (optional)
+            - `SonarCloud` (optional)
+    - `[check] Require conversation resolution before merging`
+    - `[check] Include administrators` (optional)
+
+
+## Adding Team Members
+
+Don't forget to add your team members!  
+
+From GitHub:
+1. Select Settings (gear, top right) -> Collaborators and teams (under Access)
+2. Click `Add people` or `Add teams`
+3. Use the search box to find people or teams
+4. Choose a role (one of)
+    - `Read`
+    - `Triage`
+    - `Write`
+    - `Maintain`
+    - `Admin`
+5. Click *Add <person-or-team>*
+
+
+## Troubleshooting
+
 - If failed to get authentication at the build docker image stage, check if updated to use the secrets [GHCR token and username](https://github.com/marketplace/actions/docker-build-push-action), the default GitHub token might not work
+
 - If failed to authenticate to openshfit at the deploy stage, check if the service account “pipeline” has the right ability to get project and do deploy
 
-### **Additional settings**:
-- Add branch protection rule, for example adding one for “main” branch:    
 
-        Select repo settings -> branches -> add rule, select first 2, and for the 2nd one, add “TESTS” so it requires to pass the GitHub Actions tests step. You         could customize it based on your needs.
+## Notes
 
-- Set auto delete merged branch:    
-
-    Select repo settings -> general, check “Automatically delete head branches” 
-
-- Add team members to the repositroy:  
-  
-    Select repo settings -> collaborators and teams
-
-- To check the image registry:  
-
-    You could see a list of images within bcgov organization -> select packages -> search greenfield-template.   
-
-
-
-**Note**: This greenfield-template repo provides a basic template to start up a new project. It needs to be customized based on the project, for example, run tests for a different language and what secrets to be cleaned up in the cleanup stage or so.
+This repo provides a basic template to start up a new project using nodejs. It needs to be customized based on the project, for example, run tests for a different language and revised whatever secrets required.
