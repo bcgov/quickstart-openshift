@@ -8,7 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  TRIGGERS: ('package.json' 'package-lock.json' 'Dockerfile' 'src/' 'test/' '.github/pipeline')
+  TRIGGERS: ('api/Typescript' '.github/pipeline')
 
 jobs:
   check:
@@ -167,7 +167,7 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: 
+    needs:
       - build
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
