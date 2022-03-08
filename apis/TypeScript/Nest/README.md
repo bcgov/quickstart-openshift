@@ -8,3 +8,4 @@ To Run this in on local,
 7. run the nest application by `npm run start:dev:windows`
 8. It will run typeorm migrations and then start the application on port 8000.
 9. you can now access the swagger ui at http://localhost:8000/
+ //junk commit
