@@ -7,22 +7,28 @@ metadata:
     tags: "gfp"
     iconClass: icon-js
 labels:
-  app.kubernetes.io/part-of: "${NAME}"
+  app.kubernetes.io/part-of: "${NAME}-${SUFFIX}"
   app: ${NAME}-${SUFFIX}
 parameters:
   - name: NAME
-    description: Module name
-    value: gfp-database
+    description: Product name
+    value: gfp
+  - name: COMPONENT
+    description: Component name
+    value: database
   - name: SUFFIX
     description: Deployment suffix, e.g. pr-### or prod
     required: true
+  - description: Password for the PostgreSQL connection user.
+    from: "[a-zA-Z0-9]{16}"
+    generate: expression
+    name: PG_PASSWORD
 objects:
   - apiVersion: v1
     kind: Secret
     metadata:
-      annotations:
-        template.openshift.io/expose-database_name: "{.data['database-name']}"
-        template.openshift.io/expose-password: "{.data['database-password']}"
-        template.openshift.io/expose-username: "{.data['database-user']}"
-        # as-copy-of: gfp-database-secrets
-      name: ${NAME}-${SUFFIX}
+      name: ${NAME}-${COMPONENT}-${SUFFIX}
+    stringData:
+      database-name: "${NAME}"
+      database-password: "${PG_PASSWORD}"
+      database-user: "${NAME}"
