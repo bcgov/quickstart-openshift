@@ -192,7 +192,7 @@ jobs:
             || true && echo "No stale imagestreams"
 
           # Process and apply deployment template
-          oc process -f .github/pipeline/deploy.yml \
+          oc process -f .github/pipeline/deploy.frontend.yml \
             -p SUFFIX=${{ github.event.number }} -p NAMESPACE=${{ secrets.NAMESPACE }} \
               | oc apply -f -
 
