@@ -7,7 +7,6 @@ metadata:
     tags: "gfp"
     iconClass: icon-js
 labels:
-  app.kubernetes.io/part-of: "${NAME}"
   app: ${NAME}-${SUFFIX}
 parameters:
   - name: NAME

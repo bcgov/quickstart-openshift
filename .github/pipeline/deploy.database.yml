@@ -7,7 +7,6 @@ metadata:
     tags: "gfp"
     iconClass: icon-js
 labels:
-  app.kubernetes.io/part-of: "${NAME}-${SUFFIX}"
   app: ${NAME}-${SUFFIX}
 parameters:
   - name: NAME
@@ -23,12 +22,32 @@ parameters:
     from: "[a-zA-Z0-9]{16}"
     generate: expression
     name: PG_PASSWORD
+  - description: Volume space available for data, e.g. 512Mi, 2Gi.
+    displayName: Database Volume Capacity
+    name: DB_VOLUME_CAPACITY
+    required: true
+    value: 1Gi
 objects:
   - apiVersion: v1
     kind: Secret
     metadata:
       name: ${NAME}-${COMPONENT}-${SUFFIX}
+      labels:
+        app: ${NAME}-${SUFFIX}
     stringData:
       database-name: "${NAME}"
       database-password: "${PG_PASSWORD}"
       database-user: "${NAME}"
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: ${NAME}-${COMPONENT}-${SUFFIX}
+      labels:
+        app: ${NAME}-${SUFFIX}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: "${DB_VOLUME_CAPACITY}"
+      storageClassName: netapp-file-standard
