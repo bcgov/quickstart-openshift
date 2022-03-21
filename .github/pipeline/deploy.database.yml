@@ -19,13 +19,16 @@ parameters:
   - name: SUFFIX
     description: Deployment suffix, e.g. pr-### or prod
     required: true
+  - name: NAMESPACE
+    description: Namespace to deploy to
+    value: 32d13a-dev
   - description: Password for the PostgreSQL connection user.
     from: "[a-zA-Z0-9]{16}"
     generate: expression
-    name: PG_PASSWORD
+    name: DB_PASSWORD
   - description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
-    name: DB_VOLUME_CAPACITY
+    name: DB_PVC_SIZE
     required: true
     value: 1Gi
 objects:
@@ -37,7 +40,7 @@ objects:
         app: ${NAME}-${SUFFIX}
     stringData:
       database-name: "${NAME}"
-      database-password: "${PG_PASSWORD}"
+      database-password: "${DB_PASSWORD}"
       database-user: "${NAME}"
   - kind: PersistentVolumeClaim
     apiVersion: v1
@@ -50,8 +53,24 @@ objects:
         - ReadWriteOnce
       resources:
         requests:
-          storage: "${DB_VOLUME_CAPACITY}"
+          storage: "${DB_PVC_SIZE}"
       storageClassName: netapp-file-standard
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: ${NAME}-${COMPONENT}-${SUFFIX}
+      labels:
+        app: ${NAME}-${SUFFIX}
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+      - name: pr-${SUFFIX}
+        from:
+          kind: DockerImage
+          name: image-registry.openshift-image-registry.svc:5000/openshift/postgresql:12
+        referencePolicy:
+          type: Local
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
@@ -79,7 +98,7 @@ objects:
                 claimName: ${NAME}-${COMPONENT}-${SUFFIX}
           containers:
             - name: ${NAME}-${COMPONENT}-${SUFFIX}
-              image: image-registry.openshift-image-registry.svc:5000/openshift/postgresql:12
+              image: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${NAME}-${COMPONENT}-${SUFFIX}:pr-${SUFFIX}
               ports:
                 - containerPort: 5432
                   protocol: TCP
