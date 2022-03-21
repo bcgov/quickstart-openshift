@@ -1,0 +1,143 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: ${NAME}
+  annotations:
+    description: "Greenfield Template"
+    tags: "gfp"
+    iconClass: icon-js
+labels:
+  app: ${NAME}-${SUFFIX}
+  app.kubernetes.io/part-of: "${NAME}"
+parameters:
+  - name: NAME
+    description: Product name
+    value: gfp
+  - name: COMPONENT
+    description: Component name
+    value: database
+  - name: SUFFIX
+    description: Deployment suffix, e.g. pr-### or prod
+    required: true
+  - name: NAMESPACE
+    description: Namespace to deploy to
+    value: 32d13a-dev
+  - description: Password for the PostgreSQL connection user.
+    from: "[a-zA-Z0-9]{16}"
+    generate: expression
+    name: DB_PASSWORD
+  - description: Volume space available for data, e.g. 512Mi, 2Gi.
+    displayName: Database Volume Capacity
+    name: DB_PVC_SIZE
+    required: true
+    value: 1Gi
+objects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${COMPONENT}-${SUFFIX}
+      labels:
+        app: ${NAME}-${SUFFIX}
+    stringData:
+      database-name: "${NAME}"
+      database-password: "${DB_PASSWORD}"
+      database-user: "${NAME}"
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: ${NAME}-${COMPONENT}-${SUFFIX}
+      labels:
+        app: ${NAME}-${SUFFIX}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: "${DB_PVC_SIZE}"
+      storageClassName: netapp-file-standard
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: ${NAME}-${COMPONENT}-${SUFFIX}
+      labels:
+        app: ${NAME}-${SUFFIX}
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+      - name: pr-${SUFFIX}
+        from:
+          kind: DockerImage
+          name: image-registry.openshift-image-registry.svc:5000/openshift/postgresql:12
+        referencePolicy:
+          type: Local
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: ${NAME}-${COMPONENT}-${SUFFIX}
+      labels:
+        app: ${NAME}-${SUFFIX}
+    spec:
+      replicas: 1
+      strategy:
+        type: Recreate
+        recreateParams:
+          timeoutSeconds: 600
+        resources: {}
+        activeDeadlineSeconds: 21600
+      revisionHistoryLimit: 10
+      template:
+        metadata:
+          name: ${NAME}-${COMPONENT}-${SUFFIX}
+          labels:
+            app: ${NAME}-${SUFFIX}
+        spec:
+          volumes:
+            - name: ${NAME}-${COMPONENT}-${SUFFIX}
+              persistentVolumeClaim:
+                claimName: ${NAME}-${COMPONENT}-${SUFFIX}
+          containers:
+            - name: ${NAME}-${COMPONENT}-${SUFFIX}
+              image: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${NAME}-${COMPONENT}-${SUFFIX}:pr-${SUFFIX}
+              ports:
+                - containerPort: 5432
+                  protocol: TCP
+              env:
+                - name: POSTGRESQL_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${COMPONENT}-${SUFFIX}
+                      key: database-name
+                - name: POSTGRESQL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${COMPONENT}-${SUFFIX}
+                      key: database-password
+                - name: POSTGRESQL_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${COMPONENT}-${SUFFIX}
+                      key: database-user
+              volumeMounts:
+                - name: ${NAME}-${COMPONENT}-${SUFFIX}
+                  mountPath: "/var/lib/pgsql/data"
+              livenessProbe:
+                initialDelaySeconds: 30
+                tcpSocket:
+                  port: 5432
+                timeoutSeconds: 1
+              readinessProbe:
+                exec:
+                  command:
+                    - /bin/bash
+                    - -c
+                    - pg_isready -h localhost -p 5432
+                initialDelaySeconds: 20
+                timeoutSeconds: 15
+              terminationMessagePath: "/dev/termination-log"
+              terminationMessagePolicy: File
+              imagePullPolicy: Always
+          restartPolicy: Always
+          terminationGracePeriodSeconds: 30
+          dnsPolicy: ClusterFirst
+          schedulerName: default-scheduler
