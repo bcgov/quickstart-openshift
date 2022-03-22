@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testExecutions version="1">
+  <file path="/home/derek/Repos/greenfield-template/frontend/src/app.controller.spec.ts">
+    <testCase name="AppController getHello should return &quot;Hello World!&quot;" duration="1"/>
+  </file>
+</testExecutions>
