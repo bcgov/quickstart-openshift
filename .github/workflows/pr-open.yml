@@ -8,7 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  TRIGGERS: ('package.json' 'package-lock.json' 'Dockerfile' 'src/' 'test/' '.github/pipeline')
+  TRIGGERS: ('frontend/' '.github/pipeline')
 
 jobs:
   check:
@@ -76,7 +76,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: .
+          context: ./frontend/
           push: true
           tags: ghcr.io/bcgov/greenfield-template:pr-${{ github.event.number }}
           cache-from: type=gha
@@ -94,6 +94,7 @@ jobs:
 
       - name: Tests
         run: |
+          cd frontend
           npm ci
           npm test
 
