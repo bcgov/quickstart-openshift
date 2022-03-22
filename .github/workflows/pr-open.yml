@@ -164,8 +164,8 @@ jobs:
           args: >
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.projectKey=${{ github.event.repository.name }}
-          #  -Dsonar.sources=frontend/src
-          #  -Dsonar.tests=frontend/test
+            -Dsonar.sources=src
+            -Dsonar.tests=test
           # -Dsonar.verbose=true
 
   deploy:
