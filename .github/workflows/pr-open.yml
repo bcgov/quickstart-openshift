@@ -166,6 +166,7 @@ jobs:
             -Dsonar.projectKey=${{ github.event.repository.name }}
             -Dsonar.sources=src
             -Dsonar.tests=test
+            -Dsonar.testExecutionReportPath=test-report.xml
           # -Dsonar.verbose=true
 
   deploy:
