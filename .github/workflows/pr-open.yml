@@ -160,11 +160,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
+          projectBaseDir: frontend
           args: >
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.projectKey=${{ github.event.repository.name }}
-            -Dsonar.sources=frontend/src
-            -Dsonar.tests=frontend/test
+          #  -Dsonar.sources=frontend/src
+          #  -Dsonar.tests=frontend/test
           # -Dsonar.verbose=true
 
   deploy:
