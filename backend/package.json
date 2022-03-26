@@ -1,0 +1,108 @@
+{
+  "name": "greenfield-template",
+  "version": "0.0.1",
+  "description": "BCGov greenfield template. For reference, testing and new projects.",
+  "main": "index.js",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "nest build",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "lint:staged": "./node_modules/.bin/lint-staged",
+    "make-badges": "istanbul-badges-readme --logo=jest --exitCode=1",
+    "make-badges:ci": "npm run make-badges -- --ci",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bcgov/greenfield-template.git"
+  },
+  "keywords": [
+    "openshift",
+    "pipeline",
+    "node",
+    "node",
+    "js",
+    "devops"
+  ],
+  "author": "Derek Roberts",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bcgov/greenfield-template/issues"
+  },
+  "homepage": "https://github.com/bcgov/greenfield-template#readme",
+  "dependencies": {
+    "@nestjs/cli": "^8.2.4",
+    "@nestjs/common": "^8.4.2",
+    "@nestjs/core": "^8.4.2",
+    "@nestjs/platform-express": "^8.4.2",
+    "@nestjs/schematics": "^8.0.8",
+    "@nestjs/testing": "^8.4.2",
+    "minimist": "^1.2.5",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.5.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/jest": "^27.0.2",
+    "@types/node": "^16.11.1",
+    "@types/supertest": "^2.0.11",
+    "@typescript-eslint/eslint-plugin": "^5.10.1",
+    "@typescript-eslint/parser": "^5.10.1",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.4.1",
+    "eslint-plugin-promise": "^5.2.0",
+    "istanbul-badges-readme": "^1.8.1",
+    "jest": "^27.3.0",
+    "jest-sonar-reporter": "^2.0.0",
+    "lint-staged": "^12.3.1",
+    "prettier": "^2.4.1",
+    "rimraf": "^3.0.2",
+    "source-map-support": "^0.5.20",
+    "supertest": "^6.1.6",
+    "ts-jest": "^27.0.7",
+    "ts-loader": "^9.2.6",
+    "ts-node": "^10.3.0",
+    "tsconfig-paths": "^3.11.0",
+    "typescript": "^4.4.4"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "jest-badges"
+    ],
+    "testEnvironment": "node",
+    "testResultsProcessor": "jest-sonar-reporter"
+  },
+  "lint-staged": {
+    "*.{js,ts}": "./node_modules/.bin/eslint --cache --fix"
+  }
+}

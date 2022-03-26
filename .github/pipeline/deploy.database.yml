@@ -8,7 +8,7 @@ metadata:
     iconClass: icon-js
 labels:
   app: ${NAME}-${SUFFIX}
-  app.kubernetes.io/part-of: "${NAME}"
+  app.kubernetes.io/part-of: ${NAME}-${SUFFIX}
 parameters:
   - name: NAME
     description: Product name
@@ -141,3 +141,20 @@ objects:
           terminationGracePeriodSeconds: 30
           dnsPolicy: ClusterFirst
           schedulerName: default-scheduler
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: ${NAME}-${SUFFIX}
+      name: ${NAME}-${COMPONENT}-${SUFFIX}
+    spec:
+      ports:
+        - name: postgresql
+          nodePort: 0
+          port: 5432
+          protocol: TCP
+          targetPort: 5432
+      selector:
+        name: ${NAME}-${COMPONENT}-${SUFFIX}
+      sessionAffinity: None
+      type: ClusterIP

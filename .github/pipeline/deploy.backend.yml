@@ -15,7 +15,7 @@ parameters:
     value: gfp
   - name: COMPONENT
     description: Component name
-    value: frontend
+    value: backend
   - name: SUFFIX
     description: Deployment suffix, e.g. pr-### or prod
     required: true
@@ -117,7 +117,7 @@ objects:
         app: ${NAME}-${SUFFIX}
       name: ${NAME}-${COMPONENT}-${SUFFIX}
     spec:
-      host: ${NAME}-${SUFFIX}.${DOMAIN}
+      host: ${NAME}-${COMPONENT}-${SUFFIX}.${DOMAIN}
       port:
         targetPort: 3000-tcp
       to:
