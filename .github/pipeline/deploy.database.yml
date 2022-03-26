@@ -8,7 +8,7 @@ metadata:
     iconClass: icon-js
 labels:
   app: ${NAME}-${SUFFIX}
-  app.kubernetes.io/part-of: ${NAME}-$(SUFFIX)
+  app.kubernetes.io/part-of: ${NAME}-${SUFFIX}
 parameters:
   - name: NAME
     description: Product name
