@@ -73,12 +73,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and push Frontend Docker image
         uses: docker/build-push-action@v2
         with:
           context: ./frontend/
           push: true
-          tags: ghcr.io/bcgov/greenfield-template:pr-${{ github.event.number }}
+          tags: ghcr.io/bcgov/greenfield-template:pr-frontend-${{ github.event.number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Backend Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./backend/
+          push: true
+          tags: ghcr.io/bcgov/greenfield-template:pr-backend-${{ github.event.number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -192,11 +201,15 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Cancel any rollouts in progress
-          oc rollout cancel dc/gfp-${{ github.event.number }} 2> /dev/null \
+          oc rollout cancel dc/gfp-frontend-${{ github.event.number }} 2> /dev/null \
             || true && echo "No rollout in progress"
           
           # Remove any stale imagestreams
-          oc delete is/gfp-${{ github.event.number }} 2> /dev/null \
+          oc delete is/gfp-frontend-${{ github.event.number }} 2> /dev/null \
+            || true && echo "No stale imagestreams"
+          oc delete is/gfp-backend-${{ github.event.number }} 2> /dev/null \
+            || true && echo "No stale imagestreams"
+          oc delete is/gfp-database-${{ github.event.number }} 2> /dev/null \
             || true && echo "No stale imagestreams"
 
           # Process and apply deployment template
@@ -206,12 +219,12 @@ jobs:
           done
 
           # Start rollout (if necessary) and follow it
-          oc rollout latest dc/gfp-${{ github.event.number }} 2> /dev/null \
+          oc rollout latest dc/gfp-frontend-${{ github.event.number }} 2> /dev/null \
             || true && echo "Rollout in progress"
-          oc logs -f dc/gfp-${{ github.event.number }}
+          oc logs -f dc/gfp-frontend-${{ github.event.number }}
 
           # Get status, returns 0 if rollout is successful
-          oc rollout status dc/gfp-${{ github.event.number }}
+          oc rollout status dc/gfp-frontend-${{ github.event.number }}
 
       - name: Deployment update
         uses: mshick/add-pr-comment@v1
