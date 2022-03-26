@@ -8,11 +8,14 @@ metadata:
     iconClass: icon-js
 labels:
   app: ${NAME}-${SUFFIX}
-  app.kubernetes.io/part-of: "${NAME}"
+  app.kubernetes.io/part-of: ${NAME}-$(SUFFIX)
 parameters:
   - name: NAME
     description: Module name
     value: gfp
+  - name: COMPONENT
+    description: Component name
+    value: backend
   - name: SUFFIX
     description: Deployment suffix, e.g. pr-### or prod
     required: true
@@ -31,7 +34,7 @@ objects:
     metadata:
       labels:
         app: ${NAME}-${SUFFIX}
-      name: ${NAME}-${SUFFIX}
+      name: ${NAME}-${COMPONENT}-${SUFFIX}
     spec:
       lookupPolicy:
         local: false
@@ -47,18 +50,18 @@ objects:
     metadata:
       labels:
         app: ${NAME}-${SUFFIX}
-      name: ${NAME}-${SUFFIX}
+      name: ${NAME}-${COMPONENT}-${SUFFIX}
     spec:
       replicas: 1
       revisionHistoryLimit: 10
       selector:
-        name: ${NAME}-${SUFFIX}
+        name: ${NAME}-${COMPONENT}-${SUFFIX}
       strategy:
         type: Rolling
       template:
         metadata:
           labels:
-            name: ${NAME}-${SUFFIX}
+            name: ${NAME}-${COMPONENT}-${SUFFIX}
         spec:
           containers:
             - image: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${NAME}-${SUFFIX}:pr-${SUFFIX}
@@ -98,7 +101,7 @@ objects:
     metadata:
       labels:
         app: ${NAME}-${SUFFIX}
-      name: ${NAME}-${SUFFIX}
+      name: ${NAME}-${COMPONENT}-${SUFFIX}
     spec:
       ports:
         - name: 3000-tcp
@@ -106,20 +109,20 @@ objects:
           port: 80
           targetPort: 3000
       selector:
-        name: ${NAME}-${SUFFIX}
+        name: ${NAME}-${COMPONENT}-${SUFFIX}
   - apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
       labels:
         app: ${NAME}-${SUFFIX}
-      name: ${NAME}-${SUFFIX}
+      name: ${NAME}-${COMPONENT}-${SUFFIX}
     spec:
-      host: ${NAME}-${SUFFIX}.${DOMAIN}
+      host: ${NAME}-${COMPONENT}-${SUFFIX}.${DOMAIN}
       port:
         targetPort: 3000-tcp
       to:
         kind: Service
-        name: ${NAME}-${SUFFIX}
+        name: ${NAME}-${COMPONENT}-${SUFFIX}
         weight: 100
       tls:
         termination: edge

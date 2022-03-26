@@ -220,6 +220,7 @@ jobs:
         with:
           message: |
             [${{ secrets.ENV }} deployment](https://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/) available
+            [${{ secrets.ENV }} deployment](https://gfp-backend-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
 
   zap:
