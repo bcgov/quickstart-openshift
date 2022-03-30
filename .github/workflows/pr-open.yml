@@ -232,8 +232,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           message: |
-            [${{ secrets.ENV }} deployment](https://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/) available
-            [${{ secrets.ENV }} deployment](https://gfp-backend-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/) available
+            [${{ secrets.ENV }} - Backend](https://gfp-backend-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/) deployment available
+            [${{ secrets.ENV }} - Frontend](https://gfp-frontend-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/) deployment available
           allow-repeats: false
 
   zap:

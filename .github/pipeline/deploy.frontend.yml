@@ -117,7 +117,7 @@ objects:
         app: ${NAME}-${SUFFIX}
       name: ${NAME}-${COMPONENT}-${SUFFIX}
     spec:
-      host: ${NAME}-${SUFFIX}.${DOMAIN}
+      host: ${NAME}-${COMPONENT}-${SUFFIX}.${DOMAIN}
       port:
         targetPort: 3000-tcp
       to:
