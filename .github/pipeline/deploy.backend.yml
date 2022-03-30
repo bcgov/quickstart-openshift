@@ -42,7 +42,7 @@ objects:
       - name: pr-${SUFFIX}
         from:
           kind: DockerImage
-          name: ghcr.io/bcgov/greenfield-template:pr-${SUFFIX}
+          name: ghcr.io/bcgov/greenfield-template:pr-${COMPONENT}-${SUFFIX}
         referencePolicy:
           type: Local
   - apiVersion: v1
