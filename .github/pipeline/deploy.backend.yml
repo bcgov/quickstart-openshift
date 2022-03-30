@@ -28,6 +28,8 @@ parameters:
     value: 250m
   - name: MEMORY_REQUEST
     value: 1Gi
+  - name: REGISTRY
+    value: image-registry.openshift-image-registry.svc:5000
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -53,18 +55,15 @@ objects:
       name: ${NAME}-${COMPONENT}-${SUFFIX}
     spec:
       replicas: 1
-      revisionHistoryLimit: 10
-      selector:
-        name: ${NAME}-${COMPONENT}-${SUFFIX}
       strategy:
         type: Rolling
       template:
         metadata:
           labels:
-            name: ${NAME}-${COMPONENT}-${SUFFIX}
+            app: ${NAME}-${SUFFIX}
         spec:
           containers:
-            - image: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${NAME}-${COMPONENT}-${SUFFIX}:pr-${SUFFIX}
+            - image: ${REGISTRY}/${NAMESPACE}/${NAME}-${COMPONENT}-${SUFFIX}:pr-${SUFFIX}
               imagePullPolicy: Always
               name: ${NAME}
               ports:
