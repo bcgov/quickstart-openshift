@@ -91,7 +91,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  tests:
+  tests-frontend:
     name: Tests
     needs:
       - check
@@ -104,6 +104,22 @@ jobs:
       - name: Tests
         run: |
           cd frontend
+          npm ci
+          npm test
+
+  tests-backend:
+    name: Tests
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Tests
+        run: |
+          cd backend
           npm ci
           npm test
 
