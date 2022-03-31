@@ -139,6 +139,22 @@ jobs:
           npm ci
           npm run test:cov
 
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: frontend
+          args: >
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=${{ github.event.repository.name }}
+            -Dsonar.exclusions=**/test/*
+            -Dsonar.sources=./src
+            -Dsonar.typescript.lcov.reportPath=./coverage/lcov.info
+            -Dsonar.testExecutionReportPath=./test-report.xml
+          # -Dsonar.verbose=true
+
   codeql:
     name: CodeQL
     needs:
