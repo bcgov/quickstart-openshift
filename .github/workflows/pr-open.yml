@@ -92,7 +92,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   tests-frontend:
-    name: Tests
+    name: Tests-Frontend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -124,7 +124,7 @@ jobs:
           # -Dsonar.verbose=true
 
   tests-backend:
-    name: Tests
+    name: Tests-Backend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -137,7 +137,7 @@ jobs:
         run: |
           cd backend
           npm ci
-          npm test
+          npm run test:cov
 
   codeql:
     name: CodeQL

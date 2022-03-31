@@ -15,7 +15,7 @@
     "lint:staged": "./node_modules/.bin/lint-staged",
     "make-badges": "istanbul-badges-readme --logo=jest --exitCode=1",
     "make-badges:ci": "npm run make-badges -- --ci",
-    "test": "jest --coverage",
+    "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
