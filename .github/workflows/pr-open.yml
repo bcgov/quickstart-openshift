@@ -91,8 +91,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  tests:
-    name: Tests
+  tests-frontend:
+    name: Tests-Frontend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -100,12 +100,72 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
+
+      - name: Fetch main (for SonarCloud)
+        run: git fetch origin main
 
       - name: Tests
         run: |
           cd frontend
           npm ci
           npm test
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: frontend
+          args: >
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=${{ github.event.repository.name }}
+            -Dsonar.exclusions=**/test/*
+            -Dsonar.sources=./src
+            -Dsonar.typescript.lcov.reportPath=./coverage/lcov.info
+            -Dsonar.testExecutionReportPath=./test-report.xml
+          # -Dsonar.verbose=true
+
+  tests-backend:
+    name: Tests-Backend
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
+
+      - name: Fetch main (for SonarCloud)
+        run: git fetch origin main
+
+      - name: Tests
+        run: |
+          cd backend
+          npm ci
+          npm run test:cov
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: frontend
+          args: >
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=${{ github.event.repository.name }}
+            -Dsonar.exclusions=**/test/*
+            -Dsonar.sources=./src
+            -Dsonar.typescript.lcov.reportPath=./coverage/lcov.info
+            -Dsonar.testExecutionReportPath=./test-report.xml
+          # -Dsonar.verbose=true
 
   codeql:
     name: CodeQL
@@ -141,51 +201,17 @@ jobs:
 
     - name: Run Snyk to check for vulnerabilities
       uses: snyk/actions/node@master
-      continue-on-error: true # To make sure that SARIF upload gets called
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        args: frontend --severity-threshold=high --sarif-file-output=snyk.sarif
-
-    - name: Upload result to GitHub Code Scanning
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: snyk.sarif
-
-  sonarcloud:
-    name: SonarCloud
-    needs:
-      - check
-    if: needs.check.outputs.build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          # Disabling shallow clone is recommended for improving relevancy of reporting
-          fetch-depth: 0
-
-      - name: Tests
-        run: |
-          cd frontend
-          npm ci
-          npm test
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: frontend
-          args: >
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=${{ github.event.repository.name }}
-          # -Dsonar.verbose=true
+        args: --all-projects --severity-threshold=high
 
   deploy:
     name: Deploy
     needs: 
       - build
+      - tests-frontend
+      - tests-backend
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     environment:

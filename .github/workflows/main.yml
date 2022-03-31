@@ -31,22 +31,26 @@ jobs:
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
 
-  sonarcloud:
-    name: SonarCloud
+  # https://github.com/snyk/snyk
+  snyk:
+    name: Snyk
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          # Disabling shallow clone is recommended for improving relevancy of reporting
-          fetch-depth: 0
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: frontend
-          args: >
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=${{ github.event.repository.name }}
-          # -Dsonar.verbose=true
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/node@master
+      continue-on-error: true # To make sure that SARIF upload gets called
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --all-projects --severity-threshold=high --sarif-file-output=snyk.sarif
+
+    - name: Upload result to GitHub Code Scanning
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: snyk.sarif
