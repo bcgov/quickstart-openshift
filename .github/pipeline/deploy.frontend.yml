@@ -105,6 +105,7 @@ objects:
           targetPort: 3000
       selector:
         name: ${NAME}-${COMPONENT}-${SUFFIX}
+        app: ${NAME}-${SUFFIX}
   - apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
