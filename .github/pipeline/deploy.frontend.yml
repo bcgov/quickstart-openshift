@@ -56,14 +56,14 @@ objects:
     spec:
       replicas: 1
       selector:
-        name: ${NAME}-${COMPONENT}-${SUFFIX}
+        deploymentconfig: ${NAME}-${COMPONENT}-${SUFFIX}
       strategy:
         type: Rolling
       template:
         metadata:
           labels:
             app: ${NAME}-${SUFFIX}
-            name: ${NAME}-${COMPONENT}-${SUFFIX}
+            deploymentconfig: ${NAME}-${COMPONENT}-${SUFFIX}
         spec:
           containers:
             - image: ${REGISTRY}/${NAMESPACE}/${NAME}-${COMPONENT}-${SUFFIX}:pr-${SUFFIX}
@@ -99,7 +99,6 @@ objects:
     metadata:
       labels:
         app: ${NAME}-${SUFFIX}
-        name: ${NAME}-${COMPONENT}-${SUFFIX}
       name: ${NAME}-${COMPONENT}-${SUFFIX}
     spec:
       ports:
@@ -108,7 +107,7 @@ objects:
           port: 80
           targetPort: 3000
       selector:
-        name: ${NAME}-${COMPONENT}-${SUFFIX}
+        deploymentconfig: ${NAME}-${COMPONENT}-${SUFFIX}
   - apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
