@@ -105,3 +105,7 @@ dist
 
 # Jest
 test-report.xml
+
+# Snyk
+snyk.sarif
+
