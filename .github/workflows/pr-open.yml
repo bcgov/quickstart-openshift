@@ -107,6 +107,22 @@ jobs:
           npm ci
           npm test
 
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: frontend
+          args: >
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=${{ github.event.repository.name }}
+            -Dsonar.exclusions=**/test/*
+            -Dsonar.sources=./src
+            -Dsonar.typescript.lcov.reportPath=./coverage/lcov.info
+            -Dsonar.testExecutionReportPath=./test-report.xml
+          # -Dsonar.verbose=true
+
   tests-backend:
     name: Tests
     needs:
@@ -161,36 +177,6 @@ jobs:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
         args: --all-projects --severity-threshold=high
-
-  sonarcloud:
-    name: SonarCloud
-    needs:
-      - check
-    if: needs.check.outputs.build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          # Disabling shallow clone is recommended for improving relevancy of reporting
-          fetch-depth: 0
-
-      - name: Tests
-        run: |
-          cd frontend
-          npm ci
-          npm test
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: frontend
-          args: >
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=${{ github.event.repository.name }}
-          # -Dsonar.verbose=true
 
   deploy:
     name: Deploy
