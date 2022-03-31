@@ -183,30 +183,26 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Cancel any rollouts in progress
-          oc rollout cancel dc/gfp-frontend-${{ github.event.number }} 2> /dev/null \
+          oc rollout cancel dc/gfp-${{ github.event.number }}-frontend 2> /dev/null \
             || true && echo "No rollout in progress"
           
           # Remove any stale imagestreams
-          oc delete is/gfp-frontend-${{ github.event.number }} 2> /dev/null \
-            || true && echo "No stale imagestreams"
-          oc delete is/gfp-backend-${{ github.event.number }} 2> /dev/null \
-            || true && echo "No stale imagestreams"
-          oc delete is/gfp-database-${{ github.event.number }} 2> /dev/null \
+          oc delete is -l app=gfp-${{ github.event.number }} 2> /dev/null \
             || true && echo "No stale imagestreams"
 
           # Process and apply deployment template
           for y in .github/pipeline/deploy.*.yml
-          do oc process -f ${y} -p SUFFIX=${{ github.event.number }} -p NAMESPACE=${{ secrets.NAMESPACE }} \
+          do oc process -f ${y} -p ZONE=${{ github.event.number }} -p NAMESPACE=${{ secrets.NAMESPACE }} \
               | oc apply -f -
           done
 
           # Start rollout (if necessary) and follow it
-          oc rollout latest dc/gfp-frontend-${{ github.event.number }} 2> /dev/null \
+          oc rollout latest dc/gfp-${{ github.event.number }}-frontend 2> /dev/null \
             || true && echo "Rollout in progress"
-          oc logs -f dc/gfp-frontend-${{ github.event.number }}
+          oc logs -f dc/gfp-${{ github.event.number }}-frontend
 
           # Get status, returns 0 if rollout is successful
-          oc rollout status dc/gfp-frontend-${{ github.event.number }}
+          oc rollout status dc/gfp-${{ github.event.number }}-frontend
 
       - name: Deployment update
         uses: mshick/add-pr-comment@v1
@@ -214,8 +210,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           message: |
-            [${{ secrets.ENV }} - Backend](https://gfp-backend-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/) deployment available
-            [${{ secrets.ENV }} - Frontend](https://gfp-frontend-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/) deployment available
+            [${{ secrets.ENV }} - Backend](https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) deployment available
+            [${{ secrets.ENV }} - Frontend](https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) deployment available
           allow-repeats: false
 
   zap:
@@ -232,7 +228,7 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
-          target: https://gfp-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/
+          target: https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/
           cmd_options: '-a'
           allow_issue_writing: false
           fail_action: false

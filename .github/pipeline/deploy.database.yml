@@ -7,8 +7,8 @@ metadata:
     tags: "gfp"
     iconClass: icon-js
 labels:
-  app: ${NAME}-${SUFFIX}
-  app.kubernetes.io/part-of: ${NAME}-${SUFFIX}
+  app: ${NAME}-${ZONE}
+  app.kubernetes.io/part-of: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Product name
@@ -16,8 +16,8 @@ parameters:
   - name: COMPONENT
     description: Component name
     value: database
-  - name: SUFFIX
-    description: Deployment suffix, e.g. pr-### or prod
+  - name: ZONE
+    description: Deployment zone, e.g. pr-### or prod
     required: true
   - name: NAMESPACE
     description: Namespace to deploy to
@@ -37,9 +37,9 @@ objects:
   - apiVersion: v1
     kind: Secret
     metadata:
-      name: ${NAME}-${COMPONENT}-${SUFFIX}
+      name: ${NAME}-${ZONE}-${COMPONENT}
       labels:
-        app: ${NAME}-${SUFFIX}
+        app: ${NAME}-${ZONE}
     stringData:
       database-name: "${NAME}"
       database-password: "${DB_PASSWORD}"
@@ -47,9 +47,9 @@ objects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
-      name: ${NAME}-${COMPONENT}-${SUFFIX}
+      name: ${NAME}-${ZONE}-${COMPONENT}
       labels:
-        app: ${NAME}-${SUFFIX}
+        app: ${NAME}-${ZONE}
     spec:
       accessModes:
         - ReadWriteOnce
@@ -60,14 +60,14 @@ objects:
   - kind: ImageStream
     apiVersion: v1
     metadata:
-      name: ${NAME}-${COMPONENT}-${SUFFIX}
+      name: ${NAME}-${ZONE}-${COMPONENT}
       labels:
-        app: ${NAME}-${SUFFIX}
+        app: ${NAME}-${ZONE}
     spec:
       lookupPolicy:
         local: false
       tags:
-      - name: pr-${SUFFIX}
+      - name: pr-${ZONE}
         from:
           kind: DockerImage
           name: image-registry.openshift-image-registry.svc:5000/openshift/postgresql:12
@@ -76,9 +76,9 @@ objects:
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
-      name: ${NAME}-${COMPONENT}-${SUFFIX}
+      name: ${NAME}-${ZONE}-${COMPONENT}
       labels:
-        app: ${NAME}-${SUFFIX}
+        app: ${NAME}-${ZONE}
     spec:
       replicas: 1
       strategy:
@@ -90,17 +90,17 @@ objects:
       revisionHistoryLimit: 10
       template:
         metadata:
-          name: ${NAME}-${COMPONENT}-${SUFFIX}
+          name: ${NAME}-${ZONE}-${COMPONENT}
           labels:
-            app: ${NAME}-${SUFFIX}
+            app: ${NAME}-${ZONE}
         spec:
           volumes:
-            - name: ${NAME}-${COMPONENT}-${SUFFIX}
+            - name: ${NAME}-${ZONE}-${COMPONENT}
               persistentVolumeClaim:
-                claimName: ${NAME}-${COMPONENT}-${SUFFIX}
+                claimName: ${NAME}-${ZONE}-${COMPONENT}
           containers:
-            - name: ${NAME}-${COMPONENT}-${SUFFIX}
-              image: ${REGISTRY}/${NAMESPACE}/${NAME}-${COMPONENT}-${SUFFIX}:pr-${SUFFIX}
+            - name: ${NAME}-${ZONE}-${COMPONENT}
+              image: ${REGISTRY}/${NAMESPACE}/${NAME}-${ZONE}-${COMPONENT}:pr-${ZONE}
               ports:
                 - containerPort: 5432
                   protocol: TCP
@@ -108,20 +108,20 @@ objects:
                 - name: POSTGRESQL_DATABASE
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${COMPONENT}-${SUFFIX}
+                      name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-name
                 - name: POSTGRESQL_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${COMPONENT}-${SUFFIX}
+                      name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-password
                 - name: POSTGRESQL_USER
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${COMPONENT}-${SUFFIX}
+                      name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-user
               volumeMounts:
-                - name: ${NAME}-${COMPONENT}-${SUFFIX}
+                - name: ${NAME}-${ZONE}-${COMPONENT}
                   mountPath: "/var/lib/pgsql/data"
               livenessProbe:
                 initialDelaySeconds: 30
@@ -147,8 +147,8 @@ objects:
     kind: Service
     metadata:
       labels:
-        app: ${NAME}-${SUFFIX}
-      name: ${NAME}-${COMPONENT}-${SUFFIX}
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       ports:
         - name: postgresql
@@ -157,6 +157,6 @@ objects:
           protocol: TCP
           targetPort: 5432
       selector:
-        name: ${NAME}-${COMPONENT}-${SUFFIX}
+        name: ${NAME}-${ZONE}-${COMPONENT}
       sessionAffinity: None
       type: ClusterIP

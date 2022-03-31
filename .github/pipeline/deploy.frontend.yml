@@ -7,8 +7,8 @@ metadata:
     tags: "gfp"
     iconClass: icon-js
 labels:
-  app: ${NAME}-${SUFFIX}
-  app.kubernetes.io/part-of: ${NAME}-${SUFFIX}
+  app: ${NAME}-${ZONE}
+  app.kubernetes.io/part-of: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Module name
@@ -16,8 +16,8 @@ parameters:
   - name: COMPONENT
     description: Component name
     value: frontend
-  - name: SUFFIX
-    description: Deployment suffix, e.g. pr-### or prod
+  - name: ZONE
+    description: Deployment zone, e.g. pr-### or prod
     required: true
   - name: NAMESPACE
     description: Namespace to deploy to
@@ -35,38 +35,38 @@ objects:
     kind: ImageStream
     metadata:
       labels:
-        app: ${NAME}-${SUFFIX}
-      name: ${NAME}-${COMPONENT}-${SUFFIX}
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       lookupPolicy:
         local: false
       tags:
-      - name: pr-${SUFFIX}
+      - name: pr-${ZONE}
         from:
           kind: DockerImage
-          name: ghcr.io/bcgov/greenfield-template:pr-${COMPONENT}-${SUFFIX}
+          name: ghcr.io/bcgov/greenfield-template:pr-${COMPONENT}-${ZONE}
         referencePolicy:
           type: Local
   - apiVersion: v1
     kind: DeploymentConfig
     metadata:
       labels:
-        app: ${NAME}-${SUFFIX}
-      name: ${NAME}-${COMPONENT}-${SUFFIX}
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       replicas: 1
       selector:
-        deploymentconfig: ${NAME}-${COMPONENT}-${SUFFIX}
+        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
         type: Rolling
       template:
         metadata:
           labels:
-            app: ${NAME}-${SUFFIX}
-            deploymentconfig: ${NAME}-${COMPONENT}-${SUFFIX}
+            app: ${NAME}-${ZONE}
+            deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           containers:
-            - image: ${REGISTRY}/${NAMESPACE}/${NAME}-${COMPONENT}-${SUFFIX}:pr-${SUFFIX}
+            - image: ${REGISTRY}/${NAMESPACE}/${NAME}-${ZONE}-${COMPONENT}:pr-${ZONE}
               imagePullPolicy: Always
               name: ${NAME}
               ports:
@@ -98,8 +98,8 @@ objects:
     kind: Service
     metadata:
       labels:
-        app: ${NAME}-${SUFFIX}
-      name: ${NAME}-${COMPONENT}-${SUFFIX}
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       ports:
         - name: 3000-tcp
@@ -107,20 +107,20 @@ objects:
           port: 80
           targetPort: 3000
       selector:
-        deploymentconfig: ${NAME}-${COMPONENT}-${SUFFIX}
+        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
   - apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
       labels:
-        app: ${NAME}-${SUFFIX}
-      name: ${NAME}-${COMPONENT}-${SUFFIX}
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
-      host: ${NAME}-${COMPONENT}-${SUFFIX}.${DOMAIN}
+      host: ${NAME}-${ZONE}-${COMPONENT}.${DOMAIN}
       port:
         targetPort: 3000-tcp
       to:
         kind: Service
-        name: ${NAME}-${COMPONENT}-${SUFFIX}
+        name: ${NAME}-${ZONE}-${COMPONENT}
         weight: 100
       tls:
         termination: edge
