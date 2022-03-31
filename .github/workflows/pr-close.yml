@@ -22,4 +22,4 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Remove old build runs, build pods and deployment pods
-          oc delete all -l app=gfp-${{ github.event.number }}
+          oc delete all,pvc,secret -l app=gfp-${{ github.event.number }}
