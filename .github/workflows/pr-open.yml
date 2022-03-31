@@ -104,6 +104,9 @@ jobs:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
 
+      - name: Fetch main (for SonarCloud)
+        run: git fetch origin main
+
       - name: Tests
         run: |
           cd frontend
@@ -138,6 +141,9 @@ jobs:
         with:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
+
+      - name: Fetch main (for SonarCloud)
+        run: git fetch origin main
 
       - name: Tests
         run: |
