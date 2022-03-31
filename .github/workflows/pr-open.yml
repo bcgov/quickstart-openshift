@@ -204,6 +204,8 @@ jobs:
     name: Deploy
     needs: 
       - build
+      - tests-frontend
+      - tests-backend
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     environment:
