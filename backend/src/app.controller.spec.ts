@@ -1,21 +1,22 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
+import { Test, TestingModule } from '@nestjs/testing';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 describe('AppController', () => {
-  let app: TestingModule
+  let appController: AppController;
 
-  beforeAll(async () => {
-    app = await Test.createTestingModule({
+  beforeEach(async () => {
+    const app: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService]
-    }).compile()
-  })
+      providers: [AppService],
+    }).compile();
 
-  describe('getHello', () => {
+    appController = app.get<AppController>(AppController);
+  });
+
+  describe('root', () => {
     it('should return "Hello Backend!"', () => {
-      const appController = app.get<AppController>(AppController)
-      expect(appController.getHello()).toBe('Hello Backend!')
-    })
-  })
-})
+      expect(appController.getHello()).toBe('Hello Backend!');
+    });
+  });
+});
