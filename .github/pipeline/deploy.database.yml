@@ -92,6 +92,8 @@ objects:
             kind: ImageStreamTag
             namespace: ${NAMESPACE}
             name: ${NAME}-${ZONE}-${COMPONENT}:pr-${ZONE}
+      selector:
+        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
         type: Recreate
         recreateParams:
@@ -104,6 +106,7 @@ objects:
           name: ${NAME}-${ZONE}-${COMPONENT}
           labels:
             app: ${NAME}-${ZONE}
+            deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           volumes:
             - name: ${NAME}-${ZONE}-${COMPONENT}
@@ -168,6 +171,6 @@ objects:
           protocol: TCP
           targetPort: 5432
       selector:
-        name: ${NAME}-${ZONE}-${COMPONENT}
+        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       sessionAffinity: None
       type: ClusterIP
