@@ -162,13 +162,100 @@ jobs:
       with:
         args: --all-projects --severity-threshold=high
 
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy-repo:
+    name: Trivy-Repo
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  trivy-image-backend:
+    name: Trivy-Image-Backend
+    needs:
+      - build
+      - codeql
+      - snyk
+      - tests-frontend
+      - tests-backend
+      - trivy-repo
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Trivy Vulnerability Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-backend
+        exit-code: '1'
+        ignore-unfixed: true
+        severity: CRITICAL
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  trivy-image-frontend:
+    name: Trivy-Image-Frontend
+    needs:
+      - build
+      - codeql
+      - snyk
+      - tests-frontend
+      - tests-backend
+      - trivy-repo
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Trivy Vulnerability Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-frontend
+        exit-code: '1'
+        ignore-unfixed: true
+        severity: CRITICAL
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: 'trivy-results.sarif'
+
   deploy:
     name: Deploy
     needs: 
       - build
+      - codeql
+      - snyk
       - tests-frontend
       - tests-backend
-    if: needs.check.outputs.build == 'true'
+      - trivy-repo
     runs-on: ubuntu-latest
     environment:
       name: dev
@@ -207,9 +294,7 @@ jobs:
   zap:
     name: Zap
     needs:
-      - check
       - deploy
-    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -222,21 +307,3 @@ jobs:
           cmd_options: '-a'
           allow_issue_writing: false
           fail_action: false
-
-  # trivy:
-  #   name: Trivy
-  #   needs:
-  #     - build
-  #   if: needs.check.outputs.build == 'true'
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 60
-  #   steps:
-  #   - name: Trivy Vulnerability Scan
-  #     uses: aquasecurity/trivy-action@master
-  #     with:
-  #       image-ref: ghcr.io/bcgov/greenfield-template:pr-${{ github.event.number }}
-  #       format: table
-  #       exit-code: '1'
-  #       ignore-unfixed: true
-  #       vuln-type: os,library
-  #       severity: CRITICAL
