@@ -116,6 +116,32 @@ objects:
               ports:
                 - containerPort: 5432
                   protocol: TCP
+              readinessProbe:
+                exec:
+                  command:
+                    - /usr/bin/env
+                    - bash
+                    - '-c'
+                    - >-
+                      psql -q -d
+                      $PG_DATABASE -c 'SELECT 1'
+                failureThreshold: 5
+                initialDelaySeconds: 30
+                periodSeconds: 15
+                timeoutSeconds: 1
+              livenessProbe:
+                exec:
+                  command:
+                    - /usr/bin/env
+                    - bash
+                    - '-c'
+                    - >-
+                      psql -q -d
+                      $PG_DATABASE -c 'SELECT 1'
+                failureThreshold: 5
+                initialDelaySeconds: 30
+                periodSeconds: 15
+                timeoutSeconds: 1
               env:
                 - name: POSTGRESQL_DATABASE
                   valueFrom:
