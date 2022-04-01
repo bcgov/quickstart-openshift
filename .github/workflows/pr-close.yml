@@ -32,4 +32,5 @@ jobs:
       - uses: actions/delete-package-versions@v3
         with:
           min-versions-to-keep: 10
+          package-name: greenfield-template
 
