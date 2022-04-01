@@ -28,25 +28,25 @@ jobs:
     name: Cleanup ghcr.io
     runs-on: ubuntu-latest
     steps:
-      -   name: Delete packages older than 14 days (but keep at least 30 versions)
-          uses: davahome/ghcr-cleanup@v1
-          with:
-              # The regular ${{ GITHUB_TOKEN }} is not enough because there is no "packages:delete" permission.
-              # Create a separate token and store it as a secret (see required permissions at the bottom of this README)
-              token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
-              
-              # Define the name of the package (e.g. "thedava/example" would be "example")
-              package: greenfield-template
-              
-              # Define the owner (it's either literally "user" or "orgs/<Your Org>")
-              owner: orgs/bcgov
-              #owner: orgs/davahome -- Use this for organization packages
+    # https://github.com/marketplace/actions/ghcr-io-container-cleanup
+      - name: Delete packages older than 14 days (but keep at least 30 versions)
+        uses: davahome/ghcr-cleanup@v1
+        with:
+            # The regular ${{ GITHUB_TOKEN }} is not enough because there is no "packages:delete" permission.
+            # Create a separate token and store it as a secret (see required permissions at the bottom of this README)
+            token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
+            
+            # Define the name of the package (e.g. "thedava/example" would be "example")
+            package: greenfield-template
+            
+            # Define the owner (it's either literally "user" or "orgs/<Your Org>")
+            owner: orgs/bcgov
 
-              # Configure cleanup of tagged versions
-              minimum_days: 14
-              keep_versions: 30
+            # Configure cleanup of tagged versions
+            minimum_days: 120
+            keep_versions: 10
 
-              # Configure cleanup of untagged versions
-              delete_untagged: 1
-              keep_versions_untagged: 14
+            # Configure cleanup of untagged versions
+            delete_untagged: 1
+            keep_versions_untagged: 5
 
