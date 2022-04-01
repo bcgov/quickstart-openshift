@@ -44,7 +44,7 @@ objects:
       lookupPolicy:
         local: false
       tags:
-      - name: pr-${ZONE}
+      - name: ${IMAGE_TAG}
         from:
           kind: DockerImage
           name: ghcr.io/bcgov/greenfield-template:${COMPONENT}-${ZONE}
