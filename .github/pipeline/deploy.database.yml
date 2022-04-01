@@ -81,6 +81,17 @@ objects:
         app: ${NAME}-${ZONE}
     spec:
       replicas: 1
+      triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - ${NAME}
+          from:
+            kind: ImageStreamTag
+            namespace: ${NAMESPACE}
+            name: ${NAME}-${ZONE}-${COMPONENT}:pr-${ZONE}
       strategy:
         type: Recreate
         recreateParams:
