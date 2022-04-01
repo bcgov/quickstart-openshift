@@ -47,7 +47,7 @@ objects:
       - name: ${IMAGE_TAG}
         from:
           kind: DockerImage
-          name: ghcr.io/bcgov/greenfield-template:${COMPONENT}-${ZONE}
+          name: ghcr.io/bcgov/greenfield-template:${ZONE}-${COMPONENT}
         referencePolicy:
           type: Local
   - apiVersion: v1
