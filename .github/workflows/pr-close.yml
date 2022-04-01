@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     # https://github.com/marketplace/actions/ghcr-io-container-cleanup
-      - name: Delete packages older than 14 days (but keep at least 30 versions)
+      - name: Delete old packages
         uses: davahome/ghcr-cleanup@v1
         with:
             # The regular ${{ GITHUB_TOKEN }} is not enough because there is no "packages:delete" permission.
@@ -43,10 +43,11 @@ jobs:
             owner: orgs/bcgov
 
             # Configure cleanup of tagged versions
-            minimum_days: 120
-            keep_versions: 10
+            minimum_days: 1
+            keep_versions: 5
+            skip_tags: prod,test
 
             # Configure cleanup of untagged versions
-            delete_untagged: 1
-            keep_versions_untagged: 5
+            delete_untagged: 14
+            keep_versions_untagged: 10
 
