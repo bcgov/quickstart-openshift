@@ -216,8 +216,8 @@ jobs:
       with:
         sarif_file: 'trivy-results.sarif'
 
-  trivy-frontend:
-    name: Trivy-Frontend
+  trivy-image-frontend:
+    name: trivy-image-frontend
     needs:
       - build
       - codeql
@@ -292,8 +292,8 @@ jobs:
     name: Zap
     needs:
       - deploy
-      - trivy-backend
-      - trivy-frontend
+      - trivy-image-backend
+      - trivy-image-frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
