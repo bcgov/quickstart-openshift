@@ -19,6 +19,9 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: IMAGE_TAG
+    description: Image tag to use
+    value: latest
   - name: NAMESPACE
     description: Namespace to deploy to
     value: 32d13a-dev
@@ -67,7 +70,7 @@ objects:
       lookupPolicy:
         local: false
       tags:
-      - name: pr-${ZONE}
+      - name: ${IMAGE_TAG}
         from:
           kind: DockerImage
           name: image-registry.openshift-image-registry.svc:5000/openshift/postgresql:12
@@ -81,29 +84,67 @@ objects:
         app: ${NAME}-${ZONE}
     spec:
       replicas: 1
+      triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - ${NAME}
+          from:
+            kind: ImageStreamTag
+            namespace: ${NAMESPACE}
+            name: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+      selector:
+        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
         type: Recreate
         recreateParams:
           timeoutSeconds: 600
-        resources: {}
         activeDeadlineSeconds: 21600
-      revisionHistoryLimit: 10
       template:
         metadata:
           name: ${NAME}-${ZONE}-${COMPONENT}
           labels:
             app: ${NAME}-${ZONE}
+            deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           volumes:
             - name: ${NAME}-${ZONE}-${COMPONENT}
               persistentVolumeClaim:
                 claimName: ${NAME}-${ZONE}-${COMPONENT}
           containers:
-            - name: ${NAME}-${ZONE}-${COMPONENT}
-              image: ${REGISTRY}/${NAMESPACE}/${NAME}-${ZONE}-${COMPONENT}:pr-${ZONE}
+            - name: ${NAME}
+              image: ${REGISTRY}/${NAMESPACE}/${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
               ports:
                 - containerPort: 5432
                   protocol: TCP
+              readinessProbe:
+                exec:
+                  command:
+                    - /usr/bin/env
+                    - bash
+                    - '-c'
+                    - >-
+                      psql -q -d
+                      $PG_DATABASE -c 'SELECT 1'
+                failureThreshold: 5
+                initialDelaySeconds: 30
+                periodSeconds: 15
+                timeoutSeconds: 1
+              livenessProbe:
+                exec:
+                  command:
+                    - /usr/bin/env
+                    - bash
+                    - '-c'
+                    - >-
+                      psql -q -d
+                      $PG_DATABASE -c 'SELECT 1'
+                failureThreshold: 5
+                initialDelaySeconds: 30
+                periodSeconds: 15
+                timeoutSeconds: 1
               env:
                 - name: POSTGRESQL_DATABASE
                   valueFrom:
@@ -157,6 +198,6 @@ objects:
           protocol: TCP
           targetPort: 5432
       selector:
-        name: ${NAME}-${ZONE}-${COMPONENT}
+        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       sessionAffinity: None
       type: ClusterIP

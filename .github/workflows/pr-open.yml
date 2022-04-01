@@ -78,7 +78,7 @@ jobs:
         with:
           context: ./frontend/
           push: true
-          tags: ghcr.io/bcgov/greenfield-template:pr-frontend-${{ github.event.number }}
+          tags: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-frontend
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -87,7 +87,7 @@ jobs:
         with:
           context: ./backend/
           push: true
-          tags: ghcr.io/bcgov/greenfield-template:pr-backend-${{ github.event.number }}
+          tags: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-backend
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -182,27 +182,17 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
 
-          # Cancel any rollouts in progress
-          oc rollout cancel dc/gfp-${{ github.event.number }}-frontend 2> /dev/null \
-            || true && echo "No rollout in progress"
-          
-          # Remove any stale imagestreams
-          oc delete is -l app=gfp-${{ github.event.number }} 2> /dev/null \
-            || true && echo "No stale imagestreams"
-
-          # Process and apply deployment template
-          for y in .github/pipeline/deploy.*.yml
-          do oc process -f ${y} -p ZONE=${{ github.event.number }} -p NAMESPACE=${{ secrets.NAMESPACE }} \
+          # Process and apply deployment templates
+          for yml in .github/pipeline/deploy.*.yml
+          do
+            oc process -f ${yml} -p ZONE=${{ github.event.number }} -p NAMESPACE=${{ secrets.NAMESPACE }} \
               | oc apply -f -
           done
 
-          # Start rollout (if necessary) and follow it
-          oc rollout latest dc/gfp-${{ github.event.number }}-frontend 2> /dev/null \
-            || true && echo "Rollout in progress"
-          oc logs -f dc/gfp-${{ github.event.number }}-frontend
-
-          # Get status, returns 0 if rollout is successful
-          oc rollout status dc/gfp-${{ github.event.number }}-frontend
+          # Follow any active rollouts (see deploymentconfigs)
+          oc rollout status dc/gfp-${{ github.event.number }}-database -w
+          oc rollout status dc/gfp-${{ github.event.number }}-backend -w
+          oc rollout status dc/gfp-${{ github.event.number }}-frontend -w
 
       - name: Deployment update
         uses: mshick/add-pr-comment@v1
