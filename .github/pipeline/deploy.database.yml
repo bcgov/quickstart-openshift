@@ -70,7 +70,7 @@ objects:
       lookupPolicy:
         local: false
       tags:
-      - name: pr-${ZONE}
+      - name: ${IMAGE_TAG}
         from:
           kind: DockerImage
           name: image-registry.openshift-image-registry.svc:5000/openshift/postgresql:12

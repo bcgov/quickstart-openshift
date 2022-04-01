@@ -47,7 +47,7 @@ objects:
       - name: pr-${ZONE}
         from:
           kind: DockerImage
-          name: ghcr.io/bcgov/greenfield-template:pr-${COMPONENT}-${ZONE}
+          name: ghcr.io/bcgov/greenfield-template:${COMPONENT}-${ZONE}
         referencePolicy:
           type: Local
   - apiVersion: v1
