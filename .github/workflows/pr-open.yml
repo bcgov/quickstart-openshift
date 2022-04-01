@@ -180,7 +180,12 @@ jobs:
         image-ref: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-backend
         format: table
         exit-code: '1'
-        severity: HIGH
+        severity: CRITICAL
+
+    - name: Upload Trivy results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: 'trivy-results.sarif'
 
   trivy-frontend:
     name: Trivy-Frontend
@@ -199,8 +204,12 @@ jobs:
         image-ref: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-frontend
         format: table
         exit-code: '1'
-        severity: HIGH
+        severity: CRITICAL
 
+    - name: Upload Trivy results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: 'trivy-results.sarif'
 
   deploy:
     name: Deploy
