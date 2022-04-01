@@ -34,9 +34,6 @@ jobs:
   # https://github.com/snyk/snyk
   snyk:
     name: Snyk
-    needs:
-      - check
-    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
