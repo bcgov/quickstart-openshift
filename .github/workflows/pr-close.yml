@@ -9,7 +9,7 @@ on:
 
 jobs:
   cleanup:
-    name: Cleanup
+    name: Cleanup OpenShift
     runs-on: ubuntu-latest
     environment:
       name: dev
@@ -23,3 +23,12 @@ jobs:
 
           # Remove old build runs, build pods and deployment pods
           oc delete all,pvc,secret -l app=gfp-${{ github.event.number }}
+
+    name: Cleanup ghcr.io
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/marketplace/actions/delete-package-versions
+      - uses: actions/delete-package-versions@v3
+        with:
+          package-name: greenfield-template
+          min-versions-to-keep: 10
