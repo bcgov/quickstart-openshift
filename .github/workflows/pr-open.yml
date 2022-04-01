@@ -163,9 +163,13 @@ jobs:
         args: --all-projects --severity-threshold=high
 
   trivy-backend:
-    name: Trivy Backend
+    name: Trivy-Backend
     needs:
       - build
+      - codeql
+      - snyk
+      - tests-frontend
+      - tests-backend
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -181,9 +185,13 @@ jobs:
         severity: CRITICAL
 
   trivy-frontend:
-    name: Trivy Frontend
+    name: Trivy-Frontend
     needs:
       - build
+      - codeql
+      - snyk
+      - tests-frontend
+      - tests-backend
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -203,6 +211,8 @@ jobs:
     name: Deploy
     needs: 
       - build
+      - codeql
+      - snyk
       - tests-frontend
       - tests-backend
     if: needs.check.outputs.build == 'true'
@@ -244,8 +254,9 @@ jobs:
   zap:
     name: Zap
     needs:
-      - check
       - deploy
+      - trivy-backend
+      - trivy-frontend
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
