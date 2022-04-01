@@ -170,9 +170,8 @@ jobs:
       - snyk
       - tests-frontend
       - tests-backend
-    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 5
     steps:
     - name: Trivy Vulnerability Scan
       uses: aquasecurity/trivy-action@master
@@ -192,9 +191,8 @@ jobs:
       - snyk
       - tests-frontend
       - tests-backend
-    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 5
     steps:
     - name: Trivy Vulnerability Scan
       uses: aquasecurity/trivy-action@master
@@ -215,7 +213,6 @@ jobs:
       - snyk
       - tests-frontend
       - tests-backend
-    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     environment:
       name: dev
@@ -257,7 +254,6 @@ jobs:
       - deploy
       - trivy-backend
       - trivy-frontend
-    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
