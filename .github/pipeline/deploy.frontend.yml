@@ -61,9 +61,10 @@ objects:
         imageChangeParams:
           automatic: true
           containerNames:
-          - ${NAME}-${ZONE}-${COMPONENT}
+          - ${NAME}
           from:
             kind: ImageStreamTag
+            namespace: ${NAMESPACE}
             name: ${NAME}-${ZONE}-${COMPONENT}:pr-${ZONE}
       selector:
         deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}

@@ -207,10 +207,10 @@ jobs:
           # Start rollout (if necessary) and follow it
           # oc rollout latest dc/gfp-${{ github.event.number }}-frontend 2> /dev/null \
           #   || true && echo "Rollout in progress"
-          oc logs -f dc/gfp-${{ github.event.number }}-frontend
+          # oc logs -f dc/gfp-${{ github.event.number }}-frontend
 
           # Get status, returns 0 if rollout is successful
-          oc rollout status dc/gfp-${{ github.event.number }}-frontend
+          # oc rollout status dc/gfp-${{ github.event.number }}-frontend
 
       - name: Deployment update
         uses: mshick/add-pr-comment@v1
