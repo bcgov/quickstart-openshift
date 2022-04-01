@@ -31,10 +31,6 @@ jobs:
       # https://github.com/marketplace/actions/delete-package-versions
       - uses: actions/delete-package-versions@v3
         with:
-          # min-versions-to-keep: 10
-          num-old-versions-to-delete: 99
-          owner: bcgov
+          min-versions-to-keep: 10
           package-name: greenfield-template
-          repo: greenfield-template
-          token: ${{ secrets.GITHUB_TOKEN }}
 
