@@ -163,8 +163,32 @@ jobs:
         args: --all-projects --severity-threshold=high
 
   # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy-backend:
-    name: Trivy-Backend
+  trivy-repo:
+    name: Trivy-Repo
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  trivy-image-backend:
+    name: Trivy-Image-Backend
     needs:
       - build
       - codeql
