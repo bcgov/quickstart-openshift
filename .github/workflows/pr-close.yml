@@ -28,9 +28,25 @@ jobs:
     name: Cleanup ghcr.io
     runs-on: ubuntu-latest
     steps:
-      # https://github.com/marketplace/actions/delete-package-versions
-      - uses: actions/delete-package-versions@v3
-        with:
-          min-versions-to-keep: 10
-          package-name: greenfield-template
+      -   name: Delete packages older than 14 days (but keep at least 30 versions)
+          uses: davahome/ghcr-cleanup@v1
+          with:
+              # The regular ${{ GITHUB_TOKEN }} is not enough because there is no "packages:delete" permission.
+              # Create a separate token and store it as a secret (see required permissions at the bottom of this README)
+              token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
+              
+              # Define the name of the package (e.g. "thedava/example" would be "example")
+              package: greenfield-template
+              
+              # Define the owner (it's either literally "user" or "orgs/<Your Org>")
+              owner: orgs/bcgov
+              #owner: orgs/davahome -- Use this for organization packages
+
+              # Configure cleanup of tagged versions
+              minimum_days: 14
+              keep_versions: 30
+
+              # Configure cleanup of untagged versions
+              delete_untagged: 1
+              keep_versions_untagged: 14
 
