@@ -178,9 +178,11 @@ jobs:
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-backend
-        format: table
         exit-code: '1'
+        ignore-unfixed: true
         severity: CRITICAL
+        format: 'sarif'
+        output: 'trivy-results.sarif'
 
     - name: Upload Trivy results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v1
@@ -202,9 +204,11 @@ jobs:
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-frontend
-        format: table
         exit-code: '1'
+        ignore-unfixed: true
         severity: CRITICAL
+        format: 'sarif'
+        output: 'trivy-results.sarif'
 
     - name: Upload Trivy results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v1
