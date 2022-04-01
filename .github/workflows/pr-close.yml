@@ -43,11 +43,11 @@ jobs:
             owner: orgs/bcgov
 
             # Configure cleanup of tagged versions
-            minimum_days: 1
-            keep_versions: 5
+            # minimum_days: 1
+            # keep_versions: 5
             skip_tags: prod,test
 
             # Configure cleanup of untagged versions
-            delete_untagged: 14
-            keep_versions_untagged: 10
+            # delete_untagged: 14
+            # keep_versions_untagged: 10
 
