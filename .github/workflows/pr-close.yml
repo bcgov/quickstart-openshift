@@ -8,8 +8,8 @@ on:
       - main
 
 jobs:
-  cleanup:
-    name: Cleanup
+  cleanup-openshift:
+    name: Cleanup OpenShift
     runs-on: ubuntu-latest
     environment:
       name: dev
@@ -23,3 +23,16 @@ jobs:
 
           # Remove old build runs, build pods and deployment pods
           oc delete all,pvc,secret -l app=gfp-${{ github.event.number }}
+
+  cleanup-ghcr:
+    name: Cleanup ghcr.io
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/marketplace/actions/ghcr-io-container-cleanup
+      - name: Delete old packages
+        uses: davahome/ghcr-cleanup@v1
+        with:
+            token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
+            package: greenfield-template
+            owner: orgs/bcgov
+            skip_tags: prod,test
