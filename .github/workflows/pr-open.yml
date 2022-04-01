@@ -162,6 +162,7 @@ jobs:
       with:
         args: --all-projects --severity-threshold=high
 
+  # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-backend:
     name: Trivy-Backend
     needs:
@@ -179,9 +180,7 @@ jobs:
         image-ref: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-backend
         format: table
         exit-code: '1'
-        ignore-unfixed: true
-        vuln-type: os,library
-        severity: CRITICAL
+        severity: HIGH
 
   trivy-frontend:
     name: Trivy-Frontend
@@ -200,9 +199,7 @@ jobs:
         image-ref: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-frontend
         format: table
         exit-code: '1'
-        ignore-unfixed: true
-        vuln-type: os,library
-        severity: CRITICAL
+        severity: HIGH
 
 
   deploy:
