@@ -98,9 +98,7 @@ objects:
         type: Recreate
         recreateParams:
           timeoutSeconds: 600
-        resources: {}
         activeDeadlineSeconds: 21600
-      revisionHistoryLimit: 10
       template:
         metadata:
           name: ${NAME}-${ZONE}-${COMPONENT}
@@ -113,7 +111,7 @@ objects:
               persistentVolumeClaim:
                 claimName: ${NAME}-${ZONE}-${COMPONENT}
           containers:
-            - name: ${NAME}-${ZONE}-${COMPONENT}
+            - name: ${NAME}
               image: ${REGISTRY}/${NAMESPACE}/${NAME}-${ZONE}-${COMPONENT}:pr-${ZONE}
               ports:
                 - containerPort: 5432
