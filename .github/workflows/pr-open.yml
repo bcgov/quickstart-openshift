@@ -218,8 +218,8 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-  trivy-image-backend:
-    name: Trivy-Image-Backend
+  trivy-backend:
+    name: Trivy-Backend
     needs:
       - build-backend
       - build-frontend
@@ -244,8 +244,8 @@ jobs:
       with:
         sarif_file: 'trivy-results.sarif'
 
-  trivy-image-frontend:
-    name: Trivy-Image-Frontend
+  trivy-frontend:
+    name: Trivy-Frontend
     needs:
       - build-backend
       - build-frontend
