@@ -33,7 +33,7 @@ jobs:
         with:
           # min-versions-to-keep: 10
           num-old-versions-to-delete: 99
-          owner: github
+          owner: bcgov
           package-name: greenfield-template
           repo: greenfield-template
           token: ${{ secrets.GITHUB_TOKEN }}
