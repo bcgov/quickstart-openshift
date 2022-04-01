@@ -33,3 +33,4 @@ jobs:
         with:
           package-name: greenfield-template
           min-versions-to-keep: 10
+          num-old-versions-to-delete: 100
