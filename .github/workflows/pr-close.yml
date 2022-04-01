@@ -32,5 +32,6 @@ jobs:
       - uses: actions/delete-package-versions@v3
         with:
           min-versions-to-keep: 10
+          owner: ${{ github.actor }}
           package-name: greenfield-template
 
