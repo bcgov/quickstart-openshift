@@ -182,13 +182,14 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
 
-          # Process and apply deployment template
-          for y in .github/pipeline/deploy.*.yml
-          do oc process -f ${y} -p ZONE=${{ github.event.number }} -p NAMESPACE=${{ secrets.NAMESPACE }} \
+          # Process and apply deployment templates
+          for yml in .github/pipeline/deploy.*.yml
+          do
+            oc process -f ${yml} -p ZONE=${{ github.event.number }} -p NAMESPACE=${{ secrets.NAMESPACE }} \
               | oc apply -f -
           done
 
-          # Follow any active rollouts
+          # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/gfp-${{ github.event.number }}-database -w
           oc rollout status dc/gfp-${{ github.event.number }}-backend -w
           oc rollout status dc/gfp-${{ github.event.number }}-frontend -w
