@@ -19,6 +19,9 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: IMAGE_TAG
+    description: Image tag to use
+    value: latest
   - name: NAMESPACE
     description: Namespace to deploy to
     value: 32d13a-dev
@@ -41,10 +44,10 @@ objects:
       lookupPolicy:
         local: false
       tags:
-      - name: pr-${ZONE}
+      - name: ${IMAGE_TAG}
         from:
           kind: DockerImage
-          name: ghcr.io/bcgov/greenfield-template:pr-${COMPONENT}-${ZONE}
+          name: ghcr.io/bcgov/greenfield-template:${ZONE}-${COMPONENT}
         referencePolicy:
           type: Local
   - apiVersion: v1
@@ -55,6 +58,17 @@ objects:
       name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       replicas: 1
+      triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - ${NAME}
+          from:
+            kind: ImageStreamTag
+            namespace: ${NAMESPACE}
+            name: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
       selector:
         deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
@@ -66,7 +80,7 @@ objects:
             deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           containers:
-            - image: ${REGISTRY}/${NAMESPACE}/${NAME}-${ZONE}-${COMPONENT}:pr-${ZONE}
+            - image: ${REGISTRY}/${NAMESPACE}/${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
               imagePullPolicy: Always
               name: ${NAME}
               ports:
