@@ -83,6 +83,9 @@ objects:
             - image: ${REGISTRY}/${NAMESPACE}/${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
               imagePullPolicy: Always
               name: ${NAME}
+              env:
+                - name: DATABASE_URL
+                  value: http://${NAME}-${ZONE}-database.${DOMAIN}
               ports:
                 - containerPort: 3000
                   protocol: TCP
