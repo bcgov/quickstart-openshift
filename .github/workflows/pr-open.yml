@@ -233,7 +233,6 @@ jobs:
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-backend
-        exit-code: '1'
         ignore-unfixed: true
         severity: CRITICAL
         format: 'sarif'
@@ -259,7 +258,6 @@ jobs:
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-frontend
-        exit-code: '1'
         ignore-unfixed: true
         severity: CRITICAL
         format: 'sarif'
