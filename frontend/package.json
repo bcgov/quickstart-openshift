@@ -46,7 +46,6 @@
     "@nestjs/platform-express": "^8.4.2",
     "@nestjs/schematics": "^8.0.8",
     "@nestjs/testing": "^8.4.2",
-    "minimist": "^1.2.6",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.4"
   },
@@ -110,5 +109,8 @@
   },
   "lint-staged": {
     "*.{js,ts}": "./node_modules/.bin/eslint --cache --fix"
+  },
+  "overrides": {
+    "minimist": "1.2.6"
   }
 }
