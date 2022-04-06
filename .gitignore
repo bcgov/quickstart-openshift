@@ -109,3 +109,5 @@ test-report.xml
 # Snyk
 snyk.sarif
 
+# Docker/Podman volumes
+.volumes
