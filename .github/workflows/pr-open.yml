@@ -345,7 +345,7 @@ jobs:
           # Process and apply deployment templates
           for yml in .github/pipeline/deploy.*.yml
           do
-            oc process -f ${yml} -p ZONE=prod -p NAMESPACE=${{ secrets.NAMESPACE }} \
+            oc process -f ${yml} -p ZONE=prod \
               | oc apply -f -
           done
 
