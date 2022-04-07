@@ -36,6 +36,14 @@ parameters:
     value: 1Gi
   - name: REGISTRY
     value: image-registry.openshift-image-registry.svc:5000
+  - name: IMAGE_IMPORT_PROJECT
+    value: image-registry.openshift-image-registry.svc:5000
+  - name: IMAGE_IMPORT_NAMESPACE
+    value: openshift
+  - name: IMAGE_IMPORT_NAME
+    value: postgresql
+  - name: IMAGE_IMPORT_TAG
+    value: 12
 objects:
   - apiVersion: v1
     kind: Secret
@@ -73,7 +81,7 @@ objects:
       - name: ${IMAGE_TAG}
         from:
           kind: DockerImage
-          name: image-registry.openshift-image-registry.svc:5000/openshift/postgresql:12
+          name: ${IMAGE_IMPORT_REGISTRY}/${IMAGE_IMPORT_NAMESPACE}/${IMAGE_IMPORT_NAME}:${IMAGE_IMPORT_TAG}
         referencePolicy:
           type: Local
   - kind: DeploymentConfig
