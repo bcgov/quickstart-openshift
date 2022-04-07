@@ -43,7 +43,7 @@ parameters:
   - name: IMAGE_IMPORT_NAME
     value: postgresql
   - name: IMAGE_IMPORT_TAG
-    value: 12
+    value: '12'
 objects:
   - apiVersion: v1
     kind: Secret
