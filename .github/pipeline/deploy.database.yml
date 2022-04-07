@@ -36,7 +36,7 @@ parameters:
     value: 1Gi
   - name: REGISTRY
     value: image-registry.openshift-image-registry.svc:5000
-  - name: IMAGE_IMPORT_PROJECT
+  - name: IMAGE_IMPORT_REGISTRY
     value: image-registry.openshift-image-registry.svc:5000
   - name: IMAGE_IMPORT_NAMESPACE
     value: openshift
