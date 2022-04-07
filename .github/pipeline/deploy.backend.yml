@@ -22,9 +22,6 @@ parameters:
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
-  - name: NAMESPACE
-    description: Namespace to deploy to
-    value: 32d13a-dev
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
@@ -67,7 +64,6 @@ objects:
           - ${NAME}
           from:
             kind: ImageStreamTag
-            namespace: ${NAMESPACE}
             name: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
       selector:
         deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
@@ -80,12 +76,12 @@ objects:
             deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           containers:
-            - image: ${REGISTRY}/${NAMESPACE}/${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+            - image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
               imagePullPolicy: Always
               name: ${NAME}
               env:
                 - name: DATABASE_URL
-                  value: http://${NAME}-${ZONE}-database.${DOMAIN}
+                  value: https://${NAME}-${ZONE}-database.${DOMAIN}
               ports:
                 - containerPort: 3000
                   protocol: TCP
