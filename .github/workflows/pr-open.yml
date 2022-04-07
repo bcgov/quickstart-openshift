@@ -350,9 +350,9 @@ jobs:
           done
 
           # Follow any active rollouts (see deploymentconfigs)
-          oc rollout status dc/gfp-${{ github.event.number }}-database -w
-          oc rollout status dc/gfp-${{ github.event.number }}-backend -w
-          oc rollout status dc/gfp-${{ github.event.number }}-frontend -w
+          oc rollout status dc/gfp-prod-database -w
+          oc rollout status dc/gfp-prod-backend -w
+          oc rollout status dc/gfp-prod-frontend -w
 
       - name: Deployment update
         uses: mshick/add-pr-comment@v1
@@ -360,6 +360,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           message: |
-            [${{ secrets.ENV }} - Backend](https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) deployment available
-            [${{ secrets.ENV }} - Frontend](https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) deployment available
+            [${{ secrets.ENV }} - Backend](https://gfp-prod-backend.apps.silver.devops.gov.bc.ca/) deployment available
+            [${{ secrets.ENV }} - Frontend](https://gfp-prod-frontend.apps.silver.devops.gov.bc.ca/) deployment available
           allow-repeats: false
