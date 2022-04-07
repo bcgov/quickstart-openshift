@@ -22,9 +22,6 @@ parameters:
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
-  - name: NAMESPACE
-    description: Namespace to deploy to
-    value: 32d13a-dev
   - description: Password for the PostgreSQL connection user.
     from: "[a-zA-Z0-9]{16}"
     generate: expression
@@ -96,7 +93,6 @@ objects:
           - ${NAME}
           from:
             kind: ImageStreamTag
-            namespace: ${NAMESPACE}
             name: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
       selector:
         deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
@@ -118,7 +114,7 @@ objects:
                 claimName: ${NAME}-${ZONE}-${COMPONENT}
           containers:
             - name: ${NAME}
-              image: ${REGISTRY}/${NAMESPACE}/${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+              image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
               ports:
                 - containerPort: 5432
                   protocol: TCP
