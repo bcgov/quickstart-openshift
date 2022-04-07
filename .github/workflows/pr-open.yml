@@ -268,8 +268,8 @@ jobs:
       with:
         sarif_file: 'trivy-results.sarif'
 
-  deploy:
-    name: Deploy
+  deploy-dev:
+    name: Deploy-Dev
     needs: 
       - build-backend
       - build-frontend
@@ -311,7 +311,7 @@ jobs:
   zap:
     name: Zap
     needs:
-      - deploy
+      - deploy-dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
