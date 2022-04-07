@@ -324,3 +324,42 @@ jobs:
           cmd_options: '-a'
           allow_issue_writing: false
           fail_action: false
+
+  deploy-prod:
+    name: Deploy-Prod
+    needs:
+      - deploy-dev
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy
+        run: |
+          set -eux
+
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.NAMESPACE }}
+
+          # Process and apply deployment templates
+          for yml in .github/pipeline/deploy.*.yml
+          do
+            oc process -f ${yml} -p ZONE=prod -p NAMESPACE=${{ secrets.NAMESPACE }} \
+              | oc apply -f -
+          done
+
+          # Follow any active rollouts (see deploymentconfigs)
+          oc rollout status dc/gfp-${{ github.event.number }}-database -w
+          oc rollout status dc/gfp-${{ github.event.number }}-backend -w
+          oc rollout status dc/gfp-${{ github.event.number }}-frontend -w
+
+      - name: Deployment update
+        uses: mshick/add-pr-comment@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          message: |
+            [${{ secrets.ENV }} - Backend](https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) deployment available
+            [${{ secrets.ENV }} - Frontend](https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) deployment available
+          allow-repeats: false
