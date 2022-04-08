@@ -23,6 +23,10 @@ services:
     environment:
       NODE_ENV: development
       DATABASE_URL: database
+      POSTGRES_USER: default
+      POSTGRES_PASSWORD: default
+      POSTGRES_DB: default
+      POSTGRES_HOSTNAME: database
     hostname: backend
     image: node:14
     links:
