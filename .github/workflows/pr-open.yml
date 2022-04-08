@@ -343,11 +343,9 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Process and apply deployment templates
-          for yml in .github/pipeline/deploy.*.yml
-          do
-            oc process -f ${yml} -p ZONE=prod \
-              | oc apply -f -
-          done
+          oc process -f .github/pipeline/deploy.database.yml -p ZONE=prod -p PROMOTE=bcgov/greenfield-template:${{ github.event.number }}-database | oc apply -f -
+          oc process -f .github/pipeline/deploy.backend.yml -p ZONE=prod -p PROMOTE=bcgov/greenfield-template:${{ github.event.number }}-backend | oc apply -f -
+          oc process -f .github/pipeline/deploy.frontend.yml -p ZONE=prod -p PROMOTE=bcgov/greenfield-template:${{ github.event.number }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/gfp-prod-database -w

@@ -29,7 +29,11 @@ parameters:
   - name: MEMORY_REQUEST
     value: 1Gi
   - name: REGISTRY
-    value: image-registry.openshift-image-registry.svc:5000
+    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
+    value: ghcr.io
+  - name: PROMOTE
+    description: Image (namespace/name:tag) to promote/import
+    value: openshift/postgresql:12
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -44,7 +48,7 @@ objects:
       - name: ${IMAGE_TAG}
         from:
           kind: DockerImage
-          name: ghcr.io/bcgov/greenfield-template:${ZONE}-${COMPONENT}
+          name: ${REGISTRY}/${PROMOTE}
         referencePolicy:
           type: Local
   - apiVersion: v1
