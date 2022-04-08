@@ -11,7 +11,7 @@ import { UsersModule } from "./users/users.module";
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: "postgres",
-      host: "localhost",
+      host: process.env.POSTGRES_HOSTNAME || "localhost",
       port: 5432,
       database: process.env.POSTGRES_DB || "postgres",
       username: process.env.POSTGRES_USER || "postgres",
