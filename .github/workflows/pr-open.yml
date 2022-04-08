@@ -287,7 +287,7 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Process and apply deployment templates
-          oc process -f .github/pipeline/deploy.database.yml -p ZONE=${{ github.event.number } | oc apply -f -
+          oc process -f .github/pipeline/deploy.database.yml -p ZONE=${{ github.event.number }} | oc apply -f -
           oc process -f .github/pipeline/deploy.backend.yml -p ZONE=${{ github.event.number }} -p PROMOTE=bcgov/greenfield-template:${{ github.event.number }}-backend | oc apply -f -
           oc process -f .github/pipeline/deploy.frontend.yml -p ZONE=${{ github.event.number }} -p PROMOTE=bcgov/greenfield-template:${{ github.event.number }}-frontend | oc apply -f -
 
