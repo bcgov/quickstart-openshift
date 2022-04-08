@@ -359,3 +359,20 @@ jobs:
             [Prod - Backend](https://gfp-prod-backend.apps.silver.devops.gov.bc.ca/) available
             [Prod - Frontend](https://gfp-prod-frontend.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
+
+  zap:
+    name: Zap
+    needs:
+      - deploy-prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: https://gfp-prod-frontend.apps.silver.devops.gov.bc.ca/
+          cmd_options: '-a'
+          allow_issue_writing: true
+          fail_action: false
