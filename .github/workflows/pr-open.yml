@@ -306,8 +306,8 @@ jobs:
             [Dev - Frontend](https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
 
-  zap:
-    name: Zap
+  zap-dev:
+    name: Zap-Dev
     needs:
       - deploy-dev
     runs-on: ubuntu-latest
@@ -360,8 +360,8 @@ jobs:
             [Prod - Frontend](https://gfp-prod-frontend.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
 
-  zap:
-    name: Zap
+  zap-prod:
+    name: Zap-Prod
     needs:
       - deploy-prod
     runs-on: ubuntu-latest
