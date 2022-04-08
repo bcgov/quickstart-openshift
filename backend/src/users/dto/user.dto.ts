@@ -14,8 +14,8 @@ export class UserDto {
   name: string;
 
   @ApiProperty({
-    description: 'The userType of the user, a reviewer or a submitter',
-    default: 'submitter',
+    description: 'The contact email of the user',
+    default: '',
   })
-  userType: string;
+  email: string;
 }
