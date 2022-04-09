@@ -306,8 +306,25 @@ jobs:
             [Dev - Frontend](https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
 
-  zap-dev:
-    name: Zap-Dev
+  zap-dev-backend:
+    name: Zap-Dev-Backend
+    needs:
+      - deploy-dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/
+          cmd_options: '-a'
+          allow_issue_writing: false
+          fail_action: false
+
+  zap-dev-frontend:
+    name: Zap-Dev-Frontend
     needs:
       - deploy-dev
     runs-on: ubuntu-latest
@@ -360,8 +377,25 @@ jobs:
             [Prod - Frontend](https://gfp-prod-frontend.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
 
-  zap-prod:
-    name: Zap-Prod
+  zap-prod-backend:
+    name: Zap-Prod-Backend
+    needs:
+      - deploy-prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: https://gfp-prod-backend.apps.silver.devops.gov.bc.ca/
+          cmd_options: '-a'
+          allow_issue_writing: fase
+          fail_action: false
+
+  zap-prod-frontend:
+    name: Zap-Prod-Frontend
     needs:
       - deploy-prod
     runs-on: ubuntu-latest
@@ -374,5 +408,5 @@ jobs:
         with:
           target: https://gfp-prod-frontend.apps.silver.devops.gov.bc.ca/
           cmd_options: '-a'
-          allow_issue_writing: true
+          allow_issue_writing: false
           fail_action: false
