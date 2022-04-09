@@ -35,8 +35,17 @@ Currently, our most exciting offering is the [GitHub Actions](https://github.com
 
 ...and more [on the way](https://github.com/bcgov/greenfield-template/issues)!
 
-![Pipeline Action](.github/graphics/pr.png)
+### Pull Request Opened/Modified
 
+![Pull Request Open](.github/graphics/pr-open.png)
+
+### Pull Request Merged/Closed
+
+![Pull Request Close/Merge](.github/graphics/pr-cleanup.png)
+
+### Pull Request Merged to Main
+
+![Main Merge](.github/graphics/main-merge.png)
 
 # Getting Started
 
