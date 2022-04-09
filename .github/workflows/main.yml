@@ -1,5 +1,5 @@
 
-name: Main Branch
+name: Main Merge
 
 on:
   push:
