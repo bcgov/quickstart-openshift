@@ -118,7 +118,7 @@ jobs:
         with:
           context: ./frontend/
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ github.repository }}:${{ github.event.number }}-frontend
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -266,9 +266,9 @@ jobs:
           # Process and apply deployment templates
           oc process -f .github/pipeline/deploy.database.yml -p ZONE=${{ github.event.number }} | oc apply -f -
           oc process -f .github/pipeline/deploy.backend.yml -p ZONE=${{ github.event.number }} \
-            -p PROMOTE=${{ env.ORG }}/${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
           oc process -f .github/pipeline/deploy.frontend.yml -p ZONE=${{ github.event.number }} \
-            -p PROMOTE=${{ env.ORG }}/${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/gfp-${{ github.event.number }}-database -w
@@ -337,9 +337,9 @@ jobs:
           # Process and apply deployment templates
           oc process -f .github/pipeline/deploy.database.yml -p ZONE=prod | oc apply -f -
           oc process -f .github/pipeline/deploy.backend.yml -p ZONE=prod \
-            -p PROMOTE=${{ env.ORG }}/${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
+            -p PROMOTE=/${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
           oc process -f .github/pipeline/deploy.frontend.yml -p ZONE=prod \
-            -p PROMOTE=${{ env.ORG }}/${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/gfp-prod-database -w
