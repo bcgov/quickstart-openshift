@@ -78,7 +78,7 @@ jobs:
         with:
           context: ./backend/
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ github.repository }}:${{ github.event.number }}-backend
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -110,7 +110,7 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
+          # username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Frontend Docker image
