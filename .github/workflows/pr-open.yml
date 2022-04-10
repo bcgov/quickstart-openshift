@@ -211,7 +211,7 @@ jobs:
     - name: Trivy Vulnerability Scan
       uses: aquasecurity/trivy-action@0.2.3
       with:
-        image-ref: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ github.repository }}:${{ github.event.number }}-backend
+        image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
         ignore-unfixed: true
         severity: CRITICAL
         format: 'sarif'
@@ -236,7 +236,7 @@ jobs:
     - name: Trivy Vulnerability Scan
       uses: aquasecurity/trivy-action@0.2.3
       with:
-        image-ref: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ github.repository }}:${{ github.event.number }}-frontend
+        image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
         ignore-unfixed: true
         severity: CRITICAL
         format: 'sarif'
