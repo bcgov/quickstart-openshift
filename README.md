@@ -34,16 +34,16 @@ This workflow is triggered when a Pull Request to the main branch is created or 
 The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/main/.github/workflows/pr-open.yml), includes:
 
 * [Pull Request](https://github.com/bcgov/greenfield-template/pulls)-based ephemeral, sandboxed environments
-* [Docker](https://github.com/marketplace/actions/build-and-push-docker-images)/[Podman](https://tbd) container building
+* [Docker](https://github.com/marketplace/actions/build-and-push-docker-images)/[Podman](https://podman.io) container building
 * [Build caching](https://github.com/marketplace/actions/cache) to save time and bandwidth
 * [GitHub Container Registry](https://github.com/bcgov/greenfield-template/pkgs/container/greenfield-template) image publishing
 * [RedHat OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) deployment, with other options under consideration
 * [Jest](https://jestjs.io/) JavaScript testing enforced in-pipeline
-* [CodeCov](https://tbd) test code coverage reporting (coming soon!)
-* [ESLint](https://eslint.org/) linting (currently disabled)
-* [Snyk](https://snyk.io/) development, vulnerability and security scanning
-* [Tryvy](https://tbd) scanning
-* [OWASP ZAP](https://owasp.org/www-project-zap/) Zed Attack Proxy security scanning
+* Code test coverage reporting (coming soon!)
+* [ESLint](https://eslint.org/) linting (coming soon!)
+* [Snyk](https://snyk.io/) vulnerability scanning for containers, infrastructure and dependencies
+* [Tryvy](https://aquasecurity.github.io/trivy) image/infrastructure vulnerability/config scanning
+* [OWASP ZAP](https://www.zaproxy.org/) Zed Attack Proxy live application scanning
 
 ...and more [on the way](https://github.com/bcgov/greenfield-template/issues)!
 
@@ -52,11 +52,16 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 
 ## Pull Request Cleanup Pipeline
 
-* [OpenShift artifact](https://github.com/bcgov/greenfield-template/blob/main/.github/workflows/pr-close.yml) pruning on PR completion.
+The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/main/.github/workflows/pr-close.yml), includes:
+
+* OpenShift dev artifact pruning
+* ghcr.io cleanup of dev images over 14 days-old
 
 ![Pull Request Close/Merge](.github/graphics/pr-cleanup.png)
 
 ## Pull Request Main Merge Pipeline
+
+The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/main/.github/workflows/main.yml), includes:
 
 * [SonarCloud](https://sonarcloud.io/) continuous code quality and security scanning
 * [GitHub CodeQL](https://codeql.github.com/) semantic code analysis and vulerability scanning
@@ -70,8 +75,8 @@ The starter stack includes a frontend, backend and postgres database.  The front
 Features:
 * [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
 * [NestJS](https://docs.nestjs.com) frontend and backend
-* [Postgres](https://tbd) database
 * [ESLint](https://eslint.org/) linting enforced on code staging (currently disabled)
+* [Postgres](https://www.postgresql.org/) database
 
 Local development can be supported using Docker Compose.  Please be aware that Podman and Podman Compose work as drop-in replacements for the Docker counterparts.
 
@@ -89,7 +94,7 @@ Initial setup is intended to take four hours or less.  This depends greatly on i
 * Workflows:
     * Pull Request-based (.github/workflows/pr-open.yml)
     * On Close (.github/workflows/pr-close.yml)
-    * Main Merge (.github/workflows/main-merge.yml)
+    * Main Merge (.github/workflows/main.yml)
 * Hello World! starter application
     * TypeScript source in src/
     * One Jest test in test/
@@ -105,7 +110,7 @@ Not included:
 * Environment secrets
 * Issues
 * Pull requests
-* JavaScript (transpiled/created to dist/)
+* JavaScript (transpiled/created in dist/)
 
 
 ## Prerequisites
@@ -119,7 +124,7 @@ The following are required:
     * Provide GitHub IDs to [BCGov's Just Ask](https://just-ask.developer.gov.bc.ca/)
 * Project namespaces (pick one):
     * OpenShift - [Register a New Project](https://registry.developer.gov.bc.ca/public-landing)
-    * Amazon Web Services coming soon
+    * Amazon Web Services - coming soon!
 
 
 ## Consuming This Template
