@@ -5,9 +5,9 @@ services:
   database:
     container_name: database
     environment:
-      POSTGRES_USER: default
-      POSTGRES_PASSWORD: default
-      POSTGRES_DB: default
+      POSTGRESQL_USER: default
+      POSTGRESQL_PASSWORD: default
+      POSTGRESQL_DATABASE: default
     hostname: database
     image: postgres:12
     restart: always
@@ -23,10 +23,10 @@ services:
     environment:
       NODE_ENV: development
       DATABASE_URL: database
-      POSTGRES_USER: default
-      POSTGRES_PASSWORD: default
-      POSTGRES_DB: default
-      POSTGRES_HOSTNAME: database
+      POSTGRESQL_USER: default
+      POSTGRESQL_PASSWORD: default
+      POSTGRESQL_DATABASE: default
+      POSTGRESQL_HOSTNAME: database
     hostname: backend
     image: node:14
     links:
