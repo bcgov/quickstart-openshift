@@ -35,6 +35,7 @@ describe("UserService", () => {
         {
           provide: getRepositoryToken(Users),
           useValue: {
+            // mock repository functions for testing
             find: jest.fn().mockResolvedValue(userArray),
             findOneOrFail: jest.fn().mockResolvedValue(oneUser),
             create: jest.fn().mockReturnValue(threeUser),

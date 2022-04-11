@@ -19,11 +19,11 @@ export class UsersService {
     return newUser;
   }
 
-  findAll(): Promise<Users[]> {
+  async findAll(): Promise<Users[]> {
     return this.usersRepository.find();
   }
 
-  findOne(id: number): Promise<Users> {
+  async findOne(id: number): Promise<Users> {
     return this.usersRepository.findOneOrFail(id);
   }
 
