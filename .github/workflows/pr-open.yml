@@ -7,7 +7,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
   TRIGGERS: ('frontend/' 'backend/' '.github/pipeline' '.github/workflows')
 
 jobs:
@@ -78,7 +77,7 @@ jobs:
         with:
           context: ./backend/
           push: true
-          tags: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-backend
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -118,7 +117,7 @@ jobs:
         with:
           context: ./frontend/
           push: true
-          tags: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-frontend
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -154,27 +153,6 @@ jobs:
           npm ci
           npm test
 
-  codeql:
-    name: CodeQL
-    needs:
-      - check
-    if: needs.check.outputs.build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Initialize
-        uses: github/codeql-action/init@v1
-        with:
-          languages: javascript
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v1
-
-      - name: Analysis
-        uses: github/codeql-action/analyze@v1
-
   # https://github.com/snyk/snyk
   snyk:
     name: Snyk
@@ -205,7 +183,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.2.3
         with:
           scan-type: 'fs'
           ignore-unfixed: true
@@ -230,9 +208,9 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Trivy Vulnerability Scan
-      uses: aquasecurity/trivy-action@master
+      uses: aquasecurity/trivy-action@0.2.3
       with:
-        image-ref: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-backend
+        image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
         ignore-unfixed: true
         severity: CRITICAL
         format: 'sarif'
@@ -255,9 +233,9 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Trivy Vulnerability Scan
-      uses: aquasecurity/trivy-action@master
+      uses: aquasecurity/trivy-action@0.2.3
       with:
-        image-ref: ghcr.io/bcgov/greenfield-template:${{ github.event.number }}-frontend
+        image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
         ignore-unfixed: true
         severity: CRITICAL
         format: 'sarif'
@@ -268,8 +246,8 @@ jobs:
       with:
         sarif_file: 'trivy-results.sarif'
 
-  deploy:
-    name: Deploy
+  deploy-dev:
+    name: Deploy-Dev
     needs: 
       - build-backend
       - build-frontend
@@ -280,18 +258,16 @@ jobs:
       - uses: actions/checkout@v2
       - name: Deploy
         run: |
-          set -eux
-
           # Login to OpenShift and select project
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
 
           # Process and apply deployment templates
-          for yml in .github/pipeline/deploy.*.yml
-          do
-            oc process -f ${yml} -p ZONE=${{ github.event.number }} -p NAMESPACE=${{ secrets.NAMESPACE }} \
-              | oc apply -f -
-          done
+          oc process -f .github/pipeline/deploy.database.yml -p ZONE=${{ github.event.number }} | oc apply -f -
+          oc process -f .github/pipeline/deploy.backend.yml -p ZONE=${{ github.event.number }} \
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
+          oc process -f .github/pipeline/deploy.frontend.yml -p ZONE=${{ github.event.number }} \
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/gfp-${{ github.event.number }}-database -w
@@ -304,14 +280,31 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           message: |
-            [${{ secrets.ENV }} - Backend](https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) deployment available
-            [${{ secrets.ENV }} - Frontend](https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) deployment available
+            [Dev - Backend](https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) available
+            [Dev - Frontend](https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
 
-  zap:
-    name: Zap
+  zap-dev-backend:
+    name: Zap-Dev-Backend
     needs:
-      - deploy
+      - deploy-dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/
+          cmd_options: '-a'
+          allow_issue_writing: false
+          fail_action: false
+
+  zap-dev-frontend:
+    name: Zap-Dev-Frontend
+    needs:
+      - deploy-dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -321,6 +314,77 @@ jobs:
         uses: zaproxy/action-full-scan@v0.3.0
         with:
           target: https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/
+          cmd_options: '-a'
+          allow_issue_writing: false
+          fail_action: false
+
+  deploy-prod:
+    name: Deploy-Prod
+    needs:
+      - deploy-dev
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.NAMESPACE }}
+
+          # Process and apply deployment templates
+          oc process -f .github/pipeline/deploy.database.yml -p ZONE=prod | oc apply -f -
+          oc process -f .github/pipeline/deploy.backend.yml -p ZONE=prod \
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
+          oc process -f .github/pipeline/deploy.frontend.yml -p ZONE=prod \
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
+
+          # Follow any active rollouts (see deploymentconfigs)
+          oc rollout status dc/gfp-prod-database -w
+          oc rollout status dc/gfp-prod-backend -w
+          oc rollout status dc/gfp-prod-frontend -w
+
+      - name: Deployment update
+        uses: mshick/add-pr-comment@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          message: |
+            [Prod - Backend](https://gfp-prod-backend.apps.silver.devops.gov.bc.ca/) available
+            [Prod - Frontend](https://gfp-prod-frontend.apps.silver.devops.gov.bc.ca/) available
+          allow-repeats: false
+
+  zap-prod-backend:
+    name: Zap-Prod-Backend
+    needs:
+      - deploy-prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: https://gfp-prod-backend.apps.silver.devops.gov.bc.ca/
+          cmd_options: '-a'
+          allow_issue_writing: fase
+          fail_action: false
+
+  zap-prod-frontend:
+    name: Zap-Prod-Frontend
+    needs:
+      - deploy-prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: https://gfp-prod-frontend.apps.silver.devops.gov.bc.ca/
           cmd_options: '-a'
           allow_issue_writing: false
           fail_action: false
