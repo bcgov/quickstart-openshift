@@ -6,7 +6,6 @@ on:
       - main
 
 env:
-  ORG: bcgov
   REGISTRY: ghcr.io
   TRIGGERS: ('frontend/' 'backend/' '.github/pipeline' '.github/workflows')
 
@@ -337,7 +336,7 @@ jobs:
           # Process and apply deployment templates
           oc process -f .github/pipeline/deploy.database.yml -p ZONE=prod | oc apply -f -
           oc process -f .github/pipeline/deploy.backend.yml -p ZONE=prod \
-            -p PROMOTE=/${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
           oc process -f .github/pipeline/deploy.frontend.yml -p ZONE=prod \
             -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
 
