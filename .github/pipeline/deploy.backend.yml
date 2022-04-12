@@ -34,6 +34,9 @@ parameters:
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
     required: true
+  - name: DB_PASSWORD
+    description: Password for the PostgreSQL connection user
+    required: true
 objects:
   - apiVersion: v1
     kind: ImageStream

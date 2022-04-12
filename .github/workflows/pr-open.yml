@@ -9,6 +9,12 @@ env:
   REGISTRY: ghcr.io
   TRIGGERS: ('frontend/' 'backend/' '.github/pipeline' '.github/workflows')
 
+parameters:
+  - description: Password for the PostgreSQL connection user.
+    from: "[a-zA-Z0-9]{16}"
+    generate: expression
+    name: DB_PASSWORD
+
 jobs:
   check:
     name: Check
@@ -161,15 +167,15 @@ jobs:
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Run Snyk to check for vulnerabilities
-      uses: snyk/actions/node@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: --all-projects --severity-threshold=high
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects --severity-threshold=high
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
@@ -185,16 +191,16 @@ jobs:
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@0.2.3
         with:
-          scan-type: 'fs'
+          scan-type: "fs"
           ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL'
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL"
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
   trivy-backend:
     name: Trivy-Backend
@@ -204,22 +210,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Trivy Vulnerability Scan
-      uses: aquasecurity/trivy-action@0.2.3
-      with:
-        image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
-        ignore-unfixed: true
-        severity: CRITICAL
-        format: 'sarif'
-        output: 'trivy-results.sarif'
+      - name: Trivy Vulnerability Scan
+        uses: aquasecurity/trivy-action@0.2.3
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
+          ignore-unfixed: true
+          severity: CRITICAL
+          format: "sarif"
+          output: "trivy-results.sarif"
 
-    - name: Upload Trivy results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: 'trivy-results.sarif'
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: "trivy-results.sarif"
 
   trivy-frontend:
     name: Trivy-Frontend
@@ -229,26 +235,26 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Trivy Vulnerability Scan
-      uses: aquasecurity/trivy-action@0.2.3
-      with:
-        image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
-        ignore-unfixed: true
-        severity: CRITICAL
-        format: 'sarif'
-        output: 'trivy-results.sarif'
+      - name: Trivy Vulnerability Scan
+        uses: aquasecurity/trivy-action@0.2.3
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
+          ignore-unfixed: true
+          severity: CRITICAL
+          format: "sarif"
+          output: "trivy-results.sarif"
 
-    - name: Upload Trivy results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: 'trivy-results.sarif'
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: "trivy-results.sarif"
 
   deploy-dev:
     name: Deploy-Dev
-    needs: 
+    needs:
       - build-backend
       - build-frontend
     runs-on: ubuntu-latest
@@ -263,9 +269,9 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Process and apply deployment templates
-          oc process -f .github/pipeline/deploy.database.yml -p ZONE=${{ github.event.number }} | oc apply -f -
+          oc process -f .github/pipeline/deploy.database.yml -p ZONE=${{ github.event.number }} -p DB_PASSWORD=${DB_PASSWORD} | oc apply -f -
           oc process -f .github/pipeline/deploy.backend.yml -p ZONE=${{ github.event.number }} \
-            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend -p DB_PASSWORD=${DB_PASSWORD} | oc apply -f -
           oc process -f .github/pipeline/deploy.frontend.yml -p ZONE=${{ github.event.number }} \
             -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
 
@@ -297,7 +303,7 @@ jobs:
         uses: zaproxy/action-full-scan@v0.3.0
         with:
           target: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/
-          cmd_options: '-a'
+          cmd_options: "-a"
           allow_issue_writing: false
           fail_action: false
 
@@ -314,7 +320,7 @@ jobs:
         uses: zaproxy/action-full-scan@v0.3.0
         with:
           target: https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/
-          cmd_options: '-a'
+          cmd_options: "-a"
           allow_issue_writing: false
           fail_action: false
 
@@ -334,9 +340,9 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Process and apply deployment templates
-          oc process -f .github/pipeline/deploy.database.yml -p ZONE=prod | oc apply -f -
+          oc process -f .github/pipeline/deploy.database.yml -p ZONE=prod -p DB_PASSWORD=${DB_PASSWORD} | oc apply -f -
           oc process -f .github/pipeline/deploy.backend.yml -p ZONE=prod \
-            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend -p DB_PASSWORD=${DB_PASSWORD} | oc apply -f -
           oc process -f .github/pipeline/deploy.frontend.yml -p ZONE=prod \
             -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
 
@@ -368,7 +374,7 @@ jobs:
         uses: zaproxy/action-full-scan@v0.3.0
         with:
           target: https://gfp-prod-backend.apps.silver.devops.gov.bc.ca/
-          cmd_options: '-a'
+          cmd_options: "-a"
           allow_issue_writing: fase
           fail_action: false
 
@@ -385,6 +391,6 @@ jobs:
         uses: zaproxy/action-full-scan@v0.3.0
         with:
           target: https://gfp-prod-frontend.apps.silver.devops.gov.bc.ca/
-          cmd_options: '-a'
+          cmd_options: "-a"
           allow_issue_writing: false
           fail_action: false
