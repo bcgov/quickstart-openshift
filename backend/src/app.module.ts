@@ -6,6 +6,10 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { UsersModule } from "./users/users.module";
 
+console.log("POSTGRESQL_HOSTNAME", process.env.POSTGRESQL_HOSTNAME);
+console.log("POSTGRESQL_DATABASE", process.env.POSTGRESQL_DATABASE);
+console.log("POSTGRESQL_USER", process.env.POSTGRESQL_USER);
+
 @Module({
   imports: [
     ConfigModule.forRoot(),
