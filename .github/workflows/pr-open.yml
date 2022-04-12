@@ -9,12 +9,6 @@ env:
   REGISTRY: ghcr.io
   TRIGGERS: ('frontend/' 'backend/' '.github/pipeline' '.github/workflows')
 
-parameters:
-  - description: Password for the PostgreSQL connection user.
-    from: "[a-zA-Z0-9]{16}"
-    generate: expression
-    name: DB_PASSWORD
-
 jobs:
   check:
     name: Check
@@ -262,6 +256,8 @@ jobs:
       name: dev
     steps:
       - uses: actions/checkout@v2
+      - name: Generate db password
+        run: echo DB_PASSWORD=$(echo $RANDOM | base64) >> $GITHUB_ENV
       - name: Deploy
         run: |
           # Login to OpenShift and select project
@@ -269,9 +265,9 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Process and apply deployment templates
-          oc process -f .github/pipeline/deploy.database.yml -p ZONE=${{ github.event.number }} -p DB_PASSWORD=${DB_PASSWORD} | oc apply -f -
+          oc process -f .github/pipeline/deploy.database.yml -p ZONE=${{ github.event.number }} -p DB_PASSWORD=${{ env.DB_PASSWORD }} | oc apply -f -
           oc process -f .github/pipeline/deploy.backend.yml -p ZONE=${{ github.event.number }} \
-            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend -p DB_PASSWORD=${DB_PASSWORD} | oc apply -f -
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend -p DB_PASSWORD=${{ env.DB_PASSWORD }} | oc apply -f -
           oc process -f .github/pipeline/deploy.frontend.yml -p ZONE=${{ github.event.number }} \
             -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
 
@@ -340,9 +336,9 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Process and apply deployment templates
-          oc process -f .github/pipeline/deploy.database.yml -p ZONE=prod -p DB_PASSWORD=${DB_PASSWORD} | oc apply -f -
+          oc process -f .github/pipeline/deploy.database.yml -p ZONE=prod -p DB_PASSWORD=${{ env.DB_PASSWORD }} | oc apply -f -
           oc process -f .github/pipeline/deploy.backend.yml -p ZONE=prod \
-            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend -p DB_PASSWORD=${DB_PASSWORD} | oc apply -f -
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend -p DB_PASSWORD=${{ env.DB_PASSWORD }} | oc apply -f -
           oc process -f .github/pipeline/deploy.frontend.yml -p ZONE=prod \
             -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
 
