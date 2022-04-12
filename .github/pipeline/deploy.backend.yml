@@ -34,9 +34,9 @@ parameters:
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
     required: true
-  - name: DB_PASSWORD
-    description: Password for the PostgreSQL connection user
-    required: true
+  # - name: DB_PASSWORD
+  #   description: Password for the PostgreSQL connection user
+  #   required: true
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -60,11 +60,11 @@ objects:
       name: ${NAME}-${ZONE}-${COMPONENT}
       labels:
         app: ${NAME}-${ZONE}
-    stringData:
-      database-name: "${NAME}"
-      database-password: "${DB_PASSWORD}"
-      database-user: "${NAME}"
-      database-hostname: "database"
+    # stringData:
+    #   database-name: "${NAME}"
+    #   database-password: "${DB_PASSWORD}"
+    #   database-user: "${NAME}"
+    #   database-hostname: "database"
   - apiVersion: v1
     kind: DeploymentConfig
     metadata:
@@ -125,27 +125,27 @@ objects:
                 initialDelaySeconds: 15
                 periodSeconds: 30
                 timeoutSeconds: 5
-              env:
-                - name: POSTGRESQL_DATABASE
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: database-name
-                - name: POSTGRESQL_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: database-password
-                - name: POSTGRESQL_USER
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: database-user
-                - name: POSTGRESQL_HOSTNAME
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: database-hostname
+              # env:
+              #   - name: POSTGRESQL_DATABASE
+              #     valueFrom:
+              #       secretKeyRef:
+              #         name: ${NAME}-${ZONE}-${COMPONENT}
+              #         key: database-name
+              #   - name: POSTGRESQL_PASSWORD
+              #     valueFrom:
+              #       secretKeyRef:
+              #         name: ${NAME}-${ZONE}-${COMPONENT}
+              #         key: database-password
+              #   - name: POSTGRESQL_USER
+              #     valueFrom:
+              #       secretKeyRef:
+              #         name: ${NAME}-${ZONE}-${COMPONENT}
+              #         key: database-user
+              #   - name: POSTGRESQL_HOSTNAME
+              #     valueFrom:
+              #       secretKeyRef:
+              #         name: ${NAME}-${ZONE}-${COMPONENT}
+              #         key: database-hostname
   - apiVersion: v1
     kind: Service
     metadata:
