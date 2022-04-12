@@ -8,6 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   TRIGGERS: ('frontend/' 'backend/' '.github/pipeline' '.github/workflows')
+  DB_PASSWORD: $(echo $RANDOM | base64)
 
 jobs:
   check:
@@ -51,9 +52,6 @@ jobs:
       contents: read
       packages: write
     steps:
-      - name: Generate db password
-        run: echo DB_PASSWORD=$(echo $RANDOM | base64) >> $GITHUB_ENV
-
       - name: Checkout repository
         uses: actions/checkout@v2
 
