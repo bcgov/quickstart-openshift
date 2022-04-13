@@ -15,11 +15,11 @@ console.log("POSTGRESQL_USER", process.env.POSTGRESQL_USER);
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: "postgres",
-      host: process.env.POSTGRESQL_HOSTNAME || "localhost",
+      host: process.env.PGHOST || "localhost",
       port: 5432,
-      database: process.env.POSTGRESQL_DATABASE || "postgres",
-      username: process.env.POSTGRESQL_USER || "postgres",
-      password: process.env.POSTGRESQL_PASSWORD,
+      database: process.env.PGDATABASE || "postgres",
+      username: process.env.PGUSER || "postgres",
+      password: process.env.PGPASSWORD,
       // entities: [User],
       autoLoadEntities: true, // Auto load all entities regiestered by typeorm forFeature method.
       synchronize: true, // This changes the DB schema to match changes to entities, which we might not want.
