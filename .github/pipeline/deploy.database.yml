@@ -22,13 +22,10 @@ parameters:
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
-  # - description: Password for the PostgreSQL connection user.
-  #   from: "[a-zA-Z0-9]{16}"
-  #   generate: expression
-  #   name: DB_PASSWORD
-  - name: DB_PASSWORD
-    description: Password for the PostgreSQL connection user
-    required: true
+  - description: Password for the PostgreSQL connection user.
+    from: "[a-zA-Z0-9]{16}"
+    generate: expression
+    name: DB_PASSWORD
   - description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
     name: DB_PVC_SIZE
