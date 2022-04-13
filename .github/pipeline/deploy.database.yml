@@ -44,9 +44,9 @@ objects:
       labels:
         app: ${NAME}-${ZONE}
     stringData:
-      database-name: "${NAME}"
-      database-password: "${DB_PASSWORD}"
-      database-user: "${NAME}"
+      database-name: ${NAME}
+      database-password: ${DB_PASSWORD}
+      database-user: ${NAME}
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
