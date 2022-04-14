@@ -6,9 +6,14 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { UsersModule } from "./users/users.module";
 
-console.log("POSTGRESQL_HOSTNAME", process.env.POSTGRESQL_HOSTNAME);
-console.log("POSTGRESQL_DATABASE", process.env.POSTGRESQL_DATABASE);
-console.log("POSTGRESQL_USER", process.env.POSTGRESQL_USER);
+console.log("Var check - PGHOST", process.env.PGHOST);
+console.log("Var check - PGDATABASE", process.env.PGDATABASE);
+console.log("Var check - PGUSER", process.env.PGUSER);
+if (process.env.PGUSER != null ){
+  console.log("Var check - PGUSER present");
+} else {
+  console.log("Var check - PGUSER not present");
+}
 
 @Module({
   imports: [
