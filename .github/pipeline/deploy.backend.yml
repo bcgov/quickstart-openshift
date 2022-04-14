@@ -85,21 +85,21 @@ objects:
               name: ${NAME}
               env:
                 - name: PGHOST
-                  value: ${NAME}-${ZONE}-${COMPONENT}
+                  value: ${NAME}-${ZONE}-database
                 - name: PGDATABASE
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      name: ${NAME}-${ZONE}-database
                       key: database-name
                 - name: PGPASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      name: ${NAME}-${ZONE}-database
                       key: database-password
                 - name: PGUSER
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      name: ${NAME}-${ZONE}-database
                       key: database-user
               ports:
                 - containerPort: 3000
