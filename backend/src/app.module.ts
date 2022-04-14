@@ -9,10 +9,10 @@ import { UsersModule } from "./users/users.module";
 console.log("Var check - PGHOST", process.env.PGHOST);
 console.log("Var check - PGDATABASE", process.env.PGDATABASE);
 console.log("Var check - PGUSER", process.env.PGUSER);
-if (process.env.PGUSER != null ){
-  console.log("Var check - PGUSER present");
+if (process.env.PGPASSWORD != null ){
+  console.log("Var check - PGPASSWORD present");
 } else {
-  console.log("Var check - PGUSER not present");
+  console.log("Var check - PGPASSWORD not present");
 }
 
 @Module({

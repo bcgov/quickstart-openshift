@@ -22,11 +22,10 @@ services:
       - "npm ci && npm run start"
     environment:
       NODE_ENV: development
-      DATABASE_URL: database
-      POSTGRESQL_USER: default
-      POSTGRESQL_PASSWORD: default
-      POSTGRESQL_DATABASE: default
-      POSTGRESQL_HOSTNAME: database
+      PGHOST: database
+      PGUSER: default
+      PGPASSWORD: default
+      PGDATABASE: default
     hostname: backend
     image: node:14
     links:
