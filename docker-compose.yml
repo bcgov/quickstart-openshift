@@ -26,6 +26,12 @@ services:
       PGUSER: default
       PGPASSWORD: default
       PGDATABASE: default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     hostname: backend
     image: node:14
     links:
@@ -46,6 +52,12 @@ services:
     environment:
       NODE_ENV: development
       BACKEND_URL: backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     hostname: frontend
     image: node:14
     links:
