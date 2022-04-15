@@ -84,8 +84,23 @@ objects:
               imagePullPolicy: Always
               name: ${NAME}
               env:
-                - name: DATABASE_URL
-                  value: https://${NAME}-${ZONE}-database.${DOMAIN}
+                - name: PGHOST
+                  value: ${NAME}-${ZONE}-database
+                - name: PGDATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-name
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-password
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-user
               ports:
                 - containerPort: 3000
                   protocol: TCP
