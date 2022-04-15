@@ -6,13 +6,13 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { UsersModule } from "./users/users.module";
 
-console.log("Var check - PGHOST", process.env.PGHOST);
-console.log("Var check - PGDATABASE", process.env.PGDATABASE);
-console.log("Var check - PGUSER", process.env.PGUSER);
-if (process.env.PGPASSWORD != null ){
-  console.log("Var check - PGPASSWORD present");
+console.log("Var check - PG_HOST", process.env.PG_HOST);
+console.log("Var check - PG_DATABASE", process.env.PG_DATABASE);
+console.log("Var check - PG_USER", process.env.PG_USER);
+if (process.env.PG_PASSWORD != null ){
+  console.log("Var check - PG_PASSWORD present");
 } else {
-  console.log("Var check - PGPASSWORD not present");
+  console.log("Var check - PG_PASSWORD not present");
 }
 
 @Module({
@@ -20,11 +20,11 @@ if (process.env.PGPASSWORD != null ){
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: "postgres",
-      host: process.env.PGHOST || "localhost",
+      host: process.env.PG_HOST || "localhost",
       port: 5432,
-      database: process.env.PGDATABASE || "postgres",
-      username: process.env.PGUSER || "postgres",
-      password: process.env.PGPASSWORD,
+      database: process.env.PG_DATABASE || "postgres",
+      username: process.env.PG_USER || "postgres",
+      password: process.env.PG_PASSWORD,
       // entities: [User],
       autoLoadEntities: true, // Auto load all entities regiestered by typeorm forFeature method.
       synchronize: true, // This changes the DB schema to match changes to entities, which we might not want.
