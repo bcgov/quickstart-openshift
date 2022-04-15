@@ -7,6 +7,21 @@ on:
       - main
 
 jobs:
+  cleanup-openshift:
+    name: Cleanup OpenShift
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+    steps:
+      - uses: actions/checkout@v2
+      - name: Remove OpenShift artifacts
+        run: |
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.NAMESPACE }}
+
+          # Remove completed build runs, build pods and deployment pods
+          oc get po | grep -e "Completed" | awk '{print $1}' | xargs -n 1 oc delete po
+
   codeql:
     name: CodeQL
     runs-on: ubuntu-latest
