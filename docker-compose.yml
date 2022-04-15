@@ -22,10 +22,10 @@ services:
       - "npm ci && npm run start"
     environment:
       NODE_ENV: development
-      PGHOST: database
-      PGUSER: default
-      PGPASSWORD: default
-      PGDATABASE: default
+      PG_HOST: database
+      PG_USER: default
+      PG_PASSWORD: default
+      PG_DATABASE: default
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 1m30s
