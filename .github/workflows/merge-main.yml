@@ -19,8 +19,8 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
 
-          # Remove old build runs, build pods and deployment pods
-          oc get po | grep -e "Completed\|Error" | awk '{print $1}' | xargs -n 1 oc delete po
+          # Remove completed build runs, build pods and deployment pods
+          oc get po | grep -e "Completed" | awk '{print $1}' | xargs -n 1 oc delete po
 
   codeql:
     name: CodeQL
