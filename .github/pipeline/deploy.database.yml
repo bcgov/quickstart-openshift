@@ -126,7 +126,7 @@ objects:
                     - '-c'
                     - >-
                       psql -q -d
-                      $POSTGRES_DB -c 'SELECT 1'
+                      $POSTGRESQL_DB -c 'SELECT 1'
                 failureThreshold: 5
                 initialDelaySeconds: 30
                 periodSeconds: 15
@@ -139,23 +139,23 @@ objects:
                     - '-c'
                     - >-
                       psql -q -d
-                      $POSTGRES_DB -c 'SELECT 1'
+                      $POSTGRESQL_DB -c 'SELECT 1'
                 failureThreshold: 5
                 initialDelaySeconds: 30
                 periodSeconds: 15
                 timeoutSeconds: 1
               env:
-                - name: POSTGRES_DB
+                - name: POSTGRESQL_DB
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-name
-                - name: POSTGRES_PASSWORD
+                - name: POSTGRESQL_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-password
-                - name: POSTGRES_USER
+                - name: POSTGRESQL_USER
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
