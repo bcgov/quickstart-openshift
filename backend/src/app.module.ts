@@ -7,7 +7,7 @@ import { AppService } from "./app.service";
 import { UsersModule } from "./users/users.module";
 
 console.log("Var check - POSTGRESQL_HOST", process.env.POSTGRESQL_HOST);
-console.log("Var check - POSTGRESQL_DB", process.env.POSTGRESQL_DB);
+console.log("Var check - POSTGRESQL_DATABASE", process.env.POSTGRESQL_DATABASE);
 console.log("Var check - POSTGRESQL_USER", process.env.POSTGRESQL_USER);
 if (process.env.POSTGRESQL_PASSWORD != null ){
   console.log("Var check - POSTGRESQL_PASSWORD present");
@@ -22,7 +22,7 @@ if (process.env.POSTGRESQL_PASSWORD != null ){
       type: "postgres",
       host: process.env.POSTGRESQL_HOST || "localhost",
       port: 5432,
-      database: process.env.POSTGRESQL_DB || "postgres",
+      database: process.env.POSTGRESQL_DATABASE || "postgres",
       username: process.env.POSTGRESQL_USER || "postgres",
       password: process.env.POSTGRESQL_PASSWORD,
       // entities: [User],

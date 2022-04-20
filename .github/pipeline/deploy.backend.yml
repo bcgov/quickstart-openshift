@@ -86,7 +86,7 @@ objects:
               env:
                 - name: POSTGRESQL_HOST
                   value: ${NAME}-${ZONE}-database
-                - name: POSTGRESQL_DB
+                - name: POSTGRESQL_DATABASE
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
