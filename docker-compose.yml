@@ -5,9 +5,9 @@ services:
   database:
     container_name: database
     environment:
-      POSTGRESQL_USER: default
-      POSTGRESQL_PASSWORD: default
-      POSTGRESQL_DATABASE: default
+      POSTGRES_USER: default
+      POSTGRES_PASSWORD: default
+      POSTGRES_DATABASE: default
     hostname: database
     image: postgres:12
     restart: always
