@@ -408,3 +408,8 @@ From GitHub:
 ## Notes
 
 This repo provides a basic template to start up a new project using nodejs. It needs to be customized based on the project, for example, run tests for a different language and revised whatever secrets required.
+
+## Example APIs
+This repo has good example APIs in different language and frameworks which serve as a starting point for your project.
+https://github.com/bcgov/iit-arch
+
