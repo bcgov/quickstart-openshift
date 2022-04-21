@@ -419,7 +419,7 @@ From GitHub:
 
 * If failed to authenticate to openshfit at the deploy stage, check if the service account “pipeline” has the right ability to get project and do deploy
 
-* If networking is unsuccessful, even with routes in place, try adding more permissive network policies.
+* If networking is unsuccessful, even with routes in place, try adding network policies for ingress and inter-namespace traffic.
     ```
     oc process -f .github/openshift/networkPolicies.yml | oc apply -f -
     ```
