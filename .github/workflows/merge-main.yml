@@ -20,7 +20,10 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Remove completed build runs, build pods and deployment pods
-          oc get po | grep -e "Completed" | awk '{print $1}' | xargs -n 1 oc delete po
+          for p in $(oc get po | grep "Completed" | awk '{print $1}')
+          do
+            oc delete po ${p}
+          done
 
   codeql:
     name: CodeQL
