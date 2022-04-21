@@ -153,23 +153,23 @@ jobs:
           npm ci
           npm test
 
-  # https://github.com/snyk/snyk
-  snyk:
-    name: Snyk
-    needs:
-      - check
-    if: needs.check.outputs.build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+  # # https://github.com/snyk/snyk
+  # snyk:
+  #   name: Snyk
+  #   needs:
+  #     - check
+  #   if: needs.check.outputs.build == 'true'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v2
 
-    - name: Run Snyk to check for vulnerabilities
-      uses: snyk/actions/node@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: --all-projects --severity-threshold=high
+  #   - name: Run Snyk to check for vulnerabilities
+  #     uses: snyk/actions/node@master
+  #     env:
+  #       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  #     with:
+  #       args: --all-projects --severity-threshold=high
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
