@@ -402,7 +402,7 @@ From GitHub:
 
 * If networking is unsuccessful, even with routes in place, try adding more permissive network policies.
     ```
-    oc apply -f .github/openshift/networkPolicies.yml
+    oc process -f .github/openshift/networkPolicies.yml | oc apply -f -
     ```
 
 ## Notes
