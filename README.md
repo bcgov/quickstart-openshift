@@ -41,7 +41,6 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 * [Jest](https://jestjs.io/) JavaScript testing enforced in-pipeline
 * Code test coverage reporting (coming soon!)
 * [ESLint](https://eslint.org/) linting (coming soon!)
-* [Snyk](https://snyk.io/) vulnerability scanning for containers, infrastructure and dependencies
 * [Tryvy](https://aquasecurity.github.io/trivy) image/infrastructure vulnerability/config scanning
 * [OWASP ZAP](https://www.zaproxy.org/) Zed Attack Proxy live application scanning
 
@@ -63,8 +62,9 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 
 The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/main/.github/workflows/main.yml), includes:
 
-* [SonarCloud](https://sonarcloud.io/) continuous code quality and security scanning
 * [GitHub CodeQL](https://codeql.github.com/) semantic code analysis and vulerability scanning
+* [SonarCloud](https://sonarcloud.io/) continuous code quality and security scanning
+* [Snyk](https://snyk.io/) vulnerability scanning for containers, infrastructure and dependencies
 
 ![Main Merge](.github/graphics/main-merge.png)
 
@@ -213,7 +213,7 @@ Provide these tokens or comment their jobs out:
 
 * Code quality and security scanning
 * Request to [import a GitHub repository](https://github.com/BCDevOps/devops-requests/issues/new/choose)
-* Variable: `{{ secrets.SNYK_TOKEN }}`
+* Variable: `{{ secrets.SONAR_TOKEN }}`
 
 
 ## Environment Secrets
@@ -232,12 +232,24 @@ Create a new Environment to hold the keys to our development deployment.
 
 Environment name: `dev`
 
-No  protection rules are required yet:
+No protection rules are required yet:
 
  * [`unchecked`] Required reviewers
  * [`unchecked`] Wait timer
  * Deployment branches: `All branches`
 
+**Environment: prod**
+
+Create a new Environment to hold the keys to our development deployment.
+
+Environment name: `prod`
+
+Protection rules are required:
+
+ * [`check`] Required reviewers
+   * Provide GitHub IDs as appropriate
+ * [`unchecked`] Wait timer
+ * Deployment branches: `All branches`
 
 ### Required
 
@@ -365,13 +377,20 @@ From GitHub:
     * `[check] Require status checks to pass before merging`
         * `[check] Require branches to be up to date before merging`
         * `Status checks that are required` requires to the search box to select:
-            * `Build`
             * `Check`
-            * `CodeQL`
-            * `Deploy`
-            * `Tests`
-            * `Zap`
-            * `Snyk` (optional)
+            * `Tests-Backend`
+            * `Tests-Frontend`
+            * `Build-Backend`
+            * `Build-Frontend`
+            * `Deploy-Dev`
+            * `Deploy-Prod`
+            * `Trivy-Repo`
+            * `Trivy-Backend`
+            * `Trivy-Frontend`
+            * `Zap-Dev-Backend`
+            * `Zap-Dev-Frontend`
+            * `Zap-Prod-Backend`
+            * `Zap-Prod-Frontend`
             * `SonarCloud` (optional)
     * `[check] Require conversation resolution before merging`
     * `[check] Include administrators` (optional)
@@ -410,6 +429,6 @@ From GitHub:
 This repo provides a basic template to start up a new project using nodejs. It needs to be customized based on the project, for example, run tests for a different language and revised whatever secrets required.
 
 ## Example APIs
+
 This repo has good example APIs in different language and frameworks which serve as a starting point for your project.
 https://github.com/bcgov/iit-arch
-
