@@ -400,6 +400,10 @@ From GitHub:
 
 * If failed to authenticate to openshfit at the deploy stage, check if the service account “pipeline” has the right ability to get project and do deploy
 
+* If networking is unsuccessful, even with routes in place, try adding more permissive network policies.
+    ```
+    oc apply -f .github/openshift/networkPolicies.yml
+    ```
 
 ## Notes
 
