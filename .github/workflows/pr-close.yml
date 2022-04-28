@@ -7,6 +7,10 @@ on:
     branches:
       - main
 
+env:
+  NAME: gfp
+  REPONAME: greenfield-template
+
 jobs:
   cleanup-openshift:
     name: Cleanup OpenShift
@@ -21,7 +25,7 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Remove old build runs, build pods and deployment pods
-          oc delete all,pvc,secret -l app=gfp-${{ github.event.number }}
+          oc delete all,pvc,secret -l app=${{ env.NAME }}-${{ github.event.number }}
 
   cleanup-ghcr:
     name: Cleanup ghcr.io
@@ -31,7 +35,7 @@ jobs:
       - name: Delete old packages
         uses: davahome/ghcr-cleanup@v1
         with:
-            token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
-            package: greenfield-template
-            owner: orgs/bcgov
-            skip_tags: prod,test
+          token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
+          package: ${{ env.REPONAME }}
+          owner: orgs/bcgov
+          skip_tags: prod,test

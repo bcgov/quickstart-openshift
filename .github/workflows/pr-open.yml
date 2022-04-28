@@ -8,6 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   TRIGGERS: ('frontend/' 'backend/' '.github/openshift' '.github/workflows')
+  NAME: gfp
 
 jobs:
   check:
@@ -185,16 +186,16 @@ jobs:
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@0.2.3
         with:
-          scan-type: 'fs'
+          scan-type: "fs"
           ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL'
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL"
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
   trivy-backend:
     name: Trivy-Backend
@@ -204,22 +205,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Trivy Vulnerability Scan
-      uses: aquasecurity/trivy-action@0.2.3
-      with:
-        image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
-        ignore-unfixed: true
-        severity: CRITICAL
-        format: 'sarif'
-        output: 'trivy-results.sarif'
+      - name: Trivy Vulnerability Scan
+        uses: aquasecurity/trivy-action@0.2.3
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
+          ignore-unfixed: true
+          severity: CRITICAL
+          format: "sarif"
+          output: "trivy-results.sarif"
 
-    - name: Upload Trivy results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: 'trivy-results.sarif'
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: "trivy-results.sarif"
 
   trivy-frontend:
     name: Trivy-Frontend
@@ -229,26 +230,26 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Trivy Vulnerability Scan
-      uses: aquasecurity/trivy-action@0.2.3
-      with:
-        image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
-        ignore-unfixed: true
-        severity: CRITICAL
-        format: 'sarif'
-        output: 'trivy-results.sarif'
+      - name: Trivy Vulnerability Scan
+        uses: aquasecurity/trivy-action@0.2.3
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
+          ignore-unfixed: true
+          severity: CRITICAL
+          format: "sarif"
+          output: "trivy-results.sarif"
 
-    - name: Upload Trivy results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: 'trivy-results.sarif'
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: "trivy-results.sarif"
 
   deploy-dev:
     name: Deploy-Dev
-    needs: 
+    needs:
       - build-backend
       - build-frontend
     runs-on: ubuntu-latest
@@ -270,9 +271,9 @@ jobs:
             -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
-          oc rollout status dc/gfp-${{ github.event.number }}-database -w
-          oc rollout status dc/gfp-${{ github.event.number }}-backend -w
-          oc rollout status dc/gfp-${{ github.event.number }}-frontend -w
+          oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-database -w
+          oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-backend -w
+          oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-frontend -w
 
       - name: Deployment update
         uses: mshick/add-pr-comment@v1
@@ -280,8 +281,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           message: |
-            [Dev - Backend](https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) available
-            [Dev - Frontend](https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
+            [Dev - Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) available
+            [Dev - Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
 
   zap-dev-backend:
@@ -296,8 +297,8 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
-          target: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/
-          cmd_options: '-a'
+          target: https://${{ env.NAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/
+          cmd_options: "-a"
           allow_issue_writing: false
           fail_action: false
 
@@ -313,8 +314,8 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
-          target: https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/
-          cmd_options: '-a'
+          target: https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/
+          cmd_options: "-a"
           allow_issue_writing: false
           fail_action: false
 
@@ -341,9 +342,9 @@ jobs:
             -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
-          oc rollout status dc/gfp-prod-database -w
-          oc rollout status dc/gfp-prod-backend -w
-          oc rollout status dc/gfp-prod-frontend -w
+          oc rollout status dc/${{ env.NAME }}-prod-database -w
+          oc rollout status dc/${{ env.NAME }}-prod-backend -w
+          oc rollout status dc/${{ env.NAME }}-prod-frontend -w
 
       - name: Deployment update
         uses: mshick/add-pr-comment@v1
@@ -351,8 +352,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           message: |
-            [Prod - Backend](https://gfp-prod-backend.apps.silver.devops.gov.bc.ca/) available
-            [Prod - Frontend](https://gfp-prod-frontend.apps.silver.devops.gov.bc.ca/) available
+            [Prod - Backend](https://${{ env.NAME }}-prod-backend.apps.silver.devops.gov.bc.ca/) available
+            [Prod - Frontend](https://${{ env.NAME }}-prod-frontend.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
 
   zap-prod-backend:
@@ -367,8 +368,8 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
-          target: https://gfp-prod-backend.apps.silver.devops.gov.bc.ca/
-          cmd_options: '-a'
+          target: https://${{ env.NAME }}-prod-backend.apps.silver.devops.gov.bc.ca/
+          cmd_options: "-a"
           allow_issue_writing: fase
           fail_action: false
 
@@ -384,7 +385,7 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
-          target: https://gfp-prod-frontend.apps.silver.devops.gov.bc.ca/
-          cmd_options: '-a'
+          target: https://${{ env.NAME }}-prod-frontend.apps.silver.devops.gov.bc.ca/
+          cmd_options: "-a"
           allow_issue_writing: false
           fail_action: false
