@@ -8,7 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   TRIGGERS: ('frontend/' 'backend/' '.github/openshift' '.github/workflows')
-  REPONAME: gfp
+  NAME: gfp
 
 jobs:
   check:
@@ -271,9 +271,9 @@ jobs:
             -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
-          oc rollout status dc/${{ env.REPONAME }}-${{ github.event.number }}-database -w
-          oc rollout status dc/${{ env.REPONAME }}-${{ github.event.number }}-backend -w
-          oc rollout status dc/${{ env.REPONAME }}-${{ github.event.number }}-frontend -w
+          oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-database -w
+          oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-backend -w
+          oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-frontend -w
 
       - name: Deployment update
         uses: mshick/add-pr-comment@v1
@@ -281,8 +281,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           message: |
-            [Dev - Backend](https://${{ env.REPONAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) available
-            [Dev - Frontend](https://${{ env.REPONAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
+            [Dev - Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) available
+            [Dev - Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
 
   zap-dev-backend:
@@ -297,7 +297,7 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
-          target: https://${{ env.REPONAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/
+          target: https://${{ env.NAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/
           cmd_options: "-a"
           allow_issue_writing: false
           fail_action: false
@@ -314,7 +314,7 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
-          target: https://${{ env.REPONAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/
+          target: https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/
           cmd_options: "-a"
           allow_issue_writing: false
           fail_action: false
@@ -342,9 +342,9 @@ jobs:
             -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
-          oc rollout status dc/${{ env.REPONAME }}-prod-database -w
-          oc rollout status dc/${{ env.REPONAME }}-prod-backend -w
-          oc rollout status dc/${{ env.REPONAME }}-prod-frontend -w
+          oc rollout status dc/${{ env.NAME }}-prod-database -w
+          oc rollout status dc/${{ env.NAME }}-prod-backend -w
+          oc rollout status dc/${{ env.NAME }}-prod-frontend -w
 
       - name: Deployment update
         uses: mshick/add-pr-comment@v1
@@ -352,8 +352,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           message: |
-            [Prod - Backend](https://${{ env.REPONAME }}-prod-backend.apps.silver.devops.gov.bc.ca/) available
-            [Prod - Frontend](https://${{ env.REPONAME }}-prod-frontend.apps.silver.devops.gov.bc.ca/) available
+            [Prod - Backend](https://${{ env.NAME }}-prod-backend.apps.silver.devops.gov.bc.ca/) available
+            [Prod - Frontend](https://${{ env.NAME }}-prod-frontend.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
 
   zap-prod-backend:
@@ -368,7 +368,7 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
-          target: https://${{ env.REPONAME }}-prod-backend.apps.silver.devops.gov.bc.ca/
+          target: https://${{ env.NAME }}-prod-backend.apps.silver.devops.gov.bc.ca/
           cmd_options: "-a"
           allow_issue_writing: fase
           fail_action: false
@@ -385,7 +385,7 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
-          target: https://${{ env.REPONAME }}-prod-frontend.apps.silver.devops.gov.bc.ca/
+          target: https://${{ env.NAME }}-prod-frontend.apps.silver.devops.gov.bc.ca/
           cmd_options: "-a"
           allow_issue_writing: false
           fail_action: false
