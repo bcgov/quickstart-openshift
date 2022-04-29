@@ -19,7 +19,7 @@ services:
     entrypoint:
       - "sh"
       - "-c"
-      - "npm ci && npm run start"
+      - "npm i && npm run start"
     environment:
       NODE_ENV: development
       POSTGRESQL_HOST: database
@@ -48,7 +48,7 @@ services:
     entrypoint:
       - "sh"
       - "-c"
-      - "npm ci && npm run start"
+      - "npm i && npm run start"
     environment:
       NODE_ENV: development
       BACKEND_URL: backend
