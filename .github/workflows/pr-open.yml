@@ -380,7 +380,7 @@ jobs:
         with:
           target: https://${{ env.NAME }}-prod-backend.apps.silver.devops.gov.bc.ca/
           cmd_options: "-a"
-          allow_issue_writing: fase
+          allow_issue_writing: false
           fail_action: false
 
   zap-prod-frontend:
