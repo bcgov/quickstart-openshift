@@ -48,7 +48,7 @@
     "@nestjs/schematics": "^8.0.11",
     "@nestjs/swagger": "^5.2.1",
     "@nestjs/testing": "^8.4.6",
-    "@nestjs/typeorm": "^8.0.4",
+    "@nestjs/typeorm": "^8.1.2",
     "dotenv": "^16.0.1",
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",
