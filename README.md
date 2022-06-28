@@ -36,7 +36,7 @@ Deployment to production is gatekept using GitHub environments, requiring sign o
 
 Deployment to test, staging or pre-prod (pick a name!) is currently planned to be transitory, allowing access to gatekept data, but only stopping before production deployment if a failure occurs.  (work in progress)
 
-Successful deployments are linked to in Pull Request comments.
+Successful deployments are linked in Pull Request comments.
 
 ![Deployment Update](.github/graphics/deploymentUpdate.png)
 
@@ -76,7 +76,7 @@ Dependency patching is performed by:
 
 ### Higher-Level Environments
 
-Higher-level environments come after DEV deployments and are usually called any of TEST, STAGING, PRE-PROD or PROD.  Since data and token access is more frequently sensitive access must be controller.  One of a pre-approved list of reviewers must sign off for deployment to proceed.
+Higher-level environments come after DEV deployments and are usually called any of TEST, STAGING, PRE-PROD or PROD.  Since data and token access is more frequently sensitive access must be controlled.  A user on the pre-approved list of reviewers must sign off for deployment to proceed.
 
 ![Prod Request](.github/graphics/prodRequest.png)
 
