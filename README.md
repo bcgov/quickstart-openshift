@@ -155,31 +155,6 @@ Local development can be supported using Docker Compose.  Please be aware that P
 
 Initial setup is intended to take four hours or less.  This depends greatly on intended complexity, features selected/excluded and outside cooperation.
 
-## Contents
-
-* Documentation:
-    * *.md
-* Workflows:
-    * Pull Request-based (.github/workflows/pr-open.yml)
-    * On Close (.github/workflows/pr-close.yml)
-    * Main Merge (.github/workflows/main.yml)
-* Hello World! starter application
-    * TypeScript source in src/
-    * One Jest test in test/
-    * JavaScript container in Dockerfile
-* Misc:
-    * nestjs
-    * eslint (temporarily disabled)
-    * lint-staged (temporarily disabled)
-
-Not included:
-
-* Repository secrets
-* Environment secrets
-* Issues
-* Pull requests
-* JavaScript (transpiled/created in dist/)
-
 Please read [our setup guide](./SETUP.md) for more information.
 
 ## Example APIs, UIs and Metabase/Oracle Templates
