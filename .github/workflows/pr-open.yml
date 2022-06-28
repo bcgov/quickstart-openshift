@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  TRIGGERS: ('frontend/' 'backend/' '.github/openshift' '.github/workflows')
+  TRIGGERS: ('frontend/' 'backend/' '.github/openshift')
   NAME: gfp
 
 jobs:
