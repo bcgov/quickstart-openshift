@@ -403,37 +403,3 @@ jobs:
             [Prod - Backend](https://${{ env.NAME }}-prod-backend.apps.silver.devops.gov.bc.ca/) available
             [Prod - Frontend](https://${{ env.NAME }}-prod-frontend.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
-
-  zap-prod-backend:
-    name: Zap-Prod-Backend
-    needs:
-      - deploy-prod
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.3.0
-        with:
-          target: https://${{ env.NAME }}-prod-backend.apps.silver.devops.gov.bc.ca/
-          cmd_options: "-a"
-          allow_issue_writing: false
-          fail_action: false
-
-  zap-prod-frontend:
-    name: Zap-Prod-Frontend
-    needs:
-      - deploy-prod
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.3.0
-        with:
-          target: https://${{ env.NAME }}-prod-frontend.apps.silver.devops.gov.bc.ca/
-          cmd_options: "-a"
-          allow_issue_writing: false
-          fail_action: false
