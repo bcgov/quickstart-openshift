@@ -124,6 +124,8 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 * OpenShift dev artifact pruning
 * ghcr.io cleanup of dev images over 14 days-old
 
+Close and reopen a pull request to remove and reopen a pipeline to clear all of its artifacts.  This is a decreasingly common part of the troubleshooting process.
+
 ![Pull Request Close/Merge](.github/graphics/pr-cleanup.png)
 
 ## Pull Request Main Merge Pipeline
@@ -136,7 +138,7 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 
 ![Main Merge](.github/graphics/main-merge.png)
 
-## Starter Application
+# Starter Application
 
 The starter stack includes a frontend, backend and postgres database.  The frontend and backend are buld with [NestJS](https://docs.nestjs.com).  They currently do very little, but provide placeholders for more functional products.  See the backend and frontend folders for source, including Dockerfiles.
 
@@ -149,7 +151,6 @@ Features:
 Local development can be supported using Docker Compose.  Please be aware that Podman and Podman Compose work as drop-in replacements for the Docker counterparts.
 
 `docker-compose up -d`
-
 
 # Getting Started
 
