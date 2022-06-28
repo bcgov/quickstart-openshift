@@ -26,6 +26,8 @@ Features:
 
 This project is in active development.  Please visit our [issues](https://github.com/bcgov/greenfield-template/issues) page to view or request features.
 
+![PR Open](.github/graphics/pipeline.png)
+
 ### Deployments
 
 Out of the box sandboxed, pull request-based development deployments allowing for multiple developers to work on and see their features at once.
