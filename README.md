@@ -26,6 +26,39 @@ Features:
 
 This project is in active development.  Please visit our [issues](https://github.com/bcgov/greenfield-template/issues) page to view or request features.
 
+### Deployments
+
+Out of the box sandboxed, pull request-based development deployments allowing for multiple developers to work on and see their features at once.
+
+Deployment to production is gatekept using GitHub environments, requiring sign off from code maintainers.
+
+Deployment to test, staging or pre-prod (pick a name!) is currently planned to be transitory, allowing access to gatekept data, but only stopping before production deployment if a failure occurs.  (work in progress)
+
+### Testing
+
+Unit tests are run in jest, but other test frameworks can always be installed.  SonarCube should be configured to pick up sarif files and provide coverage reports.
+
+### Code Quality
+
+Code quality and coverage reporting are performed by:
+
+* SonarCloud
+* CodeQL
+
+### Security Scanning
+
+Dependency, container and vulnerability scanning is performed by:
+
+* Trivy
+* Snyk
+* OWASP ZAP
+
+### Dependency patching
+
+Dependency patching is performed by:
+
+* Snyk
+
 
 ## Pull Request Opened/Modified
 
