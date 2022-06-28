@@ -76,7 +76,7 @@ Dependency patching is performed by:
 
 ### Higher-Level Environments
 
-Higher-level environments come after DEV deployments and are usually called any of TEST, STAGING, PRE-PROD or PROD.  Since data and token access is more frequently sensitive access must be controlled.  One of a pre-approved list of reviewers must sign off for deployment to proceed.
+Higher-level environments come after DEV deployments and are usually called any of TEST, STAGING, PRE-PROD or PROD.  Since data and token access is more frequently sensitive access must be controlled.  A user on the pre-approved list of reviewers must sign off for deployment to proceed.
 
 ![Prod Request](.github/graphics/prodRequest.png)
 
