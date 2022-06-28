@@ -93,8 +93,6 @@ jobs:
 
   sonarcloud-frontend:
     name: SonarCloud-Frontend
-    needs:
-      - check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
