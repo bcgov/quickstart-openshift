@@ -26,6 +26,8 @@ Features:
 
 This project is in active development.  Please visit our [issues](https://github.com/bcgov/greenfield-template/issues) page to view or request features.
 
+![PR Open](.github/graphics/pipeline.png)
+
 ### Deployments
 
 Out of the box sandboxed, pull request-based development deployments allowing for multiple developers to work on and see their features at once.
@@ -34,11 +36,14 @@ Deployment to production is gatekept using GitHub environments, requiring sign o
 
 Deployment to test, staging or pre-prod (pick a name!) is currently planned to be transitory, allowing access to gatekept data, but only stopping before production deployment if a failure occurs.  (work in progress)
 
+Successful deployments are linked in Pull Request comments.
+
+![Deployment Update](.github/graphics/deploymentUpdate.png)
+
 
 ### Builds
 
 Builds are handled by Docker Actions and published to the GitHub Container Registry (ghcr.io).  This allows for publicly accessible builds that can be consumed by OpenShift, Amazon Web Services or any other container service.
-
 
 ### Testing
 
@@ -50,6 +55,10 @@ Code quality and coverage reporting are performed by:
 
 * SonarCloud
 * CodeQL
+
+Sonar reports are provided as Pull Request comments.
+
+![Sonar Cloud Update](.github/graphics/sonarUpdate.png)
 
 ### Security Scanning
 
@@ -65,6 +74,13 @@ Dependency patching is performed by:
 
 * Snyk
 
+### Higher-Level Environments
+
+Higher-level environments come after DEV deployments and are usually called any of TEST, STAGING, PRE-PROD or PROD.  Since data and token access is more frequently sensitive access must be controlled.  A user on the pre-approved list of reviewers must sign off for deployment to proceed.
+
+![Prod Request](.github/graphics/prodRequest.png)
+
+![Prod Accept](.github/graphics/prodAccept.png)
 
 ## Pull Request Opened/Modified
 
@@ -86,6 +102,10 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 
 ![Pull Request Open](.github/graphics/pr-open.png)
 
+Builds can be run or skipped with directory triggers.  Documentation, for example, will not require most pipeline steps.
+
+![Pull Request Skipped](.github/graphics/prSkipped.png)
+
 ### Pull Request Future State
 
 Several improvements are on the way:
@@ -104,6 +124,8 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 * OpenShift dev artifact pruning
 * ghcr.io cleanup of dev images over 14 days-old
 
+Close and reopen a pull request to remove and reopen a pipeline to clear all of its artifacts.  This is a decreasingly common part of the troubleshooting process.
+
 ![Pull Request Close/Merge](.github/graphics/pr-cleanup.png)
 
 ## Pull Request Main Merge Pipeline
@@ -116,7 +138,7 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 
 ![Main Merge](.github/graphics/main-merge.png)
 
-## Starter Application
+# Starter Application
 
 The starter stack includes a frontend, backend and postgres database.  The frontend and backend are buld with [NestJS](https://docs.nestjs.com).  They currently do very little, but provide placeholders for more functional products.  See the backend and frontend folders for source, including Dockerfiles.
 
@@ -130,37 +152,11 @@ Local development can be supported using Docker Compose.  Please be aware that P
 
 `docker-compose up -d`
 
-
 # Getting Started
 
 Initial setup is intended to take four hours or less.  This depends greatly on intended complexity, features selected/excluded and outside cooperation.
 
-## Contents
-
-* Documentation:
-    * *.md
-* Workflows:
-    * Pull Request-based (.github/workflows/pr-open.yml)
-    * On Close (.github/workflows/pr-close.yml)
-    * Main Merge (.github/workflows/main.yml)
-* Hello World! starter application
-    * TypeScript source in src/
-    * One Jest test in test/
-    * JavaScript container in Dockerfile
-* Misc:
-    * nestjs
-    * eslint (temporarily disabled)
-    * lint-staged (temporarily disabled)
-
-Not included:
-
-* Repository secrets
-* Environment secrets
-* Issues
-* Pull requests
-* JavaScript (transpiled/created in dist/)
-
-Please read [our setup guide](./GETTING_STARTED.md) for more information.
+Please read [our setup guide](./SETUP.md) for more information.
 
 ## Example APIs, UIs and Metabase/Oracle Templates
 
