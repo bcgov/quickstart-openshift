@@ -160,7 +160,7 @@ Not included:
 * Pull requests
 * JavaScript (transpiled/created in dist/)
 
-Please read [our setup guide](./GETTING_STARTED.md) for more information.
+Please read [our setup guide](./SETUP.md) for more information.
 
 ## Example APIs, UIs and Metabase/Oracle Templates
 
