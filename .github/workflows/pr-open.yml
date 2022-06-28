@@ -154,23 +154,23 @@ jobs:
           npm ci
           npm test
 
-  # # https://github.com/snyk/snyk
-  # snyk:
-  #   name: Snyk
-  #   needs:
-  #     - check
-  #   if: needs.check.outputs.build == 'true'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout repository
-  #     uses: actions/checkout@v2
-
-  #   - name: Run Snyk to check for vulnerabilities
-  #     uses: snyk/actions/node@master
-  #     env:
-  #       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  #     with:
-  #       args: --all-projects --severity-threshold=high
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.exclusions=.github/**/*,/**/dist
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=greenfield-template
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
