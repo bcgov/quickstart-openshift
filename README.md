@@ -34,11 +34,14 @@ Deployment to production is gatekept using GitHub environments, requiring sign o
 
 Deployment to test, staging or pre-prod (pick a name!) is currently planned to be transitory, allowing access to gatekept data, but only stopping before production deployment if a failure occurs.  (work in progress)
 
+Successful deployments are linked to in Pull Request comments.
+
+![Deployment Update](.github/graphics/deploymentUpdate.png)
+
 
 ### Builds
 
 Builds are handled by Docker Actions and published to the GitHub Container Registry (ghcr.io).  This allows for publicly accessible builds that can be consumed by OpenShift, Amazon Web Services or any other container service.
-
 
 ### Testing
 
@@ -50,6 +53,10 @@ Code quality and coverage reporting are performed by:
 
 * SonarCloud
 * CodeQL
+
+Sonar reports are provided as Pull Request comments.
+
+![Sonar Cloud Update](.github/graphics/sonarUpdate.png)
 
 ### Security Scanning
 
@@ -64,7 +71,6 @@ Dependency, container and vulnerability scanning is performed by:
 Dependency patching is performed by:
 
 * Snyk
-
 
 ## Pull Request Opened/Modified
 
@@ -85,6 +91,10 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 
 
 ![Pull Request Open](.github/graphics/pr-open.png)
+
+Builds can be run or skipped with directory triggers.  Documentation, for example, will not require most pipeline steps.
+
+![Pull Request Skipped](.github/graphics/prSkipped.png)
 
 ### Pull Request Future State
 
