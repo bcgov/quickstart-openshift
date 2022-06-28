@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  TRIGGERS: ('frontend/' 'backend/' '.github/openshift' '.github/workflows')
+  TRIGGERS: ('frontend/' 'backend/' '.github/openshift')
   NAME: gfp
 
 jobs:
@@ -158,6 +158,7 @@ jobs:
     name: SonarCloud-Frontend
     needs:
       - check
+    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -182,6 +183,7 @@ jobs:
     name: SonarCloud-Backend
     needs:
       - check
+    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
