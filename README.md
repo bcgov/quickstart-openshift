@@ -27,7 +27,7 @@ Features:
 This project is in active development.  Please visit our [issues](https://github.com/bcgov/greenfield-template/issues) page to view or request features.
 
 
-### Pull Request Opened/Modified
+## Pull Request Opened/Modified
 
 This workflow is triggered when a Pull Request to the main branch is created or modified.  Each development deployment is separate, using its own stack.  This avoids collisions between development environments and provides isolation for testing and experimentation.  Pipeline steps are enforced, preventing merge of failing code.
 
@@ -39,15 +39,24 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 * [GitHub Container Registry](https://github.com/bcgov/greenfield-template/pkgs/container/greenfield-template) image publishing
 * [RedHat OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) deployment, with other options under consideration
 * [Jest](https://jestjs.io/) JavaScript testing enforced in-pipeline
-* Code test coverage reporting (coming soon!)
-* [ESLint](https://eslint.org/) linting (coming soon!)
+* [SonarCloud](https://sonarcloud.io/) Code test coverage reporting
 * [Tryvy](https://aquasecurity.github.io/trivy) image/infrastructure vulnerability/config scanning
 * [OWASP ZAP](https://www.zaproxy.org/) Zed Attack Proxy live application scanning
+* [Snyk](https://snyk.io/) vulnerability scalling and dependency patching
 
-...and more [on the way](https://github.com/bcgov/greenfield-template/issues)!
 
 ![Pull Request Open](.github/graphics/pr-open.png)
 
+### Pull Request Future State
+
+Several improvements are on the way:
+
+* Smoke testing
+* End-to-end testing
+* Gatekeeping before entering test or production
+* [ESLint](https://eslint.org/) linting
+
+Please [read or submit issues](https://github.com/bcgov/greenfield-template/issues) to help shape this project!
 
 ## Pull Request Cleanup Pipeline
 
@@ -101,8 +110,8 @@ Initial setup is intended to take four hours or less.  This depends greatly on i
     * JavaScript container in Dockerfile
 * Misc:
     * nestjs
-    * eslint
-    * lint-staged
+    * eslint (temporarily disabled)
+    * lint-staged (temporarily disabled)
 
 Not included:
 
