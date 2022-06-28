@@ -6,24 +6,6 @@ on:
       - main
 
 jobs:
-  cleanup-openshift:
-    name: Cleanup OpenShift
-    runs-on: ubuntu-latest
-    environment:
-      name: prod
-    steps:
-      - uses: actions/checkout@v2
-      - name: Remove OpenShift artifacts
-        run: |
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
-
-          # Remove completed build runs, build pods and deployment pods
-          for p in $(oc get po | grep "Completed" | awk '{print $1}')
-          do
-            oc delete po ${p}
-          done
-
   codeql:
     name: CodeQL
     runs-on: ubuntu-latest
@@ -93,8 +75,6 @@ jobs:
 
   sonarcloud-frontend:
     name: SonarCloud-Frontend
-    needs:
-      - check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -117,8 +97,6 @@ jobs:
 
   sonarcloud-backend:
     name: SonarCloud-Backend
-    needs:
-      - check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
