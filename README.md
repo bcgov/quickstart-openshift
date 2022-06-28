@@ -72,6 +72,14 @@ Dependency patching is performed by:
 
 * Snyk
 
+### Higher-Level Environments
+
+Higher-level environments come after DEV deployments and are usually called any of TEST, STAGING, PRE-PROD or PROD.  Since data and token access is more frequently sensitive access must be controller.  One of a pre-approved list of reviewers must sign off for deployment to proceed.
+
+![Prod Request](.github/graphics/prodRequest.png)
+
+![Prod Accept](.github/graphics/prodAccept.png)
+
 ## Pull Request Opened/Modified
 
 This workflow is triggered when a Pull Request to the main branch is created or modified.  Each development deployment is separate, using its own stack.  This avoids collisions between development environments and provides isolation for testing and experimentation.  Pipeline steps are enforced, preventing merge of failing code.
