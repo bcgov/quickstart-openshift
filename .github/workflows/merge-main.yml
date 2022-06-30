@@ -77,50 +77,6 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
-  sonarcloud-frontend:
-    name: SonarCloud-Frontend
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=greenfield-template
-            -Dsonar.sources=src
-            -Dsonar.exclusions=**/test/*
-            -Dsonar.projectBaseDir=./frontend
-  #          -Dsonar.typescript.lcov.reportPath=./coverage/lcov.info
-  #          -Dsonar.testExecutionReportPath=./test-report.xml
-
-  sonarcloud-backend:
-    name: SonarCloud-Backend
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=greenfield-template
-            -Dsonar.sources=src
-            -Dsonar.exclusions=**/test/*
-            -Dsonar.projectBaseDir=./backend
-  #          -Dsonar.typescript.lcov.reportPath=./coverage/lcov.info
-  #          -Dsonar.testExecutionReportPath=./test-report.xml
-
   # TEST deployment starts here
   build-backend:
     name: Build-Backend
@@ -229,6 +185,47 @@ jobs:
             -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-backend | oc apply -f -
           oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
             -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-frontend | oc apply -f -
+
+          # Follow any active rollouts (see deploymentconfigs)
+          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-database -w
+          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-backend -w
+          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-frontend -w
+
+          # Remove completed build runs, build pods and deployment pods
+          for p in $(oc get po | grep "Completed" | awk '{print $1}')
+          do
+            oc delete po ${p}
+          done
+
+  deploy-prod:
+    name: Deploy-Prod
+    needs:
+      - deploy-test
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+    env:
+      ZONE: prod
+      PREV: test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.NAMESPACE }}
+
+          # Clear stale images for import/replacement
+          if [ $(oc get is -l app=${{ env.NAME }}-${{ env.ZONE }} -o name | grep -v database | wc -l) -gt 0 ]; then
+            oc delete is -l app=${{ env.NAME }}-${{ env.ZONE }}
+          fi
+
+          # Process and apply deployment templates
+          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f -
+          oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ env.ZONE }} \
+            -p PROMOTE=${{ github.repository }}:${{ env.PREV }}-backend | oc apply -f -
+          oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
+            -p PROMOTE=${{ github.repository }}:${{ env.PREV }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-database -w
