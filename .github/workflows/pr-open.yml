@@ -296,7 +296,7 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Clear stale images for import/replacement
-          if [ $(oc get is -l app=${{ env.NAME }}-${{ github.event.number }} -o name | wc -l) -gt 0 ]; then
+          if [ $(oc get is -l app=${{ env.NAME }}-${{ env.ZONE }} -o name | grep -v database | wc -l) -gt 0 ]; then
             oc delete is -l app=${{ env.NAME }}-${{ github.event.number }}
           fi
 
