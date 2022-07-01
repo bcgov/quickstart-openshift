@@ -140,24 +140,14 @@ jobs:
           npm ci
           npm test
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Report code coverage
+        uses: zgosalvez/github-actions-report-lcov@v1
         with:
-          # projectBaseDir: backend
-          args: >
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=greenfield-template
-            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
-            -Dsonar.project.monorepo.enabled=true
-            -Dsonar.scm.exclusions.disabled=true
-            -Dsonar.sources=backend,frontend
-            -Dsonar.testExecutionReportPath=backend/test-report.xml
-            -Dsonar.typescript.tsconfigPath=backend/tsconfig.json
-            -Dsonar.test.exclusions=backend/test/**,frontend/test/**
-            -Dsonar.tests=backend/test/,backend/test/
+          coverage-files: coverage/lcov.info
+          minimum-coverage: 90
+          artifact-name: code-coverage-report
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: backend
 
   tests-frontend:
     name: Tests-Frontend
@@ -177,24 +167,14 @@ jobs:
           npm ci
           npm test
 
-      # - name: SonarCloud Scan
-      #   uses: SonarSource/sonarcloud-github-action@master
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #   with:
-      #     projectBaseDir: frontend
-      #     args: >
-      #       -Dsonar.organization=bcgov-sonarcloud
-      #       -Dsonar.projectKey=greenfield-template
-      #       -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-      #       -Dsonar.project.monorepo.enabled=true
-      #       -Dsonar.scm.exclusions.disabled=true
-      #       -Dsonar.sources=src
-      #       -Dsonar.testExecutionReportPath=test-report.xml
-      #       -Dsonar.typescript.tsconfigPath=tsconfig.json
-      #       -Dsonar.test.exclusions=test/**
-      #       -Dsonar.tests=test/
+      - name: Report code coverage
+        uses: zgosalvez/github-actions-report-lcov@v1
+        with:
+          coverage-files: coverage/lcov.info
+          minimum-coverage: 90
+          artifact-name: code-coverage-report
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: frontend
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
