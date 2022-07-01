@@ -150,7 +150,7 @@ jobs:
           args: >
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.projectKey=greenfield-template
-            -Dsonar.javascript.lcov.reportPath=coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.typescript.tsconfigPath=tsconfig.json
             -Dsonar.testExecutionReportPath=test-report.xml
             -Dsonar.test.exclusions=test/**
@@ -185,7 +185,7 @@ jobs:
           args: >
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.projectKey=greenfield-template
-            -Dsonar.javascript.lcov.reportPath=coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.typescript.tsconfigPath=tsconfig.json
             -Dsonar.testExecutionReportPath=test-report.xml
             -Dsonar.test.exclusions=test/**
