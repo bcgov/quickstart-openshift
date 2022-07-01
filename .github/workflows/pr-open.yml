@@ -144,6 +144,7 @@ jobs:
         uses: romeovs/lcov-reporter-action@v0.2.16
         with:
           lcov-file: ./backend/coverage/lcov.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   tests-frontend:
     name: Tests-Frontend
@@ -167,6 +168,7 @@ jobs:
         uses: romeovs/lcov-reporter-action@v0.2.16
         with:
           lcov-file: ./frontend/coverage/lcov.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
