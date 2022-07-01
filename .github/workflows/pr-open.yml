@@ -301,6 +301,8 @@ jobs:
     needs:
       - build-backend
       - build-frontend
+      - tests-backend
+      - tests-frontend
     runs-on: ubuntu-latest
     environment:
       name: dev
@@ -378,6 +380,7 @@ jobs:
     needs:
       - zap-dev-backend
       - zap-dev-frontend
+      - sonarcloud
     runs-on: ubuntu-latest
     steps:
       - name: Pre-merge update
