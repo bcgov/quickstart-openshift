@@ -173,8 +173,8 @@ jobs:
   sonarcloud:
     name: SonarCloud
     needs:
-      - check
-    if: needs.check.outputs.build == 'true'
+      - build-backend
+      - build-frontend
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -200,7 +200,8 @@ jobs:
   trivy-repo:
     name: Trivy-Repo
     needs:
-      - check
+      - build-backend
+      - build-frontend
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-18.04
     steps:
@@ -381,6 +382,9 @@ jobs:
       - zap-dev-backend
       - zap-dev-frontend
       - sonarcloud
+      - trivy-repo
+      - trivy-backend
+      - trivy-frontend
     runs-on: ubuntu-latest
     steps:
       - name: Pre-merge update
