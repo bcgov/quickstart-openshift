@@ -141,9 +141,10 @@ jobs:
       - name: Report code coverage
         uses: romeovs/lcov-reporter-action@v0.2.16
         with:
-          lcov-file: ./backend/coverage/lcov.info
+          title: Backend coverage report
+          delete-old-comments: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          title: Backend
+          lcov-file: ./backend/coverage/lcov.info
 
   tests-frontend:
     name: Tests-Frontend
@@ -164,9 +165,10 @@ jobs:
       - name: Report code coverage
         uses: romeovs/lcov-reporter-action@v0.2.16
         with:
-          lcov-file: ./frontend/coverage/lcov.info
+          title: Frontend coverage report
+          delete-old-comments: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          title: Frontend
+          lcov-file: ./frontend/coverage/lcov.info
 
   sonarcloud:
     name: SonarCloud
