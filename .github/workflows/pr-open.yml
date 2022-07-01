@@ -175,6 +175,8 @@ jobs:
     needs:
       - build-backend
       - build-frontend
+      - tests-backend
+      - tests-frontend
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -202,6 +204,8 @@ jobs:
     needs:
       - build-backend
       - build-frontend
+      - tests-backend
+      - tests-frontend
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-18.04
     steps:
@@ -227,6 +231,8 @@ jobs:
     needs:
       - build-backend
       - build-frontend
+      - tests-backend
+      - tests-frontend
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -252,6 +258,8 @@ jobs:
     needs:
       - build-backend
       - build-frontend
+      - tests-backend
+      - tests-frontend
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -277,6 +285,8 @@ jobs:
     needs:
       - build-backend
       - build-frontend
+      - tests-backend
+      - tests-frontend
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -383,6 +393,7 @@ jobs:
       - zap-dev-frontend
       - sonarcloud
       - trivy-repo
+      - trivy-rhel-ubi
       - trivy-backend
       - trivy-frontend
     runs-on: ubuntu-latest
