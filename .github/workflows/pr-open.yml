@@ -200,8 +200,8 @@ jobs:
             -Dsonar.test=**/test
 
   # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy-repo:
-    name: Trivy-Repo
+  trivy:
+    name: Trivy
     needs:
       - build-backend
       - build-frontend
@@ -359,10 +359,7 @@ jobs:
       - zap-dev-backend
       - zap-dev-frontend
       - sonarcloud
-      - trivy-repo
-      - trivy-rhel-ubi
-      - trivy-backend
-      - trivy-frontend
+      - trivy
     runs-on: ubuntu-latest
     steps:
       - name: Pre-merge update
