@@ -15,12 +15,12 @@ The Greenfield-template is a fully functional set of pipeline workflows and a st
 
 Features:
 * Pull Request-based pipeline
-* Sandboxed development deployments (OpenShift)
-* Gated production deployments (OpenShift)
+* Sandboxed development deployments
+* Gated production deployments
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure and container scan tools
 * Automatic dependency patching with Pull Requests
-* Gatekeeping based on code reviews and pipeline checks
+* Enforced code reviews and pipeline checks
 * Templates and setup documentation
 * Starter TypeScript application stack
 
@@ -30,7 +30,7 @@ This project is in active development.  Please visit our [issues](https://github
 
 ### Deployments
 
-Out of the box sandboxed, pull request-based development deployments allowing for multiple developers to work on and see their features at once.
+Out-of-the-box, sandboxed, pull request-based development deployments allowing for multiple developers to work on and see their features at once.
 
 Deployment to production is gatekept using GitHub environments, requiring sign off from code maintainers.
 
