@@ -146,16 +146,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          projectBaseDir: backend
+          # projectBaseDir: backend
           args: >
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.projectKey=greenfield-template
             -Dsonar.verbose=true
-  #            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-  #            -Dsonar.testExecutionReportPath=test-report.xml
-  #            -Dsonar.typescript.tsconfigPath=tsconfig.json
-  #            -Dsonar.test.exclusions=test/**
-  #            -Dsonar.tests=test/
+            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
+            -Dsonar.scm.exclusions.disabled=true
+            -Dsonar.sources=backend
+            -Dsonar.testExecutionReportPath=backend/test-report.xml
+            -Dsonar.typescript.tsconfigPath=backend/tsconfig.json
+            -Dsonar.test.exclusions=backend/test/**
+            -Dsonar.tests=backend/test/
 
   tests-frontend:
     name: Tests-Frontend
@@ -186,11 +188,12 @@ jobs:
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.projectKey=greenfield-template
             -Dsonar.verbose=true
-  #            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-  #            -Dsonar.testExecutionReportPath=test-report.xml
-  #            -Dsonar.typescript.tsconfigPath=tsconfig.json
-  #            -Dsonar.test.exclusions=test/**
-  #            -Dsonar.tests=test/
+             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+             -Dsonar.scm.exclusions.disabled=true
+             -Dsonar.testExecutionReportPath=test-report.xml
+             -Dsonar.typescript.tsconfigPath=tsconfig.json
+             -Dsonar.test.exclusions=test/**
+             -Dsonar.tests=test/
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
