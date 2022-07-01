@@ -131,8 +131,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Tests
         run: |
@@ -145,6 +143,7 @@ jobs:
         with:
           lcov-file: ./backend/coverage/lcov.info
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          title: Backend
 
   tests-frontend:
     name: Tests-Frontend
@@ -155,8 +154,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Tests
         run: |
@@ -169,6 +166,33 @@ jobs:
         with:
           lcov-file: ./frontend/coverage/lcov.info
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          title: Frontend
+
+  sonarcloud:
+    name: SonarCloud
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        # Disable shallow clone for SonarCloud analysis
+        with:
+          fetch-depth: 0
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.exclusions=**/test/**
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.project.monorepo.enabled=true
+            -Dsonar.projectKey=greenfield-template
+            -Dsonar.sources=backend,frontend
+            -Dsonar.test=**/test
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
