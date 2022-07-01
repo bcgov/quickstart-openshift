@@ -173,10 +173,8 @@ jobs:
   sonarcloud:
     name: SonarCloud
     needs:
-      - build-backend
-      - build-frontend
-      - tests-backend
-      - tests-frontend
+      - check
+    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
