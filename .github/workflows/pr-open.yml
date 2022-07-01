@@ -213,6 +213,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # Repo scan
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@0.3.0
         with:
@@ -227,19 +228,7 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
-  trivy-rhel-ubi:
-    name: Trivy-RHEL-UBI
-    needs:
-      - build-backend
-      - build-frontend
-      - tests-backend
-      - tests-frontend
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
+      # Base image scan
       - name: Trivy Vulnerability Scan
         uses: aquasecurity/trivy-action@0.3.0
         with:
@@ -254,19 +243,7 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
-  trivy-backend:
-    name: Trivy-Backend
-    needs:
-      - build-backend
-      - build-frontend
-      - tests-backend
-      - tests-frontend
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
+      # Backend container scan
       - name: Trivy Vulnerability Scan
         uses: aquasecurity/trivy-action@0.3.0
         with:
@@ -281,19 +258,7 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
-  trivy-frontend:
-    name: Trivy-Frontend
-    needs:
-      - build-backend
-      - build-frontend
-      - tests-backend
-      - tests-frontend
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
+      # Frontend container scan
       - name: Trivy Vulnerability Scan
         uses: aquasecurity/trivy-action@0.3.0
         with:
@@ -316,6 +281,7 @@ jobs:
       - tests-backend
       - tests-frontend
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment:
       name: dev
     steps:
