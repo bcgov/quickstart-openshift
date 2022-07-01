@@ -150,12 +150,12 @@ jobs:
           args: >
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.projectKey=greenfield-template
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            -Dsonar.typescript.tsconfigPath=tsconfig.json
-            -Dsonar.testExecutionReportPath=test-report.xml
-            -Dsonar.test.exclusions=test/**
-            -Dsonar.tests=test/
             -Dsonar.verbose=true
+  #            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+  #            -Dsonar.testExecutionReportPath=test-report.xml
+  #            -Dsonar.typescript.tsconfigPath=tsconfig.json
+  #            -Dsonar.test.exclusions=test/**
+  #            -Dsonar.tests=test/
 
   tests-frontend:
     name: Tests-Frontend
@@ -185,12 +185,12 @@ jobs:
           args: >
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.projectKey=greenfield-template
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            -Dsonar.typescript.tsconfigPath=tsconfig.json
-            -Dsonar.testExecutionReportPath=test-report.xml
-            -Dsonar.test.exclusions=test/**
-            -Dsonar.tests=test/
             -Dsonar.verbose=true
+  #            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+  #            -Dsonar.testExecutionReportPath=test-report.xml
+  #            -Dsonar.typescript.tsconfigPath=tsconfig.json
+  #            -Dsonar.test.exclusions=test/**
+  #            -Dsonar.tests=test/
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
