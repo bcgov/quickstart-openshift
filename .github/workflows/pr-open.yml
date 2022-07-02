@@ -43,7 +43,7 @@ jobs:
           echo "Build and deploy workflows not triggered"
 
   build-backend:
-    name: Build - Backend
+    name: Build and Push Backend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -83,7 +83,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   build-frontend:
-    name: Build - Frontend
+    name: Build and Push Frontend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -123,7 +123,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   tests-backend:
-    name: Tests - Backend
+    name: Tests for Backend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -146,7 +146,7 @@ jobs:
           lcov-file: ./backend/coverage/lcov.info
 
   tests-frontend:
-    name: Tests - Frontend
+    name: Tests for Frontend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
