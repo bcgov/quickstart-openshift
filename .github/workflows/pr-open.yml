@@ -122,22 +122,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  tests-frontend:
-    name: Tests-Frontend
-    needs:
-      - check
-    if: needs.check.outputs.build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Tests
-        run: |
-          cd frontend
-          npm ci
-          npm test
-
   tests-backend:
     name: Tests-Backend
     needs:
@@ -154,41 +138,50 @@ jobs:
           npm ci
           npm test
 
-  sonarcloud-frontend:
-    name: SonarCloud-Frontend
-    needs:
-      - check
-    if: needs.check.outputs.build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+      - name: Report code coverage
+        uses: romeovs/lcov-reporter-action@v0.3.1
         with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=greenfield-template
-            -Dsonar.sources=src
-            -Dsonar.exclusions=**/test/*
-            -Dsonar.projectBaseDir=./frontend
-  #          -Dsonar.typescript.lcov.reportPath=./coverage/lcov.info
-  #          -Dsonar.testExecutionReportPath=./test-report.xml
+          title: Backend coverage report
+          delete-old-comments: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: ./backend/coverage/lcov.info
 
-  sonarcloud-backend:
-    name: SonarCloud-Backend
+  tests-frontend:
+    name: Tests-Frontend
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Tests
+        run: |
+          cd frontend
+          npm ci
+          npm test
+
+      - name: Report code coverage
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        with:
+          title: Frontend coverage report
+          delete-old-comments: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: ./frontend/coverage/lcov.info
+
+  sonarcloud:
+    name: SonarCloud
     needs:
       - check
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        # Disable shallow clone for SonarCloud analysis
         with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
@@ -196,13 +189,12 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
+            -Dsonar.exclusions=**/test/**
             -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=greenfield-template
-            -Dsonar.sources=src
-            -Dsonar.exclusions=**/test/*
-            -Dsonar.projectBaseDir=./backend
-  #          -Dsonar.typescript.lcov.reportPath=./coverage/lcov.info
-  #          -Dsonar.testExecutionReportPath=./test-report.xml
+            -Dsonar.sources=backend,frontend
+            -Dsonar.test=**/test
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
