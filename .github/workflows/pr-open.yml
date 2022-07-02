@@ -342,7 +342,8 @@ jobs:
           oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ github.event.number }} | oc apply -f -
 
           # Select backend image, then process/apply
-          if [ ${{ needs.build-backend.outputs.build == 'true' }}];
+          if [ ${{ needs.build-backend.outputs.build == 'true' }}]
+          then
             oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ github.event.number }} \
               -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
           else
@@ -350,7 +351,8 @@ jobs:
           fi
 
           # Select frontend image, then process/apply
-          if [ ${{ needs.build-frontend.outputs.build == 'true' }}];
+          if [ ${{ needs.build-frontend.outputs.build == 'true' }}]
+          then
             oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ github.event.number }} \
               -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
           else
