@@ -369,6 +369,9 @@ jobs:
     name: ZAP - Frontend
     needs:
       - deploy-dev
+      - sonarcloud
+      - trivy-backend
+      - trivy-frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
