@@ -43,7 +43,7 @@ jobs:
           echo "Build and deploy workflows not triggered"
 
   build-backend:
-    name: Build-Backend
+    name: Build and Push Backend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -83,7 +83,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   build-frontend:
-    name: Build-Frontend
+    name: Build and Push Frontend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -123,7 +123,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   tests-backend:
-    name: Tests-Backend
+    name: Tests for Backend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -137,7 +137,6 @@ jobs:
           cd backend
           npm ci
           npm test
-
       - name: Report code coverage
         uses: romeovs/lcov-reporter-action@v0.3.1
         with:
@@ -147,7 +146,7 @@ jobs:
           lcov-file: ./backend/coverage/lcov.info
 
   tests-frontend:
-    name: Tests-Frontend
+    name: Tests for Frontend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -161,7 +160,6 @@ jobs:
           cd frontend
           npm ci
           npm test
-
       - name: Report code coverage
         uses: romeovs/lcov-reporter-action@v0.3.1
         with:
@@ -170,10 +168,34 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           lcov-file: ./frontend/coverage/lcov.info
 
-  sonarcloud:
-    name: SonarCloud
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy-repo:
+    name: Repository Scan
     needs:
       - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@0.3.0
+        with:
+          scan-type: "fs"
+          ignore-unfixed: true
+          format: "sarif"
+          output: "trivy-results-repo.sarif"
+          severity: "CRITICAL"
+
+  sonarcloud:
+    name: Static Analysis
+    needs:
+      - build-backend
+      - build-frontend
+      - tests-backend
+      - tests-frontend
+      - trivy-repo
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -197,66 +219,21 @@ jobs:
             -Dsonar.test=**/test
 
   # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy-repo:
-    name: Trivy-Repo
+  trivy-backend:
+    name: Backend Container Scan
     needs:
-      - check
+      - build-backend
+      - build-frontend
+      - tests-backend
+      - tests-frontend
+      - trivy-repo
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@0.3.0
-        with:
-          scan-type: "fs"
-          ignore-unfixed: true
-          format: "sarif"
-          output: "trivy-results.sarif"
-          severity: "CRITICAL"
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: "trivy-results.sarif"
-
-  trivy-rhel-ubi:
-    name: Trivy-RHEL-UBI
-    needs:
-      - build-backend
-      - build-frontend
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Trivy Vulnerability Scan
-        uses: aquasecurity/trivy-action@0.3.0
-        with:
-          image-ref: registry.access.redhat.com/ubi8/ubi
-          ignore-unfixed: true
-          severity: CRITICAL
-          format: "sarif"
-          output: "trivy-results.sarif"
-
-      - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: "trivy-results.sarif"
-
-  trivy-backend:
-    name: Trivy-Backend
-    needs:
-      - build-backend
-      - build-frontend
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
+      # Backend container scan
       - name: Trivy Vulnerability Scan
         uses: aquasecurity/trivy-action@0.3.0
         with:
@@ -264,24 +241,29 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL
           format: "sarif"
-          output: "trivy-results.sarif"
+          output: "trivy-results-backend.sarif"
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: "trivy-results.sarif"
+          sarif_file: "trivy-results-backend.sarif"
 
+  # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-frontend:
-    name: Trivy-Frontend
+    name: Frontend Container Scan
     needs:
       - build-backend
       - build-frontend
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+      - tests-backend
+      - tests-frontend
+      - trivy-repo
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-18.04
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v2
 
+      # Frontend container scan
       - name: Trivy Vulnerability Scan
         uses: aquasecurity/trivy-action@0.3.0
         with:
@@ -289,19 +271,23 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL
           format: "sarif"
-          output: "trivy-results.sarif"
+          output: "trivy-results-frontend.sarif"
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: "trivy-results.sarif"
+          sarif_file: "trivy-results-frontend.sarif"
 
   deploy-dev:
-    name: Deploy-Dev
+    name: DEV Environment Deploy
     needs:
       - build-backend
       - build-frontend
+      - tests-backend
+      - tests-frontend
+      - trivy-repo
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment:
       name: dev
     steps:
@@ -339,10 +325,13 @@ jobs:
             [Dev - Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
 
-  zap-dev-backend:
-    name: Zap-Dev-Backend
+  zap-backend:
+    name: Backend App Scan
     needs:
       - deploy-dev
+      - sonarcloud
+      - trivy-backend
+      - trivy-frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -356,10 +345,13 @@ jobs:
           allow_issue_writing: false
           fail_action: false
 
-  zap-dev-frontend:
-    name: Zap-Dev-Frontend
+  zap-frontend:
+    name: Frontend App Scan
     needs:
       - deploy-dev
+      - sonarcloud
+      - trivy-backend
+      - trivy-frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -373,12 +365,13 @@ jobs:
           allow_issue_writing: false
           fail_action: false
 
-  pre-merge:
-    name: Pre-Merge
+  completion:
+    name: Completion
     needs:
-      - zap-dev-backend
-      - zap-dev-frontend
+      - zap-backend
+      - zap-frontend
     runs-on: ubuntu-latest
+    environment: dev
     steps:
       - name: Pre-merge update
         uses: mshick/add-pr-comment@v1
