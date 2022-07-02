@@ -345,10 +345,13 @@ jobs:
             [Dev - Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
           allow-repeats: false
 
-  zap-dev-backend:
+  zap-backend:
     name: ZAP - Backend
     needs:
       - deploy-dev
+      - sonarcloud
+      - trivy-backend
+      - trivy-frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -362,7 +365,7 @@ jobs:
           allow_issue_writing: false
           fail_action: false
 
-  zap-dev-frontend:
+  zap-frontend:
     name: ZAP - Frontend
     needs:
       - deploy-dev
@@ -382,11 +385,8 @@ jobs:
   completion:
     name: Completion
     needs:
-      - sonarcloud
-      - trivy-backend
-      - trivy-frontend
-      - zap-dev-backend
-      - zap-dev-frontend
+      - zap-backend
+      - zap-frontend
     runs-on: ubuntu-latest
     environment: dev
     steps:
