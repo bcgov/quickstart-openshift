@@ -188,6 +188,26 @@ jobs:
           npm test
 >>>>>>> acb2533 (Adjust job names)
 
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy-repo:
+    name: Trivy - Repo
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@0.3.0
+        with:
+          scan-type: "fs"
+          ignore-unfixed: true
+          format: "sarif"
+          output: "trivy-results-repo.sarif"
+          severity: "CRITICAL"
+
   sonarcloud:
     name: SonarCloud
     needs:
@@ -195,6 +215,7 @@ jobs:
       - build-frontend
       - tests-backend
       - tests-frontend
+      - trivy-repo
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -218,48 +239,19 @@ jobs:
             -Dsonar.test=**/test
 
   # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy:
-    name: Trivy
+  trivy-backend:
+    name: Trivy - Backend
     needs:
       - build-backend
       - build-frontend
       - tests-backend
       - tests-frontend
+      - trivy-repo
     if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      # Repo scan
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@0.3.0
-        with:
-          scan-type: "fs"
-          ignore-unfixed: true
-          format: "sarif"
-          output: "trivy-results.sarif"
-          severity: "CRITICAL"
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: "trivy-results.sarif"
-
-      # Base image scan
-      - name: Trivy Vulnerability Scan
-        uses: aquasecurity/trivy-action@0.3.0
-        with:
-          image-ref: registry.access.redhat.com/ubi8/ubi
-          ignore-unfixed: true
-          severity: CRITICAL
-          format: "sarif"
-          output: "trivy-results.sarif"
-
-      - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: "trivy-results.sarif"
 
       # Backend container scan
       - name: Trivy Vulnerability Scan
@@ -269,12 +261,27 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL
           format: "sarif"
-          output: "trivy-results.sarif"
+          output: "trivy-results-backend.sarif"
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: "trivy-results.sarif"
+          sarif_file: "trivy-results-backend.sarif"
+
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy-frontend:
+    name: Trivy - Frontend
+    needs:
+      - build-backend
+      - build-frontend
+      - tests-backend
+      - tests-frontend
+      - trivy-repo
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       # Frontend container scan
       - name: Trivy Vulnerability Scan
@@ -284,12 +291,12 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL
           format: "sarif"
-          output: "trivy-results.sarif"
+          output: "trivy-results-frontend.sarif"
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: "trivy-results.sarif"
+          sarif_file: "trivy-results-frontend.sarif"
 
   deploy-dev:
     name: Deploy - DEV
@@ -298,6 +305,7 @@ jobs:
       - build-frontend
       - tests-backend
       - tests-frontend
+      - trivy-repo
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
@@ -375,7 +383,8 @@ jobs:
     name: Completion
     needs:
       - sonarcloud
-      - trivy
+      - trivy-backend
+      - trivy-frontend
       - zap-dev-backend
       - zap-dev-frontend
     runs-on: ubuntu-latest
