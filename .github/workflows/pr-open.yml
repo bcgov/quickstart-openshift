@@ -94,6 +94,8 @@ jobs:
     name: Build and Push Frontend
     outputs:
       build: ${{ steps.check.outputs.build }}
+    environment:
+      name: dev
     env:
       TRIGGERS: ('frontend/', '.github/openshift/deploy.frontend.yml')
     runs-on: ubuntu-latest
