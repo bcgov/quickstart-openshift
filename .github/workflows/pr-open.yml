@@ -43,7 +43,7 @@ jobs:
           echo "Build and deploy workflows not triggered"
 
   build-backend:
-    name: Build-Backend
+    name: Build - Backend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -83,7 +83,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   build-frontend:
-    name: Build-Frontend
+    name: Build - Frontend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -147,7 +147,7 @@ jobs:
           lcov-file: ./backend/coverage/lcov.info
 
   tests-frontend:
-    name: Tests-Frontend
+    name: Tests - Frontend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -162,6 +162,7 @@ jobs:
           npm ci
           npm test
 
+<<<<<<< HEAD
       - name: Report code coverage
         uses: romeovs/lcov-reporter-action@v0.3.1
         with:
@@ -169,6 +170,23 @@ jobs:
           delete-old-comments: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           lcov-file: ./frontend/coverage/lcov.info
+=======
+  tests-backend:
+    name: Tests - Backend
+    needs:
+      - check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Tests
+        run: |
+          cd backend
+          npm ci
+          npm test
+>>>>>>> acb2533 (Adjust job names)
 
   sonarcloud:
     name: SonarCloud
@@ -274,7 +292,7 @@ jobs:
           sarif_file: "trivy-results.sarif"
 
   deploy-dev:
-    name: Deploy-Dev
+    name: Deploy - DEV
     needs:
       - build-backend
       - build-frontend
@@ -320,7 +338,7 @@ jobs:
           allow-repeats: false
 
   zap-dev-backend:
-    name: Zap-Dev-Backend
+    name: ZAP - Backend
     needs:
       - deploy-dev
     runs-on: ubuntu-latest
@@ -337,7 +355,7 @@ jobs:
           fail_action: false
 
   zap-dev-frontend:
-    name: Zap-Dev-Frontend
+    name: ZAP - Frontend
     needs:
       - deploy-dev
     runs-on: ubuntu-latest
@@ -353,14 +371,15 @@ jobs:
           allow_issue_writing: false
           fail_action: false
 
-  pre-merge:
-    name: Pre-Merge
+  completion:
+    name: Completion
     needs:
-      - zap-dev-backend
-      - zap-dev-frontend
       - sonarcloud
       - trivy
+      - zap-dev-backend
+      - zap-dev-frontend
     runs-on: ubuntu-latest
+    environment: dev
     steps:
       - name: Pre-merge update
         uses: mshick/add-pr-comment@v1
