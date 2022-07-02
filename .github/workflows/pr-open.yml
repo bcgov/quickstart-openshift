@@ -7,7 +7,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  TRIGGERS: ('frontend/' 'backend/' '.github/openshift' '.github/workflows')
   NAME: gfp
 
 jobs:
@@ -333,17 +332,30 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Deploy
+        if: needs.build-backend.outputs.build == 'true'
         run: |
           # Login to OpenShift and select project
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.NAMESPACE }}
 
-          # Process and apply deployment templates
+          # Database uses a default build
           oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ github.event.number }} | oc apply -f -
-          oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ github.event.number }} \
-            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
-          oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ github.event.number }} \
-            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
+
+          # Select backend image, then process/apply
+          if [ ${{ needs.build-backend.outputs.build == 'true' }}];
+            oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ github.event.number }} \
+              -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
+          else
+            oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ github.event.number }} | oc apply -f -
+          fi
+
+          # Select frontend image, then process/apply
+          if [ ${{ needs.build-frontend.outputs.build == 'true' }}];
+            oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ github.event.number }} \
+              -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
+          else
+            oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ github.event.number }} | oc apply -f -
+          fi
 
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-database -w
