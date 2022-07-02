@@ -123,7 +123,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   tests-backend:
-    name: Tests-Backend
+    name: Tests - Backend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -146,7 +146,7 @@ jobs:
           lcov-file: ./backend/coverage/lcov.info
 
   tests-frontend:
-    name: Tests-Frontend
+    name: Tests - Frontend
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -170,7 +170,7 @@ jobs:
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
-    name: Trivy - Repo
+    name: Trivy Repo Scan
     needs:
       - check
     if: needs.check.outputs.build == 'true'
@@ -189,7 +189,7 @@ jobs:
           severity: "CRITICAL"
 
   sonarcloud:
-    name: SonarCloud
+    name: SonarCloud Scan
     needs:
       - build-backend
       - build-frontend
@@ -220,7 +220,7 @@ jobs:
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-backend:
-    name: Trivy - Backend
+    name: Trivy Backend Container Scan
     needs:
       - build-backend
       - build-frontend
@@ -250,7 +250,7 @@ jobs:
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-frontend:
-    name: Trivy - Frontend
+    name: Trivy Frontend Container Scan
     needs:
       - build-backend
       - build-frontend
@@ -279,7 +279,7 @@ jobs:
           sarif_file: "trivy-results-frontend.sarif"
 
   deploy-dev:
-    name: Deploy - DEV
+    name: Deploy to DEV Environment
     needs:
       - build-backend
       - build-frontend
@@ -326,7 +326,7 @@ jobs:
           allow-repeats: false
 
   zap-backend:
-    name: ZAP - Backend
+    name: ZAP Backend Web App Scan
     needs:
       - deploy-dev
       - sonarcloud
@@ -346,7 +346,7 @@ jobs:
           fail_action: false
 
   zap-frontend:
-    name: ZAP - Frontend
+    name: ZAP Frontend Web App Scan
     needs:
       - deploy-dev
       - sonarcloud
