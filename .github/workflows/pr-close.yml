@@ -9,7 +9,6 @@ on:
 
 env:
   NAME: gfp
-  REPONAME: greenfield-template
 
 jobs:
   cleanup-openshift:
