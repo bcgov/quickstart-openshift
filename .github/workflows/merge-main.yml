@@ -57,7 +57,7 @@ jobs:
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
-    name: Trivy-Repo
+    name: Repository Scan
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
@@ -115,6 +115,13 @@ jobs:
 
   deploy-test:
     name: TEST Environment Deploy
+    needs:
+      - deploy-test
+      - cleanup-ghcr
+      - codeql
+      - snyk
+      - trivy-repo
+      - trivy-rhel-ubi
     runs-on: ubuntu-latest
     environment:
       name: test
@@ -155,11 +162,6 @@ jobs:
     name: PROD Environment Deploy
     needs:
       - deploy-test
-      - cleanup-ghcr
-      - codeql
-      - snyk
-      - trivy-repo
-      - trivy-rhel-ubi
     runs-on: ubuntu-latest
     environment:
       name: prod
