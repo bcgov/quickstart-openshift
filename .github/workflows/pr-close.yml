@@ -27,6 +27,29 @@ jobs:
           # Remove old build runs, build pods and deployment pods
           oc delete all,pvc,secret -l app=${{ env.NAME }}-${{ github.event.number }}
 
+  promote-images:
+    name: Promote backend
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Promote Backend Image to TEST
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}
+          target: ${{ github.event.number }}-backend
+          tags: |
+            test-backend
+
+      - name: Promote Frontend Image to TEST
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}
+          target: ${{ github.event.number }}-frontend
+          tags: |
+            test-frontend
+
   cleanup-ghcr:
     name: Cleanup ghcr.io
     runs-on: ubuntu-latest

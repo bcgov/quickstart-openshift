@@ -76,6 +76,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - if: steps.check.outputs.build != 'true'
+        name: Recycle/regag PROD Backend Image
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: prod-backend
+          tags: |
+            ${{ github.event.number }}-backend
+
   build-frontend:
     name: Build and Push Frontend
     outputs:
@@ -141,6 +151,16 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - if: steps.check.outputs.build != 'true'
+        name: Recycle/regag PROD Frontend Image
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: prod-frontend
+          tags: |
+            ${{ github.event.number }}-frontend
 
   tests-backend:
     name: Tests for Backend
@@ -315,31 +335,29 @@ jobs:
           # Database uses a default build
           oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ github.event.number }} | oc apply -f -
 
-          # Select backend image, then process/apply
+          # Clean previous image, if rebuilding
           if [ ${{ needs.build-backend.outputs.build == 'true' }} ]
           then
             # Clear stale images for import/replacement
-            oc delete is ${{ env.NAME }}-${{ env.ZONE }}-backend && \
+            oc delete is ${{ env.NAME }}-${{ env.ZONE }}-backend || \
               echo "No previously imported images have been found"
-
-            oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ github.event.number }} \
-              -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
-          else
-            oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ github.event.number }} | oc apply -f -
           fi
 
-          # Select frontend image, then process/apply
-          if [ ${{ needs.build-frontend.outputs.build == 'true' }} ]
+          # Process and apply template
+          oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ github.event.number }} \
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
+
+          # Clean previous image, if rebuilding
+          if [ ${{ needs.build-backend.outputs.build == 'true' }} ]
           then
             # Clear stale images for import/replacement
-            oc delete is ${{ env.NAME }}-${{ env.ZONE }}-frontend && \
+            oc delete is ${{ env.NAME }}-${{ env.ZONE }}-frontend || \
               echo "No previously imported images have been found"
-
-            oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ github.event.number }} \
-              -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
-          else
-            oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ github.event.number }} | oc apply -f -
           fi
+
+          # Process and apply template
+          oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ github.event.number }} \
+            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-database -w
