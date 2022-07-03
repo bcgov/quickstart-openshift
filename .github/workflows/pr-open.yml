@@ -351,7 +351,7 @@ jobs:
             Frontend: [https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/]()
 
   zap-backend:
-    name: Backend Penetration Tests
+    name: Backend Pen Tests
     needs:
       - deploy-dev
     runs-on: ubuntu-latest
@@ -368,7 +368,7 @@ jobs:
           fail_action: false
 
   zap-frontend:
-    name: Frontend Penetration Tests
+    name: Frontend Pen Tests
     needs:
       - deploy-dev
     runs-on: ubuntu-latest
