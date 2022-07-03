@@ -372,9 +372,6 @@ jobs:
     name: Frontend Penetration Tests
     needs:
       - deploy-dev
-      - sonarcloud
-      - trivy-backend
-      - trivy-frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
