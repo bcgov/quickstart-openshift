@@ -144,6 +144,9 @@ jobs:
     name: Deploy-Prod
     needs:
       - deploy-test
+      - codeql
+      - snyk
+      - trivy-repo
     runs-on: ubuntu-latest
     environment:
       name: prod
