@@ -429,24 +429,3 @@ jobs:
           cmd_options: "-a"
           allow_issue_writing: false
           fail_action: false
-
-  completion:
-    name: Completion
-    needs:
-      - zap-backend
-      - zap-frontend
-    runs-on: ubuntu-latest
-    environment: dev
-    steps:
-      - name: Pre-merge update
-        uses: mshick/add-pr-comment@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          message: |
-            Your Pull Request has completed our workflow!
-
-            Once merged, your code will be promoted to a higher environment, linked below.
-
-            [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
-          allow-repeats: false

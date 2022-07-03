@@ -27,7 +27,7 @@ jobs:
           # Remove old build runs, build pods and deployment pods
           oc delete all,pvc,secret -l app=${{ env.NAME }}-${{ github.event.number }}
 
-  promote-images:
+  merge-promote-images:
     name: Promote backend
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
@@ -50,6 +50,22 @@ jobs:
           tags: |
             test-frontend
 
+  merge-notification:
+    name: Promote backend
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Pre-merge update
+        uses: mshick/add-pr-comment@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          allow-repeats: false
+          message: |
+            Your Pull Request code is being promoted!  Please follow the link below.
+
+            [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+
   cleanup-ghcr:
     name: Cleanup ghcr.io
     runs-on: ubuntu-latest
@@ -61,4 +77,4 @@ jobs:
           token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
           package: ${{ env.REPONAME }}
           owner: orgs/bcgov
-          skip_tags: prod,test
+          skip_tags: prod-frontend,prod-backend
