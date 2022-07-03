@@ -56,28 +56,6 @@ jobs:
         with:
           sarif_file: snyk.sarif
 
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy-repo:
-    name: Trivy-Repo
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@0.3.0
-        with:
-          scan-type: "fs"
-          ignore-unfixed: true
-          format: "sarif"
-          output: "trivy-results.sarif"
-          severity: "CRITICAL"
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: "trivy-results.sarif"
-
   trivy-rhel-ubi:
     name: Base Image Scan
     runs-on: ubuntu-latest
