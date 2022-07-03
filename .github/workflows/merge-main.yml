@@ -108,7 +108,7 @@ jobs:
       - name: Delete old packages
         uses: davahome/ghcr-cleanup@v1
         with:
-          token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           package: ${{ github.event.repository.name }}
           owner: orgs/bcgov
           skip_tags: prod-frontend,prod-backend
