@@ -241,7 +241,7 @@ jobs:
     name: Backend Image Scan
     if: needs.build-backend.outputs.build == 'true'
     needs:
-      - build-backend
+      - deploy-dev
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
@@ -267,7 +267,7 @@ jobs:
     name: Frontend Image Scan
     if: needs.build-frontend.outputs.build == 'true'
     needs:
-      - build-frontend
+      - deploy-dev
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
