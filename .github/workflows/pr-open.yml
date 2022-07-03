@@ -251,7 +251,6 @@ jobs:
       - build-frontend
       - tests-backend
       - tests-frontend
-    if: needs.build-backend.outputs.build == 'true'
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
@@ -280,7 +279,6 @@ jobs:
       - build-frontend
       - tests-backend
       - tests-frontend
-    if: needs.build-frontend.outputs.build == 'true'
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
