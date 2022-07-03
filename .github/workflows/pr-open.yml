@@ -238,7 +238,7 @@ jobs:
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-backend:
-    name: Backend Vulnerability Scan
+    name: Backend Image Scan
     if: needs.build-backend.outputs.build == 'true'
     needs:
       - build-backend
@@ -274,7 +274,7 @@ jobs:
         uses: actions/checkout@v2
 
       # Frontend container scan
-      - name: Trivy Vulnerability Scan
+      - name: Trivy Image Scan
         uses: aquasecurity/trivy-action@0.3.0
         with:
           image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
