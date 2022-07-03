@@ -15,7 +15,7 @@ jobs:
     outputs:
       build: ${{ steps.check.outputs.build }}
     env:
-      TRIGGERS: ('backend/', '.github/openshift/deploy.backend.yml')
+      TRIGGERS: ('backend/' '.github/openshift/deploy.backend.yml')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -96,7 +96,7 @@ jobs:
     outputs:
       build: ${{ steps.check.outputs.build }}
     env:
-      TRIGGERS: ('frontend/', '.github/openshift/deploy.frontend.yml')
+      TRIGGERS: ('frontend/' '.github/openshift/deploy.frontend.yml')
     runs-on: ubuntu-latest
     permissions:
       contents: read
