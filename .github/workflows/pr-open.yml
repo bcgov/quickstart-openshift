@@ -295,8 +295,6 @@ jobs:
     needs:
       - build-backend
       - build-frontend
-      - tests-backend
-      - tests-frontend
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
