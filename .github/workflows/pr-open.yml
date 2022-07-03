@@ -334,6 +334,8 @@ jobs:
     timeout-minutes: 15
     environment:
       name: dev
+    env:
+      ZONE: ${{ github.event.number }}
     steps:
       - uses: actions/checkout@v2
       - name: Deploy
@@ -343,7 +345,7 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Database uses a default build
-          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ github.event.number }} | oc apply -f -
+          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f -
 
           # Clean previous image, if rebuilding
           if [ ${{ needs.build-backend.outputs.build == 'true' }} ]
@@ -354,8 +356,8 @@ jobs:
           fi
 
           # Process and apply template
-          oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ github.event.number }} \
-            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
+          oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ env.ZONE }} \
+            -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-backend | oc apply -f -
 
           # Clean previous image, if rebuilding
           if [ ${{ needs.build-backend.outputs.build == 'true' }} ]
@@ -366,13 +368,13 @@ jobs:
           fi
 
           # Process and apply template
-          oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ github.event.number }} \
-            -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
+          oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
+            -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
-          oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-database -w
-          oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-backend -w
-          oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-frontend -w
+          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-database -w
+          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-backend -w
+          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-frontend -w
 
   zap-backend:
     name: Backend App Scan
