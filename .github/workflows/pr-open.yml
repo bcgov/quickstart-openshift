@@ -213,8 +213,7 @@ jobs:
   sonarcloud:
     name: Static Analysis
     needs:
-      - build-backend
-      - build-frontend
+      - deploy-dev
     if: needs.build-backend.outputs.build == 'true' || needs.build-frontend.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
