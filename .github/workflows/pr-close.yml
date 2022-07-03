@@ -27,8 +27,8 @@ jobs:
           # Remove old build runs, build pods and deployment pods
           oc delete all,pvc,secret -l app=${{ env.NAME }}-${{ github.event.number }}
 
-  merge-promote-images:
-    name: Promote backend
+  promote-images:
+    name: Promote DEV images to TEST
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     steps:

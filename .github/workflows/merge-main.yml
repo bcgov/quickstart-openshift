@@ -11,7 +11,7 @@ env:
 
 jobs:
   codeql:
-    name: CodeQL
+    name: Semantic Code Analysis
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -36,7 +36,7 @@ jobs:
 
   # https://github.com/snyk/snyk
   snyk:
-    name: Snyk
+    name: Vulnerability/Dependency Scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -49,6 +49,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --all-projects --severity-threshold=high --sarif-file-output=snyk.sarif
+          command: monitor
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
@@ -158,6 +159,7 @@ jobs:
       - codeql
       - snyk
       - trivy-repo
+      - trivy-rhel-ubi
     runs-on: ubuntu-latest
     environment:
       name: prod
