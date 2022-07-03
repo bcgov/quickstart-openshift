@@ -168,7 +168,7 @@ jobs:
     name: Backend Unit Tests
     if: needs.build-backend.outputs.build == 'true'
     needs:
-      - build-backend
+      - deploy-dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -191,7 +191,7 @@ jobs:
     name: Frontend Unit Tests
     if: needs.build-frontend.outputs.build == 'true'
     needs:
-      - build-frontend
+      - deploy-dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
