@@ -289,29 +289,6 @@ jobs:
         with:
           sarif_file: "trivy-results-frontend.sarif"
 
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy-repo:
-    name: Repo Vulnerability Scan
-    if: needs.build-backend.outputs.build == 'true' || needs.build-frontend.outputs.build == 'true'
-    needs:
-      - build-backend
-      - build-frontend
-      - tests-backend
-      - tests-frontend
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@0.3.0
-        with:
-          scan-type: "fs"
-          ignore-unfixed: true
-          format: "sarif"
-          output: "trivy-results-repo.sarif"
-          severity: "CRITICAL"
-
   deploy-dev:
     name: DEV Environment Deploy
     if: needs.build-backend.outputs.build == 'true' || needs.build-backend.outputs.build == 'true'
@@ -385,7 +362,6 @@ jobs:
       - sonarcloud
       - trivy-backend
       - trivy-frontend
-      - trivy-repo
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -406,7 +382,6 @@ jobs:
       - sonarcloud
       - trivy-backend
       - trivy-frontend
-      - trivy-repo
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
