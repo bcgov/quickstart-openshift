@@ -99,6 +99,19 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
+  cleanup-ghcr:
+    name: Cleanup Container Registry
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/marketplace/actions/ghcr-io-container-cleanup
+      - name: Delete old packages
+        uses: davahome/ghcr-cleanup@v1
+        with:
+          token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
+          package: ${{ env.REPONAME }}
+          owner: orgs/bcgov
+          skip_tags: prod-frontend,prod-backend
+
   deploy-test:
     name: Deploy-Test
     runs-on: ubuntu-latest
@@ -141,6 +154,7 @@ jobs:
     name: Deploy-Prod
     needs:
       - deploy-test
+      - cleanup-ghcr
       - codeql
       - snyk
       - trivy-repo
