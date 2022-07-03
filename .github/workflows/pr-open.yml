@@ -14,8 +14,6 @@ jobs:
     name: Build and Push Backend
     outputs:
       build: ${{ steps.check.outputs.build }}
-    environment:
-      name: dev
     env:
       TRIGGERS: ('backend/', '.github/openshift/deploy.backend.yml')
     runs-on: ubuntu-latest
@@ -78,23 +76,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Import image
-        run: |
-          # Login to OpenShift and select project
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
-
-          # Clear stale images for import/replacement]
-          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-backend && \
-            echo "Previously imported images have been deleted" || \
-            echo "No previously imported images have been found"
-
   build-frontend:
     name: Build and Push Frontend
     outputs:
       build: ${{ steps.check.outputs.build }}
-    environment:
-      name: dev
     env:
       TRIGGERS: ('frontend/', '.github/openshift/deploy.frontend.yml')
     runs-on: ubuntu-latest
@@ -156,17 +141,6 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Import image
-        run: |
-          # Login to OpenShift and select project
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
-
-          # Clear stale images for import/replacement]
-          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-frontend && \
-            echo "Previously imported images have been deleted" || \
-            echo "No previously imported images have been found"
 
   tests-backend:
     name: Tests for Backend
@@ -344,6 +318,10 @@ jobs:
           # Select backend image, then process/apply
           if [ ${{ needs.build-backend.outputs.build == 'true' }} ]
           then
+            # Clear stale images for import/replacement
+            oc delete is ${{ env.NAME }}-${{ env.ZONE }}-backend && \
+              echo "No previously imported images have been found"
+
             oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ github.event.number }} \
               -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
           else
@@ -353,6 +331,10 @@ jobs:
           # Select frontend image, then process/apply
           if [ ${{ needs.build-frontend.outputs.build == 'true' }} ]
           then
+            # Clear stale images for import/replacement
+            oc delete is ${{ env.NAME }}-${{ env.ZONE }}-frontend && \
+              echo "No previously imported images have been found"
+
             oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ github.event.number }} \
               -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
           else
