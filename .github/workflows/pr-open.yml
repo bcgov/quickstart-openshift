@@ -166,6 +166,9 @@ jobs:
 
   tests-backend:
     name: Backend Unit Tests
+    if: needs.build-backend.outputs.build == 'true'
+    needs:
+      - build-backend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -186,6 +189,9 @@ jobs:
 
   tests-frontend:
     name: Frontend Unit Tests
+    if: needs.build-frontend.outputs.build == 'true'
+    needs:
+      - build-frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -209,8 +215,6 @@ jobs:
     needs:
       - build-backend
       - build-frontend
-      - tests-backend
-      - tests-frontend
     if: needs.build-backend.outputs.build == 'true' || needs.build-frontend.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -236,11 +240,9 @@ jobs:
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-backend:
     name: Backend Vulnerability Scan
+    if: needs.build-backend.outputs.build == 'true'
     needs:
       - build-backend
-      - build-frontend
-      - tests-backend
-      - tests-frontend
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
@@ -264,11 +266,9 @@ jobs:
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-frontend:
     name: Frontend Vulnerability Scan
+    if: needs.build-frontend.outputs.build == 'true'
     needs:
-      - build-backend
       - build-frontend
-      - tests-backend
-      - tests-frontend
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
@@ -291,7 +291,7 @@ jobs:
 
   deploy-dev:
     name: DEV Environment Deploy
-    if: needs.build-backend.outputs.build == 'true' || needs.build-backend.outputs.build == 'true'
+    if: needs.build-backend.outputs.build == 'true' || needs.build-frontend.outputs.build == 'true'
     needs:
       - build-backend
       - build-frontend
@@ -357,9 +357,6 @@ jobs:
     name: Backend Penetration Tests
     needs:
       - deploy-dev
-      - sonarcloud
-      - trivy-backend
-      - trivy-frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
