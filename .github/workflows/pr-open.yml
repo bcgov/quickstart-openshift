@@ -28,8 +28,12 @@ jobs:
         id: check
         run: |
           set -x
+
           # Fetch main to diff against
           git fetch origin main:refs/remotes/origin/master
+
+          echo "diff"
+          git diff origin/main --name-only
 
           # Trigger build if diff matches any triggers
           TRIGGERS=${{ env.TRIGGERS }}
@@ -105,8 +109,12 @@ jobs:
         id: check
         run: |
           set -x
+
           # Fetch main to diff against
           git fetch origin main:refs/remotes/origin/master
+
+          echo "diff"
+          git diff origin/main --name-only
 
           # Trigger build if diff matches any triggers
           TRIGGERS=${{ env.TRIGGERS }}
