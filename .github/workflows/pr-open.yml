@@ -45,6 +45,7 @@ jobs:
                       # Output build=true for next steps
                       echo "::set-output name=build::true"
                       echo -e "${t}\n --> ${check}\n"
+                      exit 0
                   fi
               done
           done < <(git diff origin/main --name-only)
@@ -126,6 +127,7 @@ jobs:
                       # Output build=true for next steps
                       echo "::set-output name=build::true"
                       echo -e "${t}\n --> ${check}\n"
+                      exit 0
                   fi
               done
           done < <(git diff origin/main --name-only)
