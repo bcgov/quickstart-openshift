@@ -299,8 +299,6 @@ jobs:
       - tests-frontend
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment:
-      name: dev
     env:
       ZONE: ${{ github.event.number }}
     steps:
@@ -309,7 +307,7 @@ jobs:
         run: |
           # Login to OpenShift and select project
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
+          oc project ${{ secrets.OC_NAMESPACE }}
 
           # Database uses a default build
           oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f -
