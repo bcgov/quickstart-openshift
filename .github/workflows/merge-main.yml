@@ -116,7 +116,6 @@ jobs:
   deploy-test:
     name: TEST Environment Deploy
     needs:
-      - deploy-test
       - cleanup-ghcr
       - codeql
       - snyk
