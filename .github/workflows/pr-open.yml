@@ -166,6 +166,9 @@ jobs:
 
   tests-backend:
     name: Backend Unit Tests
+    if: needs.build-backend.outputs.build == 'true'
+    needs:
+      - deploy-dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -186,6 +189,9 @@ jobs:
 
   tests-frontend:
     name: Frontend Unit Tests
+    if: needs.build-frontend.outputs.build == 'true'
+    needs:
+      - deploy-dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -207,10 +213,7 @@ jobs:
   sonarcloud:
     name: Static Analysis
     needs:
-      - build-backend
-      - build-frontend
-      - tests-backend
-      - tests-frontend
+      - deploy-dev
     if: needs.build-backend.outputs.build == 'true' || needs.build-frontend.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -235,19 +238,17 @@ jobs:
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-backend:
-    name: Backend Vulnerability Scan
+    name: Backend Image Scan
+    if: needs.build-backend.outputs.build == 'true'
     needs:
-      - build-backend
-      - build-frontend
-      - tests-backend
-      - tests-frontend
+      - deploy-dev
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       # Backend container scan
-      - name: Trivy Vulnerability Scan
+      - name: Trivy Image Scan
         uses: aquasecurity/trivy-action@0.3.0
         with:
           image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
@@ -263,19 +264,17 @@ jobs:
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-frontend:
-    name: Frontend Vulnerability Scan
+    name: Frontend Image Scan
+    if: needs.build-frontend.outputs.build == 'true'
     needs:
-      - build-backend
-      - build-frontend
-      - tests-backend
-      - tests-frontend
+      - deploy-dev
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       # Frontend container scan
-      - name: Trivy Vulnerability Scan
+      - name: Trivy Image Scan
         uses: aquasecurity/trivy-action@0.3.0
         with:
           image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
@@ -291,16 +290,12 @@ jobs:
 
   deploy-dev:
     name: DEV Environment Deploy
-    if: needs.build-backend.outputs.build == 'true' || needs.build-backend.outputs.build == 'true'
+    if: needs.build-backend.outputs.build == 'true' || needs.build-frontend.outputs.build == 'true'
     needs:
       - build-backend
       - build-frontend
-      - tests-backend
-      - tests-frontend
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment:
-      name: dev
     env:
       ZONE: ${{ github.event.number }}
     steps:
@@ -309,7 +304,7 @@ jobs:
         run: |
           # Login to OpenShift and select project
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
+          oc project ${{ secrets.OC_NAMESPACE }}
 
           # Database uses a default build
           oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f -
@@ -356,12 +351,10 @@ jobs:
             Frontend: [https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/]()
 
   zap-backend:
-    name: Backend Penetration Tests
+    name: Backend Pen Tests
+    if: needs.build-backend.outputs.build == 'true'
     needs:
       - deploy-dev
-      - sonarcloud
-      - trivy-backend
-      - trivy-frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -376,12 +369,10 @@ jobs:
           fail_action: false
 
   zap-frontend:
-    name: Frontend Penetration Tests
+    name: Frontend Pen Tests
+    if: needs.build-frontend.outputs.build == 'true'
     needs:
       - deploy-dev
-      - sonarcloud
-      - trivy-backend
-      - trivy-frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

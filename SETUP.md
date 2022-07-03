@@ -171,7 +171,7 @@ Protection rules are required:
 **NAMESPACE**
 
 * OpenShift Development namespace (see **Prerequisites**)
-* Variable: `{{ secrets.NAMESPACE }}`
+* Variable: `{{ secrets.OC_NAMESPACE }}`
 
 **OC_TOKEN**
 

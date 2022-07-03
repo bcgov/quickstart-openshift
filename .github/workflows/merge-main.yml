@@ -57,7 +57,7 @@ jobs:
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
-    name: Trivy-Repo
+    name: Repository Scan
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
@@ -108,13 +108,20 @@ jobs:
       - name: Delete old packages
         uses: davahome/ghcr-cleanup@v1
         with:
-          token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           package: ${{ github.event.repository.name }}
           owner: orgs/bcgov
           skip_tags: prod-frontend,prod-backend
 
   deploy-test:
     name: TEST Environment Deploy
+    needs:
+      - deploy-test
+      - cleanup-ghcr
+      - codeql
+      - snyk
+      - trivy-repo
+      - trivy-rhel-ubi
     runs-on: ubuntu-latest
     environment:
       name: test
@@ -126,7 +133,7 @@ jobs:
         run: |
           # Login to OpenShift and select project
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
+          oc project ${{ secrets.OC_NAMESPACE }}
 
           # Clear stale images for import/replacement
           if [ $(oc get is -l app=${{ env.NAME }}-${{ env.ZONE }} -o name | grep -v database | wc -l) -gt 0 ]; then
@@ -155,11 +162,6 @@ jobs:
     name: PROD Environment Deploy
     needs:
       - deploy-test
-      - cleanup-ghcr
-      - codeql
-      - snyk
-      - trivy-repo
-      - trivy-rhel-ubi
     runs-on: ubuntu-latest
     environment:
       name: prod
@@ -172,7 +174,7 @@ jobs:
         run: |
           # Login to OpenShift and select project
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
+          oc project ${{ secrets.OC_NAMESPACE }}
 
           # Clear stale images for import/replacement
           if [ $(oc get is -l app=${{ env.NAME }}-${{ env.ZONE }} -o name | grep -v database | wc -l) -gt 0 ]; then
