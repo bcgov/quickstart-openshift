@@ -56,6 +56,7 @@ jobs:
         with:
           sarif_file: snyk.sarif
 
+  # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-rhel-ubi:
     name: Base Image Scan
     runs-on: ubuntu-latest
@@ -92,7 +93,7 @@ jobs:
           skip_tags: prod-frontend,prod-backend
 
   deploy-test:
-    name: Deploy-Test
+    name: TEST Environment Deploy
     runs-on: ubuntu-latest
     environment:
       name: test
@@ -130,13 +131,12 @@ jobs:
           done
 
   deploy-prod:
-    name: Deploy-Prod
+    name: PROD Environment Deploy
     needs:
       - deploy-test
       - cleanup-ghcr
       - codeql
       - snyk
-      - trivy-repo
       - trivy-rhel-ubi
     runs-on: ubuntu-latest
     environment:
