@@ -352,6 +352,7 @@ jobs:
 
   zap-backend:
     name: Backend Pen Tests
+    if: needs.build-backend.outputs.build == 'true'
     needs:
       - deploy-dev
     runs-on: ubuntu-latest
@@ -369,6 +370,7 @@ jobs:
 
   zap-frontend:
     name: Frontend Pen Tests
+    if: needs.build-frontend.outputs.build == 'true'
     needs:
       - deploy-dev
     runs-on: ubuntu-latest
