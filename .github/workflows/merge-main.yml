@@ -11,7 +11,7 @@ env:
 
 jobs:
   codeql:
-    name: CodeQL
+    name: Semantic Code Analysis
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -36,7 +36,7 @@ jobs:
 
   # https://github.com/snyk/snyk
   snyk:
-    name: Snyk
+    name: Dependency Scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -77,6 +77,7 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
+  # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-rhel-ubi:
     name: Base Image Scan
     runs-on: ubuntu-latest
@@ -108,12 +109,12 @@ jobs:
         uses: davahome/ghcr-cleanup@v1
         with:
           token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
-          package: ${{ env.REPONAME }}
+          package: ${{ github.event.repository.name }}
           owner: orgs/bcgov
           skip_tags: prod-frontend,prod-backend
 
   deploy-test:
-    name: Deploy-Test
+    name: TEST Environment Deploy
     runs-on: ubuntu-latest
     environment:
       name: test
@@ -151,13 +152,14 @@ jobs:
           done
 
   deploy-prod:
-    name: Deploy-Prod
+    name: PROD Environment Deploy
     needs:
       - deploy-test
       - cleanup-ghcr
       - codeql
       - snyk
       - trivy-repo
+      - trivy-rhel-ubi
     runs-on: ubuntu-latest
     environment:
       name: prod

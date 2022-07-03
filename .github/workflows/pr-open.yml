@@ -11,7 +11,7 @@ env:
 
 jobs:
   build-backend:
-    name: Build and Push Backend
+    name: Backend Image Build
     outputs:
       build: ${{ steps.check.outputs.build }}
     env:
@@ -27,13 +27,8 @@ jobs:
       - name: Check and process modified files
         id: check
         run: |
-          set -x
-
           # Fetch main to diff against
           git fetch origin main:refs/remotes/origin/master
-
-          echo "diff"
-          git diff origin/main --name-only
 
           # Trigger build if diff matches any triggers
           TRIGGERS=${{ env.TRIGGERS }}
@@ -93,7 +88,7 @@ jobs:
             ${{ github.event.number }}-backend
 
   build-frontend:
-    name: Build and Push Frontend
+    name: Frontend Image Build
     outputs:
       build: ${{ steps.check.outputs.build }}
     env:
@@ -109,13 +104,8 @@ jobs:
       - name: Check and process modified files
         id: check
         run: |
-          set -x
-
           # Fetch main to diff against
           git fetch origin main:refs/remotes/origin/master
-
-          echo "diff"
-          git diff origin/main --name-only
 
           # Trigger build if diff matches any triggers
           TRIGGERS=${{ env.TRIGGERS }}
@@ -175,7 +165,7 @@ jobs:
             ${{ github.event.number }}-frontend
 
   tests-backend:
-    name: Tests for Backend
+    name: Backend Unit Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -195,7 +185,7 @@ jobs:
           lcov-file: ./backend/coverage/lcov.info
 
   tests-frontend:
-    name: Tests for Frontend
+    name: Frontend Unit Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -245,7 +235,7 @@ jobs:
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-backend:
-    name: Backend Container Scan
+    name: Backend Vulnerability Scan
     needs:
       - build-backend
       - build-frontend
@@ -273,7 +263,7 @@ jobs:
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-frontend:
-    name: Frontend Container Scan
+    name: Frontend Vulnerability Scan
     needs:
       - build-backend
       - build-frontend
@@ -298,29 +288,6 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: "trivy-results-frontend.sarif"
-
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy-repo:
-    name: Repository Scan
-    if: needs.build-backend.outputs.build == 'true' || needs.build-frontend.outputs.build == 'true'
-    needs:
-      - build-backend
-      - build-frontend
-      - tests-backend
-      - tests-frontend
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@0.3.0
-        with:
-          scan-type: "fs"
-          ignore-unfixed: true
-          format: "sarif"
-          output: "trivy-results-repo.sarif"
-          severity: "CRITICAL"
 
   deploy-dev:
     name: DEV Environment Deploy
@@ -389,13 +356,12 @@ jobs:
             Frontend: [https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/]()
 
   zap-backend:
-    name: Backend App Scan
+    name: Backend Penetration Tests
     needs:
       - deploy-dev
       - sonarcloud
       - trivy-backend
       - trivy-frontend
-      - trivy-repo
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -410,13 +376,12 @@ jobs:
           fail_action: false
 
   zap-frontend:
-    name: Frontend App Scan
+    name: Frontend Penetration Tests
     needs:
       - deploy-dev
       - sonarcloud
       - trivy-backend
       - trivy-frontend
-      - trivy-repo
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
