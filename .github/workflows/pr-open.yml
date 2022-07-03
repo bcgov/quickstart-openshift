@@ -420,11 +420,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           message: |
-            Your Pull Request has completed our workflow!  Please make sure a code review has been obtained.
+            Your Pull Request has completed our workflow!
 
             [Dev - Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) available
             [Dev - Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
 
-            Once merged, your code will be promoted to a higher environment.  Please follow the link below.
+            Once merged, your code will be promoted to a higher environment, linked below.
+
             [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
           allow-repeats: false
