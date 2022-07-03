@@ -320,6 +320,7 @@ jobs:
 
   deploy-dev:
     name: DEV Environment Deploy
+    if: needs.build-backend.outputs.build == 'true' || needs.build-backend.outputs.build == 'true'
     needs:
       - build-backend
       - build-frontend
@@ -332,7 +333,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Deploy
-        if: needs.build-backend.outputs.build == 'true'
         run: |
           # Login to OpenShift and select project
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
@@ -342,7 +342,7 @@ jobs:
           oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ github.event.number }} | oc apply -f -
 
           # Select backend image, then process/apply
-          if [ ${{ needs.build-backend.outputs.build == 'true' }}]
+          if [ ${{ needs.build-backend.outputs.build == 'true' }} ]
           then
             oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ github.event.number }} \
               -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
@@ -351,7 +351,7 @@ jobs:
           fi
 
           # Select frontend image, then process/apply
-          if [ ${{ needs.build-frontend.outputs.build == 'true' }}]
+          if [ ${{ needs.build-frontend.outputs.build == 'true' }} ]
           then
             oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ github.event.number }} \
               -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
@@ -363,16 +363,6 @@ jobs:
           oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-database -w
           oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-backend -w
           oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-frontend -w
-
-      - name: Deployment update
-        uses: mshick/add-pr-comment@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          message: |
-            [Dev - Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) available
-            [Dev - Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
-          allow-repeats: false
 
   zap-backend:
     name: Backend App Scan
@@ -431,6 +421,10 @@ jobs:
         with:
           message: |
             Your Pull Request has completed our workflow!  Please make sure a code review has been obtained.
+
+            [Dev - Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) available
+            [Dev - Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
+
             Once merged, your code will be promoted to a higher environment.  Please follow the link below.
             [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
           allow-repeats: false
