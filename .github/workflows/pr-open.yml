@@ -14,10 +14,8 @@ jobs:
     name: Build and Push Backend
     outputs:
       build: ${{ steps.check.outputs.build }}
-    environment:
-      name: dev
     env:
-      TRIGGERS: ('backend/', '.github/openshift/deploy.backend.yml')
+      TRIGGERS: ('backend/' '.github/openshift/deploy.backend.yml')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -29,8 +27,13 @@ jobs:
       - name: Check and process modified files
         id: check
         run: |
+          set -x
+
           # Fetch main to diff against
           git fetch origin main:refs/remotes/origin/master
+
+          echo "diff"
+          git diff origin/main --name-only
 
           # Trigger build if diff matches any triggers
           TRIGGERS=${{ env.TRIGGERS }}
@@ -42,6 +45,7 @@ jobs:
                       # Output build=true for next steps
                       echo "::set-output name=build::true"
                       echo -e "${t}\n --> ${check}\n"
+                      exit 0
                   fi
               done
           done < <(git diff origin/main --name-only)
@@ -78,25 +82,22 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Import image
-        run: |
-          # Login to OpenShift and select project
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
-
-          # Clear stale images for import/replacement]
-          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-backend && \
-            echo "Previously imported images have been deleted" || \
-            echo "No previously imported images have been found"
+      - if: steps.check.outputs.build != 'true'
+        name: Recycle/regag PROD Backend Image
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: prod-backend
+          tags: |
+            ${{ github.event.number }}-backend
 
   build-frontend:
     name: Build and Push Frontend
     outputs:
       build: ${{ steps.check.outputs.build }}
-    environment:
-      name: dev
     env:
-      TRIGGERS: ('frontend/', '.github/openshift/deploy.frontend.yml')
+      TRIGGERS: ('frontend/' '.github/openshift/deploy.frontend.yml')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -108,8 +109,13 @@ jobs:
       - name: Check and process modified files
         id: check
         run: |
+          set -x
+
           # Fetch main to diff against
           git fetch origin main:refs/remotes/origin/master
+
+          echo "diff"
+          git diff origin/main --name-only
 
           # Trigger build if diff matches any triggers
           TRIGGERS=${{ env.TRIGGERS }}
@@ -121,6 +127,7 @@ jobs:
                       # Output build=true for next steps
                       echo "::set-output name=build::true"
                       echo -e "${t}\n --> ${check}\n"
+                      exit 0
                   fi
               done
           done < <(git diff origin/main --name-only)
@@ -157,16 +164,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Import image
-        run: |
-          # Login to OpenShift and select project
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.NAMESPACE }}
-
-          # Clear stale images for import/replacement]
-          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-frontend && \
-            echo "Previously imported images have been deleted" || \
-            echo "No previously imported images have been found"
+      - if: steps.check.outputs.build != 'true'
+        name: Recycle/regag PROD Frontend Image
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: prod-frontend
+          tags: |
+            ${{ github.event.number }}-frontend
 
   tests-backend:
     name: Tests for Backend
@@ -245,7 +251,6 @@ jobs:
       - build-frontend
       - tests-backend
       - tests-frontend
-    if: needs.build-backend.outputs.build == 'true'
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
@@ -274,7 +279,6 @@ jobs:
       - build-frontend
       - tests-backend
       - tests-frontend
-    if: needs.build-frontend.outputs.build == 'true'
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
@@ -330,6 +334,8 @@ jobs:
     timeout-minutes: 15
     environment:
       name: dev
+    env:
+      ZONE: ${{ github.event.number }}
     steps:
       - uses: actions/checkout@v2
       - name: Deploy
@@ -339,30 +345,36 @@ jobs:
           oc project ${{ secrets.NAMESPACE }}
 
           # Database uses a default build
-          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ github.event.number }} | oc apply -f -
+          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f -
 
-          # Select backend image, then process/apply
+          # Clean previous image, if rebuilding
           if [ ${{ needs.build-backend.outputs.build == 'true' }} ]
           then
-            oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ github.event.number }} \
-              -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend | oc apply -f -
-          else
-            oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ github.event.number }} | oc apply -f -
+            # Clear stale images for import/replacement
+            oc delete is ${{ env.NAME }}-${{ env.ZONE }}-backend || \
+              echo "No previously imported images have been found"
           fi
 
-          # Select frontend image, then process/apply
-          if [ ${{ needs.build-frontend.outputs.build == 'true' }} ]
+          # Process and apply template
+          oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ env.ZONE }} \
+            -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-backend | oc apply -f -
+
+          # Clean previous image, if rebuilding
+          if [ ${{ needs.build-backend.outputs.build == 'true' }} ]
           then
-            oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ github.event.number }} \
-              -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend | oc apply -f -
-          else
-            oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ github.event.number }} | oc apply -f -
+            # Clear stale images for import/replacement
+            oc delete is ${{ env.NAME }}-${{ env.ZONE }}-frontend || \
+              echo "No previously imported images have been found"
           fi
+
+          # Process and apply template
+          oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
+            -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
-          oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-database -w
-          oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-backend -w
-          oc rollout status dc/${{ env.NAME }}-${{ github.event.number }}-frontend -w
+          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-database -w
+          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-backend -w
+          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-frontend -w
 
   zap-backend:
     name: Backend App Scan
