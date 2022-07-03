@@ -101,9 +101,6 @@ jobs:
 
   deploy-test:
     name: Deploy-Test
-    needs:
-      - build-backend
-      - build-frontend
     runs-on: ubuntu-latest
     environment:
       name: test
