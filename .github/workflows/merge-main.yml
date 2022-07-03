@@ -154,6 +154,7 @@ jobs:
     name: Deploy-Prod
     needs:
       - deploy-test
+      - cleanup-ghcr
       - codeql
       - snyk
       - trivy-repo
