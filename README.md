@@ -112,7 +112,7 @@ Optionally, higher-level deployments can be prevented until manually approved.
 
 ## Workflows
 
-### Pull Request Opened/Modified
+### 1: Pull Request Opened/Modified
 
 This workflow is triggered when a Pull Request to the main branch is created or modified.  Each development deployment is separate, using its own stack.  This avoids collisions between development environments and provides isolation for testing and experimentation.  Pipeline steps are enforced, preventing merge of failing code.
 
@@ -134,20 +134,27 @@ Triggers are used to determine whether images need to be built or previous ones 
 
 ![Pull Request Skipped](.github/graphics/prSkipped.png)
 
-## Pull Request Close Pipeline
+When a PR is merged, the message comment below is added.  Desive decorating this pull request it is actually handled by the following pipeline.
+
+![Merge Notification](.github/graphics/mergeNotification.png)
+
+### 2: Pull Request Close Pipeline
 
 The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/main/.github/workflows/pr-close.yml), includes:
 
-* OpenShift dev artifact pruning
+* Image promotion to higher-level environments (e.g. TEST, PROD)
 * ghcr.io cleanup of dev images over 14 days-old
+* OpenShift dev artifact removal
 
-Close and reopen a pull request to remove and reopen a pipeline to clear all of its artifacts.  This is a decreasingly common part of the troubleshooting process.
+Closing and reopening a pull request is usually done to trigger OpenShift artifact removal.  This is a decreasingly common part of the troubleshooting process.
 
 ![Pull Request Close/Merge](.github/graphics/pr-cleanup.png)
 
 <!-- TODO: update pic w/ corrected name -->
 
-## Pull Request Main Merge Pipeline
+If this closure was triggered by a merge to the main branch it will trigger the following workflow.
+
+### 3: Pull Request Main Merge Pipeline
 
 The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/main/.github/workflows/main.yml), includes:
 
@@ -156,6 +163,7 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 * [Snyk](https://snyk.io/) vulnerability scanning and PR-based dependency patching
 * [Tryvy](https://aquasecurity.github.io/trivy) repository and base image scanning
 * Higher-level deployments (e.g. TEST, STAGING, PRE-PROD, PROD)
+* Publishing of production images to the GitHub Container Registry (ghcr.io)
 
 ![Main Merge](.github/graphics/main-merge.png)
 
