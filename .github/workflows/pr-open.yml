@@ -366,7 +366,7 @@ jobs:
           target: https://${{ env.NAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/
           cmd_options: "-a"
           allow_issue_writing: false
-          fail_action: false
+          fail_action: true
 
   zap-frontend:
     name: Frontend Pen Tests
@@ -384,4 +384,4 @@ jobs:
           target: https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/
           cmd_options: "-a"
           allow_issue_writing: false
-          fail_action: false
+          fail_action: true
