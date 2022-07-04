@@ -115,12 +115,6 @@ jobs:
 
   deploy-test:
     name: TEST Deployment
-    needs:
-      - cleanup-ghcr
-      - codeql
-      - snyk
-      - trivy-repo
-      - trivy-rhel-ubi
     runs-on: ubuntu-latest
     environment:
       name: test
@@ -157,10 +151,43 @@ jobs:
             oc delete po ${p}
           done
 
+  zap-backend:
+    needs:
+      - deploy-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: https://${{ env.NAME }}-test-backend.apps.silver.devops.gov.bc.ca/
+          cmd_options: "-a"
+          allow_issue_writing: true
+          fail_action: false
+
+  zap-frontend:
+    needs:
+      - deploy-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.4.0
+        with:
+          target: https://${{ env.NAME }}-test-frontend.apps.silver.devops.gov.bc.ca/
+          cmd_options: "-a"
+          allow_issue_writing: true
+          fail_action: false
+
   deploy-prod:
     name: PROD Deployment
     needs:
-      - deploy-test
+      - zap-backend
+      - zap-frontend
     runs-on: ubuntu-latest
     environment:
       name: prod
