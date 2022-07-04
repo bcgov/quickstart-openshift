@@ -48,6 +48,10 @@ TODO: Update pic
 
 Builds are handled by Docker Actions and published to the GitHub Container Registry (ghcr.io).  This allows for publicly accessible builds that can be consumed by OpenShift, Amazon Web Services or any other container service.
 
+![]()
+
+TODO: add pic
+
 ### Testing
 
 Unit tests are run in jest, but other test frameworks can always be installed.  SonarCube should be configured to pick up sarif files and provide coverage reports.
@@ -103,6 +107,12 @@ Optionally, higher-level deployments can be prevented until manually approved.
 TODO: update pic
 
 ![Prod Accept](.github/graphics/prodAccept.png)
+
+### Conditional Workloads
+
+Triggers are used to determine whether images need to be built or previous ones consumed.  Deployments, scans and other jobs are skipped conditionally.
+
+TODO: add pic
 
 ## Workflows
 
