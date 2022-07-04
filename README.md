@@ -150,8 +150,6 @@ Closing and reopening a pull request is usually done to trigger OpenShift artifa
 
 ![Pull Request Close/Merge](.github/graphics/pr-cleanup.png)
 
-<!-- TODO: update pic w/ corrected name -->
-
 If this closure was triggered by a merge to the main branch it will trigger the following workflow.
 
 ### 3: Pull Request Main Merge Pipeline
