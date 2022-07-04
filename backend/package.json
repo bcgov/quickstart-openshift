@@ -108,6 +108,7 @@
     ],
     "coverageReporters": [
       "text",
+      "cobertura",
       "lcov",
       "jest-badges"
     ],
