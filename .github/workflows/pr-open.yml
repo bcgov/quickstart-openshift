@@ -366,7 +366,7 @@ jobs:
           target: https://${{ env.NAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/
           cmd_options: "-a"
           allow_issue_writing: false
-          fail_action: true
+          fail_action: false
 
   zap-frontend:
     name: Frontend Pen Tests
@@ -379,9 +379,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.3.0
+        uses: zaproxy/action-full-scan@v0.4.0
         with:
           target: https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/
           cmd_options: "-a"
           allow_issue_writing: false
-          fail_action: true
+          fail_action: false
