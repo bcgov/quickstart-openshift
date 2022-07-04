@@ -57,7 +57,7 @@ jobs:
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-backend:
-    name: Backend Image Scan
+    name: Backend Image Report
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
@@ -80,7 +80,7 @@ jobs:
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-frontend:
-    name: Frontend Image Scan
+    name: Frontend Image Report
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
