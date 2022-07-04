@@ -134,23 +134,22 @@ Triggers are used to determine whether images need to be built or previous ones 
 
 ![Pull Request Skipped](.github/graphics/prSkipped.png)
 
-When a PR is merged, the message comment below is added.  Desive decorating this pull request it is actually handled by the following pipeline.
+When a PR is merged, the message comment below is added.  Despite showing on this pull request it is actually handled by the next pipeline.
 
 ![Merge Notification](.github/graphics/mergeNotification.png)
 
 ### 2: Pull Request Close Pipeline
 
-The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/main/.github/workflows/pr-close.yml), includes:
+The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/main/.github/workflows/pr-close.yml), fires when a pull request is closed.
 
-* Image promotion to higher-level environments (e.g. TEST, PROD)
 * ghcr.io cleanup of dev images over 14 days-old
 * OpenShift dev artifact removal
 
-Closing and reopening a pull request is usually done to trigger OpenShift artifact removal.  This is a decreasingly common part of the troubleshooting process.
+When a pull request is merged to main, one additional job is run.  This promotes the new images to the TEST environment.
+
+* Image promotion to higher-level environments
 
 ![Pull Request Close/Merge](.github/graphics/pr-cleanup.png)
-
-<!-- TODO: update pic w/ corrected name -->
 
 If this closure was triggered by a merge to the main branch it will trigger the following workflow.
 
@@ -167,7 +166,6 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 
 ![Main Merge](.github/graphics/main-merge.png)
 
-<!-- TODO: update graphic w/ shorter titles -->
 
 # Starter Application
 

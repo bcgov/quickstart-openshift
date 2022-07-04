@@ -191,30 +191,6 @@ Please assume that your OpenShift platform team has provisioned a pipeline accou
 5. Under Data, copy `token`
 6. Paste into the GitHub Environment Secret `OC_TOKEN` (see above)
 
-
-#### Getting a Personal Access Token
-
-TODO: verify still required
-
-Generate a Personal Access Token in a GitHub account of your choosing.  Personal or shared Service accounts can be used.
-
-From GitHub:
-1. Select Settings (gear, top right) -> Developer settings -> Personal access tokens
-2. Create a new token with the following rights:
-    * `workflow`
-    * `write:packages`
-3. Paste into the GitHub Action Secret `GHCR_TOKEN` (see above)
-4. Update the “Log in to the Container registry” step in `pr_open.yml` as follows:
-    ```
-    * name: Log in to the Container registry
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.GHCR_USERNAME }}
-          password: ${{ secrets.GHCR_TOKEN }}
-    ```
-
-
 ## First Pipeline Run
 
 By now all relevant tokens should be provided.  We are going to assume that Synk and SonarCloud aren't on hand yet, so let's comment themout.  Please revise as appropriate.
