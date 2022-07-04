@@ -114,7 +114,7 @@ jobs:
           skip_tags: prod-frontend,prod-backend
 
   deploy-test:
-    name: TEST Environment Deploy
+    name: TEST Deployment
     needs:
       - cleanup-ghcr
       - codeql
@@ -158,7 +158,7 @@ jobs:
           done
 
   deploy-prod:
-    name: PROD Environment Deploy
+    name: PROD Deployment
     needs:
       - deploy-test
     runs-on: ubuntu-latest
