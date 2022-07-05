@@ -33,7 +33,7 @@ parameters:
     value: ghcr.io
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
-    required: true
+    value: bcgov/greenfield-pipeline:prod-frontend
 objects:
   - apiVersion: v1
     kind: ImageStream
