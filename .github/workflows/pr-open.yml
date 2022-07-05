@@ -235,7 +235,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: frontend/coverage
-          key: cache-backend
+          key: cache-frontend
 
       - name: Tests
         run: |
@@ -277,7 +277,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: backend/coverage
-          key: cache-backend
+          key: cache-frontend
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
