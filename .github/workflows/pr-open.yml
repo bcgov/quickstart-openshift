@@ -166,9 +166,6 @@ jobs:
 
   tests-backend:
     name: Backend Unit Tests
-    if: needs.build-backend.outputs.build == 'true'
-    needs:
-      - deploy-dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -209,9 +206,6 @@ jobs:
 
   tests-frontend:
     name: Frontend Unit Tests
-    if: needs.build-frontend.outputs.build == 'true'
-    needs:
-      - deploy-dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -254,7 +248,6 @@ jobs:
   sonarcloud:
     name: Static Analysis
     needs:
-      - deploy-dev
       - tests-backend
       - tests-frontend
     if: needs.build-backend.outputs.build == 'true' || needs.build-frontend.outputs.build == 'true'
