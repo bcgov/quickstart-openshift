@@ -192,11 +192,24 @@ jobs:
           npm ci
           npm run test:cov
 
-      - name: Check code coverage
-        uses: themichaelhall/check-code-coverage@v1
+          cd ../frontend
+          npm ci
+          npm run test:cov
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          report: backend/coverage/cobertura-coverage.xml
-          required-percentage: 80
+          args: >
+            -Dsonar.exclusions=**/test/**
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.javascript.lcov.reportPaths=./backend/coverage/lcov.info,./frontend/coverage/lcov.info
+            -Dsonar.project.monorepo.enabled=true
+            -Dsonar.projectKey=greenfield-template
+            -Dsonar.sources=backend,frontend
+            -Dsonar.test=**/test
 
       - name: Report code coverage
         uses: romeovs/lcov-reporter-action@v0.3.1
@@ -233,12 +246,6 @@ jobs:
           cd frontend
           npm ci
           npm run test:cov
-
-      - name: Check code coverage
-        uses: themichaelhall/check-code-coverage@v1
-        with:
-          report: frontend/coverage/cobertura-coverage.xml
-          required-percentage: 80
 
       - name: Report code coverage
         uses: romeovs/lcov-reporter-action@v0.3.1

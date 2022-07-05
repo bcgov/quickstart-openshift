@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="9" failures="0" errors="0" time="6.965">
+  <testsuite name="src/app.controller.spec.ts" errors="0" failures="0" skipped="0" timestamp="2022-07-05T19:32:26" time="3.067" tests="1">
+    <testcase classname="AppController root should return &quot;Hello Backend!&quot;" name="AppController root should return &quot;Hello Backend!&quot;" time="0.01">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/users/users.service.spec.ts" errors="0" failures="0" skipped="0" timestamp="2022-07-05T19:32:26" time="3.575" tests="7">
+    <testcase classname="UserService should be defined" name="UserService should be defined" time="0.009">
+    </testcase>
+    <testcase classname="UserService createOne should successfully add a user" name="UserService createOne should successfully add a user" time="0.003">
+    </testcase>
+    <testcase classname="UserService findAll should return an array of users" name="UserService findAll should return an array of users" time="0.002">
+    </testcase>
+    <testcase classname="UserService findOne should get a single user" name="UserService findOne should get a single user" time="0.002">
+    </testcase>
+    <testcase classname="UserService update should call the update method" name="UserService update should call the update method" time="0.002">
+    </testcase>
+    <testcase classname="UserService remove should return {deleted: true}" name="UserService remove should return {deleted: true}" time="0.002">
+    </testcase>
+    <testcase classname="UserService remove should return {deleted: false, message: err.message}" name="UserService remove should return {deleted: false, message: err.message}" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/users/users.controller.spec.ts" errors="0" failures="0" skipped="0" timestamp="2022-07-05T19:32:26" time="3.586" tests="1">
+    <testcase classname="UserController should be defined" name="UserController should be defined" time="0.009">
+    </testcase>
+  </testsuite>
+</testsuites>
