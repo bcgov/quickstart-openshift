@@ -52,7 +52,7 @@ jobs:
 
       - if: steps.check.outputs.build == 'true'
         name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -129,7 +129,7 @@ jobs:
 
       - if: steps.check.outputs.build == 'true'
         name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -186,30 +186,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      - name: Cache for test results
+        id: cache-backend
+        uses: actions/cache@v3
+        with:
+          path: backend/coverage
+          key: cache-backend
+
       - name: Tests
         run: |
           cd backend
           npm ci
           npm run test:cov
-
-          cd ../frontend
-          npm ci
-          npm run test:cov
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.exclusions=**/test/**
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.javascript.lcov.reportPaths=./backend/coverage/lcov.info,./frontend/coverage/lcov.info
-            -Dsonar.project.monorepo.enabled=true
-            -Dsonar.projectKey=greenfield-template
-            -Dsonar.sources=backend,frontend
-            -Dsonar.test=**/test
 
       - name: Report code coverage
         uses: romeovs/lcov-reporter-action@v0.3.1
@@ -233,6 +221,7 @@ jobs:
         id: npm-cache-dir-frontend
         run: |
           echo "::set-output name=dir::$(npm config get cache)"
+
       - uses: actions/cache@v3
         id: npm-cache-frontend # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
         with:
@@ -240,6 +229,13 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+
+      - name: Cache for test results
+        id: cache-frontend
+        uses: actions/cache@v3
+        with:
+          path: frontend/coverage
+          key: cache-backend
 
       - name: Tests
         run: |
@@ -259,6 +255,8 @@ jobs:
     name: Static Analysis
     needs:
       - deploy-dev
+      - tests-backend
+      - tests-frontend
     if: needs.build-backend.outputs.build == 'true' || needs.build-frontend.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -266,6 +264,20 @@ jobs:
         # Disable shallow clone for SonarCloud analysis
         with:
           fetch-depth: 0
+
+      - name: Cache for backend test results
+        id: cache-backend
+        uses: actions/cache@v3
+        with:
+          path: backend/coverage
+          key: cache-backend
+
+      - name: Cache for frontend test results
+        id: cache-backend
+        uses: actions/cache@v3
+        with:
+          path: backend/coverage
+          key: cache-backend
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -276,6 +288,7 @@ jobs:
           args: >
             -Dsonar.exclusions=**/test/**
             -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.javascript.lcov.reportPaths=./backend/coverage/lcov.info,./frontend/coverage/lcov.info
             -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=greenfield-template
             -Dsonar.sources=backend,frontend
