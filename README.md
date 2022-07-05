@@ -155,7 +155,7 @@ If this closure was triggered by a merge to the main branch it will trigger the 
 
 ### 3: Pull Request Main Merge Pipeline
 
-The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/main/.github/workflows/main.yml), includes:
+The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/main/.github/workflows/merge-main.yml), includes:
 
 * [GitHub CodeQL](https://codeql.github.com/) semantic code analysis and vulerability scanning
 * [SonarCloud](https://sonarcloud.io/) continuous code quality and security scanning
