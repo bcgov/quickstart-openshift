@@ -197,7 +197,6 @@ jobs:
           npm run test:cov
 
       - name: Cache for test results
-        id: cache-backend
         uses: actions/cache@v3
         with:
           path: backend/coverage
@@ -250,7 +249,6 @@ jobs:
           npm run test:cov
 
       - name: Cache for test results
-        id: cache-frontend
         uses: actions/cache@v3
         with:
           path: frontend/coverage
