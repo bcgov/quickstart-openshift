@@ -183,16 +183,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Create coverage dir
-        run: |
-          mkdir backend/coverage
-
       - name: Cache for test results
         id: cache-backend
         uses: actions/cache@v3
         with:
           path: backend/coverage
           key: backend-coverage-${{ github.run_number }}
+          restore-keys: |
+            backend-coverage-
 
       - name: Tests
         run: |
@@ -228,16 +226,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Create coverage dir
-        run: |
-          mkdir frontend/coverage
-
       - name: Cache for test results
         id: cache-frontend
         uses: actions/cache@v3
         with:
           path: frontend/coverage
           key: frontend-coverage-${{ github.run_number }}
+          restore-keys: |
+            frontend-coverage-
 
       - name: Tests
         run: |
@@ -295,7 +291,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.exclusions=**/test/**
+            -Dsonar.exclusions=**/test/**,.github/**/*
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info
             -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml,frontend/coverage/cobertura-coverage.xml
