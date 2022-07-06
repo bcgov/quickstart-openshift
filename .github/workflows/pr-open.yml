@@ -262,14 +262,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: backend/coverage
-          restore-keys: cache-backend
+          key: cache-backend
 
       - name: Cache for frontend test results
         id: cache-frontend
         uses: actions/cache@v3
         with:
           path: frontend/coverage
-          restore-keys: cache-frontend
+          key: cache-frontend
 
       - name: Report code coverage
         uses: romeovs/lcov-reporter-action@v0.3.1
