@@ -188,15 +188,17 @@ jobs:
         uses: actions/cache@v3
         with:
           path: backend/coverage
-          key: cache-backend
+          key: cache-backend-${{ github.event.number }}
 
       - name: Tests
         run: |
           cd backend
-          rm -rf coverage || true
           npm ci
           npm run test:cov
-          cd coverage
+
+      - name: Rename lcov.info
+        run: |
+          cd backend/coverage
           mv lcov.info lcov_1.info
 
       # - name: Report code coverage
@@ -232,15 +234,17 @@ jobs:
         uses: actions/cache@v3
         with:
           path: frontend/coverage
-          key: cache-frontend
+          key: cache-frontend-${{ github.event.number }}
 
       - name: Tests
         run: |
           cd frontend
-          rm -rf coverage || true
           npm ci
           npm run test:cov
-          cd coverage
+
+      - name: Rename lcov.info
+        run: |
+          cd backend/coverage
           mv lcov.info lcov_2.info
 
       # - name: Report code coverage
@@ -268,14 +272,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: backend/coverage
-          key: cache-backend
+          key: cache-backend-${{ github.event.number }}
 
       - name: Cache for frontend test results
         id: cache-frontend
         uses: actions/cache@v3
         with:
           path: frontend/coverage
-          key: cache-frontend
+          key: cache-frontend-${{ github.event.number }}
 
       - name: Display coverage file locations
         run: |
