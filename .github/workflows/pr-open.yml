@@ -183,6 +183,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      - name: Create coverage dir
+        run: |
+          mkdir backend/coverage
+
       - name: Cache for test results
         id: cache-backend
         uses: actions/cache@v3
@@ -223,6 +227,10 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+
+      - name: Create coverage dir
+        run: |
+          mkdir backend/coverage
 
       - name: Cache for test results
         id: cache-frontend
