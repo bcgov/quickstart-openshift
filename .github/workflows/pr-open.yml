@@ -183,9 +183,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Create coverage dir
+      - name: Tests
         run: |
-          mkdir backend/coverage
+          cd backend
+          npm ci
+          npm run test
 
       - name: Cache for test results
         id: cache-backend
@@ -193,12 +195,6 @@ jobs:
         with:
           path: backend/coverage
           key: backend-coverage
-
-      - name: Tests
-        run: |
-          cd backend
-          npm ci
-          npm run test:cov
 
       - name: Report code coverage
         uses: romeovs/lcov-reporter-action@v0.3.1
@@ -228,9 +224,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Create coverage dir
+      - name: Tests
         run: |
-          mkdir frontend/coverage
+          cd frontend
+          npm ci
+          npm run test
 
       - name: Cache for test results
         id: cache-frontend
@@ -238,12 +236,6 @@ jobs:
         with:
           path: frontend/coverage
           key: frontend-coverage
-
-      - name: Tests
-        run: |
-          cd frontend
-          npm ci
-          npm run test:cov
 
       - name: Report code coverage
         uses: romeovs/lcov-reporter-action@v0.3.1
