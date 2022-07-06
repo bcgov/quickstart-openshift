@@ -196,20 +196,13 @@ jobs:
           npm ci
           npm run test:cov
 
-      - name: Rename lcov.info
-        run: |
-          cd backend/coverage
-          mv lcov.info lcov_1.info
-          pwd
-          ls -la
-
       # - name: Report code coverage
       #   uses: romeovs/lcov-reporter-action@v0.3.1
       #   with:
       #     title: Backend coverage report
       #     delete-old-comments: true
       #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     lcov-file: ./backend/coverage/lcov_1.info
+      #     lcov-file: ./backend/coverage/lcov.info
 
   tests-frontend:
     name: Frontend Unit Tests
@@ -244,20 +237,13 @@ jobs:
           npm ci
           npm run test:cov
 
-      - name: Rename lcov.info
-        run: |
-          cd frontend/coverage
-          mv lcov.info lcov_2.info
-          pwd
-          ls -la
-
       # - name: Report code coverage
       #   uses: romeovs/lcov-reporter-action@v0.3.1
       #   with:
       #     title: Frontend coverage report
       #     delete-old-comments: true
       #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     lcov-file: ./frontend/coverage/lcov_2.info
+      #     lcov-file: ./frontend/coverage/lcov.info
 
   sonarcloud:
     name: Static Analysis
@@ -298,7 +284,7 @@ jobs:
           title: Backend Coverage Report
           delete-old-comments: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          lcov-file: ./backend/coverage/lcov_1.info
+          lcov-file: ./backend/coverage/lcov.info
 
       - name: Report code coverage
         uses: romeovs/lcov-reporter-action@v0.3.1
@@ -306,7 +292,11 @@ jobs:
           title: Frontend Coverage Report
           delete-old-comments: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          lcov-file: ./frontend/coverage/lcov_2.info
+          lcov-file: ./frontend/coverage/lcov.info
+
+      - name: Combine lcov.info files for SonarCloud
+        run: |
+          npx lcov-result-merger '**/coverage/lcov.info' lcov.info
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -317,10 +307,10 @@ jobs:
           args: >
             -Dsonar.exclusions=**/test/**
             -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov_1.info
+            -Dsonar.javascript.lcov.reportPaths=lcov.info
             -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=greenfield-template
-            -Dsonar.sources=backend
+            -Dsonar.sources=backend,frontend
             -Dsonar.test=**/test
             -Dsonar.log.level=DEBUG
 
