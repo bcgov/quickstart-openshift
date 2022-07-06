@@ -271,6 +271,11 @@ jobs:
           path: frontend/coverage
           key: cache-frontend-${{ github.event.number }}
 
+      - name: Look for files
+        run: |
+          ls -la backend/coverage
+          ls -la frontend/coverage
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
