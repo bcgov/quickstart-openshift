@@ -230,7 +230,7 @@ jobs:
 
       - name: Create coverage dir
         run: |
-          mkdir backend/coverage
+          mkdir frontend/coverage
 
       - name: Cache for test results
         id: cache-frontend
