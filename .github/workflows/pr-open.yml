@@ -186,7 +186,6 @@ jobs:
       - name: Cache for test results
         id: cache-backend
         uses: actions/cache@v3
-        id: cache-backend
         with:
           path: backend/coverage
           key: cache-backend
