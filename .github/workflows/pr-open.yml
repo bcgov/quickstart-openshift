@@ -279,11 +279,6 @@ jobs:
           restore-keys: |
             frontend-coverage-
 
-      - name: Look for files
-        run: |
-          ls -la backend/coverage
-          ls -la frontend/coverage
-
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
@@ -291,14 +286,14 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.exclusions=**/test/**,.github/**/*
+            -Dsonar.exclusions=.github/**/*
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info
             -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml,frontend/coverage/cobertura-coverage.xml
             -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=greenfield-template
             -Dsonar.sources=backend,frontend
-            -Dsonar.test=**/test
+            -Dsonar.tests=backend/test,frontend/test
 
   deploy-dev:
     name: DEV Deployment
