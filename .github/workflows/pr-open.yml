@@ -280,28 +280,28 @@ jobs:
           ls -la backend/coverage
           ls -la frontend/coverage
 
-      # - name: Report code coverage
-      #   uses: romeovs/lcov-reporter-action@v0.3.1
-      #   with:
-      #     title: Coverage Report
-      #     delete-old-comments: true
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     lcov-file: ./backend/coverage/lcov.info,./frontend/coverage/lcov.info
+      - name: Report code coverage
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        with:
+          title: Coverage Report
+          delete-old-comments: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: backend/coverage/lcov.info,frontend/coverage/lcov.info
 
-      # - name: SonarCloud Scan
-      #   uses: SonarSource/sonarcloud-github-action@master
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #   with:
-      #     args: >
-      #       -Dsonar.exclusions=**/test/**
-      #       -Dsonar.organization=bcgov-sonarcloud
-      #       -Dsonar.javascript.lcov.reportPaths=./backend/coverage/lcov.info,./frontend/coverage/lcov.info
-      #       -Dsonar.project.monorepo.enabled=true
-      #       -Dsonar.projectKey=greenfield-template
-      #       -Dsonar.sources=backend,frontend
-      #       -Dsonar.test=**/test
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.exclusions=**/test/**
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info
+            -Dsonar.project.monorepo.enabled=true
+            -Dsonar.projectKey=greenfield-template
+            -Dsonar.sources=backend,frontend
+            -Dsonar.test=**/test
 
   # deploy-dev:
   #   name: DEV Deployment
