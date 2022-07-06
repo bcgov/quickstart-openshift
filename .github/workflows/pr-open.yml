@@ -196,13 +196,13 @@ jobs:
           npm ci
           npm run test:cov
 
-      # - name: Report code coverage
-      #   uses: romeovs/lcov-reporter-action@v0.3.1
-      #   with:
-      #     title: Backend coverage report
-      #     delete-old-comments: true
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     lcov-file: ./backend/coverage/lcov.info
+      - name: Report code coverage
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        with:
+          title: Backend coverage report
+          delete-old-comments: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: ./backend/coverage/lcov.info
 
   tests-frontend:
     name: Frontend Unit Tests
@@ -237,13 +237,13 @@ jobs:
           npm ci
           npm run test:cov
 
-      # - name: Report code coverage
-      #   uses: romeovs/lcov-reporter-action@v0.3.1
-      #   with:
-      #     title: Frontend coverage report
-      #     delete-old-comments: true
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     lcov-file: ./frontend/coverage/lcov.info
+      - name: Report code coverage
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        with:
+          title: Frontend coverage report
+          delete-old-comments: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: ./frontend/coverage/lcov.info
 
   sonarcloud:
     name: Static Analysis
@@ -278,25 +278,9 @@ jobs:
           ls -la backend/coverage
           ls -la frontend/coverage
 
-      - name: Report code coverage
-        uses: romeovs/lcov-reporter-action@v0.3.1
-        with:
-          title: Backend Coverage Report
-          delete-old-comments: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          lcov-file: ./backend/coverage/lcov.info
-
-      - name: Report code coverage
-        uses: romeovs/lcov-reporter-action@v0.3.1
-        with:
-          title: Frontend Coverage Report
-          delete-old-comments: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          lcov-file: ./frontend/coverage/lcov.info
-
       - name: Combine lcov.info files for SonarCloud
         run: |
-          npx lcov-result-merger '**/coverage/lcov.info' lcov.info
+          npx lcov-result-merger '**/coverage/lcov*.info' lcov.info
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
