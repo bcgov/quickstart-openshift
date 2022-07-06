@@ -102,6 +102,7 @@
     "coverageReporters": [
       "text",
       "lcov",
+      "cobertura",
       "jest-badges"
     ],
     "testEnvironment": "node",
