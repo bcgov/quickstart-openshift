@@ -188,7 +188,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: backend/coverage
-          key: cache-backend-${{ github.event.number }}
+          key: cache-backend-${{ github.event.number }}-${{ github.run.number}}
 
       - name: Tests
         run: |
@@ -262,7 +262,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: backend/coverage
-          key: cache-backend-${{ github.event.number }}
+          key: cache-backend-${{ github.event.number }}-${{ github.run.number}}
 
       - name: Cache for frontend test results
         id: cache-frontend
