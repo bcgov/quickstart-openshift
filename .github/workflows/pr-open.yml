@@ -308,6 +308,7 @@ jobs:
             -Dsonar.projectKey=greenfield-template
             -Dsonar.sources=backend,frontend
             -Dsonar.test=**/test
+            -Dsonar.log.level=DEBUG
 
   # deploy-dev:
   #   name: DEV Deployment
