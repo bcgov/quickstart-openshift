@@ -196,16 +196,12 @@ jobs:
           npm ci
           npm run test:cov
 
-      - name: Cache for test results
-        uses: actions/cache@v3
-        with:
-          path: backend/coverage
-          key: cache-backend-${{ github.event.number }}
-
       - name: Rename lcov.info
         run: |
           cd backend/coverage
           mv lcov.info lcov_1.info
+          pwd
+          ls -la
 
       # - name: Report code coverage
       #   uses: romeovs/lcov-reporter-action@v0.3.1
@@ -248,16 +244,12 @@ jobs:
           npm ci
           npm run test:cov
 
-      - name: Cache for test results
-        uses: actions/cache@v3
-        with:
-          path: frontend/coverage
-          key: cache-frontend-${{ github.event.number }}
-
       - name: Rename lcov.info
         run: |
-          cd backend/coverage
+          cd frontend/coverage
           mv lcov.info lcov_2.info
+          pwd
+          ls -la
 
       # - name: Report code coverage
       #   uses: romeovs/lcov-reporter-action@v0.3.1
