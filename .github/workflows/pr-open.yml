@@ -227,7 +227,6 @@ jobs:
       - name: Cache for test results
         id: cache-frontend
         uses: actions/cache@v3
-        id: cache-frontend
         with:
           path: frontend/coverage
           key: cache-frontend
