@@ -297,7 +297,8 @@ jobs:
           args: >
             -Dsonar.exclusions=**/test/**
             -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.info,frontend/coverage/cobertura-coverage.info
+            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info
+            -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml,frontend/coverage/cobertura-coverage.xml
             -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=greenfield-template
             -Dsonar.sources=backend,frontend
