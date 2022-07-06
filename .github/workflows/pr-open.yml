@@ -280,7 +280,7 @@ jobs:
           args: >
             -Dsonar.exclusions=**/test/**
             -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.javascript.lcov.reportPaths=**/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info
             -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=greenfield-template
             -Dsonar.sources=backend,frontend
