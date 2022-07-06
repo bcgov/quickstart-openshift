@@ -277,7 +277,8 @@ jobs:
         run: |
           whoami
           pwd
-          ls -la
+          ls -la backend
+          ls -la frontend
 
       # - name: Report code coverage
       #   uses: romeovs/lcov-reporter-action@v0.3.1
