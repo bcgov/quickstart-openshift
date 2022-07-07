@@ -266,6 +266,8 @@ jobs:
   sonarcloud:
     name: Static Analysis
     needs:
+      - build-backend
+      - build-frontend
       - tests-backend
       - tests-frontend
     if: needs.tests-backend.result == 'success' || needs.tests-frontend.result == 'success'
@@ -315,6 +317,8 @@ jobs:
     needs:
       - build-backend
       - build-frontend
+      - tests-backend
+      - tests-frontend
     if: needs.build-backend.outputs.build == 'true' || needs.build-frontend.outputs.build == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
