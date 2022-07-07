@@ -128,9 +128,11 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 
 ![Pull Request Open](.github/graphics/pr-open.png)
 
-Triggers are used to determine whether images need to be built or previous ones consumed.  Deployments, scans and other jobs are skipped conditionally.  Documentation, for example, will not require most pipeline steps.
+Triggers are used to determine whether images need to be built or previous ones consumed.  Partial or full skips, like when limited to documentation, are shown below.
 
-![Pull Request Skipped](.github/graphics/prSkipped.png)
+![Pull Request Partially Skipped](.github/graphics/skipPartial.png)
+
+![Pull Request Fully Skipped](.github/graphics/skipFull.png)
 
 When a PR is merged, the message comment below is added.  Despite showing on this pull request it is actually handled by the next pipeline.
 
