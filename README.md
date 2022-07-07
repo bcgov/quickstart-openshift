@@ -125,14 +125,14 @@ The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/m
 * [RedHat OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) deployment, with other options under consideration
 * [Jest](https://jestjs.io/) JavaScript testing enforced in-pipeline
 * [SonarCloud](https://sonarcloud.io/) static analysis test coverage reporting
-* [Tryvy](https://aquasecurity.github.io/trivy) image, infrastructure and config scanning
-* [OWASP ZAP](https://www.zaproxy.org/) Zed Attack Proxy web app penetration testing
 
 ![Pull Request Open](.github/graphics/pr-open.png)
 
-Triggers are used to determine whether images need to be built or previous ones consumed.  Deployments, scans and other jobs are skipped conditionally.  Documentation, for example, will not require most pipeline steps.
+Triggers are used to determine whether images need to be built or previous ones consumed.  Partial or full skips, like when limited to documentation, are shown below.
 
-![Pull Request Skipped](.github/graphics/prSkipped.png)
+![Pull Request Partially Skipped](.github/graphics/skipPartial.png)
+
+![Pull Request Fully Skipped](.github/graphics/skipFull.png)
 
 When a PR is merged, the message comment below is added.  Despite showing on this pull request it is actually handled by the next pipeline.
 
@@ -158,7 +158,8 @@ If this closure was triggered by a merge to the main branch it will trigger the 
 The workflow, located [here](https://github.com/bcgov/greenfield-template/blob/main/.github/workflows/merge-main.yml), includes:
 
 * [GitHub CodeQL](https://codeql.github.com/) semantic code analysis and vulerability scanning
-* [SonarCloud](https://sonarcloud.io/) continuous code quality and security scanning
+* [OWASP ZAP](https://www.zaproxy.org/) Zed Attack Proxy web app penetration testing
+* [SonarCloud](https://sonarcloud.io/) static analysis for continuous code quality and security scanning
 * [Snyk](https://snyk.io/) vulnerability scanning and PR-based dependency patching
 * [Tryvy](https://aquasecurity.github.io/trivy) repository and base image scanning
 * Higher-level deployments (e.g. TEST, STAGING, PRE-PROD, PROD)
