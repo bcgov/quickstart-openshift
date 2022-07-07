@@ -41,6 +41,26 @@ jobs:
           done < <(git diff origin/main --name-only)
           echo "Container build not required"
 
+      - name: Recycle/retag PROD Image - not true
+        if: steps.check.output.build != 'true'
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: prod-backend
+          tags: |
+            ${{ github.event.number }}-backend
+
+      - name: Recycle/retag PROD Image - yes true
+        if: steps.check.output.build == 'true'
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: prod-backend
+          tags: |
+            ${{ github.event.number }}-backend
+
   check-frontend:
     name: Check Frontend
     outputs:
@@ -73,6 +93,26 @@ jobs:
               done
           done < <(git diff origin/main --name-only)
           echo "Container build not required"
+
+      - name: Recycle/retag PROD Image - not true
+        if: steps.check.output.build != 'true'
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: prod-frontend
+          tags: |
+            ${{ github.event.number }}-frontend
+
+      - name: Recycle/retag PROD Image - yes true
+        if: steps.check.output.build == 'true'
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: prod-frontend
+          tags: |
+            ${{ github.event.number }}-frontend
 
   build-backend:
     name: Backend Image Build
@@ -114,15 +154,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Recycle/retag PROD Backend Image
-        uses: shrink/actions-docker-registry-tag@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          repository: ${{ github.repository }}
-          target: prod-backend
-          tags: |
-            ${{ github.event.number }}-backend
-
   build-frontend:
     name: Frontend Image Build
     runs-on: ubuntu-latest
@@ -162,15 +193,6 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Recycle/retag PROD Frontend Image
-        uses: shrink/actions-docker-registry-tag@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          repository: ${{ github.repository }}
-          target: prod-frontend
-          tags: |
-            ${{ github.event.number }}-frontend
 
   tests-backend:
     name: Backend Unit Tests
