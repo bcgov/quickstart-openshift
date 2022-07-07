@@ -8,16 +8,13 @@ env:
   NAME: gfp
 
 jobs:
-  build-backend:
-    name: Backend Image Build
+  check-backend:
+    name: Check Backend
     outputs:
       build: ${{ steps.check.outputs.build }}
     env:
       TRIGGERS: ('backend/' '.github/openshift/deploy.backend.yml')
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -44,39 +41,8 @@ jobs:
           done < <(git diff origin/main --name-only)
           echo "Container build not required"
 
-      - if: steps.check.outputs.build == 'true'
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - if: steps.check.outputs.build == 'true'
-        name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      - if: steps.check.outputs.build == 'true'
-        name: Log in to the Container registry
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - if: steps.check.outputs.build == 'true'
-        name: Build and push Backend Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./backend/
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - if: steps.check.outputs.build != 'true'
-        name: Recycle/regag PROD Backend Image
+      - name: Recycle/retag PROD Image
+        if: steps.check.outputs.build != 'true'
         uses: shrink/actions-docker-registry-tag@v2
         with:
           registry: ${{ env.REGISTRY }}
@@ -85,16 +51,13 @@ jobs:
           tags: |
             ${{ github.event.number }}-backend
 
-  build-frontend:
-    name: Frontend Image Build
+  check-frontend:
+    name: Check Frontend
     outputs:
       build: ${{ steps.check.outputs.build }}
     env:
       TRIGGERS: ('frontend/' '.github/openshift/deploy.frontend.yml')
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -121,39 +84,8 @@ jobs:
           done < <(git diff origin/main --name-only)
           echo "Container build not required"
 
-      - if: steps.check.outputs.build == 'true'
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - if: steps.check.outputs.build == 'true'
-        name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      - if: steps.check.outputs.build == 'true'
-        name: Log in to the Container registry
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - if: steps.check.outputs.build == 'true'
-        name: Build and push Backend Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./frontend/
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - if: steps.check.outputs.build != 'true'
-        name: Recycle/regag PROD Frontend Image
+      - name: Recycle/retag PROD Image
+        if: steps.check.outputs.build != 'true'
         uses: shrink/actions-docker-registry-tag@v2
         with:
           registry: ${{ env.REGISTRY }}
@@ -162,9 +94,92 @@ jobs:
           tags: |
             ${{ github.event.number }}-frontend
 
+  build-backend:
+    name: Backend Image Build
+    runs-on: ubuntu-latest
+    needs:
+      - check-backend
+    if: needs.check-backend.outputs.build == 'true'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Backend Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./backend/
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-frontend:
+    name: Frontend Image Build
+    runs-on: ubuntu-latest
+    needs:
+      - check-frontend
+    if: needs.check-frontend.outputs.build == 'true'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Backend Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./frontend/
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   tests-backend:
     name: Backend Unit Tests
     runs-on: ubuntu-latest
+    needs:
+      - check-backend
+    if: needs.check-backend.outputs.build == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -207,6 +222,9 @@ jobs:
   tests-frontend:
     name: Frontend Unit Tests
     runs-on: ubuntu-latest
+    needs:
+      - check-frontend
+    if: needs.check-frontend.outputs.build == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -250,8 +268,11 @@ jobs:
   sonarcloud:
     name: Static Analysis
     needs:
+      - build-backend
+      - build-frontend
       - tests-backend
       - tests-frontend
+    if: always() && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -295,10 +316,12 @@ jobs:
 
   deploy-dev:
     name: DEV Deployment
-    if: needs.build-backend.outputs.build == 'true' || needs.build-frontend.outputs.build == 'true'
     needs:
       - build-backend
       - build-frontend
+      - tests-backend
+      - tests-frontend
+    if: always() && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
