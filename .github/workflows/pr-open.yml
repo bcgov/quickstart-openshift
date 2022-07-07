@@ -268,11 +268,13 @@ jobs:
   sonarcloud:
     name: Static Analysis
     needs:
+      - check-backend
+      - check-frontend
       - build-backend
       - build-frontend
       - tests-backend
       - tests-frontend
-    if: needs.tests-backend.result == 'success' || needs.tests-frontend.result == 'success'
+    if: needs.check-backend.outputs.build == 'true' || needs.check-frontend.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -317,11 +319,13 @@ jobs:
   deploy-dev:
     name: DEV Deployment
     needs:
+      - check-backend
+      - check-frontend
       - build-backend
       - build-frontend
       - tests-backend
       - tests-frontend
-    if: needs.build-backend.outputs.build == 'true' || needs.build-frontend.outputs.build == 'true'
+    if: needs.check-backend.outputs.build == 'true' || needs.check-frontend.outputs.build == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
