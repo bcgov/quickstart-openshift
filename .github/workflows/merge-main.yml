@@ -265,7 +265,7 @@ jobs:
         with:
           target: https://${{ env.NAME }}-test-frontend.apps.silver.devops.gov.bc.ca/
           cmd_options: "-a"
-          allow_issue_writing: true
+          allow_issue_writing: false
           fail_action: false
 
   deploy-prod:
