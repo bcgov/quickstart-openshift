@@ -9,7 +9,7 @@ Initial setup is intended to take four hours or less.  This depends greatly on i
 * Workflows:
     * Pull Request-based (.github/workflows/pr-open.yml)
     * On Close (.github/workflows/pr-close.yml)
-    * Main Merge (.github/workflows/main.yml)
+    * Main Merge (.github/workflows/merge-main.yml)
 * Hello World! starter application
     * TypeScript source in src/
     * One Jest test in test/
@@ -64,8 +64,9 @@ Cleaning up merged branches is recommended for your DevOps Specialist's fragile 
 From GitHub:
 1. Select Settings (gear, top right) -> General (selected automatically)
 2. Scroll to Pull Requests
-    * `[check] Allow squash merging`
-    * `[check] Automatically delete head branches`
+* `[check] Allow squash merging`
+    * `[check] Default to PR title for squash merge commits `
+* `[check] Automatically delete head branches`
 
 
 ## Closing Repo-Mountie Issues
@@ -97,10 +98,6 @@ Manage Action Secrets from your Repo > Settings > Secrets > Actions.
 * Default token, not viewable, common to all repositories
 * Variable: `{{ secrets.GHTOKEN }}`
 
-**GHPROJECT_TOKEN** (TODO: check that this is still in use)
-
-* Personal Access Token for writing to Pull Requests
-* Variable: `{{ secrets.GHPROJECT_TOKEN }}`
 
 **OC_SERVER**
 
@@ -116,7 +113,7 @@ Manage Action Secrets from your Repo > Settings > Secrets > Actions.
 Provide these tokens or comment their jobs out:
 
 * ./github/workflows/pr-open.yml
-* ./github/workflows/main.yml
+* ./github/workflows/merge-main.yml
 
 **SNYK_TOKEN**
 
