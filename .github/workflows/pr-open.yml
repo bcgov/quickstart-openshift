@@ -224,7 +224,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - check-frontend
-    if: needs.check-backend.outputs.build == 'true'
+    if: needs.check-frontend.outputs.build == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
