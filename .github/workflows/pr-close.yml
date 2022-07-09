@@ -4,13 +4,12 @@ on:
   pull_request:
     types:
       - closed
-    branches:
-      - main
 
 env:
   NAME: gfp
 
 jobs:
+  # Clean up OpenShift when PR closed, no conditions
   cleanup-openshift:
     name: Cleanup OpenShift
     runs-on: ubuntu-latest
@@ -26,10 +25,11 @@ jobs:
           # Remove old build runs, build pods and deployment pods
           oc delete all,pvc,secret -l app=${{ env.NAME }}-${{ github.event.number }}
 
+  # Promote images when PR merged and branch = main
   promote-images:
     name: Promote DEV images to TEST
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
     steps:
       - name: Promote Backend Image to TEST
         uses: shrink/actions-docker-registry-tag@v2
@@ -49,10 +49,11 @@ jobs:
           tags: |
             test-frontend
 
+  # Notify when PR merged and branch = main
   merge-notification:
     name: Merge Notification
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
     steps:
       - name: Pre-merge update
         uses: mshick/add-pr-comment@v1
