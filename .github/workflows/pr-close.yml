@@ -4,8 +4,8 @@ on:
   pull_request:
     types:
       - closed
-    branches:
-      - main
+    # branches:
+    #   - main
 
 env:
   NAME: gfp
@@ -29,7 +29,7 @@ jobs:
   promote-images:
     name: Promote DEV images to TEST
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && ${GITHUB_REF##/} == 'main'
     steps:
       - name: Promote Backend Image to TEST
         uses: shrink/actions-docker-registry-tag@v2
@@ -52,7 +52,7 @@ jobs:
   merge-notification:
     name: Merge Notification
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && ${GITHUB_REF##/} == 'main
     steps:
       - name: Pre-merge update
         uses: mshick/add-pr-comment@v1
