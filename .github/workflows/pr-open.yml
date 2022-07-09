@@ -13,7 +13,7 @@ jobs:
     outputs:
       build: ${{ steps.check.outputs.build }}
     env:
-      TRIGGERS: ('backend/' '.github/openshift/deploy.backend.yml')
+      TRIGGERS: ('backend/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -56,7 +56,7 @@ jobs:
     outputs:
       build: ${{ steps.check.outputs.build }}
     env:
-      TRIGGERS: ('frontend/' '.github/openshift/deploy.frontend.yml')
+      TRIGGERS: ('frontend/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
