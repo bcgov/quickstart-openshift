@@ -202,12 +202,14 @@ jobs:
     steps:
       # https://github.com/marketplace/actions/ghcr-io-container-cleanup
       - name: Delete old packages
-        uses: davahome/ghcr-cleanup@v1
+        uses: davahome/ghcr-cleanup@v1.1.0.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          package: ${{ github.event.repository.name }}
+          delete_untagged: 1
+          keep_versions_untagged: 0
           owner: orgs/bcgov
+          package: ${{ github.event.repository.name }}
           skip_tags: prod-frontend,prod-backend
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-test:
     name: TEST Deployment
