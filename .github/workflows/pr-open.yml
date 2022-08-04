@@ -383,5 +383,5 @@ jobs:
           message: |
             DEV deployments have completed successfully!
 
-            Backend: [https://${{ env.NAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/]()
-            Frontend: [https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/]()
+            [Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) available
+            [Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
