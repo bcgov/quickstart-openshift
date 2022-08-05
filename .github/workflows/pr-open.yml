@@ -374,6 +374,23 @@ jobs:
           oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-backend -w
           oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-frontend -w
 
+      - name: Deployment Verification
+        env:
+          LINKS: ('https://${{ env.NAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/' 'https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/')
+        run: |
+          set -eux
+
+          LINKS=${{ env.LINKS }}
+          for l in "${LINKS[@]}"; do
+              if [ $(curl -L --max-redirs 5 -s -o /dev/null -w "%{http_code}" "${l}") -ne 200 ]
+              then
+                  echo "Status != 200 for ${t}"
+                  exit 0
+              fi
+          done
+
+          echo "Deployment verification successful"
+
       - name: DEV Deployment update
         uses: mshick/add-pr-comment@v1
         env:
