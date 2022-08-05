@@ -333,6 +333,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
       ZONE: ${{ github.event.number }}
     steps:
       - uses: actions/checkout@v2
@@ -374,6 +375,24 @@ jobs:
           oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-backend -w
           oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-frontend -w
 
+      - name: Deployment Verification
+        env:
+          LINKS: (
+            'https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}'
+            'https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}'
+            )
+        run: |
+          LINKS=${{ env.LINKS }}
+          for l in "${LINKS[@]}"; do
+              if [ $(curl -L -s -o /dev/null -w "%{http_code}" "${l}") -ne 200 ]
+              then
+                  echo "Status != 200 for ${l}"
+                  exit 1
+              fi
+          done
+
+          echo "Deployment verification successful"
+
       - name: DEV Deployment update
         uses: mshick/add-pr-comment@v1
         env:
@@ -383,5 +402,5 @@ jobs:
           message: |
             DEV deployments have completed successfully!
 
-            [Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/) available
-            [Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/) available
+            [Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}/) available
+            [Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/) available
