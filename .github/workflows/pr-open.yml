@@ -386,8 +386,8 @@ jobs:
           for l in "${LINKS[@]}"; do
               if [ $(curl -L -s -o /dev/null -w "%{http_code}" "${l}") -ne 200 ]
               then
-                  echo "Status != 200 for ${t}"
-                  exit 0
+                  echo "Status != 200 for ${l}"
+                  exit 1
               fi
           done
 
