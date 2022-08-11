@@ -49,7 +49,7 @@ jobs:
           done < <(git diff origin/main --name-only)
           echo "Container build not required"
 
-      - name: Recycle/retag PROD image
+      - name: Recycle/retag PROD Image
         if: steps.check.outputs.build != 'true'
         uses: shrink/actions-docker-registry-tag@v2
         with:
@@ -367,14 +367,6 @@ jobs:
           # Process and apply template
           oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ env.ZONE }} \
             -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-backend | oc apply -f -
-
-          # Clean previous image, if rebuilding
-          if [ ${{ needs.build-backend.outputs.build == 'true' }} ]
-          then
-            # Clear stale images for import/replacement
-            oc delete is ${{ env.NAME }}-${{ env.ZONE }}-frontend || \
-              echo "No previously imported images have been found"
-          fi
 
           # Process and apply template
           oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
