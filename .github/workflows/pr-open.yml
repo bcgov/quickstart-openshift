@@ -142,6 +142,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Clear any previous OpenShift image
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.OC_NAMESPACE }}
+
+          # Clean previous image
+          oc delete is ${{ env.NAME }}-${{ github.event.number }}-backend || true
+
   build-frontend:
     name: Frontend Image Build
     runs-on: ubuntu-latest
@@ -181,6 +190,15 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Clear any previous OpenShift image
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.OC_NAMESPACE }}
+
+          # Clean previous image
+          oc delete is ${{ env.NAME }}-${{ github.event.number }}-frontend || true
 
   tests-backend:
     name: Backend Unit Tests
@@ -346,25 +364,9 @@ jobs:
           # Database uses a default build
           oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f -
 
-          # Clean previous image, if rebuilding
-          if [ ${{ needs.build-backend.outputs.build == 'true' }} ]
-          then
-            # Clear stale images for import/replacement
-            oc delete is ${{ env.NAME }}-${{ env.ZONE }}-backend || \
-              echo "No previously imported images have been found"
-          fi
-
           # Process and apply template
           oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ env.ZONE }} \
             -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-backend | oc apply -f -
-
-          # Clean previous image, if rebuilding
-          if [ ${{ needs.build-backend.outputs.build == 'true' }} ]
-          then
-            # Clear stale images for import/replacement
-            oc delete is ${{ env.NAME }}-${{ env.ZONE }}-frontend || \
-              echo "No previously imported images have been found"
-          fi
 
           # Process and apply template
           oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
