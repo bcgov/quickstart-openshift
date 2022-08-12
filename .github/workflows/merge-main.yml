@@ -24,11 +24,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   view-context:
+    # https://docs.github.com/en/actions/learn-github-actions/contexts
     name: View GitHub Context
     runs-on: ubuntu-latest
     steps:
       - name: Echo GitHub context
-        run: echo '${{ toJSON(github) }}'
+        uses: satackey/action-js-inline@v0.0.2
+        with:
+          script: |
+            const github = require('@actions/github');
+            console.log(JSON.stringify(github, null, 2));
 
   codeql:
     name: Semantic Code Analysis
