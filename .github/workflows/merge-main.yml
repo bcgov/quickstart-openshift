@@ -24,11 +24,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   view-context:
+    # https://docs.github.com/en/actions/learn-github-actions/contexts
     name: View GitHub Context
     runs-on: ubuntu-latest
     steps:
       - name: Echo GitHub context
-        run: echo '${{ toJSON(github) }}'
+        uses: satackey/action-js-inline@v0.0.2
+        with:
+          script: |
+            const github = require('@actions/github');
+            console.log(JSON.stringify(github, null, 2));
 
   codeql:
     name: Semantic Code Analysis
@@ -235,6 +240,10 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.OC_NAMESPACE }}
 
+          # Clear previous images
+          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-backend || true
+          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-frontend || true
+
           # Do not replace database; 'oc create' kicks up an error if objects already exist
           oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f - || true
 
@@ -307,6 +316,10 @@ jobs:
           # Login to OpenShift and select project
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.OC_NAMESPACE }}
+
+          # Clear previous images
+          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-backend || true
+          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-frontend || true
 
           # Do not replace database; 'oc create' kicks up an error if objects already exist
           oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f - || true
