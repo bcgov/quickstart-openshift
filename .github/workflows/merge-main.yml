@@ -228,13 +228,10 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.OC_NAMESPACE }}
 
-          # Clear stale images for import/replacement
-          if [ $(oc get is -l app=${{ env.NAME }}-${{ env.ZONE }} -o name | grep -v database | wc -l) -gt 0 ]; then
-            oc delete is -l app=${{ env.NAME }}-${{ env.ZONE }}
-          fi
+          # Do not replace database; 'oc create' kicks up an error if objects already exist
+          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f - || true
 
           # Process and apply deployment templates
-          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f -
           oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ env.ZONE }} \
             -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-backend | oc apply -f -
           oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
@@ -304,13 +301,10 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.OC_NAMESPACE }}
 
-          # Clear stale images for import/replacement
-          if [ $(oc get is -l app=${{ env.NAME }}-${{ env.ZONE }} -o name | grep -v database | wc -l) -gt 0 ]; then
-            oc delete is -l app=${{ env.NAME }}-${{ env.ZONE }}
-          fi
+          # Do not replace database; 'oc create' kicks up an error if objects already exist
+          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f - || true
 
           # Process and apply deployment templates
-          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f -
           oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ env.ZONE }} \
             -p PROMOTE=${{ github.repository }}:${{ env.PREV }}-backend | oc apply -f -
           oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \

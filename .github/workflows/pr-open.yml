@@ -361,8 +361,8 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.OC_NAMESPACE }}
 
-          # Database uses a default build
-          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f -
+          # Database uses a default build; 'oc create' kicks up an error if objects already exist
+          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc create -f - || true
 
           # Process and apply template
           oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ env.ZONE }} \
