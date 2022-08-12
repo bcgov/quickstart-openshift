@@ -23,6 +23,13 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+  view-context:
+    name: View GitHub Context
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo GitHub context
+        run: echo '${{ toJSON(github) }}'
+
   codeql:
     name: Semantic Code Analysis
     runs-on: ubuntu-latest

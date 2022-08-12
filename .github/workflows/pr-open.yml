@@ -16,6 +16,13 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+  view-context:
+    name: View GitHub Context
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo GitHub context
+        run: echo '${{ toJSON(github) }}'
+
   check-backend:
     name: Check Backend
     outputs:
