@@ -17,11 +17,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   view-context:
+    # https://docs.github.com/en/actions/learn-github-actions/contexts
     name: View GitHub Context
     runs-on: ubuntu-latest
     steps:
       - name: Echo GitHub context
-        run: echo '${{ toJSON(github) }}'
+        run: $(echo '${{ toJSON(github) }}')
 
   check-backend:
     name: Check Backend
