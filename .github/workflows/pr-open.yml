@@ -19,8 +19,6 @@ jobs:
   view-context:
     name: View GitHub Context
     runs-on: ubuntu-latest
-    environment:
-      name: prod
     steps:
       - name: Echo GitHub context
         run: echo '${{ toJSON(github) }}'
