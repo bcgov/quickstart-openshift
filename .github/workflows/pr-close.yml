@@ -11,6 +11,7 @@ on:
       - "**.yaml"
 
 env:
+  REGISTRY: ghcr.io
   NAME: gfp
 
 jobs:
@@ -30,29 +31,99 @@ jobs:
           # Remove old build runs, build pods and deployment pods
           oc delete all,pvc,secret -l app=${{ env.NAME }}-${{ github.event.number }}
 
-  # Promote images when PR merged and branch = main
-  promote-images:
-    name: Promote DEV images to TEST
+  # If merged, then handle any image promotion
+  image-backend:
+    name: Backend Image Handling
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    env:
+      COMPONENT: backend
+      PROMOTION: test
+    environment:
+      name: test
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
     steps:
-      - name: Promote Backend Image to TEST
-        uses: shrink/actions-docker-registry-tag@v2
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}
-          target: ${{ github.event.number }}-backend
-          tags: |
-            test-backend
+      - name: Check and process modified files
+        id: check
+        run: |
+          set -eux
 
-      - name: Promote Frontend Image to TEST
+          # Pull images and SHAs
+          docker pull ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-${{ env.COMPONENT }}
+          docker pull ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PROMOTION }}-${{ env.COMPONENT }}
+          SHA0=$(docker inspect -f '{{.Id}}' ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-${{ env.COMPONENT }})
+          SHA1=$(docker inspect -f '{{.Id}}' ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PROMOTION }}-${{ env.COMPONENT }})
+
+          # If different, then trigger updates
+          if [[ "${SHA0}" == "${SHA1} "]]; then
+            echo "::set-output name=build::true"
+            echo "Image has changed"
+
+            # Login to OpenShift and select project
+            oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+            oc project ${{ secrets.OC_NAMESPACE }}
+            oc delete is/${{ env.NAME }}-${{ env.PROMOTION}}-${{ env.COMPONENT }} || true
+            exit 0
+          fi
+          echo "Image promotion not required"
+
+      - name: Promote Backend Image
+        if: steps.check.outputs.build == 'true'
         uses: shrink/actions-docker-registry-tag@v2
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}
-          target: ${{ github.event.number }}-frontend
+          target: ${{ github.event.number }}-${{ env.COMPONENT }}
           tags: |
-            test-frontend
+            ${{ env.PROMOTION }}-${{ env.COMPONENT }}
+
+  # If merged, then handle any image promotion
+  image-frontend:
+    name: Frontend Image Handling
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    env:
+      COMPONENT: frontend
+      PROMOTION: test
+    environment:
+      name: test
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    steps:
+      - name: Check and process modified files
+        id: check
+        run: |
+          set -eux
+
+          # Pull images and SHAs
+          docker pull ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-${{ env.COMPONENT }}
+          docker pull ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PROMOTION }}-${{ env.COMPONENT }}
+          SHA0=$(docker inspect -f '{{.Id}}' ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-${{ env.COMPONENT }})
+          SHA1=$(docker inspect -f '{{.Id}}' ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PROMOTION }}-${{ env.COMPONENT }})
+
+          # If different, then trigger updates
+          if [[ "${SHA0}" == "${SHA1} "]]; then
+            echo "::set-output name=build::true"
+            echo "Image has changed"
+
+            # Login to OpenShift and select project
+            oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+            oc project ${{ secrets.OC_NAMESPACE }}
+            oc delete is/${{ env.NAME }}-${{ env.PROMOTION}}-${{ env.COMPONENT }} || true
+            exit 0
+          fi
+          echo "Image promotion not required"
+
+      - name: Promote Backend Image
+        if: steps.check.outputs.build == 'true'
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}
+          target: ${{ github.event.number }}-${{ env.COMPONENT }}
+          tags: |
+            ${{ env.PROMOTION }}-${{ env.COMPONENT }}
 
   # Notify when PR merged and branch = main
   merge-notification:
