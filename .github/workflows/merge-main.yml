@@ -240,10 +240,6 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.OC_NAMESPACE }}
 
-          # Clear previous images
-          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-backend || true
-          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-frontend || true
-
           # Do not replace database; 'oc create' kicks up an error if objects already exist
           oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f - || true
 
