@@ -49,28 +49,28 @@ jobs:
         id: check
         run: |
           # Vars
-          IMG_OLD="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PREV }}-${{ env.COMPONENT }}"
-          IMG_NEW="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}"
+          IMG_PREV="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PREV }}-${{ env.COMPONENT }}"
+          IMG_ZONE="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}"
 
           # Make sure an image exists to promote; grab SHA
-          if [[ ! $(docker pull "${IMG_OLD}") ]]; then
+          if [[ ! $(docker pull "${IMG_PREV}") ]]; then
               echo -e "\n No images to promote"
               exit 0
           fi
-          SHA_OLD=$(docker inspect -f '{{.Id}}' "${IMG_OLD}")
+          SHA_PREV=$(docker inspect -f '{{.Id}}' "${IMG_PREV}")
 
           # Use blank SHA for promoted image, unless a real one exists instead
-          SHA_NEW=""
-          if [[ $(docker pull "${IMG_NEW}") ]]; then
-            SHA_NEW=$(docker inspect -f '{{.Id}}' "${IMG_NEW}")
+          SHA_ZONE=""
+          if [[ $(docker pull "${IMG_ZONE}") ]]; then
+            SHA_ZONE=$(docker inspect -f '{{.Id}}' "${IMG_ZONE}")
           fi
 
           # Output SHAs
-          echo -e "\n${IMG_OLD}: ${SHA_OLD}"
-          echo -e "${IMG_NEW}: ${SHA_NEW}\n"
+          echo -e "\n${IMG_PREV}: ${SHA_PREV}"
+          echo -e "${IMG_ZONE}: ${SHA_ZONE}\n"
 
           # If different, then trigger updates
-          if [[ "${SHA_OLD}" != "${SHA_NEW}" ]]; then
+          if [[ "${SHA_PREV}" != "${SHA_ZONE}" ]]; then
             echo "::set-output name=build::true"
             echo "Image has changed"
 
@@ -111,28 +111,28 @@ jobs:
         id: check
         run: |
           # Vars
-          IMG_OLD="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PREV }}-${{ env.COMPONENT }}"
-          IMG_NEW="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}"
+          IMG_PREV="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PREV }}-${{ env.COMPONENT }}"
+          IMG_ZONE="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}"
 
           # Make sure an image exists to promote; grab SHA
-          if [[ ! $(docker pull "${IMG_OLD}") ]]; then
+          if [[ ! $(docker pull "${IMG_PREV}") ]]; then
               echo -e "\n No images to promote"
               exit 0
           fi
-          SHA_OLD=$(docker inspect -f '{{.Id}}' "${IMG_OLD}")
+          SHA_PREV=$(docker inspect -f '{{.Id}}' "${IMG_PREV}")
 
           # Use blank SHA for promoted image, unless a real one exists instead
-          SHA_NEW=""
-          if [[ $(docker pull "${IMG_NEW}") ]]; then
-            SHA_NEW=$(docker inspect -f '{{.Id}}' "${IMG_NEW}")
+          SHA_ZONE=""
+          if [[ $(docker pull "${IMG_ZONE}") ]]; then
+            SHA_ZONE=$(docker inspect -f '{{.Id}}' "${IMG_ZONE}")
           fi
 
           # Output SHAs
-          echo -e "\n${IMG_OLD}: ${SHA_OLD}"
-          echo -e "${IMG_NEW}: ${SHA_NEW}\n"
+          echo -e "\n${IMG_PREV}: ${SHA_PREV}"
+          echo -e "${IMG_ZONE}: ${SHA_ZONE}\n"
 
           # If different, then trigger updates
-          if [[ "${SHA_OLD}" != "${SHA_NEW}" ]]; then
+          if [[ "${SHA_PREV}" != "${SHA_ZONE}" ]]; then
             echo "::set-output name=build::true"
             echo "Image has changed"
 
