@@ -240,12 +240,8 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.OC_NAMESPACE }}
 
-          # Clear previous images
-          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-backend || true
-          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-frontend || true
-
           # Do not replace database; 'oc create' kicks up an error if objects already exist
-          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f - || true
+          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc create -f - || true
 
           # Process and apply deployment templates
           oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ env.ZONE }} \
@@ -298,11 +294,129 @@ jobs:
           allow_issue_writing: false
           fail_action: false
 
-  deploy-prod:
-    name: PROD Deployment
+  image-backend:
+    name: Backend Image Handling
     needs:
       - zap-backend
       - zap-frontend
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    env:
+      COMPONENT: backend
+      PREV: test
+      ZONE: prod
+    environment:
+      name: prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for image changes
+        id: check
+        run: |
+          # Vars
+          IMG_PREV="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PREV }}-${{ env.COMPONENT }}"
+          IMG_ZONE="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}"
+
+          # Pull previous image; grab SHA
+          docker pull "${IMG_PREV}"
+          SHA_PREV=$(docker inspect -f '{{.Id}}' "${IMG_PREV}")
+
+          # Use blank SHA for promoted image, unless a real one exists instead
+          docker pull "${IMG_ZONE}" && \
+            SHA_ZONE=$(docker inspect -f '{{.Id}}' "${IMG_ZONE}") ||
+            SHA_ZONE=""
+
+          # Output SHAs
+          echo -e "\n${IMG_PREV}: ${SHA_PREV}"
+          echo -e "${IMG_ZONE}: ${SHA_ZONE}\n"
+
+          # If different, then trigger updates
+          if [[ "${SHA_PREV}" != "${SHA_ZONE}" ]]; then
+            echo "::set-output name=build::true"
+            echo "Image has changed"
+
+            # Login to OpenShift and select project
+            oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+            oc project ${{ secrets.OC_NAMESPACE }}
+
+            oc delete is/${{ env.NAME }}-${{ env.ZONE}}-${{ env.COMPONENT }} || true
+            exit 0
+          fi
+          echo "Image promotion not required"
+
+      - name: Promote Backend Image
+        if: steps.check.outputs.build == 'true'
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: ${{ github.event.number }}-${{ env.COMPONENT }}
+          tags: |
+            ${{ env.PROMOTION }}-${{ env.COMPONENT }}
+
+  image-frontend:
+    name: Frontend Image Handling
+    needs:
+      - zap-backend
+      - zap-frontend
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    env:
+      COMPONENT: frontend
+      PREV: test
+      ZONE: prod
+    environment:
+      name: prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for image changes
+        id: check
+        run: |
+          # Vars
+          IMG_PREV="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PREV }}-${{ env.COMPONENT }}"
+          IMG_ZONE="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}"
+
+          # Pull previous image; grab SHA
+          docker pull "${IMG_PREV}"
+          SHA_PREV=$(docker inspect -f '{{.Id}}' "${IMG_PREV}")
+
+          # Use blank SHA for promoted image, unless a real one exists instead
+          docker pull "${IMG_ZONE}" && \
+            SHA_ZONE=$(docker inspect -f '{{.Id}}' "${IMG_ZONE}") ||
+            SHA_ZONE=""
+
+          # Output SHAs
+          echo -e "\n${IMG_PREV}: ${SHA_PREV}"
+          echo -e "${IMG_ZONE}: ${SHA_ZONE}\n"
+
+          # If different, then trigger updates
+          if [[ "${SHA_PREV}" != "${SHA_ZONE}" ]]; then
+            echo "::set-output name=build::true"
+            echo "Image has changed"
+
+            # Login to OpenShift and select project
+            oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+            oc project ${{ secrets.OC_NAMESPACE }}
+
+            oc delete is/${{ env.NAME }}-${{ env.ZONE}}-${{ env.COMPONENT }} || true
+            exit 0
+          fi
+          echo "Image promotion not required"
+
+      - name: Promote Backend Image
+        if: steps.check.outputs.build == 'true'
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: ${{ github.event.number }}-${{ env.COMPONENT }}
+          tags: |
+            ${{ env.PROMOTION }}-${{ env.COMPONENT }}
+
+  deploy-prod:
+    name: PROD Deployment
+    needs:
+      - image-backend
+      - image-frontend
     runs-on: ubuntu-latest
     environment:
       name: prod
@@ -317,12 +431,8 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
           oc project ${{ secrets.OC_NAMESPACE }}
 
-          # Clear previous images
-          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-backend || true
-          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-frontend || true
-
           # Do not replace database; 'oc create' kicks up an error if objects already exist
-          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc apply -f - || true
+          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc create -f - || true
 
           # Process and apply deployment templates
           oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ env.ZONE }} \
@@ -344,7 +454,7 @@ jobs:
       - name: Promote Backend Image to PROD
         uses: shrink/actions-docker-registry-tag@v2
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           repository: ${{ github.repository }}
           target: ${{ env.PREV }}-backend
           tags: |
@@ -353,7 +463,7 @@ jobs:
       - name: Promote Frontend Image to PROD
         uses: shrink/actions-docker-registry-tag@v2
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           repository: ${{ github.repository }}
           target: ${{ env.PREV }}-frontend
           tags: |
