@@ -347,7 +347,7 @@ jobs:
         if: steps.check.outputs.build == 'true'
         uses: shrink/actions-docker-registry-tag@v2
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           repository: ${{ github.repository }}
           target: ${{ github.event.number }}-${{ env.COMPONENT }}
           tags: |
@@ -406,7 +406,7 @@ jobs:
         if: steps.check.outputs.build == 'true'
         uses: shrink/actions-docker-registry-tag@v2
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           repository: ${{ github.repository }}
           target: ${{ github.event.number }}-${{ env.COMPONENT }}
           tags: |
@@ -454,7 +454,7 @@ jobs:
       - name: Promote Backend Image to PROD
         uses: shrink/actions-docker-registry-tag@v2
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           repository: ${{ github.repository }}
           target: ${{ env.PREV }}-backend
           tags: |
@@ -463,7 +463,7 @@ jobs:
       - name: Promote Frontend Image to PROD
         uses: shrink/actions-docker-registry-tag@v2
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           repository: ${{ github.repository }}
           target: ${{ env.PREV }}-frontend
           tags: |
