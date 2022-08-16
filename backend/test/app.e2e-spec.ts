@@ -18,5 +18,5 @@ describe('AppController (e2e)', () => {
   it('/ (GET)', () => request(app.getHttpServer())
     .get('/')
     .expect(200)
-    .expect('Hello Backend!'))
+    .expect('Hello Backend Modification #1!'))
 })
