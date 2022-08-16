@@ -87,7 +87,7 @@ jobs:
         if: steps.check.outputs.build == 'true'
         uses: shrink/actions-docker-registry-tag@v2
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           repository: ${{ github.repository }}
           target: ${{ github.event.number }}-${{ env.COMPONENT }}
           tags: |
@@ -149,7 +149,7 @@ jobs:
         if: steps.check.outputs.build == 'true'
         uses: shrink/actions-docker-registry-tag@v2
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           repository: ${{ github.repository }}
           target: ${{ github.event.number }}-${{ env.COMPONENT }}
           tags: |
