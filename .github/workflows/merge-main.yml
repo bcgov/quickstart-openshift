@@ -1,4 +1,4 @@
-name: Main Merge
+name: 03. Merge to Main
 
 on:
   push:

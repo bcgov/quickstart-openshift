@@ -1,4 +1,4 @@
-name: Pull Request
+name: 01. Pull Request Open
 
 on:
   pull_request:
