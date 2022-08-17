@@ -35,27 +35,6 @@ jobs:
             const github = require('@actions/github');
             console.log(JSON.stringify(github, null, 2));
 
-  # https://github.com/snyk/snyk
-  snyk:
-    name: Dependency Report
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
-        continue-on-error: true # To make sure that SARIF upload gets called
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --all-projects --severity-threshold=high --sarif-file-output=snyk.sarif
-
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: snyk.sarif
-
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-backend:
     name: Backend Image Report
@@ -416,11 +395,34 @@ jobs:
           tags: |
             ${{ env.ZONE }}-${{ env.COMPONENT }}
 
+  # https://github.com/snyk/snyk
+  # Note: using free tier - called late in pipeline to limit runs
+  snyk:
+    name: Dependency Report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true # To make sure that SARIF upload gets called
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects --severity-threshold=high --sarif-file-output=snyk.sarif
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk.sarif
+
   deploy-prod:
     name: PROD Deployment
     needs:
       - image-backend
       - image-frontend
+      - snyk
     runs-on: ubuntu-latest
     environment:
       name: prod
