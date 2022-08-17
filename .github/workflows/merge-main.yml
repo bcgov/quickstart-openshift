@@ -353,7 +353,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           repository: ${{ github.repository }}
-          target: ${{ github.event.number }}-${{ env.COMPONENT }}
+          target: ${{ env.PREV }}-${{ env.COMPONENT }}
           tags: |
             ${{ env.ZONE }}-${{ env.COMPONENT }}
 
@@ -412,7 +412,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           repository: ${{ github.repository }}
-          target: ${{ github.event.number }}-${{ env.COMPONENT }}
+          target: ${{ env.PREV }}-${{ env.COMPONENT }}
           tags: |
             ${{ env.ZONE }}-${{ env.COMPONENT }}
 
