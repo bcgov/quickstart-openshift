@@ -35,30 +35,6 @@ jobs:
             const github = require('@actions/github');
             console.log(JSON.stringify(github, null, 2));
 
-  codeql:
-    name: Semantic Code Analysis
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Initialize
-        uses: github/codeql-action/init@v2
-        with:
-          languages: javascript
-
-      # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
-      # If this step fails, then you should remove it and run the build manually (see below)
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v2
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
-
   # https://github.com/snyk/snyk
   snyk:
     name: Dependency Report
@@ -79,43 +55,6 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: snyk.sarif
-
-  sonarcloud:
-    name: Static Analysis
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        # Disable shallow clone for SonarCloud analysis
-        with:
-          fetch-depth: 0
-
-      - name: Backend Tests
-        run: |
-          cd frontend
-          npm ci
-          npm run test:cov
-
-      - name: Frontend Tests
-        run: |
-          cd frontend
-          npm ci
-          npm run test:cov
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.exclusions=**/test/**,.github/**/*
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info
-            -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml,frontend/coverage/cobertura-coverage.xml
-            -Dsonar.project.monorepo.enabled=true
-            -Dsonar.projectKey=greenfield-template
-            -Dsonar.sources=backend,frontend
-            -Dsonar.tests=backend/test,frontend/test
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-backend:
@@ -225,8 +164,73 @@ jobs:
           skip_tags: prod-frontend,prod-backend
           token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
 
+  codeql:
+    name: Semantic Code Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Initialize
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+
+      # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
+      # If this step fails, then you should remove it and run the build manually (see below)
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  # SonarCloud runs in the main branch are needed to compare against PRs
+  sonarcloud:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        # Disable shallow clone for SonarCloud analysis
+        with:
+          fetch-depth: 0
+
+      - name: Backend Tests
+        run: |
+          cd frontend
+          npm ci
+          npm run test:cov
+
+      - name: Frontend Tests
+        run: |
+          cd frontend
+          npm ci
+          npm run test:cov
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.exclusions=**/test/**,.github/**/*
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info
+            -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml,frontend/coverage/cobertura-coverage.xml
+            -Dsonar.project.monorepo.enabled=true
+            -Dsonar.projectKey=greenfield-template
+            -Dsonar.sources=backend,frontend
+            -Dsonar.tests=backend/test,frontend/test
+
   deploy-test:
     name: TEST Deployment
+    needs:
+      - codeql
+      - sonarcloud
     runs-on: ubuntu-latest
     environment:
       name: test
@@ -351,7 +355,7 @@ jobs:
           repository: ${{ github.repository }}
           target: ${{ github.event.number }}-${{ env.COMPONENT }}
           tags: |
-            ${{ env.PROMOTION }}-${{ env.COMPONENT }}
+            ${{ env.ZONE }}-${{ env.COMPONENT }}
 
   image-frontend:
     name: Frontend Image Handling
@@ -410,7 +414,7 @@ jobs:
           repository: ${{ github.repository }}
           target: ${{ github.event.number }}-${{ env.COMPONENT }}
           tags: |
-            ${{ env.PROMOTION }}-${{ env.COMPONENT }}
+            ${{ env.ZONE }}-${{ env.COMPONENT }}
 
   deploy-prod:
     name: PROD Deployment

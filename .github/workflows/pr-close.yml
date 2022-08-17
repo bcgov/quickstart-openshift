@@ -91,7 +91,7 @@ jobs:
           repository: ${{ github.repository }}
           target: ${{ github.event.number }}-${{ env.COMPONENT }}
           tags: |
-            ${{ env.PROMOTION }}-${{ env.COMPONENT }}
+            ${{ env.ZONE }}-${{ env.COMPONENT }}
 
   # If merged, then handle any image promotion
   image-frontend:
@@ -153,7 +153,7 @@ jobs:
           repository: ${{ github.repository }}
           target: ${{ github.event.number }}-${{ env.COMPONENT }}
           tags: |
-            ${{ env.PROMOTION }}-${{ env.COMPONENT }}
+            ${{ env.ZONE }}-${{ env.COMPONENT }}
 
   # Notify when PR merged and branch = main
   merge-notification:
