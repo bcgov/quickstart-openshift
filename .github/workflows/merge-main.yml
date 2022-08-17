@@ -395,10 +395,10 @@ jobs:
           tags: |
             ${{ env.ZONE }}-${{ env.COMPONENT }}
 
-  # https://github.com/snyk/snyk
+  # https://github.com/snyk/cli, https://github.com/snyk/actions
   # Note: using free tier - called late in pipeline to limit runs
   snyk:
-    name: Dependency Report
+    name: Vulnerability Report
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
