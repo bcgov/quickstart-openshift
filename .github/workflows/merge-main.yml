@@ -376,6 +376,9 @@ jobs:
   # Note: using free tier - called late in pipeline to limit runs
   snyk:
     name: Vulnerability Report
+    needs:
+      - zap-backend
+      - zap-frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
