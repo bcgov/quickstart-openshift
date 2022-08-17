@@ -103,29 +103,6 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy-rhel-ubi:
-    name: Base Image Report
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Trivy Vulnerability Scan
-        uses: aquasecurity/trivy-action@0.3.0
-        with:
-          image-ref: registry.access.redhat.com/ubi8/ubi
-          ignore-unfixed: true
-          severity: CRITICAL
-          format: "sarif"
-          output: "trivy-results.sarif"
-
-      - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: "trivy-results.sarif"
-
   cleanup-ghcr:
     name: Cleanup Container Registry
     runs-on: ubuntu-latest
