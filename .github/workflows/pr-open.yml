@@ -34,6 +34,9 @@ jobs:
       build: ${{ steps.check.outputs.build }}
     env:
       TRIGGERS: ('backend/')
+      COMPONENT: backend
+      PREV: prod
+      ZONE: ${{ github.event.number }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -61,15 +64,15 @@ jobs:
           done < <(git diff origin/main --name-only)
           echo "Container build not required"
 
-      - name: Recycle/retag PROD Image
+      - name: Recycle/retag Previous Images
         if: steps.check.outputs.build != 'true'
         uses: shrink/actions-docker-registry-tag@v2
         with:
           registry: ${{ env.REGISTRY }}
           repository: ${{ github.repository }}
-          target: prod-backend
+          target: ${{ env.PREV }}-${{ env.COMPONENT }}
           tags: |
-            ${{ github.event.number }}-backend
+            ${{ env.ZONE }}-${{ env.COMPONENT }}
 
   check-frontend:
     name: Check Frontend
@@ -77,6 +80,9 @@ jobs:
       build: ${{ steps.check.outputs.build }}
     env:
       TRIGGERS: ('frontend/')
+      COMPONENT: frontend
+      PREV: prod
+      ZONE: ${{ github.event.number }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -104,18 +110,21 @@ jobs:
           done < <(git diff origin/main --name-only)
           echo "Container build not required"
 
-      - name: Recycle/retag PROD Image
+      - name: Recycle/retag Previous Images
         if: steps.check.outputs.build != 'true'
         uses: shrink/actions-docker-registry-tag@v2
         with:
           registry: ${{ env.REGISTRY }}
           repository: ${{ github.repository }}
-          target: prod-frontend
+          target: ${{ env.PREV }}-${{ env.COMPONENT }}
           tags: |
-            ${{ github.event.number }}-frontend
+            ${{ env.ZONE }}-${{ env.COMPONENT }}
 
   build-backend:
     name: Backend Image Build
+    env:
+      COMPONENT: backend
+      ZONE: ${{ github.event.number }}
     runs-on: ubuntu-latest
     needs:
       - check-backend
@@ -150,7 +159,7 @@ jobs:
         with:
           context: ./backend/
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -161,10 +170,13 @@ jobs:
           oc project ${{ secrets.OC_NAMESPACE }}
 
           # Clean previous image
-          oc delete is ${{ env.NAME }}-${{ github.event.number }}-backend || true
+          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-${{ env.COMPONENT }} || true
 
   build-frontend:
     name: Frontend Image Build
+    env:
+      COMPONENT: frontend
+      ZONE: ${{ github.event.number }}
     runs-on: ubuntu-latest
     needs:
       - check-frontend
@@ -199,7 +211,7 @@ jobs:
         with:
           context: ./frontend/
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -210,7 +222,7 @@ jobs:
           oc project ${{ secrets.OC_NAMESPACE }}
 
           # Clean previous image
-          oc delete is ${{ env.NAME }}-${{ github.event.number }}-frontend || true
+          oc delete is ${{ env.NAME }}-${{ env.ZONE }}-${{ env.COMPONENT }} || true
 
   tests-backend:
     name: Backend Unit Tests
