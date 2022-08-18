@@ -394,6 +394,28 @@ jobs:
       ZONE: prod
       PREV: test
     steps:
+      - name: Remove any stale backend images
+        if: needs.image-backend.outputs.build != 'true'
+        env:
+          COMPONENT: backend
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.OC_NAMESPACE }}
+
+          oc delete is/${{ env.NAME }}-${{ env.ZONE}}-${{ env.COMPONENT }} || true
+
+      - name: Remove any stale frontend images
+        if: needs.image-frontend.outputs.build != 'true'
+        env:
+          COMPONENT: frontend
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.OC_NAMESPACE }}
+
+          oc delete is/${{ env.NAME }}-${{ env.ZONE}}-${{ env.COMPONENT }} || true
+
       - uses: actions/checkout@v2
       - name: Deploy
         run: |
