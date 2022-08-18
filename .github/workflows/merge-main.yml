@@ -1,4 +1,4 @@
-name: Main Merge
+name: Merge to Main
 
 on:
   push:
@@ -34,27 +34,6 @@ jobs:
           script: |
             const github = require('@actions/github');
             console.log(JSON.stringify(github, null, 2));
-
-  # https://github.com/snyk/snyk
-  snyk:
-    name: Dependency Report
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
-        continue-on-error: true # To make sure that SARIF upload gets called
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --all-projects --severity-threshold=high --sarif-file-output=snyk.sarif
-
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: snyk.sarif
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-backend:
@@ -120,29 +99,6 @@ jobs:
           severity: "CRITICAL"
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: "trivy-results.sarif"
-
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy-rhel-ubi:
-    name: Base Image Report
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Trivy Vulnerability Scan
-        uses: aquasecurity/trivy-action@0.3.0
-        with:
-          image-ref: registry.access.redhat.com/ubi8/ubi
-          ignore-unfixed: true
-          severity: CRITICAL
-          format: "sarif"
-          output: "trivy-results.sarif"
-
-      - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: "trivy-results.sarif"
@@ -416,11 +372,37 @@ jobs:
           tags: |
             ${{ env.ZONE }}-${{ env.COMPONENT }}
 
+  # https://github.com/snyk/cli, https://github.com/snyk/actions
+  # Note: using free tier - called late in pipeline to limit runs
+  snyk:
+    name: Vulnerability Report
+    needs:
+      - zap-backend
+      - zap-frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true # To make sure that SARIF upload gets called
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects --severity-threshold=high --sarif-file-output=snyk.sarif
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk.sarif
+
   deploy-prod:
     name: PROD Deployment
     needs:
       - image-backend
       - image-frontend
+      - snyk
     runs-on: ubuntu-latest
     environment:
       name: prod

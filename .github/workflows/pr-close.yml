@@ -1,4 +1,4 @@
-name: Cleanup
+name: Pull Request Close
 
 on:
   pull_request:
@@ -19,8 +19,6 @@ jobs:
   cleanup-openshift:
     name: Cleanup OpenShift
     runs-on: ubuntu-latest
-    environment:
-      name: dev
     steps:
       - uses: actions/checkout@v2
       - name: Remove OpenShift artifacts
