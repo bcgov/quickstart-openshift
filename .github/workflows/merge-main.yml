@@ -265,8 +265,6 @@ jobs:
       COMPONENT: backend
       PREV: test
       ZONE: prod
-    environment:
-      name: prod
     runs-on: ubuntu-latest
     steps:
       - name: Check for image changes
@@ -293,12 +291,6 @@ jobs:
           if [[ "${SHA_PREV}" != "${SHA_ZONE}" ]]; then
             echo "::set-output name=build::true"
             echo "Image has changed"
-
-            # Login to OpenShift and select project
-            oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-            oc project ${{ secrets.OC_NAMESPACE }}
-
-            oc delete is/${{ env.NAME }}-${{ env.ZONE}}-${{ env.COMPONENT }} || true
             exit 0
           fi
           echo "Image promotion not required"
@@ -324,8 +316,6 @@ jobs:
       COMPONENT: frontend
       PREV: test
       ZONE: prod
-    environment:
-      name: prod
     runs-on: ubuntu-latest
     steps:
       - name: Check for image changes
@@ -352,12 +342,6 @@ jobs:
           if [[ "${SHA_PREV}" != "${SHA_ZONE}" ]]; then
             echo "::set-output name=build::true"
             echo "Image has changed"
-
-            # Login to OpenShift and select project
-            oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-            oc project ${{ secrets.OC_NAMESPACE }}
-
-            oc delete is/${{ env.NAME }}-${{ env.ZONE}}-${{ env.COMPONENT }} || true
             exit 0
           fi
           echo "Image promotion not required"
