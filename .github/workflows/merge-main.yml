@@ -254,124 +254,6 @@ jobs:
           allow_issue_writing: false
           fail_action: false
 
-  image-backend:
-    name: Backend Image Handling
-    needs:
-      - zap-backend
-      - zap-frontend
-    outputs:
-      build: ${{ steps.check.outputs.build }}
-    env:
-      COMPONENT: backend
-      PREV: test
-      ZONE: prod
-    environment:
-      name: prod
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check for image changes
-        id: check
-        run: |
-          # Vars
-          IMG_PREV="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PREV }}-${{ env.COMPONENT }}"
-          IMG_ZONE="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}"
-
-          # Pull previous image; grab SHA
-          docker pull "${IMG_PREV}"
-          SHA_PREV=$(docker inspect -f '{{.Id}}' "${IMG_PREV}")
-
-          # Use blank SHA for promoted image, unless a real one exists instead
-          docker pull "${IMG_ZONE}" && \
-            SHA_ZONE=$(docker inspect -f '{{.Id}}' "${IMG_ZONE}") ||
-            SHA_ZONE=""
-
-          # Output SHAs
-          echo -e "\n${IMG_PREV}: ${SHA_PREV}"
-          echo -e "${IMG_ZONE}: ${SHA_ZONE}\n"
-
-          # If different, then trigger updates
-          if [[ "${SHA_PREV}" != "${SHA_ZONE}" ]]; then
-            echo "::set-output name=build::true"
-            echo "Image has changed"
-
-            # Login to OpenShift and select project
-            oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-            oc project ${{ secrets.OC_NAMESPACE }}
-
-            oc delete is/${{ env.NAME }}-${{ env.ZONE}}-${{ env.COMPONENT }} || true
-            exit 0
-          fi
-          echo "Image promotion not required"
-
-      - name: Promote Backend Image
-        if: steps.check.outputs.build == 'true'
-        uses: shrink/actions-docker-registry-tag@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          repository: ${{ github.repository }}
-          target: ${{ env.PREV }}-${{ env.COMPONENT }}
-          tags: |
-            ${{ env.ZONE }}-${{ env.COMPONENT }}
-
-  image-frontend:
-    name: Frontend Image Handling
-    needs:
-      - zap-backend
-      - zap-frontend
-    outputs:
-      build: ${{ steps.check.outputs.build }}
-    env:
-      COMPONENT: frontend
-      PREV: test
-      ZONE: prod
-    environment:
-      name: prod
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check for image changes
-        id: check
-        run: |
-          # Vars
-          IMG_PREV="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PREV }}-${{ env.COMPONENT }}"
-          IMG_ZONE="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}"
-
-          # Pull previous image; grab SHA
-          docker pull "${IMG_PREV}"
-          SHA_PREV=$(docker inspect -f '{{.Id}}' "${IMG_PREV}")
-
-          # Use blank SHA for promoted image, unless a real one exists instead
-          docker pull "${IMG_ZONE}" && \
-            SHA_ZONE=$(docker inspect -f '{{.Id}}' "${IMG_ZONE}") ||
-            SHA_ZONE=""
-
-          # Output SHAs
-          echo -e "\n${IMG_PREV}: ${SHA_PREV}"
-          echo -e "${IMG_ZONE}: ${SHA_ZONE}\n"
-
-          # If different, then trigger updates
-          if [[ "${SHA_PREV}" != "${SHA_ZONE}" ]]; then
-            echo "::set-output name=build::true"
-            echo "Image has changed"
-
-            # Login to OpenShift and select project
-            oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-            oc project ${{ secrets.OC_NAMESPACE }}
-
-            oc delete is/${{ env.NAME }}-${{ env.ZONE}}-${{ env.COMPONENT }} || true
-            exit 0
-          fi
-          echo "Image promotion not required"
-
-      - name: Promote Backend Image
-        if: steps.check.outputs.build == 'true'
-        uses: shrink/actions-docker-registry-tag@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          repository: ${{ github.repository }}
-          target: ${{ env.PREV }}-${{ env.COMPONENT }}
-          tags: |
-            ${{ env.ZONE }}-${{ env.COMPONENT }}
-
   # https://github.com/snyk/cli, https://github.com/snyk/actions
   # Note: using free tier - called late in pipeline to limit runs
   snyk:
@@ -397,6 +279,108 @@ jobs:
         with:
           sarif_file: snyk.sarif
 
+  image-backend:
+    name: Backend Image Handling
+    needs:
+      - zap-backend
+      - zap-frontend
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    env:
+      COMPONENT: backend
+      PREV: test
+      ZONE: prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for image changes
+        id: check
+        run: |
+          # Vars
+          IMG_PREV="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PREV }}-${{ env.COMPONENT }}"
+          IMG_ZONE="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}"
+
+          # Pull previous image; grab SHA
+          docker pull "${IMG_PREV}"
+          SHA_PREV=$(docker inspect -f '{{.Id}}' "${IMG_PREV}")
+
+          # Use blank SHA for promoted image, unless a real one exists instead
+          docker pull "${IMG_ZONE}" && \
+            SHA_ZONE=$(docker inspect -f '{{.Id}}' "${IMG_ZONE}") ||
+            SHA_ZONE=""
+
+          # Output SHAs
+          echo -e "\n${IMG_PREV}: ${SHA_PREV}"
+          echo -e "${IMG_ZONE}: ${SHA_ZONE}\n"
+
+          # If different, then trigger updates
+          if [[ "${SHA_PREV}" != "${SHA_ZONE}" ]]; then
+            echo "::set-output name=build::true"
+            echo "Image has changed"
+            exit 0
+          fi
+          echo "Image promotion not required"
+
+      - name: Promote Backend Image
+        if: steps.check.outputs.build == 'true'
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: ${{ env.PREV }}-${{ env.COMPONENT }}
+          tags: |
+            ${{ env.ZONE }}-${{ env.COMPONENT }}
+
+  image-frontend:
+    name: Frontend Image Handling
+    needs:
+      - zap-backend
+      - zap-frontend
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    env:
+      COMPONENT: frontend
+      PREV: test
+      ZONE: prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for image changes
+        id: check
+        run: |
+          # Vars
+          IMG_PREV="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PREV }}-${{ env.COMPONENT }}"
+          IMG_ZONE="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}"
+
+          # Pull previous image; grab SHA
+          docker pull "${IMG_PREV}"
+          SHA_PREV=$(docker inspect -f '{{.Id}}' "${IMG_PREV}")
+
+          # Use blank SHA for promoted image, unless a real one exists instead
+          docker pull "${IMG_ZONE}" && \
+            SHA_ZONE=$(docker inspect -f '{{.Id}}' "${IMG_ZONE}") ||
+            SHA_ZONE=""
+
+          # Output SHAs
+          echo -e "\n${IMG_PREV}: ${SHA_PREV}"
+          echo -e "${IMG_ZONE}: ${SHA_ZONE}\n"
+
+          # If different, then trigger updates
+          if [[ "${SHA_PREV}" != "${SHA_ZONE}" ]]; then
+            echo "::set-output name=build::true"
+            echo "Image has changed"
+            exit 0
+          fi
+          echo "Image promotion not required"
+
+      - name: Promote Backend Image
+        if: steps.check.outputs.build == 'true'
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: ${{ env.PREV }}-${{ env.COMPONENT }}
+          tags: |
+            ${{ env.ZONE }}-${{ env.COMPONENT }}
+
   deploy-prod:
     name: PROD Deployment
     needs:
@@ -410,6 +394,28 @@ jobs:
       ZONE: prod
       PREV: test
     steps:
+      - name: Remove any stale backend images
+        if: needs.image-backend.outputs.build != 'true'
+        env:
+          COMPONENT: backend
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.OC_NAMESPACE }}
+
+          oc delete is/${{ env.NAME }}-${{ env.ZONE}}-${{ env.COMPONENT }} || true
+
+      - name: Remove any stale frontend images
+        if: needs.image-frontend.outputs.build != 'true'
+        env:
+          COMPONENT: frontend
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.OC_NAMESPACE }}
+
+          oc delete is/${{ env.NAME }}-${{ env.ZONE}}-${{ env.COMPONENT }} || true
+
       - uses: actions/checkout@v2
       - name: Deploy
         run: |
