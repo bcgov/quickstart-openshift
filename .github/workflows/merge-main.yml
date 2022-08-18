@@ -254,6 +254,31 @@ jobs:
           allow_issue_writing: false
           fail_action: false
 
+  # https://github.com/snyk/cli, https://github.com/snyk/actions
+  # Note: using free tier - called late in pipeline to limit runs
+  snyk:
+    name: Vulnerability Report
+    needs:
+      - zap-backend
+      - zap-frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true # To make sure that SARIF upload gets called
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects --severity-threshold=high --sarif-file-output=snyk.sarif
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk.sarif
+
   image-backend:
     name: Backend Image Handling
     needs:
@@ -355,31 +380,6 @@ jobs:
           target: ${{ env.PREV }}-${{ env.COMPONENT }}
           tags: |
             ${{ env.ZONE }}-${{ env.COMPONENT }}
-
-  # https://github.com/snyk/cli, https://github.com/snyk/actions
-  # Note: using free tier - called late in pipeline to limit runs
-  snyk:
-    name: Vulnerability Report
-    needs:
-      - zap-backend
-      - zap-frontend
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
-        continue-on-error: true # To make sure that SARIF upload gets called
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --all-projects --severity-threshold=high --sarif-file-output=snyk.sarif
-
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: snyk.sarif
 
   deploy-prod:
     name: PROD Deployment

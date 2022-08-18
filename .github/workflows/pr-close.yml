@@ -31,7 +31,7 @@ jobs:
 
   # If merged, then handle any image promotion
   image-backend:
-    name: Backend Image Handling
+    name: Backend Image Promotion
     outputs:
       build: ${{ steps.check.outputs.build }}
     env:
@@ -93,7 +93,7 @@ jobs:
 
   # If merged, then handle any image promotion
   image-frontend:
-    name: Frontend Image Handling
+    name: Frontend Image Promotion
     outputs:
       build: ${{ steps.check.outputs.build }}
     env:
