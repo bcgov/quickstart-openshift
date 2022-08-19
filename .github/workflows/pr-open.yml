@@ -30,7 +30,7 @@ jobs:
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
-    name: Repository Report
+    name: Repository Scan
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
@@ -46,11 +46,7 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
           severity: "CRITICAL,HIGH"
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: "trivy-results.sarif"
+          security-checks: "vuln,secret,config"
 
   check-backend:
     name: Check Backend
