@@ -28,6 +28,74 @@ jobs:
             const github = require('@actions/github');
             console.log(JSON.stringify(github, null, 2));
 
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy-backend:
+    name: Backend Image Report
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Backend container scan
+      - name: Trivy Image Scan
+        uses: aquasecurity/trivy-action@0.3.0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
+          ignore-unfixed: true
+          severity: CRITICAL
+          format: "sarif"
+          output: "trivy-results-backend.sarif"
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "trivy-results-backend.sarif"
+
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy-frontend:
+    name: Frontend Image Report
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Frontend container scan
+      - name: Trivy Image Scan
+        uses: aquasecurity/trivy-action@0.3.0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
+          ignore-unfixed: true
+          severity: CRITICAL
+          format: "sarif"
+          output: "trivy-results-frontend.sarif"
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "trivy-results-frontend.sarif"
+
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy-repo:
+    name: Repository Report
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@0.3.0
+        with:
+          scan-type: "fs"
+          ignore-unfixed: true
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL"
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "trivy-results.sarif"
+
   check-backend:
     name: Check Backend
     outputs:
