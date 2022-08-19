@@ -211,6 +211,32 @@ jobs:
         with:
           sarif_file: snyk.sarif
 
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy-repo:
+    name: Repository Report
+    needs:
+      - zap-backend
+      - zap-frontend
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@0.3.0
+        with:
+          scan-type: "fs"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH"
+          security-checks: "vuln,secret,config"
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "trivy-results.sarif"
+
   image-backend:
     name: Backend Image Handling
     needs:
@@ -319,6 +345,7 @@ jobs:
       - image-backend
       - image-frontend
       - snyk
+      - trivy-repo
     runs-on: ubuntu-latest
     environment:
       name: prod
