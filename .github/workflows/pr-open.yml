@@ -41,7 +41,7 @@ jobs:
         with:
           scan-type: "fs"
           hide-progress: true
-          format: "sarif"
+          format: "table"
           output: "trivy-results.sarif"
           exit-code: 1
           ignore-unfixed: true
