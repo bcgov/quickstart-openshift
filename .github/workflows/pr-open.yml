@@ -7,15 +7,11 @@ env:
   REGISTRY: ghcr.io
   NAME: gfp
 
-jobs:
-  cancel-prev-runs:
-    name: Cancel Previous Runs
-    runs-on: ubuntu-latest
-    steps:
-      - uses: n1hility/cancel-previous-runs@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
+jobs:
   # https://docs.github.com/en/actions/learn-github-actions/contexts
   view-context:
     name: View GitHub Context
