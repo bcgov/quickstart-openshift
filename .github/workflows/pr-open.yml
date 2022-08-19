@@ -16,8 +16,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+  # https://docs.github.com/en/actions/learn-github-actions/contexts
   view-context:
-    # https://docs.github.com/en/actions/learn-github-actions/contexts
     name: View GitHub Context
     runs-on: ubuntu-latest
     steps:
