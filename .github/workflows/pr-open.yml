@@ -16,8 +16,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+  # https://docs.github.com/en/actions/learn-github-actions/contexts
   view-context:
-    # https://docs.github.com/en/actions/learn-github-actions/contexts
     name: View GitHub Context
     runs-on: ubuntu-latest
     steps:
@@ -27,58 +27,6 @@ jobs:
           script: |
             const github = require('@actions/github');
             console.log(JSON.stringify(github, null, 2));
-
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy-backend:
-    name: Backend Image Report
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      # Backend container scan
-      - name: Trivy Image Scan
-        uses: aquasecurity/trivy-action@0.3.0
-        with:
-          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-backend
-          ignore-unfixed: true
-          severity: "CRITICAL,HIGH"
-          exit-code: 1
-          hide-progress: false
-          security-checks: "vuln,secret,config"
-          # format: "sarif"
-          # output: "trivy-results-backend.sarif"
-
-      # - name: Upload Trivy results to GitHub Security tab
-      #   uses: github/codeql-action/upload-sarif@v2
-      #   with:
-      #     sarif_file: "trivy-results-backend.sarif"
-
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy-frontend:
-    name: Frontend Image Report
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      # Frontend container scan
-      - name: Trivy Image Scan
-        uses: aquasecurity/trivy-action@0.3.0
-        with:
-          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.event.number }}-frontend
-          ignore-unfixed: true
-          severity: "CRITICAL,HIGH"
-          exit-code: 1
-          hide-progress: false
-          security-checks: "vuln,secret,config"
-          # format: "sarif"
-          # output: "trivy-results-backend.sarif"
-
-      # - name: Upload Trivy results to GitHub Security tab
-      #   uses: github/codeql-action/upload-sarif@v2
-      #   with:
-      #     sarif_file: "trivy-results-frontend.sarif"
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy-repo:
@@ -92,19 +40,17 @@ jobs:
         uses: aquasecurity/trivy-action@0.3.0
         with:
           scan-type: "fs"
-          ignore-unfixed: true
+          hide-progress: true
+          format: "sarif"
           output: "trivy-results.sarif"
-          severity: "CRITICAL,HIGH"
           exit-code: 1
-          hide-progress: false
-          security-checks: "vuln,secret,config"
-          # format: "sarif"
-          # output: "trivy-results-backend.sarif"
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH"
 
-      # - name: Upload Trivy scan results to GitHub Security tab
-      #   uses: github/codeql-action/upload-sarif@v2
-      #   with:
-      #     sarif_file: "trivy-results.sarif"
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "trivy-results.sarif"
 
   check-backend:
     name: Check Backend
