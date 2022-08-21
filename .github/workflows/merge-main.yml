@@ -9,6 +9,7 @@ on:
       - "**.md"
       - "**.yml"
       - "**.yaml"
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -19,23 +20,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  view-context:
-    # https://docs.github.com/en/actions/learn-github-actions/contexts
-    name: View GitHub Context
-    runs-on: ubuntu-latest
-    steps:
-      - name: Echo GitHub context
-        uses: satackey/action-js-inline@v0.0.2
-        with:
-          script: |
-            const github = require('@actions/github');
-            console.log(JSON.stringify(github, null, 2));
-
+  # https://github.com/marketplace/actions/ghcr-io-container-cleanup
   cleanup-ghcr:
     name: Cleanup Container Registry
     runs-on: ubuntu-latest
     steps:
-      # https://github.com/marketplace/actions/ghcr-io-container-cleanup
       - name: Delete old packages
         uses: davahome/ghcr-cleanup@v1.1.0.1
         with:
@@ -113,6 +102,7 @@ jobs:
   deploy-test:
     name: TEST Deployment
     needs:
+      - cleanup-ghcr
       - codeql
       - sonarcloud
     runs-on: ubuntu-latest
@@ -415,3 +405,16 @@ jobs:
           target: ${{ env.PREV }}-frontend
           tags: |
             prod-frontend
+
+  # # Uncomment to for development and troubleshooting
+  # # https://docs.github.com/en/actions/learn-github-actions/contexts
+  # view-context:
+  #   name: View GitHub Context
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Echo GitHub context
+  #       uses: satackey/action-js-inline@v0.0.2
+  #       with:
+  #         script: |
+  #           const github = require('@actions/github');
+  #           console.log(JSON.stringify(github, null, 2));
