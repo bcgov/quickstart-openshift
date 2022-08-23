@@ -23,7 +23,7 @@ jobs:
   # https://github.com/marketplace/actions/ghcr-io-container-cleanup
   cleanup-ghcr:
     name: Cleanup Container Registry
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Delete old packages
         uses: davahome/ghcr-cleanup@v1.1.0.1
@@ -39,7 +39,7 @@ jobs:
 
   codeql:
     name: Semantic Code Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       actions: read
       contents: read
@@ -64,7 +64,7 @@ jobs:
   # SonarCloud runs in the main branch are needed to compare against PRs
   sonarcloud:
     name: Static Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
         # Disable shallow clone for SonarCloud analysis
@@ -105,7 +105,7 @@ jobs:
       - cleanup-ghcr
       - codeql
       - sonarcloud
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment:
       name: test
     env:
@@ -142,7 +142,7 @@ jobs:
     name: Backend Pen Tests
     needs:
       - deploy-test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -159,7 +159,7 @@ jobs:
     name: Frontend Pen Tests
     needs:
       - deploy-test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -179,7 +179,7 @@ jobs:
     needs:
       - zap-backend
       - zap-frontend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -203,7 +203,7 @@ jobs:
     needs:
       - zap-backend
       - zap-frontend
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -234,7 +234,7 @@ jobs:
       COMPONENT: backend
       PREV: test
       ZONE: prod
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Check for image changes
         id: check
@@ -285,7 +285,7 @@ jobs:
       COMPONENT: frontend
       PREV: test
       ZONE: prod
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Check for image changes
         id: check
@@ -332,7 +332,7 @@ jobs:
       - image-frontend
       - snyk
       - trivy-repo
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment:
       name: prod
     env:
@@ -410,7 +410,7 @@ jobs:
   # # https://docs.github.com/en/actions/learn-github-actions/contexts
   # view-context:
   #   name: View GitHub Context
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-22.04
   #   steps:
   #     - name: Echo GitHub context
   #       uses: satackey/action-js-inline@v0.0.2
