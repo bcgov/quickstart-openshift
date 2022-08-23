@@ -21,7 +21,7 @@ jobs:
       COMPONENT: backend
       PREV: prod
       ZONE: ${{ github.event.number }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -67,7 +67,7 @@ jobs:
       COMPONENT: frontend
       PREV: prod
       ZONE: ${{ github.event.number }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -109,7 +109,7 @@ jobs:
     env:
       COMPONENT: backend
       ZONE: ${{ github.event.number }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - check-backend
     if: needs.check-backend.outputs.build == 'true'
@@ -161,7 +161,7 @@ jobs:
     env:
       COMPONENT: frontend
       ZONE: ${{ github.event.number }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - check-frontend
     if: needs.check-frontend.outputs.build == 'true'
@@ -210,7 +210,7 @@ jobs:
 
   tests-backend:
     name: Backend Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - check-backend
     if: needs.check-backend.outputs.build == 'true'
@@ -255,7 +255,7 @@ jobs:
 
   tests-frontend:
     name: Frontend Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - check-frontend
     if: needs.check-frontend.outputs.build == 'true'
@@ -307,7 +307,7 @@ jobs:
       - tests-backend
       - tests-frontend
     if: always() && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
         # Disable shallow clone for SonarCloud analysis
@@ -356,7 +356,7 @@ jobs:
       - tests-backend
       - tests-frontend
     if: always() && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
@@ -419,7 +419,7 @@ jobs:
   # # https://docs.github.com/en/actions/learn-github-actions/contexts
   # view-context:
   #   name: View GitHub Context
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-22.04
   #   steps:
   #     - name: Echo GitHub context
   #       uses: satackey/action-js-inline@v0.0.2
