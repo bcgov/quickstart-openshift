@@ -52,94 +52,25 @@ jobs:
 
   tests-backend:
     name: Backend Unit Tests
-    runs-on: ubuntu-22.04
+    if: needs.check-backend.outputs.build == 'true'
     needs:
       - check-backend
-    if: needs.check-backend.outputs.build == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Get npm cache directory
-        id: npm-cache-dir-backend
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-      - uses: actions/cache@v3
-        id: npm-cache-backend # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
-        with:
-          path: ${{ steps.npm-cache-dir-backend.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Cache for test results
-        id: cache-backend
-        uses: actions/cache@v3
-        with:
-          path: backend/coverage
-          key: backend-coverage-${{ github.run_number }}
-          restore-keys: |
-            backend-coverage-
-
-      - name: Tests
-        run: |
-          cd backend
-          npm ci
-          npm run test:cov
-
-      - name: Report code coverage
-        uses: romeovs/lcov-reporter-action@v0.3.1
-        with:
-          title: Backend coverage report
-          delete-old-comments: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          lcov-file: ./backend/coverage/lcov.info
+    uses: ./.github/workflows/_code-cov.yml
+    with:
+      component: backend
+      lcov_file: backend/coverage/lcov.info
+      test_cmd: npm run test:cov
 
   tests-frontend:
     name: Frontend Unit Tests
-    runs-on: ubuntu-22.04
+    if: needs.check-frontend.outputs.build == 'true'
     needs:
       - check-frontend
-    if: needs.check-frontend.outputs.build == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Get npm cache directory
-        id: npm-cache-dir-frontend
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-
-      - uses: actions/cache@v3
-        id: npm-cache-frontend # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
-        with:
-          path: ${{ steps.npm-cache-dir-frontend.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Cache for test results
-        id: cache-frontend
-        uses: actions/cache@v3
-        with:
-          path: frontend/coverage
-          key: frontend-coverage-${{ github.run_number }}
-          restore-keys: |
-            frontend-coverage-
-
-      - name: Tests
-        run: |
-          cd frontend
-          npm ci
-          npm run test:cov
-
-      - name: Report code coverage
-        uses: romeovs/lcov-reporter-action@v0.3.1
-        with:
-          title: Frontend coverage report
-          delete-old-comments: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          lcov-file: ./frontend/coverage/lcov.info
+    uses: ./.github/workflows/_code-cov.yml
+    with:
+      component: frontend
+      lcov_file: coverage
+      test_cmd: npm run test:cov
 
   sonarcloud:
     name: Static Analysis
