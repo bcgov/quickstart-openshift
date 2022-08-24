@@ -1,0 +1,75 @@
+name: Build Check
+
+on:
+  workflow_call:
+    inputs:
+      triggers:
+        type: string
+        required: true
+        description: Build triggers in a bash array, e.g. ('./backend/', './frontend/)
+      component:
+        type: string
+        required: true
+        description: Component (backend, frontend)
+      prev:
+        type: string
+        required: true
+        description: Where to pull default images from (prod, pr#, test)
+      zone:
+        type: string
+        required: true
+        description: Default zone (pr#, test, demo, prod)
+    outputs:
+      build:
+        description: True = build has changed
+        value: ${{ jobs.check.outputs.build }}
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  check:
+    name: Check ${{ inputs.component }}
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    env:
+      TRIGGERS: ${{ inputs.triggers }}
+      COMPONENT: ${{ inputs.component }}
+      PREV: ${{ inputs.prev }}
+      ZONE: ${{ inputs.zone }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check and process modified files
+        id: check
+        run: |
+          # Fetch main to diff against
+          git fetch origin main:refs/remotes/origin/master
+
+          # Trigger build if diff matches any triggers
+          TRIGGERS=${{ env.TRIGGERS }}
+          while read -r check
+          do
+              for t in "${TRIGGERS[@]}"; do
+                  if [[ "${check}" =~ "${t}" ]]
+                  then
+                      # Output build=true for next steps
+                      echo "::set-output name=build::true"
+                      echo -e "${t}\n --> ${check}\n"
+                      exit 0
+                  fi
+              done
+          done < <(git diff origin/main --name-only)
+          echo "Container build not required"
+
+      - name: Recycle/retag Previous Images
+        if: steps.check.outputs.build != 'true'
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: ${{ env.PREV }}-${{ env.COMPONENT }}
+          tags: |
+            ${{ env.ZONE }}-${{ env.COMPONENT }}
