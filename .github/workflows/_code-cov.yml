@@ -24,25 +24,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      # Find npm cache dir
       - name: Get npm cache directory
         id: npm-cache-dir
         run: |
           echo "::set-output name=dir::$(npm config get cache)"
 
+      # Use GitHub Actions cache for npm cache
       - uses: actions/cache@v3
+        # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
         with:
-          path: $(basedir ${{ inputs.lcov_file }})
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-
-      - name: Cache for test results
-        uses: actions/cache@v3
-        with:
-          path: ${{ inputs.lcov_file }}
-          key: ${{ inputs.lcov_file }}-${{ github.run_number }}
-          restore-keys: |
-            ${{ inputs.lcov_file }}-
 
       - name: Tests
         run: |
