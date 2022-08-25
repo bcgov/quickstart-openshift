@@ -38,7 +38,7 @@ jobs:
     uses: ./.github/workflows/_build-image.yml
     with:
       component: backend
-      zone: ${{ github.event.number }}]
+      zone: ${{ github.event.number }}
 
   build-frontend:
     name: Image
