@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   check-backend:
-    name: Check Backend
+    name: Check
     uses: ./.github/workflows/_build-check.yml
     with:
       triggers: ('backend/')
@@ -22,7 +22,7 @@ jobs:
       zone: ${{ github.event.number }}
 
   check-frontend:
-    name: Check Frontend
+    name: Check
     uses: ./.github/workflows/_build-check.yml
     with:
       triggers: ('frontend/')
@@ -31,7 +31,7 @@ jobs:
       zone: ${{ github.event.number }}
 
   build-backend:
-    name: Backend Image Build
+    name: Image
     if: needs.check-backend.outputs.build == 'true'
     needs:
       - check-backend
@@ -41,7 +41,7 @@ jobs:
       zone: ${{ github.event.number }}]
 
   build-frontend:
-    name: Frontend Image Build
+    name: Image
     if: needs.check-frontend.outputs.build == 'true'
     needs:
       - check-frontend
@@ -51,7 +51,7 @@ jobs:
       zone: ${{ github.event.number }}
 
   tests-backend:
-    name: Backend Unit Tests
+    name: Unit Tests
     if: needs.check-backend.outputs.build == 'true'
     needs:
       - check-backend
@@ -62,7 +62,7 @@ jobs:
       test_cmd: npm run test:cov
 
   tests-frontend:
-    name: Frontend Unit Tests
+    name: Unit Tests
     if: needs.check-frontend.outputs.build == 'true'
     needs:
       - check-frontend
@@ -82,8 +82,8 @@ jobs:
     if: always() && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
     runs-on: ubuntu-22.04
     steps:
+      # Disable shallow clone for SonarCloud analysis
       - uses: actions/checkout@v2
-        # Disable shallow clone for SonarCloud analysis
         with:
           fetch-depth: 0
 

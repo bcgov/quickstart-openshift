@@ -29,7 +29,7 @@ env:
 
 jobs:
   check:
-    name: Check ${{ inputs.component }}
+    name: ${{ inputs.component }}
     outputs:
       build: ${{ steps.check.outputs.build }}
     env:
