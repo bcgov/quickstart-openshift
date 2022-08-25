@@ -38,6 +38,7 @@ jobs:
     uses: ./.github/workflows/_build-image.yml
     with:
       component: backend
+      token: ${{ secrets.GITHUB_TOKEN }}
       zone: ${{ github.event.number }}
 
   build-frontend:
@@ -87,7 +88,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache for backend test results
+      - name: Get backend coverage from cache
         id: cache-backend
         uses: actions/cache@v3
         with:
@@ -96,7 +97,7 @@ jobs:
           restore-keys: |
             backend-coverage-
 
-      - name: Cache for frontend test results
+      - name: Get frontend coverage from cache
         id: cache-frontend
         uses: actions/cache@v3
         with:
@@ -136,6 +137,7 @@ jobs:
       ZONE: ${{ github.event.number }}
     steps:
       - uses: actions/checkout@v2
+
       - name: Deploy
         run: |
           # Login to OpenShift and select project
@@ -147,27 +149,18 @@ jobs:
 
           # Clean previous images
           oc delete is ${{ env.name }}-${{ inputs.zone }}-backend || true
-          oc delete is ${{ env.name }}-${{ inputs.zone }}-frontend || true
 
           # Process and apply template
           oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ env.ZONE }} \
             -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-backend | oc apply -f -
 
-          # Process and apply template
-          oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
-            -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-frontend | oc apply -f -
-
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-database -w
           oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-backend -w
-          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-frontend -w
 
       - name: Deployment Verification
         env:
-          LINKS: (
-            'https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}'
-            'https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}'
-            )
+          LINKS: ('https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}')
         run: |
           LINKS=${{ env.LINKS }}
           for l in "${LINKS[@]}"; do
@@ -177,7 +170,6 @@ jobs:
                   exit 1
               fi
           done
-
           echo "Deployment verification successful"
 
       - name: DEV Deployment update
@@ -190,7 +182,22 @@ jobs:
             DEV deployments have completed successfully!
 
             [Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}/) available
-            [Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/) available
+          # [Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/) available
+
+  deploy-frontend:
+    name: Deploy Frontend
+    needs:
+      - deploy-dev
+    uses: ./.github/workflows/_deploy.yml
+    with:
+      app_name: gfp
+      component: frontend
+      domain: apps.silver.devops.gov.bc.ca
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_server: ${{ secrets.OC_SERVER }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+      template_file: .github/openshift/deploy.frontend.yml
+      template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend
 
   # # Uncomment to for development and troubleshooting
   # # https://docs.github.com/en/actions/learn-github-actions/contexts

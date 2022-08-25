@@ -15,6 +15,10 @@ on:
         type: string
         required: true
         description: Command to run unit tests
+      token:
+        type: string
+        required: true
+        description: Default github token ('${{ secrets.GITHUB_TOKEN }}')
 
 jobs:
   test:
@@ -40,9 +44,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ inputs.component }}/coverage
-          key: ${{ inputs.component }}-coverage-${{ github.run_number }}
+          key: coverage-${{ inputs.component }}-${{ github.run_number }}
           restore-keys: |
-            ${{ inputs.component }}-coverage-
+            coverage-${{ inputs.component }}-
 
       - name: Tests
         run: |
@@ -55,5 +59,5 @@ jobs:
         with:
           title: ${{ inputs.component }} coverage report
           delete-old-comments: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ inputs.token }}
           lcov-file: ./${{ inputs.lcov_file }}/lcov.info

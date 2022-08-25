@@ -1,0 +1,91 @@
+name: Code Coverage
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        type: string
+        required: true
+        description: Name of app (e.g. gfp, fom)
+      component:
+        type: string
+        required: true
+        description: Component (e.g. backend, frontend), also used as path
+      domain:
+        type: string
+        required: true
+        description: Domain (e.g. apps.silver.devops.gov.bc.ca)
+      oc_namespace:
+        type: string
+        required: true
+        description: OpenShift access token (e.g. abc123-dev)
+      oc_server:
+        type: string
+        required: true
+        description: OpenShift access token
+      oc_token:
+        type: string
+        required: true
+        description: OpenShift access token
+      template_file:
+        type: string
+        required: true
+        description: Template file (e.g. .github/openshift/deploy.frontend.yml)
+      template_vars:
+        type: string
+        required: true
+        description: Variables to pass (e.g. -p ZONE=${{ github.event.number }})
+      token:
+        type: string
+        required: true
+        description: Default github token ('${{ secrets.GITHUB_TOKEN }}')
+      url:
+        type: string
+        required: true
+        description: URL to verify deployment
+      zone:
+        type: string
+        required: true
+        description: Default zone (pr#, test, demo, prod)
+
+jobs:
+  test:
+    name: ${{ inputs.component }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Deploy
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ inputs.oc_token }} --server=${{ inputs.oc_server }}
+          oc project ${{ inputs.oc_namespace }}
+
+          # Clean previous images
+          oc delete is ${{ inputs.app_name }}-${{ inputs.zone }}-${{ inputs.component }} || true
+
+          # Process and apply template
+          oc process -f ${{ inputs.template_file) ${{ inputs.oc_process_f }} | oc apply -f -
+
+          # Follow any active rollouts (see deploymentconfigs)
+          oc rollout status dc/${{ inputs.app_name }}-${{ inputs.zone }}-${{ inputs.component }} -w
+
+      - name: Deployment Verification
+        run: |
+          if [ $(curl -L -s -o /dev/null -w "%{http_code}" "${{ inputs.url }}") -ne 200 ]
+          then
+              echo "Status != 200 for ${{ inputs.url }}"
+              exit 1
+          fi
+          echo "Deployment verification successful"
+
+      - name: DEV Deployment update
+        uses: mshick/add-pr-comment@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          allow-repeats: false
+          message: |
+            DEV deployments have completed successfully!
+
+            [${{ inputs.component }}](https://${{ inputs.name }}-${{ inputs.zone }}-${{ inputs.component }}.${{ inputs.domain }}/) available
