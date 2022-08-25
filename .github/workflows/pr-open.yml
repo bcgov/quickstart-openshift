@@ -79,7 +79,7 @@ jobs:
       - build-frontend
       - tests-backend
       - tests-frontend
-    if: always() && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
+    if: always() && (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
     runs-on: ubuntu-22.04
     steps:
       # Disable shallow clone for SonarCloud analysis
@@ -128,7 +128,7 @@ jobs:
       - build-frontend
       - tests-backend
       - tests-frontend
-    if: always() && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
+    if: always() && (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     env:
