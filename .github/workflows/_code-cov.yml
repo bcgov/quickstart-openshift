@@ -21,23 +21,28 @@ jobs:
     name: Test ${{ inputs.component }}
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      # Find npm cache dir
       - name: Get npm cache directory
         id: npm-cache-dir
         run: |
           echo "::set-output name=dir::$(npm config get cache)"
 
-      # Use GitHub Actions cache for npm cache
-      - uses: actions/cache@v3
-        # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
+      - name: Cache npm cache directory
+        uses: actions/cache@v3
         with:
           path: ${{ steps.npm-cache-dir.outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+
+      - name: Cache coverage for static analysis
+        uses: actions/cache@v3
+        with:
+          path: ${{ inputs.component }}/coverage
+          key: ${{ inputs.component }}-coverage-${{ github.run_number }}
+          restore-keys: |
+            ${{ inputs.component }}-coverage-
 
       - name: Tests
         run: |
