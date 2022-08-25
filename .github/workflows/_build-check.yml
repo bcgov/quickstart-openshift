@@ -32,11 +32,6 @@ jobs:
     name: ${{ inputs.component }}
     outputs:
       build: ${{ steps.check.outputs.build }}
-    env:
-      TRIGGERS: ${{ inputs.triggers }}
-      COMPONENT: ${{ inputs.component }}
-      PREV: ${{ inputs.prev }}
-      ZONE: ${{ inputs.zone }}
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
@@ -49,7 +44,7 @@ jobs:
           git fetch origin main:refs/remotes/origin/master
 
           # Trigger build if diff matches any triggers
-          TRIGGERS=${{ env.TRIGGERS }}
+          TRIGGERS=${{ inputs.triggers }}
           while read -r check
           do
               for t in "${TRIGGERS[@]}"; do
@@ -70,6 +65,6 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           repository: ${{ github.repository }}
-          target: ${{ env.PREV }}-${{ env.COMPONENT }}
+          target: ${{ inputs.prev }}-${{ inputs.component }}
           tags: |
-            ${{ env.ZONE }}-${{ env.COMPONENT }}
+            ${{ inputs.zone }}-${{ inputs.component }}
