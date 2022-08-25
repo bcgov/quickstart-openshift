@@ -15,18 +15,6 @@ on:
         type: string
         required: true
         description: Domain (e.g. apps.silver.devops.gov.bc.ca)
-      oc_namespace:
-        type: string
-        required: true
-        description: OpenShift access token (e.g. abc123-dev)
-      oc_server:
-        type: string
-        required: true
-        description: OpenShift access token
-      oc_token:
-        type: string
-        required: true
-        description: OpenShift access token
       template_file:
         type: string
         required: true
@@ -34,11 +22,7 @@ on:
       template_vars:
         type: string
         required: true
-        description: Variables to pass (e.g. -p ZONE=${{ github.event.number }})
-      token:
-        type: string
-        required: true
-        description: Default github token ('${{ secrets.GITHUB_TOKEN }}')
+        description: Variables to pass (e.g. -p ZONE=...)
       url:
         type: string
         required: true
@@ -47,6 +31,19 @@ on:
         type: string
         required: true
         description: Default zone (pr#, test, demo, prod)
+    secrets:
+      gh_token:
+        required: true
+        description: Default github token (secrets.GITHUB_TOKEN)
+      oc_namespace:
+        required: true
+        description: OpenShift access token (e.g. abc123-dev)
+      oc_server:
+        required: true
+        description: OpenShift access token
+      oc_token:
+        required: true
+        description: OpenShift access token
 
 jobs:
   test:
@@ -58,14 +55,14 @@ jobs:
       - name: Deploy
         run: |
           # Login to OpenShift and select project
-          oc login --token=${{ inputs.oc_token }} --server=${{ inputs.oc_server }}
-          oc project ${{ inputs.oc_namespace }}
+          oc login --token=${{ secrets.oc_token }} --server=${{ secrets.oc_server }}
+          oc project ${{ secrets.oc_namespace }}
 
           # Clean previous images
           oc delete is ${{ inputs.app_name }}-${{ inputs.zone }}-${{ inputs.component }} || true
 
           # Process and apply template
-          oc process -f ${{ inputs.template_file) ${{ inputs.oc_process_f }} | oc apply -f -
+          oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/${{ inputs.app_name }}-${{ inputs.zone }}-${{ inputs.component }} -w
@@ -82,7 +79,7 @@ jobs:
       - name: DEV Deployment update
         uses: mshick/add-pr-comment@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.gh_token }}
         with:
           allow-repeats: false
           message: |
