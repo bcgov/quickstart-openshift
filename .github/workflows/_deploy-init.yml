@@ -11,10 +11,6 @@ on:
         type: string
         required: true
         description: Component (e.g. backend, frontend), also used as path
-      domain:
-        type: string
-        required: true
-        description: Domain (e.g. apps.silver.devops.gov.bc.ca)
       template_file:
         type: string
         required: true
@@ -23,18 +19,11 @@ on:
         type: string
         required: true
         description: Variables to pass (e.g. -p ZONE=...)
-      url:
-        type: string
-        required: true
-        description: URL to verify deployment
       zone:
         type: string
         required: true
         description: Default zone (pr#, test, demo, prod)
     secrets:
-      gh_token:
-        required: true
-        description: Default github token (secrets.GITHUB_TOKEN)
       oc_namespace:
         required: true
         description: OpenShift access token (e.g. abc123-dev)
@@ -58,31 +47,8 @@ jobs:
           oc login --token=${{ secrets.oc_token }} --server=${{ secrets.oc_server }}
           oc project ${{ secrets.oc_namespace }}
 
-          # Clean previous images
-          oc delete is ${{ inputs.app_name }}-${{ inputs.zone }}-${{ inputs.component }} || true
-
-          # Process and apply template
-          oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} | oc apply -f -
+          # Database uses a default build; 'oc create' kicks up an error if objects already exist
+          oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} | oc create -f - || true
 
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/${{ inputs.app_name }}-${{ inputs.zone }}-${{ inputs.component }} -w
-
-      - name: Deployment Verification
-        run: |
-          if [ $(curl -L -s -o /dev/null -w "%{http_code}" "${{ inputs.url }}") -ne 200 ]
-          then
-              echo "Status != 200 for ${{ inputs.url }}"
-              exit 1
-          fi
-          echo "Deployment verification successful"
-
-      - name: DEV Deployment update
-        uses: mshick/add-pr-comment@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.gh_token }}
-        with:
-          allow-repeats: false
-          message: |
-            DEV deployments have completed successfully!
-
-            [${{ inputs.component }}](https://${{ inputs.name }}-${{ inputs.zone }}-${{ inputs.component }}.${{ inputs.domain }}/) available
