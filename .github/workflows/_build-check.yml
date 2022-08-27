@@ -25,7 +25,7 @@ on:
         value: ${{ jobs.check.outputs.build }}
 
 env:
-  REGISTRY: ghcr.io
+  default_branch: $default-branch
 
 jobs:
   check:
@@ -40,8 +40,8 @@ jobs:
       - name: Check and process modified files
         id: check
         run: |
-          # Fetch main to diff against
-          git fetch origin main:refs/remotes/origin/master
+          # Fetch default branch to diff against
+          git fetch origin ${{ env.default_branch }}:refs/remotes/origin/master
 
           # Trigger build if diff matches any triggers
           TRIGGERS=${{ inputs.triggers }}
@@ -56,14 +56,14 @@ jobs:
                       exit 0
                   fi
               done
-          done < <(git diff origin/main --name-only)
+          done < <(git diff origin/${{ env.default_branch }} --name-only)
           echo "Container build not required"
 
       - name: Recycle/retag Previous Images
         if: steps.check.outputs.build != 'true'
         uses: shrink/actions-docker-registry-tag@v2
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           repository: ${{ github.repository }}
           target: ${{ inputs.prev }}-${{ inputs.component }}
           tags: |
