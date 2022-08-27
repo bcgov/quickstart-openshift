@@ -195,15 +195,15 @@ jobs:
       url: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
       zone: ${{ github.event.number }}
 
-  # # Uncomment to for development and troubleshooting
-  # # https://docs.github.com/en/actions/learn-github-actions/contexts
-  # view-context:
-  #   name: View GitHub Context
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - name: Echo GitHub context
-  #       uses: satackey/action-js-inline@v0.0.2
-  #       with:
-  #         script: |
-  #           const github = require('@actions/github');
-  #           console.log(JSON.stringify(github, null, 2));
+  # Uncomment to for development and troubleshooting
+  # https://docs.github.com/en/actions/learn-github-actions/contexts
+  view-context:
+    name: View GitHub Context
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Echo GitHub context
+        uses: satackey/action-js-inline@v0.0.2
+        with:
+          script: |
+            const github = require('@actions/github');
+            console.log(JSON.stringify(github, null, 2));
