@@ -12,131 +12,131 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # check-backend:
-  #   name: Check
-  #   uses: ./.github/workflows/_build-check.yml
-  #   with:
-  #     triggers: ('backend/')
-  #     component: backend
-  #     prev: prod
-  #     zone: ${{ github.event.number }}
+  check-backend:
+    name: Check
+    uses: ./.github/workflows/_build-check.yml
+    with:
+      triggers: ('backend/')
+      component: backend
+      prev: prod
+      zone: ${{ github.event.number }}
 
-  # check-frontend:
-  #   name: Check
-  #   uses: ./.github/workflows/_build-check.yml
-  #   with:
-  #     triggers: ('frontend/')
-  #     component: frontend
-  #     prev: prod
-  #     zone: ${{ github.event.number }}
+  check-frontend:
+    name: Check
+    uses: ./.github/workflows/_build-check.yml
+    with:
+      triggers: ('frontend/')
+      component: frontend
+      prev: prod
+      zone: ${{ github.event.number }}
 
-  # build-backend:
-  #   name: Image
-  #   if: needs.check-backend.outputs.build == 'true'
-  #   needs:
-  #     - check-backend
-  #   uses: ./.github/workflows/_build-image.yml
-  #   secrets:
-  #     gh_token: ${{ secrets.GITHUB_TOKEN }}
-  #   with:
-  #     component: backend
-  #     zone: ${{ github.event.number }}
+  build-backend:
+    name: Image
+    if: needs.check-backend.outputs.build == 'true'
+    needs:
+      - check-backend
+    uses: ./.github/workflows/_build-image.yml
+    secrets:
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      component: backend
+      zone: ${{ github.event.number }}
 
-  # build-frontend:
-  #   name: Image
-  #   if: needs.check-frontend.outputs.build == 'true'
-  #   needs:
-  #     - check-frontend
-  #   uses: ./.github/workflows/_build-image.yml
-  #   secrets:
-  #     gh_token: ${{ secrets.GITHUB_TOKEN }}
-  #   with:
-  #     component: frontend
-  #     zone: ${{ github.event.number }}
+  build-frontend:
+    name: Image
+    if: needs.check-frontend.outputs.build == 'true'
+    needs:
+      - check-frontend
+    uses: ./.github/workflows/_build-image.yml
+    secrets:
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      component: frontend
+      zone: ${{ github.event.number }}
 
-  # tests-backend:
-  #   name: Unit Tests
-  #   if: needs.check-backend.outputs.build == 'true'
-  #   needs:
-  #     - check-backend
-  #   uses: ./.github/workflows/_code-cov.yml
-  #   secrets:
-  #     gh_token: ${{ secrets.GITHUB_TOKEN }}
-  #   with:
-  #     component: backend
-  #     lcov_file: backend/coverage/lcov.info
-  #     test_cmd: npm run test:cov
+  tests-backend:
+    name: Unit Tests
+    if: needs.check-backend.outputs.build == 'true'
+    needs:
+      - check-backend
+    uses: ./.github/workflows/_code-cov.yml
+    secrets:
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      component: backend
+      lcov_file: backend/coverage/lcov.info
+      test_cmd: npm run test:cov
 
-  # tests-frontend:
-  #   name: Unit Tests
-  #   if: needs.check-frontend.outputs.build == 'true'
-  #   needs:
-  #     - check-frontend
-  #   uses: ./.github/workflows/_code-cov.yml
-  #   secrets:
-  #     gh_token: ${{ secrets.GITHUB_TOKEN }}
-  #   with:
-  #     component: frontend
-  #     lcov_file: coverage
-  #     test_cmd: npm run test:cov
+  tests-frontend:
+    name: Unit Tests
+    if: needs.check-frontend.outputs.build == 'true'
+    needs:
+      - check-frontend
+    uses: ./.github/workflows/_code-cov.yml
+    secrets:
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      component: frontend
+      lcov_file: coverage
+      test_cmd: npm run test:cov
 
-  # sonarcloud:
-  #   name: Static Analysis
-  #   needs:
-  #     - build-backend
-  #     - build-frontend
-  #     - tests-backend
-  #     - tests-frontend
-  #   if: always() && (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     # Disable shallow clone for SonarCloud analysis
-  #     - uses: actions/checkout@v2
-  #       with:
-  #         fetch-depth: 0
+  sonarcloud:
+    name: Static Analysis
+    needs:
+      - build-backend
+      - build-frontend
+      - tests-backend
+      - tests-frontend
+    if: always() && (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
+    runs-on: ubuntu-22.04
+    steps:
+      # Disable shallow clone for SonarCloud analysis
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-  #     - name: Get backend coverage from cache
-  #       id: cache-backend
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: backend/coverage
-  #         key: backend-coverage-${{ github.run_number }}
-  #         restore-keys: |
-  #           backend-coverage-
+      - name: Get backend coverage from cache
+        id: cache-backend
+        uses: actions/cache@v3
+        with:
+          path: backend/coverage
+          key: backend-coverage-${{ github.run_number }}
+          restore-keys: |
+            backend-coverage-
 
-  #     - name: Get frontend coverage from cache
-  #       id: cache-frontend
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: frontend/coverage
-  #         key: frontend-coverage-${{ github.run_number }}
-  #         restore-keys: |
-  #           frontend-coverage-
+      - name: Get frontend coverage from cache
+        id: cache-frontend
+        uses: actions/cache@v3
+        with:
+          path: frontend/coverage
+          key: frontend-coverage-${{ github.run_number }}
+          restore-keys: |
+            frontend-coverage-
 
-  #     - name: SonarCloud Scan
-  #       uses: SonarSource/sonarcloud-github-action@master
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  #       with:
-  #         args: >
-  #           -Dsonar.exclusions=**/test/**,.github/**/*
-  #           -Dsonar.organization=bcgov-sonarcloud
-  #           -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info
-  #           -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml,frontend/coverage/cobertura-coverage.xml
-  #           -Dsonar.project.monorepo.enabled=true
-  #           -Dsonar.projectKey=greenfield-template
-  #           -Dsonar.sources=backend,frontend
-  #           -Dsonar.tests=backend/test,frontend/test
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.exclusions=**/test/**,.github/**/*
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info
+            -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml,frontend/coverage/cobertura-coverage.xml
+            -Dsonar.project.monorepo.enabled=true
+            -Dsonar.projectKey=greenfield-template
+            -Dsonar.sources=backend,frontend
+            -Dsonar.tests=backend/test,frontend/test
 
   deploy-database:
     name: Deploy
     if: always() && (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
-    # needs:
-    #   - build-backend
-    #   - build-frontend
-    #   - tests-backend
-    #   - tests-frontend
+    needs:
+      - build-backend
+      - build-frontend
+      - tests-backend
+      - tests-frontend
     uses: ./.github/workflows/_deploy-init.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -149,61 +149,61 @@ jobs:
       template_vars: -p ZONE=${{ github.event.number }}
       zone: ${{ github.event.number }}
 
-  # deploy-backend:
-  #   name: Deploy
-  #   if: always() && (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
-  #   needs:
-  #     - build-backend
-  #     - build-frontend
-  #     - tests-backend
-  #     - tests-frontend
-  #   uses: ./.github/workflows/_deploy.yml
-  #   secrets:
-  #     gh_token: ${{ secrets.GITHUB_TOKEN }}
-  #     oc_namespace: ${{ secrets.OC_NAMESPACE }}
-  #     oc_server: ${{ secrets.OC_SERVER }}
-  #     oc_token: ${{ secrets.OC_TOKEN }}
-  #   with:
-  #     app_name: gfp
-  #     component: backend
-  #     domain: apps.silver.devops.gov.bc.ca
-  #     template_file: .github/openshift/deploy.backend.yml
-  #     template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend
-  #     url: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-  #     zone: ${{ github.event.number }}
+  deploy-backend:
+    name: Deploy
+    if: always() && (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
+    needs:
+      - build-backend
+      - build-frontend
+      - tests-backend
+      - tests-frontend
+    uses: ./.github/workflows/_deploy.yml
+    secrets:
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_server: ${{ secrets.OC_SERVER }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+    with:
+      app_name: gfp
+      component: backend
+      domain: apps.silver.devops.gov.bc.ca
+      template_file: .github/openshift/deploy.backend.yml
+      template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend
+      url: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
+      zone: ${{ github.event.number }}
 
-  # deploy-frontend:
-  #   name: Deploy
-  #   if: always() && (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
-  #   needs:
-  #     - build-backend
-  #     - build-frontend
-  #     - tests-backend
-  #     - tests-frontend
-  #   uses: ./.github/workflows/_deploy.yml
-  #   secrets:
-  #     gh_token: ${{ secrets.GITHUB_TOKEN }}
-  #     oc_namespace: ${{ secrets.OC_NAMESPACE }}
-  #     oc_server: ${{ secrets.OC_SERVER }}
-  #     oc_token: ${{ secrets.OC_TOKEN }}
-  #   with:
-  #     app_name: gfp
-  #     component: frontend
-  #     domain: apps.silver.devops.gov.bc.ca
-  #     template_file: .github/openshift/deploy.frontend.yml
-  #     template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend
-  #     url: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-  #     zone: ${{ github.event.number }}
+  deploy-frontend:
+    name: Deploy
+    if: always() && (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
+    needs:
+      - build-backend
+      - build-frontend
+      - tests-backend
+      - tests-frontend
+    uses: ./.github/workflows/_deploy.yml
+    secrets:
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_server: ${{ secrets.OC_SERVER }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+    with:
+      app_name: gfp
+      component: frontend
+      domain: apps.silver.devops.gov.bc.ca
+      template_file: .github/openshift/deploy.frontend.yml
+      template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend
+      url: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
+      zone: ${{ github.event.number }}
 
-  # # # Uncomment to for development and troubleshooting
-  # # # https://docs.github.com/en/actions/learn-github-actions/contexts
-  # # view-context:
-  # #   name: View GitHub Context
-  # #   runs-on: ubuntu-22.04
-  # #   steps:
-  # #     - name: Echo GitHub context
-  # #       uses: satackey/action-js-inline@v0.0.2
-  # #       with:
-  # #         script: |
-  # #           const github = require('@actions/github');
-  # #           console.log(JSON.stringify(github, null, 2));
+  # # Uncomment to for development and troubleshooting
+  # # https://docs.github.com/en/actions/learn-github-actions/contexts
+  # view-context:
+  #   name: View GitHub Context
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: Echo GitHub context
+  #       uses: satackey/action-js-inline@v0.0.2
+  #       with:
+  #         script: |
+  #           const github = require('@actions/github');
+  #           console.log(JSON.stringify(github, null, 2));

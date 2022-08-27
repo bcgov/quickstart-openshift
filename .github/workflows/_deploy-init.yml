@@ -48,7 +48,8 @@ jobs:
           oc project ${{ secrets.oc_namespace }}
 
           # Database uses a default build; 'oc create' kicks up an error if objects already exist
-          oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} | oc create -f - || true
+          oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} | oc create -f - 2>&1 \
+            | grep -v "(AlreadyExists)" || true
 
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/${{ inputs.app_name }}-${{ inputs.zone }}-${{ inputs.component }} -w
