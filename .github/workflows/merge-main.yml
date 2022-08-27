@@ -5,10 +5,8 @@ on:
     branches:
       - main
     paths-ignore:
-      - ".**"
+      - ".github/ISSUE_TEMPLATE/*"
       - "**.md"
-      - "**.yml"
-      - "**.yaml"
   workflow_dispatch:
 
 env:
