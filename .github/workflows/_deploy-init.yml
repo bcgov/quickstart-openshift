@@ -1,0 +1,55 @@
+name: Code Coverage
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        type: string
+        required: true
+        description: Name of app (e.g. gfp, fom)
+      component:
+        type: string
+        required: true
+        description: Component (e.g. backend, frontend), also used as path
+      template_file:
+        type: string
+        required: true
+        description: Template file (e.g. .github/openshift/deploy.frontend.yml)
+      template_vars:
+        type: string
+        required: true
+        description: Variables to pass (e.g. -p ZONE=...)
+      zone:
+        type: string
+        required: true
+        description: Default zone (pr#, test, demo, prod)
+    secrets:
+      oc_namespace:
+        required: true
+        description: OpenShift access token (e.g. abc123-dev)
+      oc_server:
+        required: true
+        description: OpenShift access token
+      oc_token:
+        required: true
+        description: OpenShift access token
+
+jobs:
+  deploy:
+    name: ${{ inputs.component }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Deploy
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.oc_token }} --server=${{ secrets.oc_server }}
+          oc project ${{ secrets.oc_namespace }}
+
+          # Database uses a default build; 'oc create' kicks up an error if objects already exist
+          oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} | oc create -f - 2>&1 \
+            | grep -v "(AlreadyExists)" || true
+
+          # Follow any active rollouts (see deploymentconfigs)
+          oc rollout status dc/${{ inputs.app_name }}-${{ inputs.zone }}-${{ inputs.component }} -w
