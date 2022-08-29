@@ -36,9 +36,6 @@ jobs:
 
   tests-backend:
     name: Unit Tests
-    if: needs.build-backend.outputs.build == 'true'
-    needs:
-      - build-backend
     uses: ./.github/workflows/_code-cov.yml
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -49,9 +46,6 @@ jobs:
 
   tests-frontend:
     name: Unit Tests
-    if: needs.build-frontend.outputs.build == 'true'
-    needs:
-      - build-frontend
     uses: ./.github/workflows/_code-cov.yml
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -65,9 +59,7 @@ jobs:
     needs:
       - build-backend
       - build-frontend
-      - tests-backend
-      - tests-frontend
-    if: always() && (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
+    if: (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
     runs-on: ubuntu-22.04
     steps:
       # Disable shallow clone for SonarCloud analysis
