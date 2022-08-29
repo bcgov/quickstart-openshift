@@ -164,7 +164,7 @@ jobs:
       zone: ${{ github.event.number }}
 
   deploy-check:
-    name: Verify deployment
+    name: Post-deploy
     needs:
       - deploy-database
       - deploy-backend
@@ -187,6 +187,17 @@ jobs:
               fi
           done
           echo "Deployment verification successful"
+
+      - name: Comment with links
+        uses: mshick/add-pr-comment@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          allow-repeats: false
+          message: |
+            DEV deployments have completed successfully!
+            [Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}/) available
+            [Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/) available
 
   # https://docs.github.com/en/actions/learn-github-actions/contexts
   view-context:
