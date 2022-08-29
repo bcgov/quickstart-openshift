@@ -57,9 +57,8 @@ jobs:
   sonarcloud:
     name: Static Analysis
     needs:
-      - build-backend
-      - build-frontend
-    if: (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
+      - tests-backend
+      - tests-frontend
     runs-on: ubuntu-22.04
     steps:
       # Disable shallow clone for SonarCloud analysis
@@ -107,8 +106,6 @@ jobs:
     needs:
       - build-backend
       - build-frontend
-      - tests-backend
-      - tests-frontend
     uses: ./.github/workflows/_deploy-init.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -127,8 +124,6 @@ jobs:
     needs:
       - build-backend
       - build-frontend
-      - tests-backend
-      - tests-frontend
     uses: ./.github/workflows/_deploy.yml
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -150,8 +145,6 @@ jobs:
     needs:
       - build-backend
       - build-frontend
-      - tests-backend
-      - tests-frontend
     uses: ./.github/workflows/_deploy.yml
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
