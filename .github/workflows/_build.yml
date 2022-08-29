@@ -38,8 +38,7 @@ jobs:
     outputs:
       build: ${{ steps.check.outputs.build }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Check triggers to see if a build is required
       # Returns jobs.check.outputs.build as a boolean (true/false)

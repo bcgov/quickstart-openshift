@@ -43,8 +43,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Initialize
         uses: github/codeql-action/init@v2
@@ -64,7 +63,7 @@ jobs:
     name: Static Analysis
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         # Disable shallow clone for SonarCloud analysis
         with:
           fetch-depth: 0
@@ -109,7 +108,7 @@ jobs:
     env:
       ZONE: test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Deploy
         run: |
           # Login to OpenShift and select project
@@ -142,8 +141,7 @@ jobs:
       - deploy-test
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
@@ -159,8 +157,7 @@ jobs:
       - deploy-test
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.4.0
@@ -179,8 +176,7 @@ jobs:
       - zap-frontend
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/node@master
@@ -203,8 +199,7 @@ jobs:
       - zap-frontend
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@0.3.0
@@ -359,7 +354,7 @@ jobs:
 
           oc delete is/${{ env.NAME }}-${{ env.ZONE}}-${{ env.COMPONENT }} || true
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Deploy
         run: |
           # Login to OpenShift and select project
