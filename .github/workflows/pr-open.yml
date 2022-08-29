@@ -36,9 +36,9 @@ jobs:
 
   tests-backend:
     name: Unit Tests
-    if: needs.check-backend.outputs.build == 'true'
+    if: needs.build-backend.outputs.build == 'true'
     needs:
-      - check-backend
+      - build-backend
     uses: ./.github/workflows/_code-cov.yml
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -49,9 +49,9 @@ jobs:
 
   tests-frontend:
     name: Unit Tests
-    if: needs.check-frontend.outputs.build == 'true'
+    if: needs.build-frontend.outputs.build == 'true'
     needs:
-      - check-frontend
+      - build-frontend
     uses: ./.github/workflows/_code-cov.yml
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
