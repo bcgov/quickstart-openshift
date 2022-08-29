@@ -20,7 +20,7 @@ jobs:
     with:
       component: backend
       img_build: ${{ github.event.number }}
-      imb_fallback: prod
+      img_fallback: prod
       triggers: ('backend/')
 
   build-frontend:
@@ -30,9 +30,9 @@ jobs:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
     with:
       component: frontend
+      img_build: ${{ github.event.number }}
+      img_fallback: prod
       triggers: ('frontend/')
-      prev: prod
-      zone: ${{ github.event.number }}
 
   tests-backend:
     name: Unit Tests

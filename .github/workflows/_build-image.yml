@@ -7,7 +7,11 @@ on:
         type: string
         required: true
         description: Component (backend, frontend)
-      prev:
+      img_build:
+        type: string
+        required: true
+        description: Default zone (pr#, test, demo, prod)
+      img_fallback:
         type: string
         required: true
         description: Where to pull default images from (prod, pr#, test)
@@ -15,10 +19,6 @@ on:
         type: string
         required: true
         description: Build triggers in a bash array, e.g. ('./backend/', './frontend/)
-      zone:
-        type: string
-        required: true
-        description: Default zone (pr#, test, demo, prod)
     secrets:
       gh_token:
         required: true
@@ -35,14 +35,14 @@ jobs:
     name: ${{ inputs.component }} check
     uses: ./.github/workflows/_build-check.yml
     with:
-      triggers: ('${{ inputs.triggers }}/')
+      triggers: ${{ inputs.triggers }}
 
   # If a build is not required, reuse a previous image
   retag:
     name: ${{ inputs.component }} retag
     needs:
       - check
-    if: jobs.check.outputs.build != 'true'
+    if: needs.check.outputs.build != 'true'
     runs-on: ubuntu-22.04
     steps:
       - name: Recycle/retag Previous Images
@@ -50,16 +50,16 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}
-          target: ${{ inputs.prev }}-${{ inputs.component }}
+          target: ${{ inputs.img_fallback }}-${{ inputs.component }}
           tags: |
-            ${{ inputs.zone }}-${{ inputs.component }}
+            ${{ inputs.img_build }}-${{ inputs.component }}
 
   # If a build is required, then create a new image
   build:
     name: ${{ inputs.component }} build
     needs:
       - check
-    if: jobs.check.outputs.build == 'true'
+    if: needs.check.outputs.build == 'true'
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -91,6 +91,6 @@ jobs:
         with:
           context: ./${{ inputs.component }}/
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ inputs.zone }}-${{ inputs.component }}
+          tags: ghcr.io/${{ github.repository }}:${{ inputs.img_build }}-${{ inputs.component }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
