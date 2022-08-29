@@ -163,6 +163,31 @@ jobs:
       url: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
       zone: ${{ github.event.number }}
 
+  deploy-check:
+    name: Verify deployment
+    needs:
+      - deploy-database
+      - deploy-backend
+      - deploy-frontend
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Verify deployment
+        env:
+          LINKS: (
+            'https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}'
+            'https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}'
+            )
+        run: |
+          LINKS=${{ env.LINKS }}
+          for l in "${LINKS[@]}"; do
+              if [ $(curl -L -s -o /dev/null -w "%{http_code}" "${l}") -ne 200 ]
+              then
+                  echo "Status != 200 for ${l}"
+                  exit 1
+              fi
+          done
+          echo "Deployment verification successful"
+
   # https://docs.github.com/en/actions/learn-github-actions/contexts
   view-context:
     name: View GitHub Context
