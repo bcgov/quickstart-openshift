@@ -12,46 +12,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check-backend:
-    name: Check
-    uses: ./.github/workflows/_build-check.yml
-    with:
-      triggers: ('backend/')
-      component: backend
-      prev: prod
-      zone: ${{ github.event.number }}
-
-  check-frontend:
-    name: Check
-    uses: ./.github/workflows/_build-check.yml
-    with:
-      triggers: ('frontend/')
-      component: frontend
-      prev: prod
-      zone: ${{ github.event.number }}
-
   build-backend:
     name: Image
-    if: needs.check-backend.outputs.build == 'true'
-    needs:
-      - check-backend
     uses: ./.github/workflows/_build-image.yml
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
     with:
       component: backend
-      zone: ${{ github.event.number }}
+      img_build: ${{ github.event.number }}
+      imb_fallback: prod
+      triggers: ('backend/')
 
   build-frontend:
     name: Image
-    if: needs.check-frontend.outputs.build == 'true'
-    needs:
-      - check-frontend
     uses: ./.github/workflows/_build-image.yml
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
     with:
       component: frontend
+      triggers: ('frontend/')
+      prev: prod
       zone: ${{ github.event.number }}
 
   tests-backend:

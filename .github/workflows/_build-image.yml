@@ -7,6 +7,14 @@ on:
         type: string
         required: true
         description: Component (backend, frontend)
+      prev:
+        type: string
+        required: true
+        description: Where to pull default images from (prod, pr#, test)
+      triggers:
+        type: string
+        required: true
+        description: Build triggers in a bash array, e.g. ('./backend/', './frontend/)
       zone:
         type: string
         required: true
@@ -15,10 +23,67 @@ on:
       gh_token:
         required: true
         description: Default github token (secrets.GITHUB_TOKEN)
+    outputs:
+      build:
+        description: True = build has changed
+        value: ${{ jobs.check.outputs.build }}
 
 jobs:
+  # Check triggers to see if a build is required
+  check:
+    name: ${{ inputs.component }} check
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check and process modified files
+        id: check
+        run: |
+          # Fetch default branch to diff against
+          git fetch origin ${{ env.default_branch }}:refs/remotes/origin/master
+
+          # Trigger build if diff matches any triggers
+          TRIGGERS=${{ inputs.triggers }}
+          while read -r check
+          do
+              for t in "${TRIGGERS[@]}"; do
+                  if [[ "${check}" =~ "${t}" ]]
+                  then
+                      # Output build=true for next steps
+                      echo "::set-output name=build::true"
+                      echo -e "${t}\n --> ${check}\n"
+                      exit 0
+                  fi
+              done
+          done < <(git diff origin/${{ env.default_branch }} --name-only)
+          echo "Container build not required"
+
+  # If a build is not required, reuse a previous image
+  retag:
+    name: ${{ inputs.component }} retag
+    needs:
+      - check
+    if: jobs.check.outputs.build != 'true'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Recycle/retag Previous Images
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}
+          target: ${{ inputs.prev }}-${{ inputs.component }}
+          tags: |
+            ${{ inputs.zone }}-${{ inputs.component }}
+
+  # If a build is required, then create a new image
   build:
-    name: ${{ inputs.component }}
+    name: ${{ inputs.component }} build
+    needs:
+      - check
+    if: jobs.check.outputs.build == 'true'
     runs-on: ubuntu-22.04
     permissions:
       contents: read

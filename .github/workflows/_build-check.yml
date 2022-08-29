@@ -7,18 +7,6 @@ on:
         type: string
         required: true
         description: Build triggers in a bash array, e.g. ('./backend/', './frontend/)
-      component:
-        type: string
-        required: true
-        description: Component (backend, frontend)
-      prev:
-        type: string
-        required: true
-        description: Where to pull default images from (prod, pr#, test)
-      zone:
-        type: string
-        required: true
-        description: Default zone (pr#, test, demo, prod)
     outputs:
       build:
         description: True = build has changed
@@ -29,7 +17,7 @@ env:
 
 jobs:
   check:
-    name: ${{ inputs.component }}
+    name: Diff and check triggers
     outputs:
       build: ${{ steps.check.outputs.build }}
     runs-on: ubuntu-22.04
@@ -58,13 +46,3 @@ jobs:
               done
           done < <(git diff origin/${{ env.default_branch }} --name-only)
           echo "Container build not required"
-
-      - name: Recycle/retag Previous Images
-        if: steps.check.outputs.build != 'true'
-        uses: shrink/actions-docker-registry-tag@v2
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}
-          target: ${{ inputs.prev }}-${{ inputs.component }}
-          tags: |
-            ${{ inputs.zone }}-${{ inputs.component }}
