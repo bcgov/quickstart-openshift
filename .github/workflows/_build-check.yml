@@ -45,4 +45,6 @@ jobs:
                   fi
               done
           done < <(git diff origin/${{ env.default_branch }} --name-only)
+
+          echo "::set-output name=build::false"
           echo "Container build not required"

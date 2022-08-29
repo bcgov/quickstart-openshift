@@ -30,36 +30,12 @@ on:
 
 jobs:
   # Check triggers to see if a build is required
+  # Returns jobs.check.outputs.build as a boolean (true/false)
   check:
     name: ${{ inputs.component }} check
-    outputs:
-      build: ${{ steps.check.outputs.build }}
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Check and process modified files
-        id: check
-        run: |
-          # Fetch default branch to diff against
-          git fetch origin ${{ env.default_branch }}:refs/remotes/origin/master
-
-          # Trigger build if diff matches any triggers
-          TRIGGERS=${{ inputs.triggers }}
-          while read -r check
-          do
-              for t in "${TRIGGERS[@]}"; do
-                  if [[ "${check}" =~ "${t}" ]]
-                  then
-                      # Output build=true for next steps
-                      echo "::set-output name=build::true"
-                      echo -e "${t}\n --> ${check}\n"
-                      exit 0
-                  fi
-              done
-          done < <(git diff origin/${{ env.default_branch }} --name-only)
-          echo "Container build not required"
+    uses: ./.github/workflows/_build-check.yml
+    with:
+      triggers: ('${{ inputs.triggers }}/')
 
   # If a build is not required, reuse a previous image
   retag:
