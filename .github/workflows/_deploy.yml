@@ -75,14 +75,3 @@ jobs:
               exit 1
           fi
           echo "Deployment verification successful"
-
-      - name: DEV Deployment update
-        uses: mshick/add-pr-comment@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.gh_token }}
-        with:
-          allow-repeats: false
-          message: |
-            DEV deployments have completed successfully!
-
-            [${{ inputs.component }}](https://${{ inputs.name }}-${{ inputs.zone }}-${{ inputs.component }}.${{ inputs.domain }}/) available
