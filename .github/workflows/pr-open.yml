@@ -13,8 +13,8 @@ concurrency:
 
 jobs:
   build-backend:
-    name: Image
-    uses: ./.github/workflows/_build-image.yml
+    name: Build
+    uses: ./.github/workflows/_build.yml
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
     with:
@@ -24,8 +24,8 @@ jobs:
       triggers: ('backend/')
 
   build-frontend:
-    name: Image
-    uses: ./.github/workflows/_build-image.yml
+    name: Build
+    uses: ./.github/workflows/_build.yml
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
     with:
@@ -102,10 +102,11 @@ jobs:
 
   deploy-database:
     name: Deploy
-    if: always() && (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
     needs:
       - build-backend
       - build-frontend
+    # If any of the prerequs created a build, then deploy
+    if: contains(needs.*.outputs.build, 'true')
     uses: ./.github/workflows/_deploy-init.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -120,10 +121,11 @@ jobs:
 
   deploy-backend:
     name: Deploy
-    if: always() && (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
     needs:
       - build-backend
       - build-frontend
+    # If any of the prerequs created a build, then deploy
+    if: contains(needs.*.outputs.build, 'true')
     uses: ./.github/workflows/_deploy.yml
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -141,10 +143,11 @@ jobs:
 
   deploy-frontend:
     name: Deploy
-    if: always() && (needs.*.result != 'failure') && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
     needs:
       - build-backend
       - build-frontend
+    # If any of the prerequs created a build, then deploy
+    if: contains(needs.*.outputs.build, 'true')
     uses: ./.github/workflows/_deploy.yml
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -160,7 +163,6 @@ jobs:
       url: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
       zone: ${{ github.event.number }}
 
-  # Uncomment to for development and troubleshooting
   # https://docs.github.com/en/actions/learn-github-actions/contexts
   view-context:
     name: View GitHub Context

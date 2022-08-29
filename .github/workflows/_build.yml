@@ -26,12 +26,17 @@ on:
     outputs:
       build:
         description: True = build has changed
-        value: ${{ jobs.check.outputs.build }}
+        value: ${{ jobs.build.outputs.build }}
+
+env:
+  default_branch: ${{ github.event.repository.default_branch }}
 
 jobs:
   build:
     name: ${{ inputs.component }}
     runs-on: ubuntu-22.04
+    outputs:
+      build: ${{ steps.check.outputs.build }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
