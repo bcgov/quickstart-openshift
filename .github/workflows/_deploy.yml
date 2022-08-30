@@ -32,9 +32,6 @@ on:
         required: true
         description: Default zone (pr#, test, demo, prod)
     secrets:
-      gh_token:
-        required: true
-        description: Default github token (secrets.GITHUB_TOKEN)
       oc_namespace:
         required: true
         description: OpenShift access token (e.g. abc123-dev)
