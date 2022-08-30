@@ -169,6 +169,8 @@ jobs:
       - deploy-database
       - deploy-backend
       - deploy-frontend
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
     runs-on: ubuntu-22.04
     steps:
       - name: Verify deployment
