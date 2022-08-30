@@ -136,7 +136,6 @@ jobs:
       domain: ${{ matrix.domain }}
       template_file: ${{ matrix.template_file }}
       template_vars: ${{ matrix.template_vars }}
-      url: ${{ matrix.url }}
       zone: ${{ github.event.number }}
 
   deploy-check:
