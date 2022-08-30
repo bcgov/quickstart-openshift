@@ -23,10 +23,6 @@ on:
         type: string
         required: true
         description: Variables to pass (e.g. -p ZONE=...)
-      url:
-        type: string
-        required: true
-        description: URL to verify deployment
       zone:
         type: string
         required: true
@@ -66,9 +62,16 @@ jobs:
 
       - name: Deployment Verification
         run: |
-          if [ $(curl -L -s -o /dev/null -w "%{http_code}" "${{ inputs.url }}") -ne 200 ]
+          # If in template,Pick out a url (host+path), if in template
+          URL=$( \
+            oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local \
+              | jq '.items[] | select(.kind=="Route") | .spec | .host + "/" +.path' \
+          )
+
+          # If URL exists and is usable (e.g. at least a hostname), then test it
+          if [ ! -z "${URL%/*}" ] && [ $(curl -Lso /dev/null -w "%{http_code}" "${URL}") -ne 200 ]
           then
               echo "Status != 200 for ${{ inputs.url }}"
               exit 1
           fi
-          echo "Deployment verification successful"
+          echo "Deployment successful"

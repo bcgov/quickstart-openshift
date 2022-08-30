@@ -122,12 +122,10 @@ jobs:
             domain: apps.silver.devops.gov.bc.ca
             template_file: .github/openshift/deploy.backend.yml
             template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend
-            url: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
           - component: frontend
             domain: apps.silver.devops.gov.bc.ca
             template_file: .github/openshift/deploy.frontend.yml
             template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend
-            url: https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_server: ${{ secrets.OC_SERVER }}
