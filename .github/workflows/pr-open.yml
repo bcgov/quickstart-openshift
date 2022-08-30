@@ -110,8 +110,7 @@ jobs:
   deploy-backend:
     name: Deploy
     needs:
-      - build-backend
-      - build-frontend
+      - builds
     # If any of the prerequs created a build, then deploy
     if: contains(needs.*.outputs.build, 'true')
     uses: ./.github/workflows/_deploy.yml
@@ -132,8 +131,7 @@ jobs:
   deploy-frontend:
     name: Deploy
     needs:
-      - build-backend
-      - build-frontend
+      - builds
     # If any of the prerequs created a build, then deploy
     if: contains(needs.*.outputs.build, 'true')
     uses: ./.github/workflows/_deploy.yml
