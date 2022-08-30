@@ -12,53 +12,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-backend:
+  builds:
     name: Build
     uses: ./.github/workflows/_build.yml
+    strategy:
+      matrix:
+        component: [backend, frontend]
+        include:
+          - component: backend
+            triggers: ('backend/')
+          - component: frontend
+            triggers: ('frontend/')
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
     with:
-      component: backend
+      component: ${{ matrix.component }}
       img_build: ${{ github.event.number }}
       img_fallback: prod
-      triggers: ('backend/')
+      triggers: ${{ matrix.triggers }}
 
-  build-frontend:
-    name: Build
-    uses: ./.github/workflows/_build.yml
-    secrets:
-      gh_token: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      component: frontend
-      img_build: ${{ github.event.number }}
-      img_fallback: prod
-      triggers: ('frontend/')
-
-  tests-backend:
+  tests:
     name: Unit Tests
     uses: ./.github/workflows/_code-cov.yml
+    strategy:
+      matrix:
+        component: [backend, frontend]
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
     with:
-      component: backend
-      lcov_file: backend/coverage/lcov.info
-      test_cmd: npm run test:cov
-
-  tests-frontend:
-    name: Unit Tests
-    uses: ./.github/workflows/_code-cov.yml
-    secrets:
-      gh_token: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      component: frontend
-      lcov_file: coverage
+      component: ${{ matrix.component }}
+      lcov_file: ${{ matrix.component }}/coverage/lcov.info
       test_cmd: npm run test:cov
 
   sonarcloud:
     name: Static Analysis
     needs:
-      - tests-backend
-      - tests-frontend
+      - tests
     runs-on: ubuntu-22.04
     steps:
       # Disable shallow clone for SonarCloud analysis
@@ -103,8 +92,7 @@ jobs:
   deploy-database:
     name: Deploy
     needs:
-      - build-backend
-      - build-frontend
+      - builds
     # If any of the prerequs created a build, then deploy
     if: contains(needs.*.outputs.build, 'true')
     uses: ./.github/workflows/_deploy-init.yml
