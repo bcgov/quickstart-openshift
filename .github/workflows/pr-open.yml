@@ -12,53 +12,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-backend:
-    name: Build
+  builds:
+    name: Builds
     uses: ./.github/workflows/_build.yml
+    strategy:
+      matrix:
+        component: [backend, frontend]
+        include:
+          - component: backend
+            triggers: ('backend/')
+          - component: frontend
+            triggers: ('frontend/')
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
     with:
-      component: backend
+      component: ${{ matrix.component }}
       img_build: ${{ github.event.number }}
       img_fallback: prod
-      triggers: ('backend/')
+      triggers: ${{ matrix.triggers }}
 
-  build-frontend:
-    name: Build
-    uses: ./.github/workflows/_build.yml
-    secrets:
-      gh_token: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      component: frontend
-      img_build: ${{ github.event.number }}
-      img_fallback: prod
-      triggers: ('frontend/')
-
-  tests-backend:
+  tests:
     name: Unit Tests
     uses: ./.github/workflows/_code-cov.yml
+    strategy:
+      matrix:
+        component: [backend, frontend]
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
     with:
-      component: backend
-      lcov_file: backend/coverage/lcov.info
-      test_cmd: npm run test:cov
-
-  tests-frontend:
-    name: Unit Tests
-    uses: ./.github/workflows/_code-cov.yml
-    secrets:
-      gh_token: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      component: frontend
-      lcov_file: coverage
+      component: ${{ matrix.component }}
+      lcov_file: ${{ matrix.component }}/coverage/lcov.info
       test_cmd: npm run test:cov
 
   sonarcloud:
     name: Static Analysis
     needs:
-      - tests-backend
-      - tests-frontend
+      - tests
     runs-on: ubuntu-22.04
     steps:
       # Disable shallow clone for SonarCloud analysis
@@ -103,8 +92,7 @@ jobs:
   deploy-database:
     name: Deploy
     needs:
-      - build-backend
-      - build-frontend
+      - builds
     # If any of the prerequs created a build, then deploy
     if: contains(needs.*.outputs.build, 'true')
     uses: ./.github/workflows/_deploy-init.yml
@@ -119,56 +107,45 @@ jobs:
       template_vars: -p ZONE=${{ github.event.number }}
       zone: ${{ github.event.number }}
 
-  deploy-backend:
-    name: Deploy
+  deploys:
+    name: Deploys
     needs:
-      - build-backend
-      - build-frontend
+      - builds
     # If any of the prerequs created a build, then deploy
     if: contains(needs.*.outputs.build, 'true')
     uses: ./.github/workflows/_deploy.yml
+    strategy:
+      matrix:
+        component: [backend, frontend]
+        include:
+          - component: backend
+            domain: apps.silver.devops.gov.bc.ca
+            template_file: .github/openshift/deploy.backend.yml
+            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend
+            url: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
+          - component: frontend
+            domain: apps.silver.devops.gov.bc.ca
+            template_file: .github/openshift/deploy.frontend.yml
+            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend
+            url: https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca
     secrets:
-      gh_token: ${{ secrets.GITHUB_TOKEN }}
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_server: ${{ secrets.OC_SERVER }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       app_name: gfp
-      component: backend
-      domain: apps.silver.devops.gov.bc.ca
-      template_file: .github/openshift/deploy.backend.yml
-      template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend
-      url: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-      zone: ${{ github.event.number }}
-
-  deploy-frontend:
-    name: Deploy
-    needs:
-      - build-backend
-      - build-frontend
-    # If any of the prerequs created a build, then deploy
-    if: contains(needs.*.outputs.build, 'true')
-    uses: ./.github/workflows/_deploy.yml
-    secrets:
-      gh_token: ${{ secrets.GITHUB_TOKEN }}
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_server: ${{ secrets.OC_SERVER }}
-      oc_token: ${{ secrets.OC_TOKEN }}
-    with:
-      app_name: gfp
-      component: frontend
-      domain: apps.silver.devops.gov.bc.ca
-      template_file: .github/openshift/deploy.frontend.yml
-      template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend
-      url: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
+      component: ${{ matrix.component }}
+      domain: ${{ matrix.domain }}
+      template_file: ${{ matrix.template_file }}
+      template_vars: ${{ matrix.template_vars }}
+      url: ${{ matrix.url }}
       zone: ${{ github.event.number }}
 
   deploy-check:
     name: Post-deploy
     needs:
       - deploy-database
-      - deploy-backend
-      - deploy-frontend
+      - deploys
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
     runs-on: ubuntu-22.04
