@@ -119,9 +119,11 @@ jobs:
         component: [backend, frontend]
         include:
           - component: backend
+            overwrite: true
             template_file: .github/openshift/deploy.backend.yml
             template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend
           - component: frontend
+            overwrite: true
             template_file: .github/openshift/deploy.frontend.yml
             template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend
     secrets:
