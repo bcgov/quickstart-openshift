@@ -3,10 +3,6 @@ name: Pull Request
 on:
   pull_request:
 
-env:
-  REGISTRY: ghcr.io
-  NAME: gfp
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -56,7 +52,6 @@ jobs:
           fetch-depth: 0
 
       - name: Get backend coverage from cache
-        id: cache-backend
         uses: actions/cache@v3
         with:
           path: backend/coverage
@@ -65,7 +60,6 @@ jobs:
             backend-coverage-
 
       - name: Get frontend coverage from cache
-        id: cache-frontend
         uses: actions/cache@v3
         with:
           path: frontend/coverage
@@ -98,7 +92,7 @@ jobs:
     uses: ./.github/workflows/_deploy.yml
     strategy:
       matrix:
-        component: [backend, frontend]
+        component: [backend, database, frontend]
         include:
           - component: database
             overwrite: false
@@ -122,31 +116,15 @@ jobs:
       template_file: ${{ matrix.template_file }}
       template_vars: ${{ matrix.template_vars }}
 
-  deploy-check:
+  post-deploy:
     name: Post-deploy
     needs:
       - deploys
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
+      NAME: gfp
     runs-on: ubuntu-22.04
     steps:
-      - name: Verify deployment
-        env:
-          LINKS: (
-            'https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}'
-            'https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}'
-            )
-        run: |
-          LINKS=${{ env.LINKS }}
-          for l in "${LINKS[@]}"; do
-              if [ $(curl -L -s -o /dev/null -w "%{http_code}" "${l}") -ne 200 ]
-              then
-                  echo "Status != 200 for ${l}"
-                  exit 1
-              fi
-          done
-          echo "Deployment verification successful"
-
       - name: Comment with links
         uses: mshick/add-pr-comment@v1
         env:
@@ -158,14 +136,15 @@ jobs:
             [Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}/) available
             [Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/) available
 
-  # https://docs.github.com/en/actions/learn-github-actions/contexts
-  view-context:
-    name: View GitHub Context
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Echo GitHub context
-        uses: satackey/action-js-inline@v0.0.2
-        with:
-          script: |
-            const github = require('@actions/github');
-            console.log(JSON.stringify(github, null, 2));
+  # # Uncomment to view GitHub context object
+  # # https://docs.github.com/en/actions/learn-github-actions/contexts
+  # view-context:
+  #   name: View GitHub Context
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: Echo GitHub context
+  #       uses: satackey/action-js-inline@v0.0.2
+  #       with:
+  #         script: |
+  #           const github = require('@actions/github');
+  #           console.log(JSON.stringify(github, null, 2));
