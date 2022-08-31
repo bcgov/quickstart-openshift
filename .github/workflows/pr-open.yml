@@ -89,24 +89,6 @@ jobs:
             -Dsonar.sources=backend,frontend
             -Dsonar.tests=backend/test,frontend/test
 
-  deploy-database:
-    name: Deploy
-    needs:
-      - builds
-    # If any of the prerequs created a build, then deploy
-    if: contains(needs.*.outputs.build, 'true')
-    uses: ./.github/workflows/_deploy-init.yml
-    secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_server: ${{ secrets.OC_SERVER }}
-      oc_token: ${{ secrets.OC_TOKEN }}
-    with:
-      app_name: gfp
-      component: database
-      template_file: .github/openshift/deploy.database.yml
-      template_vars: -p ZONE=${{ github.event.number }}
-      zone: ${{ github.event.number }}
-
   deploys:
     name: Deploys
     needs:
@@ -118,6 +100,10 @@ jobs:
       matrix:
         component: [backend, frontend]
         include:
+          - component: database
+            overwrite: false
+            template_file: .github/openshift/deploy.database.yml
+            template_vars: -p ZONE=${{ github.event.number }}
           - component: backend
             overwrite: true
             template_file: .github/openshift/deploy.backend.yml
@@ -139,7 +125,6 @@ jobs:
   deploy-check:
     name: Post-deploy
     needs:
-      - deploy-database
       - deploys
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
