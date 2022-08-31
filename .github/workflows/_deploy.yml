@@ -62,7 +62,9 @@ jobs:
 
       - name: Deployment Verification
         run: |
-          # If in template,Pick out a url (host+path), if in template
+          set -eux
+
+          # Pick out a url (host+path), if in template
           URL=$( \
             oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local \
               | jq -r '.items[] | select(.kind=="Route") | .spec | .host + "/" +.path' \
