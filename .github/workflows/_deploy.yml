@@ -3,10 +3,6 @@ name: Code Coverage
 on:
   workflow_call:
     inputs:
-      app_name:
-        type: string
-        required: true
-        description: Name of app (e.g. gfp, fom)
       component:
         type: string
         required: true
@@ -19,10 +15,6 @@ on:
         type: string
         required: true
         description: Variables to pass (e.g. -p ZONE=...)
-      zone:
-        type: string
-        required: true
-        description: Default zone (pr#, test, demo, prod)
     secrets:
       oc_namespace:
         required: true
@@ -47,14 +39,29 @@ jobs:
           oc login --token=${{ secrets.oc_token }} --server=${{ secrets.oc_server }}
           oc project ${{ secrets.oc_namespace }}
 
+          # Process template
+          TEMPLATE=$(oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local)
+
+          # ImageStream
+          IS=$( \
+            oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local \
+              | jq -r '.items[] | select(.kind=="ImageStream") | .metadata.name' \
+          )
+
+          # DeploymentConfig
+          DC=$( \
+            oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local \
+              | jq -r '.items[] | select(.kind=="DeploymentConfig") | .metadata.name' \
+          )
+
           # Clean previous images
-          oc delete is ${{ inputs.app_name }}-${{ inputs.zone }}-${{ inputs.component }} || true
+          oc delete is is/${IS} || true
 
           # Process and apply template
           oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
-          oc rollout status dc/${{ inputs.app_name }}-${{ inputs.zone }}-${{ inputs.component }} -w
+          oc rollout status dc/${DC} -w
 
       - name: Deployment Verification
         run: |

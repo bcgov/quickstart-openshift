@@ -129,11 +129,9 @@ jobs:
       oc_server: ${{ secrets.OC_SERVER }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
-      app_name: gfp
       component: ${{ matrix.component }}
       template_file: ${{ matrix.template_file }}
       template_vars: ${{ matrix.template_vars }}
-      zone: ${{ github.event.number }}
 
   deploy-check:
     name: Post-deploy
