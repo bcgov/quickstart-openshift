@@ -35,8 +35,6 @@ jobs:
 
       - name: Deploy
         run: |
-          set -eux
-
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ secrets.oc_server }}
           oc project ${{ secrets.oc_namespace }}
@@ -59,8 +57,6 @@ jobs:
 
       - name: Deployment Verification
         run: |
-          set -eux
-
           # Pick out a url (host+path), if in template
           URL=$( \
             oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local \
@@ -68,10 +64,10 @@ jobs:
           )
 
           # If URL exists and is usable (e.g. at least a hostname), then test it
-          echo -e "\nChecking ${URL}\n"
+          echo -e "URL: ${URL}\n"
           if [ ! -z "${URL%/*}" ] && [ $(curl -Lso /dev/null -w "%{http_code}" "${URL}") -ne 200 ]
           then
-              echo "Failure!  Status != 200"
+              echo -e "Failure!  \n\tStatus != 200"
               exit 1
           fi
-          echo "Deployment successful"
+          echo -e "Deployment successful!  \n\tStatus == 200"
