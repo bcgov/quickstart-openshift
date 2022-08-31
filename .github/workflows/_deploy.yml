@@ -58,7 +58,7 @@ jobs:
             oc apply -f - <<< "${TEMPLATE}"
           else
             # Suppress AlreadyExists errors and expected failure
-            oc create -f - 2>&1 <<< "${TEMPLATE}" | { grep -v "(AlreadyExists)" || true; }
+            oc create -f - 2>&1 <<< "${TEMPLATE}" | sed 's/.*: //'
           fi
 
           # Follow any active rollouts (see deploymentconfigs)
