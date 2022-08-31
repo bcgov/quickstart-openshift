@@ -132,6 +132,7 @@ jobs:
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       component: ${{ matrix.component }}
+      overwrite: ${{ matrix.overwrite }}
       template_file: ${{ matrix.template_file }}
       template_vars: ${{ matrix.template_vars }}
 
