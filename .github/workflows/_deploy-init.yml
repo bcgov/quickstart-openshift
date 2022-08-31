@@ -43,6 +43,8 @@ jobs:
 
       - name: Deploy
         run: |
+          set -eux
+
           # Login to OpenShift and select project
           oc login --token=${{ secrets.oc_token }} --server=${{ secrets.oc_server }}
           oc project ${{ secrets.oc_namespace }}
