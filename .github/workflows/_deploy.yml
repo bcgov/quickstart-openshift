@@ -11,10 +11,6 @@ on:
         type: string
         required: true
         description: Component (e.g. backend, frontend), also used as path
-      domain:
-        type: string
-        required: true
-        description: Domain (e.g. apps.silver.devops.gov.bc.ca)
       template_file:
         type: string
         required: true
@@ -30,10 +26,10 @@ on:
     secrets:
       oc_namespace:
         required: true
-        description: OpenShift access token (e.g. abc123-dev)
+        description: OpenShift namespace (e.g. abc123-dev)
       oc_server:
         required: true
-        description: OpenShift access token
+        description: OpenShift server (e.g. https://api.silver.devops.gov.bc.ca:6443)
       oc_token:
         required: true
         description: OpenShift access token

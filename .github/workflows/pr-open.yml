@@ -119,11 +119,9 @@ jobs:
         component: [backend, frontend]
         include:
           - component: backend
-            domain: apps.silver.devops.gov.bc.ca
             template_file: .github/openshift/deploy.backend.yml
             template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend
           - component: frontend
-            domain: apps.silver.devops.gov.bc.ca
             template_file: .github/openshift/deploy.frontend.yml
             template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend
     secrets:
@@ -133,7 +131,6 @@ jobs:
     with:
       app_name: gfp
       component: ${{ matrix.component }}
-      domain: ${{ matrix.domain }}
       template_file: ${{ matrix.template_file }}
       template_vars: ${{ matrix.template_vars }}
       zone: ${{ github.event.number }}
