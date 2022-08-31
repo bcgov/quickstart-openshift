@@ -62,11 +62,10 @@ jobs:
 
       - name: Deployment Verification
         run: |
+          set -eux
+
           # If in template,Pick out a url (host+path), if in template
-          URL=$( \
-            oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local \
-              | jq '.items[] | select(.kind=="Route") | .spec | .host + "/" +.path' \
-          )
+          URL=$(oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local | jq '.items[] | select(.kind=="Route") | .spec | .host + "/" +.path')
 
           # If URL exists and is usable (e.g. at least a hostname), then test it
           if [ ! -z "${URL%/*}" ] && [ $(curl -Lso /dev/null -w "%{http_code}" "${URL}") -ne 200 ]
