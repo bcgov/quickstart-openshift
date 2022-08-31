@@ -3,18 +3,14 @@ name: Code Coverage
 on:
   workflow_call:
     inputs:
-      app_name:
-        type: string
-        required: true
-        description: Name of app (e.g. gfp, fom)
       component:
         type: string
         required: true
         description: Component (e.g. backend, frontend), also used as path
-      domain:
+      overwrite:
         type: string
         required: true
-        description: Domain (e.g. apps.silver.devops.gov.bc.ca)
+        description: Replace existing objects/artifacts?
       template_file:
         type: string
         required: true
@@ -23,21 +19,13 @@ on:
         type: string
         required: true
         description: Variables to pass (e.g. -p ZONE=...)
-      url:
-        type: string
-        required: true
-        description: URL to verify deployment
-      zone:
-        type: string
-        required: true
-        description: Default zone (pr#, test, demo, prod)
     secrets:
       oc_namespace:
         required: true
-        description: OpenShift access token (e.g. abc123-dev)
+        description: OpenShift namespace (e.g. abc123-dev)
       oc_server:
         required: true
-        description: OpenShift access token
+        description: OpenShift server (e.g. https://api.silver.devops.gov.bc.ca:6443)
       oc_token:
         required: true
         description: OpenShift access token
@@ -51,24 +39,43 @@ jobs:
 
       - name: Deploy
         run: |
-          # Login to OpenShift and select project
+          # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ secrets.oc_server }}
           oc project ${{ secrets.oc_namespace }}
 
-          # Clean previous images
-          oc delete is ${{ inputs.app_name }}-${{ inputs.zone }}-${{ inputs.component }} || true
+          # Process template, consuming variables/parameters
+          TEMPLATE=$(oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local)
 
-          # Process and apply template
-          oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} | oc apply -f -
+          # ImageStream and DeploymentConfig names
+          IS=$(jq -rn "${TEMPLATE} | .items[] | select(.kind==\"ImageStream\") | .metadata.name")
+          DC=$(jq -rn "${TEMPLATE} | .items[] | select(.kind==\"DeploymentConfig\") | .metadata.name")
+
+          # Clean previous images
+          oc delete is/${IS} || true
+
+          # Apply (overwrites) or create (does not overwrite) using processed template
+          if [ "${{ inputs.overwrite }}" == "true" ]; then
+            oc apply -f - <<< "${TEMPLATE}"
+          else
+            # Suppress AlreadyExists errors and expected failure
+            oc create -f - 2>&1 <<< "${TEMPLATE}" | sed 's/.*: //'
+          fi
 
           # Follow any active rollouts (see deploymentconfigs)
-          oc rollout status dc/${{ inputs.app_name }}-${{ inputs.zone }}-${{ inputs.component }} -w
+          oc rollout status dc/${DC} -w
 
       - name: Deployment Verification
         run: |
-          if [ $(curl -L -s -o /dev/null -w "%{http_code}" "${{ inputs.url }}") -ne 200 ]
+          # Pick out a url (host+path), if in template
+          URL=$( \
+            oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local \
+              | jq -r '.items[] | select(.kind=="Route") | .spec | .host + "/" +.path' \
+          )
+
+          # If URL exists and is usable (e.g. at least a hostname), then test it
+          if [ ! -z "${URL%/*}" ] && [ $(curl -Lso /dev/null -w "%{http_code}" "${URL}") -ne 200 ]
           then
-              echo "Status != 200 for ${{ inputs.url }}"
+              echo -e "Failure!  \n\tStatus != 200  \n\tURL: ${URL}\n"
               exit 1
           fi
-          echo "Deployment verification successful"
+          echo -e "Deployment successful!"

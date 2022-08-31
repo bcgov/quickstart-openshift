@@ -3,10 +3,6 @@ name: Pull Request
 on:
   pull_request:
 
-env:
-  REGISTRY: ghcr.io
-  NAME: gfp
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -56,7 +52,6 @@ jobs:
           fetch-depth: 0
 
       - name: Get backend coverage from cache
-        id: cache-backend
         uses: actions/cache@v3
         with:
           path: backend/coverage
@@ -65,7 +60,6 @@ jobs:
             backend-coverage-
 
       - name: Get frontend coverage from cache
-        id: cache-frontend
         uses: actions/cache@v3
         with:
           path: frontend/coverage
@@ -89,26 +83,8 @@ jobs:
             -Dsonar.sources=backend,frontend
             -Dsonar.tests=backend/test,frontend/test
 
-  deploy-database:
-    name: Deploy
-    needs:
-      - builds
-    # If any of the prerequs created a build, then deploy
-    if: contains(needs.*.outputs.build, 'true')
-    uses: ./.github/workflows/_deploy-init.yml
-    secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_server: ${{ secrets.OC_SERVER }}
-      oc_token: ${{ secrets.OC_TOKEN }}
-    with:
-      app_name: gfp
-      component: database
-      template_file: .github/openshift/deploy.database.yml
-      template_vars: -p ZONE=${{ github.event.number }}
-      zone: ${{ github.event.number }}
-
   deploys:
-    name: Deploys
+    name: Deploys (if necessary)
     needs:
       - builds
     # If any of the prerequs created a build, then deploy
@@ -116,57 +92,39 @@ jobs:
     uses: ./.github/workflows/_deploy.yml
     strategy:
       matrix:
-        component: [backend, frontend]
+        component: [backend, database, frontend]
         include:
+          - component: database
+            overwrite: false
+            template_file: .github/openshift/deploy.database.yml
+            template_vars: -p ZONE=${{ github.event.number }}
           - component: backend
-            domain: apps.silver.devops.gov.bc.ca
+            overwrite: true
             template_file: .github/openshift/deploy.backend.yml
             template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend
-            url: https://gfp-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
           - component: frontend
-            domain: apps.silver.devops.gov.bc.ca
+            overwrite: true
             template_file: .github/openshift/deploy.frontend.yml
             template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend
-            url: https://gfp-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_server: ${{ secrets.OC_SERVER }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
-      app_name: gfp
       component: ${{ matrix.component }}
-      domain: ${{ matrix.domain }}
+      overwrite: ${{ matrix.overwrite }}
       template_file: ${{ matrix.template_file }}
       template_vars: ${{ matrix.template_vars }}
-      url: ${{ matrix.url }}
-      zone: ${{ github.event.number }}
 
-  deploy-check:
+  post-deploy:
     name: Post-deploy
     needs:
-      - deploy-database
       - deploys
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
+      NAME: gfp
     runs-on: ubuntu-22.04
     steps:
-      - name: Verify deployment
-        env:
-          LINKS: (
-            'https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}'
-            'https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}'
-            )
-        run: |
-          LINKS=${{ env.LINKS }}
-          for l in "${LINKS[@]}"; do
-              if [ $(curl -L -s -o /dev/null -w "%{http_code}" "${l}") -ne 200 ]
-              then
-                  echo "Status != 200 for ${l}"
-                  exit 1
-              fi
-          done
-          echo "Deployment verification successful"
-
       - name: Comment with links
         uses: mshick/add-pr-comment@v1
         env:
@@ -178,14 +136,15 @@ jobs:
             [Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}/) available
             [Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/) available
 
-  # https://docs.github.com/en/actions/learn-github-actions/contexts
-  view-context:
-    name: View GitHub Context
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Echo GitHub context
-        uses: satackey/action-js-inline@v0.0.2
-        with:
-          script: |
-            const github = require('@actions/github');
-            console.log(JSON.stringify(github, null, 2));
+  # # Uncomment to view GitHub context object
+  # # https://docs.github.com/en/actions/learn-github-actions/contexts
+  # view-context:
+  #   name: View GitHub Context
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: Echo GitHub context
+  #       uses: satackey/action-js-inline@v0.0.2
+  #       with:
+  #         script: |
+  #           const github = require('@actions/github');
+  #           console.log(JSON.stringify(github, null, 2));
