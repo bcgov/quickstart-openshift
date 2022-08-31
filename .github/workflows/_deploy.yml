@@ -35,30 +35,24 @@ jobs:
 
       - name: Deploy
         run: |
-          # Login to OpenShift and select project
+          set -eux
+
+          # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ secrets.oc_server }}
           oc project ${{ secrets.oc_namespace }}
 
-          # Process template
+          # Process template, consuming variables/parameters
           TEMPLATE=$(oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local)
 
-          # ImageStream
-          IS=$( \
-            oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local \
-              | jq -r '.items[] | select(.kind=="ImageStream") | .metadata.name' \
-          )
-
-          # DeploymentConfig
-          DC=$( \
-            oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local \
-              | jq -r '.items[] | select(.kind=="DeploymentConfig") | .metadata.name' \
-          )
+          # ImageStream and DeploymentConfig names
+          IS=$(jq -rn "${TEMPLATE} | .items[] | select(.kind==\"ImageStream\") | .metadata.name")
+          DC=$(jq -rn "${TEMPLATE} | .items[] | select(.kind==\"DeploymentConfig\") | .metadata.name")
 
           # Clean previous images
-          oc delete is is/${IS} || true
+          oc delete is/${IS} || true
 
-          # Process and apply template
-          oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} | oc apply -f -
+          # Apply processed template
+          oc apply -f - <<< "${TEMPLATE}"
 
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/${DC} -w
