@@ -62,8 +62,6 @@ jobs:
 
       - name: Deployment Verification
         run: |
-          set -eux
-
           # Pick out a url (host+path), if in template
           URL=$( \
             oc process -f ${{ inputs.template_file }} ${{ inputs.template_vars }} --local \
