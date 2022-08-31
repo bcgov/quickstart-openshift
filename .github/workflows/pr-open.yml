@@ -84,7 +84,7 @@ jobs:
             -Dsonar.tests=backend/test,frontend/test
 
   deploys:
-    name: Deploys
+    name: Deploys (if necessary)
     needs:
       - builds
     # If any of the prerequs created a build, then deploy
