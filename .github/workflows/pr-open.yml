@@ -55,17 +55,17 @@ jobs:
         uses: actions/cache@v3
         with:
           path: backend/coverage
-          key: backend-coverage-${{ github.run_number }}
+          key: coverage-backend-${{ github.run_number }}
           restore-keys: |
-            backend-coverage-
+            coverage-backend-
 
       - name: Get frontend coverage from cache
         uses: actions/cache@v3
         with:
           path: frontend/coverage
-          key: frontend-coverage-${{ github.run_number }}
+          key: coverage-frontend-${{ github.run_number }}
           restore-keys: |
-            frontend-coverage-
+            coverage-frontend-
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -74,7 +74,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.exclusions=**/test/**,.github/**/*
+            -Dsonar.exclusions=**/test/**,.github/**/*,*.md
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info
             -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml,frontend/coverage/cobertura-coverage.xml
