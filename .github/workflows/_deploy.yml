@@ -73,9 +73,10 @@ jobs:
           )
 
           # If URL exists and is usable (e.g. at least a hostname), then test it
-          if [ ! -z "${URL%/*}" ] && [ $(curl -Lso /dev/null -w "%{http_code}" "${URL}") -ne 200 ]
+          HTTP_CODE=$(curl -Lso /dev/null -w "%{http_code}" "${URL}")
+          if [ ! -z "${URL%/*}" ] && [ "${HTTP_CODE}" -ne 200 ]
           then
-              echo -e "Failure!  \n\tStatus != 200  \n\tURL: ${URL}\n"
+              echo -e "Failure!  \n\tStatus = "${HTTP_CODE}"  \n\tURL: ${URL}\n"
               exit 1
           fi
           echo -e "Deployment successful!"
