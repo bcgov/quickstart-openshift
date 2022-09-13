@@ -92,7 +92,7 @@ jobs:
       # If a build is required, then create a new image
       - name: Set up Docker Buildx
         if: steps.check.outputs.build == 'true'
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2.0.0
 
       - name: Cache Docker layers
         if: steps.check.outputs.build == 'true'
@@ -105,7 +105,7 @@ jobs:
 
       - name: Log in to the Container registry
         if: steps.check.outputs.build == 'true'
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2.0.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -113,7 +113,7 @@ jobs:
 
       - name: Build and push ${{ inputs.component }} Docker image
         if: steps.check.outputs.build == 'true'
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3.1.1
         with:
           context: ./${{ inputs.component }}/
           push: true
