@@ -64,12 +64,13 @@ jobs:
           done < <(git diff origin/${{ env.default_branch }} --name-only)
 
           # Check that fallback tag exists, otherwise build
-          TOKEN=$(curl https://ghcr.io/token\?scope\="repository:${{ github.repository }}:pull" | jq -r .token)
-          if [ $(curl -Lso /dev/null -w "%{http_code}" --head -H "Authorization: Bearer $TOKEN" https://ghcr.io/v2/${{ github.repository }}/manifests/${{ inputs.img_fallback }}-${{ inputs.component }}) -ne 200 ]
+          TOKEN=$(curl -s https://ghcr.io/token\?scope\="repository:${{ github.repository }}:pull" | jq -r .token)
+          URL="https://ghcr.io/v2/${{ github.repository }}/manifests/${{ inputs.img_fallback }}-${{ inputs.component }}"
+          if [ $(curl -Lso /dev/null -w "%{http_code}" --head -H "Authorization: Bearer ${TOKEN}" "${URL}") -ne 200 ]
           then
               # Output build=true for next steps
               echo "::set-output name=build::true"
-              echo -e "Building image, since no fallback is available!"
+              echo -e "\nBuilding image, since no fallback is available!"
               exit 0
           fi
 
