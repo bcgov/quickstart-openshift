@@ -65,8 +65,7 @@ jobs:
 
           # Check that fallback tag exists, otherwise build
           TOKEN=$(curl https://ghcr.io/token\?scope\="repository:${{ github.repository }}:pull" | jq -r .token)
-          curl --head --fail -H "Authorization: Bearer $TOKEN" https://ghcr.io/v2/${{ github.repository }}/manifests/${{ inputs.img_fallback }}-${{ inputs.component }}
-          if [ $? -ne 0 ]
+          if [ $(curl -Lso /dev/null -w "%{http_code}" --head -H "Authorization: Bearer $TOKEN" https://ghcr.io/v2/${{ github.repository }}/manifests/${{ inputs.img_fallback }}-${{ inputs.component }}) -ne 200 ]
           then
               # Output build=true for next steps
               echo "::set-output name=build::true"
