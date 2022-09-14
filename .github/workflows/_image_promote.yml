@@ -1,0 +1,91 @@
+name: Promote Image
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        type: string
+        required: true
+        description: App base name, without component
+      component:
+        type: string
+        required: true
+        description: Component (backend, frontend), also used as path
+      env_source:
+        type: string
+        required: true
+        description: Source environment (e.g. pr#, test)
+      env_target:
+        type: string
+        required: true
+        description: Target environment (test, demo, prod)
+    secrets:
+      oc_namespace:
+        required: true
+        description: OpenShift namespace (e.g. abc123-dev)
+      oc_server:
+        required: true
+        description: OpenShift server (e.g. https://api.silver.devops.gov.bc.ca:6443)
+      oc_token:
+        required: true
+        description: OpenShift access token
+
+env:
+  registry: ghcr.io
+
+jobs:
+  image-promote:
+    name: ${{ inputs.component }}
+    runs-on: ubuntu-22.04
+    environment: ${{ inputs.env_target }}
+    steps:
+      - name: Check for image changes
+        id: check
+        run: |
+          set -eux
+
+          # Vars
+          IMG_PREV="${{ env.registry }}/${{ github.repository }}:${{ inputs.env_source }}-${{ inputs.component }}"
+          IMG_ZONE="${{ env.registry }}/${{ github.repository }}:${{ inputs.env_target }}-${{ inputs.component }}"
+
+          # Make sure an image exists to promote; grab SHA
+          if [[ ! $(docker pull "${IMG_PREV}") ]]; then
+              echo -e "\n No images to promote"
+              exit 0
+          fi
+          SHA_PREV=$(docker inspect -f '{{.Id}}' "${IMG_PREV}")
+
+          # Use blank SHA for promoted image, unless a real one exists instead
+          SHA_ZONE=""
+          if [[ $(docker pull "${IMG_ZONE}") ]]; then
+            SHA_ZONE=$(docker inspect -f '{{.Id}}' "${IMG_ZONE}")
+          fi
+
+          # Output SHAs
+          echo -e "\n${IMG_PREV}: ${SHA_PREV}"
+          echo -e "${IMG_ZONE}: ${SHA_ZONE}\n"
+
+          # If different, then trigger updates
+          if [[ "${SHA_PREV}" != "${SHA_ZONE}" ]]; then
+            echo "::set-output name=build::true"
+            echo "Image has changed"
+
+            # Login to OpenShift and select project
+            oc login --token=${{ secrets.oc_token }} --server=${{ secrets.oc_server }}
+            oc project ${{ secrets.oc_namespace }}
+
+            # Clean previous promoted image (bug requires this step)
+            oc delete is/${{ inputs.app_name }}-${{ inputs.env_target }}-${{ inputs.component }} || true
+            exit 0
+          fi
+          echo "Image promotion not required"
+
+      - name: Promote Backend Image
+        if: steps.check.outputs.build == 'true'
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.registry }}
+          repository: ${{ github.repository }}
+          target: ${{ inputs.env_source }}-${{ inputs.component }}
+          tags: |
+            ${{ inputs.env_target }}-${{ inputs.component }}
