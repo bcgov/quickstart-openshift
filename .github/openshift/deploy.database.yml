@@ -1,18 +1,12 @@
 apiVersion: template.openshift.io/v1
 kind: Template
-metadata:
-  name: ${NAME}
-  annotations:
-    description: "Greenfield Template"
-    tags: "gfp"
-    iconClass: icon-js
 labels:
   app: ${NAME}-${ZONE}
   app.kubernetes.io/part-of: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Product name
-    value: gfp
+    value: devops-quickstart
   - name: COMPONENT
     description: Component name
     value: database
@@ -70,12 +64,12 @@ objects:
       lookupPolicy:
         local: false
       tags:
-      - name: ${IMAGE_TAG}
-        from:
-          kind: DockerImage
-          name: ${REGISTRY}/${PROMOTE}
-        referencePolicy:
-          type: Local
+        - name: ${IMAGE_TAG}
+          from:
+            kind: DockerImage
+            name: ${REGISTRY}/${PROMOTE}
+          referencePolicy:
+            type: Local
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
@@ -85,15 +79,15 @@ objects:
     spec:
       replicas: 1
       triggers:
-      - type: ConfigChange
-      - type: ImageChange
-        imageChangeParams:
-          automatic: true
-          containerNames:
-          - ${NAME}
-          from:
-            kind: ImageStreamTag
-            name: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+        - type: ConfigChange
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - ${NAME}
+            from:
+              kind: ImageStreamTag
+              name: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
       selector:
         deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
@@ -123,7 +117,7 @@ objects:
                   command:
                     - /usr/bin/env
                     - bash
-                    - '-c'
+                    - "-c"
                     - >-
                       psql -q -d
                       $POSTGRESQL_DATABASE -c 'SELECT 1'
@@ -136,7 +130,7 @@ objects:
                   command:
                     - /usr/bin/env
                     - bash
-                    - '-c'
+                    - "-c"
                     - >-
                       psql -q -d
                       $POSTGRESQL_DATABASE -c 'SELECT 1'
@@ -163,19 +157,6 @@ objects:
               volumeMounts:
                 - name: ${NAME}-${ZONE}-${COMPONENT}
                   mountPath: "/var/lib/pgsql/data"
-              livenessProbe:
-                initialDelaySeconds: 30
-                tcpSocket:
-                  port: 5432
-                timeoutSeconds: 1
-              readinessProbe:
-                exec:
-                  command:
-                    - /bin/bash
-                    - -c
-                    - pg_isready -h localhost -p 5432
-                initialDelaySeconds: 20
-                timeoutSeconds: 15
               terminationMessagePath: "/dev/termination-log"
               terminationMessagePolicy: File
               imagePullPolicy: Always
