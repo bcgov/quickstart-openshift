@@ -122,7 +122,7 @@ jobs:
       - deploys
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
-      NAME: gfp
+      NAME: devops-quickstart
     runs-on: ubuntu-22.04
     steps:
       - name: Comment with links
