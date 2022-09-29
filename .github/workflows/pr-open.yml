@@ -10,7 +10,7 @@ concurrency:
 jobs:
   builds:
     name: Builds
-    uses: ./.github/workflows/_build.yml
+    uses: bcgov/devops-quickstart-helpers/.github/workflows/_build.yml
     strategy:
       matrix:
         component: [backend, frontend]
@@ -29,7 +29,7 @@ jobs:
 
   tests:
     name: Unit Tests
-    uses: ./.github/workflows/_code-cov.yml
+    uses: bcgov/devops-quickstart-helpers/.github/workflows/_code-cov.yml
     strategy:
       matrix:
         component: [backend, frontend]
@@ -89,7 +89,7 @@ jobs:
       - builds
     # If any of the prerequs created a build, then deploy
     if: contains(needs.*.outputs.build, 'true')
-    uses: ./.github/workflows/_deploy.yml
+    uses: bcgov/devops-quickstart-helpers/.github/workflows/_deploy.yml
     strategy:
       matrix:
         component: [backend, database, frontend]
