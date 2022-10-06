@@ -24,7 +24,7 @@ jobs:
     with:
       component: ${{ matrix.component }}
       img_build: ${{ github.event.number }}
-      img_fallback: prod
+      img_fallback: test
       triggers: ${{ matrix.triggers }}
 
   tests:
