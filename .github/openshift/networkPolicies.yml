@@ -4,7 +4,7 @@ metadata:
   name: ${NAME}
   annotations:
     description: "DevOps QuickStart"
-    tags: "devops-quickstart"
+    tags: "nr-quickstart-typescript"
     iconClass: icon-js
 objects:
   - apiVersion: networking.k8s.io/v1

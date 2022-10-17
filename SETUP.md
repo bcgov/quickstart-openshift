@@ -47,7 +47,7 @@ The following are required:
 ![image](./.github/graphics/newRepo.png)
 
 Create a new repository using this repository as a template.
-* Select bcgov/devops-quickstart under Repository template
+* Select bcgov/nr-quickstart-typescript under Repository template
 * Check Codecov | Code Coverage to grant access
 * Jira cannot be unchecked (I try every time!)
 
@@ -249,7 +249,7 @@ From your GitHub repository:
 
 Packages are available from your repository (link on right) or your organization's package lists.
 
-E.g. https://github.com/orgs/bcgov/packages?repo_name=devops-quickstart
+E.g. https://github.com/orgs/bcgov/packages?repo_name=nr-quickstart-typescript
 
 
 ### Branch Protection

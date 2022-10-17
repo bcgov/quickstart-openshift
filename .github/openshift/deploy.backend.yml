@@ -6,7 +6,7 @@ labels:
 parameters:
   - name: NAME
     description: Module name
-    value: devops-quickstart
+    value: nr-quickstart-typescript
   - name: COMPONENT
     description: Component name
     value: backend
@@ -27,7 +27,7 @@ parameters:
     value: ghcr.io
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
-    value: bcgov/devops-quickstart:prod-backend
+    value: bcgov/nr-quickstart-typescript:prod-backend
 objects:
   - apiVersion: v1
     kind: ImageStream

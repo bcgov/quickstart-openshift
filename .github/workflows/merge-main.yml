@@ -11,7 +11,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  NAME: devops-quickstart
+  NAME: nr-quickstart-typescript
 
 concurrency:
   group: ${{ github.workflow }}

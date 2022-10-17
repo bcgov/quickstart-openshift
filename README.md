@@ -1,10 +1,10 @@
 <!-- PROJECT SHIELDS -->
 
-[![Contributors](https://img.shields.io/github/contributors/bcgov/devops-quickstart)](/../../graphs/contributors)
-[![Forks](https://img.shields.io/github/forks/bcgov/devops-quickstart)](/../../network/members)
-[![Stargazers](https://img.shields.io/github/stars/bcgov/devops-quickstart)](/../../stargazers)
-[![Issues](https://img.shields.io/github/issues/bcgov/devops-quickstart)](/../../issues)
-[![MIT License](https://img.shields.io/github/license/bcgov/devops-quickstart.svg)](/LICENSE.md)
+[![Contributors](https://img.shields.io/github/contributors/bcgov/nr-quickstart-typescript)](/../../graphs/contributors)
+[![Forks](https://img.shields.io/github/forks/bcgov/nr-quickstart-typescript)](/../../network/members)
+[![Stargazers](https://img.shields.io/github/stars/bcgov/nr-quickstart-typescript)](/../../stargazers)
+[![Issues](https://img.shields.io/github/issues/bcgov/nr-quickstart-typescript)](/../../issues)
+[![MIT License](https://img.shields.io/github/license/bcgov/nr-quickstart-typescript.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
 # DevOps QuickStart (formerly Greenfield Template)
@@ -19,7 +19,7 @@ Initial configuration is expected to take under three hours.  Please read [our s
 
 ## Overview
 
-The DevOps Quickstart is a fully functional set of pipeline workflows and a starter application stack intended to help Agile DevOps teams hit the ground running.  Currently OpenShift is supported with plans for AWS (Amazon Web Services).  Pipelines are run using [GitHub Actions](https://github.com/bcgov/devops-quickstart/actions).
+The DevOps Quickstart is a fully functional set of pipeline workflows and a starter application stack intended to help Agile DevOps teams hit the ground running.  Currently OpenShift is supported with plans for AWS (Amazon Web Services).  Pipelines are run using [GitHub Actions](https://github.com/bcgov/nr-quickstart-typescript/actions).
 
 Features:
 * Pull Request-based pipeline
@@ -32,7 +32,7 @@ Features:
 * Templates and setup documentation
 * Starter TypeScript application stack
 
-This project is in active development.  Please visit our [issues](https://github.com/bcgov/devops-quickstart/issues) page to view or request features.
+This project is in active development.  Please visit our [issues](https://github.com/bcgov/nr-quickstart-typescript/issues) page to view or request features.
 
 ### Workflow 1 of 3: PR Open
 
@@ -124,12 +124,12 @@ Optionally, higher-level deployments can be prevented until manually approved.
 
 This workflow is triggered when a Pull Request to the main branch is created or modified.  Each development deployment is separate, using its own stack.  This avoids collisions between development environments and provides isolation for testing and experimentation.  Pipeline steps are enforced, preventing merge of failing code.
 
-The workflow, located [here](https://github.com/bcgov/devops-quickstart/blob/main/.github/workflows/pr-open.yml), includes:
+The workflow, located [here](https://github.com/bcgov/nr-quickstart-typescript/blob/main/.github/workflows/pr-open.yml), includes:
 
-* [Pull Request](https://github.com/bcgov/devops-quickstart/pulls)-based ephemeral, sandboxed environments
+* [Pull Request](https://github.com/bcgov/nr-quickstart-typescript/pulls)-based ephemeral, sandboxed environments
 * [Docker](https://github.com/marketplace/actions/build-and-push-docker-images)/[Podman](https://podman.io) container building
 * [Build caching](https://github.com/marketplace/actions/cache) to save time and bandwidth
-* [GitHub Container Registry](https://github.com/bcgov/devops-quickstart/pkgs/container/devops-quickstart) image publishing
+* [GitHub Container Registry](https://github.com/bcgov/nr-quickstart-typescript/pkgs/container/nr-quickstart-typescript) image publishing
 * [RedHat OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) deployment, with other options under consideration
 * [Jest](https://jestjs.io/) JavaScript testing enforced in-pipeline
 * [SonarCloud](https://sonarcloud.io/) static analysis test coverage reporting
@@ -148,7 +148,7 @@ When a PR is merged, the message comment below is added.  Despite showing on thi
 
 ### 2: Pull Request Close Pipeline
 
-The workflow, located [here](https://github.com/bcgov/devops-quickstart/blob/main/.github/workflows/pr-close.yml), fires when a pull request is closed.
+The workflow, located [here](https://github.com/bcgov/nr-quickstart-typescript/blob/main/.github/workflows/pr-close.yml), fires when a pull request is closed.
 
 * ghcr.io cleanup of dev images over 14 days-old
 * OpenShift dev artifact removal
@@ -163,7 +163,7 @@ If this closure was triggered by a merge to the main branch it will trigger the 
 
 ### 3: Pull Request Main Merge Pipeline
 
-The workflow, located [here](https://github.com/bcgov/devops-quickstart/blob/main/.github/workflows/merge-main.yml), includes:
+The workflow, located [here](https://github.com/bcgov/nr-quickstart-typescript/blob/main/.github/workflows/merge-main.yml), includes:
 
 * [GitHub CodeQL](https://codeql.github.com/) semantic code analysis and vulerability scanning
 * [OWASP ZAP](https://www.zaproxy.org/) Zed Attack Proxy web app penetration testing

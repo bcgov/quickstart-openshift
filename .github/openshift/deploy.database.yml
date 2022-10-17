@@ -6,7 +6,7 @@ labels:
 parameters:
   - name: NAME
     description: Product name
-    value: devops-quickstart
+    value: nr-quickstart-typescript
   - name: COMPONENT
     description: Component name
     value: database
