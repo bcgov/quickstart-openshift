@@ -11,7 +11,7 @@
 
 Courtesy of the Forestry Suite of Applications Program from the Ministry of Land, Water and Resource Stewardship.
 
-UPDATE: We are of splitting this offering into a quickstart template and helper functions.  Please be on the lookup for progress, releases and new features! 
+UPDATE: We are of splitting this offering into a quickstart template and helper functions.  Please be on the lookout for progress, releases and new features! 
 
 ## Getting Started
 
