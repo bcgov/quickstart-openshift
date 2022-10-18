@@ -7,11 +7,9 @@
 [![MIT License](https://img.shields.io/github/license/bcgov/nr-quickstart-typescript.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
-# DevOps QuickStart (formerly Greenfield Template)
+# Natural Resources QuickStart for TypeScript
 
 Courtesy of the Forestry Suite of Applications Program from the Ministry of Land, Water and Resource Stewardship.
-
-UPDATE: We are of splitting this offering into a quickstart template and helper functions.  Please be on the lookout for progress, releases and new features! 
 
 ## Getting Started
 
