@@ -1,5 +1,5 @@
 {
-  "name": "devops-quickstart",
+  "name": "nr-quickstart-typescript",
   "version": "0.0.1",
   "description": "BCGov devops quickstart. For reference, testing and new projects.",
   "main": "index.js",
@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bcgov/devops-quickstart.git"
+    "url": "git+https://github.com/bcgov/nr-quickstart-typescript.git"
   },
   "keywords": [
     "openshift",
@@ -36,9 +36,9 @@
   "author": "Derek Roberts",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/bcgov/devops-quickstart/issues"
+    "url": "https://github.com/bcgov/nr-quickstart-typescript/issues"
   },
-  "homepage": "https://github.com/bcgov/devops-quickstart#readme",
+  "homepage": "https://github.com/bcgov/nr-quickstart-typescript#readme",
   "dependencies": {
     "@nestjs/cli": "^8.2.6",
     "@nestjs/common": "^8.4.6",

@@ -9,7 +9,7 @@ on:
       - "**.md"
 
 env:
-  name: devops-quickstart
+  name: nr-quickstart-typescript
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -34,12 +34,12 @@ jobs:
   image-promotions:
     name: Image Promotions
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-    uses: bcgov/devops-quickstart-helpers/.github/workflows/_image_promote.yml@main
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_image_promote.yml@main
     strategy:
       matrix:
         component: [backend, frontend]
     with:
-      app_name: devops-quickstart
+      app_name: nr-quickstart-typescript
       component: ${{ matrix.component }}
       env_source: ${{ github.event.number }}
       env_target: test
