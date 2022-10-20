@@ -290,10 +290,10 @@ Manage Action Secrets from your Repo > Settings > Secrets > Actions.
 
 #### Required
 
-**GHTOKEN**
+**GITHUB_TOKEN**
 
 * Default token, not viewable, common to all repositories
-* Variable: `{{ secrets.GHTOKEN }}`
+* Variable: `{{ secrets.GITHUB_TOKEN }}`
 
 **GHPROJECT_TOKEN** (TODO: check that this is still in use)
 
