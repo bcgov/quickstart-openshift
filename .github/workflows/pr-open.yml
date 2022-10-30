@@ -96,15 +96,15 @@ jobs:
         include:
           - component: database
             overwrite: false
-            template_file: .github/openshift/deploy.database.yml
+            template_file: database/openshift.deploy.yml
             template_vars: -p ZONE=${{ github.event.number }}
           - component: backend
             overwrite: true
-            template_file: .github/openshift/deploy.backend.yml
+            template_file: backend/openshift.deploy.yml
             template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend
           - component: frontend
             overwrite: true
-            template_file: .github/openshift/deploy.frontend.yml
+            template_file: frontend/openshift.deploy.yml
             template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}

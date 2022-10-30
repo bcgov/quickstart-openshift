@@ -116,12 +116,12 @@ jobs:
           oc project ${{ secrets.OC_NAMESPACE }}
 
           # Do not replace database; 'oc create' kicks up an error if objects already exist
-          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc create -f - || true
+          oc process -f database/openshift.deploy.yml -p ZONE=${{ env.ZONE }} | oc create -f - || true
 
           # Process and apply deployment templates
-          oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ env.ZONE }} \
+          oc process -f backend/openshift.deploy.yml -p ZONE=${{ env.ZONE }} \
             -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-backend | oc apply -f -
-          oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
+          oc process -f frontend/openshift.deploy.yml -p ZONE=${{ env.ZONE }} \
             -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
@@ -342,12 +342,12 @@ jobs:
           oc project ${{ secrets.OC_NAMESPACE }}
 
           # Do not replace database; 'oc create' kicks up an error if objects already exist
-          oc process -f .github/openshift/deploy.database.yml -p ZONE=${{ env.ZONE }} | oc create -f - || true
+          oc process -f database/openshift.deploy.yml -p ZONE=${{ env.ZONE }} | oc create -f - || true
 
           # Process and apply deployment templates
-          oc process -f .github/openshift/deploy.backend.yml -p ZONE=${{ env.ZONE }} \
+          oc process -f backend/openshift.deploy.yml -p ZONE=${{ env.ZONE }} \
             -p PROMOTE=${{ github.repository }}:${{ env.PREV }}-backend | oc apply -f -
-          oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
+          oc process -f frontend/openshift.deploy.yml -p ZONE=${{ env.ZONE }} \
             -p PROMOTE=${{ github.repository }}:${{ env.PREV }}-frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
