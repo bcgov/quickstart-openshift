@@ -10,7 +10,7 @@ concurrency:
 jobs:
   builds:
     name: Builds
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_build.yml@v0.0.1
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_build.yml@v0.0.2
     strategy:
       matrix:
         component: [backend, frontend]
@@ -29,16 +29,13 @@ jobs:
 
   tests:
     name: Unit Tests
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_code-cov.yml@v0.0.1
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_unit-tests.yml@v0.0.2
     strategy:
       matrix:
         component: [backend, frontend]
-    secrets:
-      gh_token: ${{ secrets.GITHUB_TOKEN }}
     with:
       component: ${{ matrix.component }}
-      lcov_file: ${{ matrix.component }}/coverage/lcov.info
-      test_cmd: npm run test:cov
+      test_cmd: npm run test
 
   sonarcloud:
     name: Static Analysis
@@ -89,7 +86,7 @@ jobs:
       - builds
     # If any of the prerequs created a build, then deploy
     if: contains(needs.*.outputs.build, 'true')
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@v0.0.1
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@v0.0.2
     strategy:
       matrix:
         component: [backend, database, frontend]
