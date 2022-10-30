@@ -127,7 +127,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.3.0
+        uses: zaproxy/action-full-scan@v0.4.0
         with:
           target: https://${{ env.NAME }}-test-backend.apps.silver.devops.gov.bc.ca/
           cmd_options: "-a"
