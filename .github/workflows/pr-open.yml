@@ -10,7 +10,7 @@ concurrency:
 jobs:
   builds:
     name: Builds
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_build.yml@v0.0.1
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_build.yml@v0.0.2
     strategy:
       matrix:
         component: [backend, frontend]
@@ -29,16 +29,13 @@ jobs:
 
   tests:
     name: Unit Tests
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_code-cov.yml@v0.0.1
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_unit-tests.yml@v0.0.2
     strategy:
       matrix:
         component: [backend, frontend]
-    secrets:
-      gh_token: ${{ secrets.GITHUB_TOKEN }}
     with:
       component: ${{ matrix.component }}
-      lcov_file: ${{ matrix.component }}/coverage/lcov.info
-      test_cmd: npm run test:cov
+      test_cmd: npm run test
 
   sonarcloud:
     name: Static Analysis
@@ -89,23 +86,23 @@ jobs:
       - builds
     # If any of the prerequs created a build, then deploy
     if: contains(needs.*.outputs.build, 'true')
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@v0.0.1
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@v0.0.2
     strategy:
       matrix:
         component: [backend, database, frontend]
         include:
           - component: database
             overwrite: false
-            template_file: .github/openshift/deploy.database.yml
+            template_file: database/openshift.deploy.yml
             template_vars: -p ZONE=${{ github.event.number }}
           - component: backend
             overwrite: true
-            template_file: .github/openshift/deploy.backend.yml
-            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-backend
+            template_file: backend/openshift.deploy.yml
+            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}/backend:${{ github.event.number }}
           - component: frontend
             overwrite: true
-            template_file: .github/openshift/deploy.frontend.yml
-            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}:${{ github.event.number }}-frontend
+            template_file: frontend/openshift.deploy.yml
+            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}/frontend:${{ github.event.number }}
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_server: ${{ secrets.OC_SERVER }}
