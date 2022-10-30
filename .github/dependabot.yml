@@ -1,0 +1,24 @@
+# Dependency updates for GitHub Actions and npm
+# https://docs.github.com/en/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /backend
+    schedule:
+      interval: daily
+    commit-message:
+      prefix: "Backend"
+      include: "scope"
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: daily
+    commit-message:
+      prefix: "Frontend"
+      include: "scope"
