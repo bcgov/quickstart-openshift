@@ -34,7 +34,7 @@ jobs:
   image-promotions:
     name: Image Promotions
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_image_promote.yml@main
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_image_promote.yml@v0.0.1
     strategy:
       matrix:
         component: [backend, frontend]
