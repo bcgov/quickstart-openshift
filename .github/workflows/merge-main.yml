@@ -120,9 +120,9 @@ jobs:
 
           # Process and apply deployment templates
           oc process -f backend/openshift.deploy.yml -p ZONE=${{ env.ZONE }} \
-            -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-backend | oc apply -f -
+            -p PROMOTE=${{ github.repository }}/${{ env.ZONE }}:backend | oc apply -f -
           oc process -f frontend/openshift.deploy.yml -p ZONE=${{ env.ZONE }} \
-            -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-frontend | oc apply -f -
+            -p PROMOTE=${{ github.repository }}/${{ env.ZONE }}:frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-database -w
@@ -346,9 +346,9 @@ jobs:
 
           # Process and apply deployment templates
           oc process -f backend/openshift.deploy.yml -p ZONE=${{ env.ZONE }} \
-            -p PROMOTE=${{ github.repository }}:${{ env.PREV }}-backend | oc apply -f -
+            -p PROMOTE=${{ github.repository }}/${{ env.PREV }}:backend | oc apply -f -
           oc process -f frontend/openshift.deploy.yml -p ZONE=${{ env.ZONE }} \
-            -p PROMOTE=${{ github.repository }}:${{ env.PREV }}-frontend | oc apply -f -
+            -p PROMOTE=${{ github.repository }}/${{ env.PREV }}:frontend | oc apply -f -
 
           # Follow any active rollouts (see deploymentconfigs)
           oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-database -w
