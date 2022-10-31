@@ -102,7 +102,7 @@ objects:
                   path: /
                   port: 3000
                   scheme: HTTP
-                initialDelaySeconds: 30
+                initialDelaySeconds: 15
                 periodSeconds: 30
                 timeoutSeconds: 5
   - apiVersion: v1
