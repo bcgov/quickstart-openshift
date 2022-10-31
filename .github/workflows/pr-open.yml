@@ -8,6 +8,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pr-greeting:
+    name: PR Greeting
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      NAME: nr-quickstart-helpers
+    runs-on: ubuntu-22.04
+    steps:
+      - name: PR Greeting
+        # Run if PR opened or reopened
+        if: contains(github.event.action, 'opened')
+        uses: DerekRoberts/action-pr-description-add@v0.0.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          add_markdown: |
+            <p>
+            ---
+
+            Thanks for the PR!
+
+            Any successful deployments (not always required) will be available below.
+            [Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}/) available
+            [Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/) available
+
+            Once merged, code will be promoted and handed off to following workflow run.
+            [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+
   builds:
     name: Builds
     uses: bcgov/nr-quickstart-helpers/.github/workflows/_build.yml@v0.0.2
@@ -29,6 +55,10 @@ jobs:
 
   tests:
     name: Unit Tests
+    needs:
+      - builds
+    # If any of the prerequs created a build, then run tests
+    if: contains(needs.*.outputs.build, 'true')
     uses: bcgov/nr-quickstart-helpers/.github/workflows/_unit-tests.yml@v0.0.2
     strategy:
       matrix:
@@ -37,9 +67,43 @@ jobs:
       component: ${{ matrix.component }}
       test_cmd: npm run test
 
+  deploys:
+    name: Deploys
+    needs:
+      - builds
+    # If any of the prerequs created a build, then deploy
+    if: contains(needs.*.outputs.build, 'true')
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@v0.0.2
+    strategy:
+      matrix:
+        component: [backend, database, frontend]
+        include:
+          - component: database
+            overwrite: false
+            template_file: database/openshift.deploy.yml
+            template_vars: -p ZONE=${{ github.event.number }}
+          - component: backend
+            overwrite: true
+            template_file: backend/openshift.deploy.yml
+            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}/backend:${{ github.event.number }}
+          - component: frontend
+            overwrite: true
+            template_file: frontend/openshift.deploy.yml
+            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}/frontend:${{ github.event.number }}
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_server: ${{ secrets.OC_SERVER }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+    with:
+      component: ${{ matrix.component }}
+      overwrite: ${{ matrix.overwrite }}
+      template_file: ${{ matrix.template_file }}
+      template_vars: ${{ matrix.template_vars }}
+
   sonarcloud:
     name: Static Analysis
     needs:
+      - deploys
       - tests
     runs-on: ubuntu-22.04
     steps:
@@ -79,59 +143,6 @@ jobs:
             -Dsonar.projectKey=${{ github.event.repository.name }}
             -Dsonar.sources=backend,frontend
             -Dsonar.tests=backend/test,frontend/test
-
-  deploys:
-    name: Deploys
-    needs:
-      - builds
-    # If any of the prerequs created a build, then deploy
-    if: contains(needs.*.outputs.build, 'true')
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@v0.0.2
-    strategy:
-      matrix:
-        component: [backend, database, frontend]
-        include:
-          - component: database
-            overwrite: false
-            template_file: database/openshift.deploy.yml
-            template_vars: -p ZONE=${{ github.event.number }}
-          - component: backend
-            overwrite: true
-            template_file: backend/openshift.deploy.yml
-            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}/backend:${{ github.event.number }}
-          - component: frontend
-            overwrite: true
-            template_file: frontend/openshift.deploy.yml
-            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}/frontend:${{ github.event.number }}
-    secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_server: ${{ secrets.OC_SERVER }}
-      oc_token: ${{ secrets.OC_TOKEN }}
-    with:
-      component: ${{ matrix.component }}
-      overwrite: ${{ matrix.overwrite }}
-      template_file: ${{ matrix.template_file }}
-      template_vars: ${{ matrix.template_vars }}
-
-  post-deploy:
-    name: Post-deploy
-    needs:
-      - deploys
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      NAME: nr-quickstart-typescript
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Comment with links
-        uses: mshick/add-pr-comment@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          allow-repeats: false
-          message: |
-            DEV deployments have completed successfully!
-            [Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}/) available
-            [Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/) available
 
   # # Uncomment to view GitHub context object
   # # https://docs.github.com/en/actions/learn-github-actions/contexts
