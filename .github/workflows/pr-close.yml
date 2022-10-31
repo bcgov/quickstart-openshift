@@ -21,7 +21,6 @@ jobs:
     name: Cleanup OpenShift
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
       - name: Remove OpenShift artifacts
         run: |
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
@@ -34,33 +33,14 @@ jobs:
   image-promotions:
     name: Image Promotions
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_image_promote.yml@v0.0.2
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         component: [backend, frontend]
-    with:
-      app_name: nr-quickstart-typescript
-      component: ${{ matrix.component }}
-      env_source: ${{ github.event.number }}
-      env_target: test
-    secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_server: ${{ secrets.OC_SERVER }}
-      oc_token: ${{ secrets.OC_TOKEN }}
-
-  # Notify when PR merged into main
-  merge-notification:
-    name: Merge Notification
-    runs-on: ubuntu-22.04
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
     steps:
-      - name: Pre-merge update
-        uses: mshick/add-pr-comment@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: shrink/actions-docker-registry-tag@v3
         with:
-          allow-repeats: false
-          message: |
-            Your Pull Request code is being promoted!  Please follow the link below.
-
-            [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.component }}
+          target: ${{ github.event.number }}
+          tags: test
