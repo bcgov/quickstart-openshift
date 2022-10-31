@@ -23,6 +23,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_markdown: |
             <p>
+
             ---
 
             Thanks for the PR!
@@ -97,6 +98,7 @@ jobs:
     with:
       component: ${{ matrix.component }}
       overwrite: ${{ matrix.overwrite }}
+      penetration_test: false
       template_file: ${{ matrix.template_file }}
       template_vars: ${{ matrix.template_vars }}
 
