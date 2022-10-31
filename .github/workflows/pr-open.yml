@@ -38,6 +38,8 @@ jobs:
   builds:
     name: Builds
     uses: bcgov/nr-quickstart-helpers/.github/workflows/_build.yml@v0.0.2
+    permissions:
+      packages: write
     strategy:
       matrix:
         component: [backend, frontend]
