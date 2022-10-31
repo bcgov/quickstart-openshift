@@ -54,26 +54,12 @@ jobs:
       img_fallback: test
       triggers: ${{ matrix.triggers }}
 
-  tests:
-    name: Unit Tests
-    needs:
-      - builds
-    # If any of the prerequs created a build, then run tests
-    if: contains(needs.*.outputs.build, 'true')
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_unit-tests.yml@v0.0.2
-    strategy:
-      matrix:
-        component: [backend, frontend]
-    with:
-      component: ${{ matrix.component }}
-      test_cmd: npm run test
-
   deploys:
     name: Deploys
     needs:
       - builds
-    # If any of the prerequs created a build, then deploy
-    if: contains(needs.*.outputs.build, 'true')
+    # # If any of the prerequs created a build, then deploy
+    # if: contains(needs.*.outputs.build, 'true')
     uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@v0.0.2
     strategy:
       matrix:
@@ -102,10 +88,19 @@ jobs:
       template_file: ${{ matrix.template_file }}
       template_vars: ${{ matrix.template_vars }}
 
+  tests:
+    name: Unit Tests
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_unit-tests.yml@v0.0.2
+    strategy:
+      matrix:
+        component: [backend, frontend]
+    with:
+      component: ${{ matrix.component }}
+      test_cmd: npm run test
+
   sonarcloud:
     name: Static Analysis
     needs:
-      - deploys
       - tests
     runs-on: ubuntu-22.04
     steps:
