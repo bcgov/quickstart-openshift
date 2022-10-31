@@ -20,12 +20,10 @@ jobs:
       - name: PR Greeting
         # Run if PR opened or reopened
         if: contains(github.event.action, 'opened')
-        uses: DerekRoberts/action-pr-description-add@v0.0.1
+        uses: DerekRoberts/action-pr-description-add@v0.0.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_markdown: |
-            <p>
-
             ---
 
             Thanks for the PR!
