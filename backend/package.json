@@ -57,7 +57,7 @@
     "typeorm": "^0.2.45"
   },
   "devDependencies": {
-    "@types/express": "^4.17.13",
+    "@types/express": "^4.17.14",
     "@types/jest": "^27.0.2",
     "@types/node": "^16.11.1",
     "@types/supertest": "^2.0.11",
