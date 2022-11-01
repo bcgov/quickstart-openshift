@@ -107,6 +107,7 @@ jobs:
   sonarcloud:
     name: Static Analysis
     needs:
+      - deploys
       - tests
     runs-on: ubuntu-22.04
     steps:
