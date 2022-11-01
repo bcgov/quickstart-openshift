@@ -93,13 +93,13 @@ jobs:
             overwrite: true
             template_file: backend/openshift.deploy.yml
             template_vars:
-              -p ZONE=test -p PROMOTE=${{ github.repository }}/backend:test \
+              -p ZONE=test -p PROMOTE=${{ github.repository }}/backend:test
               -p NAME=${{ github.event.repository.name }}
           - component: frontend
             overwrite: true
             template_file: frontend/openshift.deploy.yml
             template_vars:
-              -p ZONE=test -p PROMOTE=${{ github.repository }}/frontend:test \
+              -p ZONE=test -p PROMOTE=${{ github.repository }}/frontend:test
               -p NAME=${{ github.event.repository.name }}
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -179,13 +179,13 @@ jobs:
             overwrite: true
             template_file: backend/openshift.deploy.yml
             template_vars:
-              -p ZONE=prod -p PROMOTE=${{ github.repository }}/backend:test \
+              -p ZONE=prod -p PROMOTE=${{ github.repository }}/backend:test
               -p NAME=${{ github.event.repository.name }}
           - component: frontend
             overwrite: true
             template_file: frontend/openshift.deploy.yml
             template_vars:
-              -p ZONE=prod -p PROMOTE=${{ github.repository }}/frontend:test \
+              -p ZONE=prod -p PROMOTE=${{ github.repository }}/frontend:test
               -p NAME=${{ github.event.repository.name }}
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
