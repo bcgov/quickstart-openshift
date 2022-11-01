@@ -74,11 +74,11 @@ jobs:
           - component: backend
             overwrite: true
             template_file: backend/openshift.deploy.yml
-            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}/backend:${{ github.event.number }}
+            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}/backend:${{ github.event.number }} -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
           - component: frontend
             overwrite: true
             template_file: frontend/openshift.deploy.yml
-            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}/frontend:${{ github.event.number }}
+            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}/frontend:${{ github.event.number }} -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_server: ${{ secrets.OC_SERVER }}
