@@ -8,9 +8,6 @@ on:
       - ".github/ISSUE_TEMPLATE/*"
       - "**.md"
 
-env:
-  name: nr-quickstart-typescript
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -27,7 +24,7 @@ jobs:
           oc project ${{ secrets.OC_NAMESPACE }}
 
           # Remove old build runs, build pods and deployment pods
-          oc delete all,pvc,secret -l app=${{ env.name }}-${{ github.event.number }}
+          oc delete all,pvc,secret -l app=${{ github.event.repository.name }}-${{ github.event.number }}
 
   # If merged into main, then handle any image promotions
   image-promotions:

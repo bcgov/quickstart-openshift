@@ -12,7 +12,7 @@ jobs:
     name: PR Greeting
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
-      NAME: nr-quickstart-helpers
+      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
     runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
@@ -29,8 +29,8 @@ jobs:
             Thanks for the PR!
 
             Any successful deployments (not always required) will be available below.
-            [Backend](https://${{ env.NAME }}-${{ github.event.number }}-backend.${{ env.DOMAIN }}/) available
-            [Frontend](https://${{ env.NAME }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/) available
+            [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/) available
+            [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/) available
 
             Once merged, code will be promoted and handed off to following workflow run.
             [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
@@ -74,11 +74,15 @@ jobs:
           - component: backend
             overwrite: true
             template_file: backend/openshift.deploy.yml
-            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}/backend:${{ github.event.number }} -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+            template_vars:
+              -p ZONE=${{ github.event.number }} -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+              -p PROMOTE=${{ github.repository }}/backend:${{ github.event.number }}
           - component: frontend
             overwrite: true
             template_file: frontend/openshift.deploy.yml
-            template_vars: -p ZONE=${{ github.event.number }} -p PROMOTE=${{ github.repository }}/frontend:${{ github.event.number }} -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+            template_vars:
+              -p ZONE=${{ github.event.number }} -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+              -p PROMOTE=${{ github.repository }}/frontend:${{ github.event.number }}
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_server: ${{ secrets.OC_SERVER }}
@@ -130,7 +134,8 @@ jobs:
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
