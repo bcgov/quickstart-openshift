@@ -118,7 +118,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get backend coverage from cache
+      - name: Get ${{ matrix.component }} coverage from cache
         uses: actions/cache@v3
         with:
           path: ${{ matrix.component }}/coverage
@@ -142,6 +142,7 @@ jobs:
             -Dsonar.projectKey=bcgov_${{ github.event.repository.name }}
             -Dsonar.sources=${{ matrix.component }}
             -Dsonar.tests=${{ matrix.component }}/test
+            -Dsonar.log.level=DEBUG
 
   # # Uncomment to view GitHub context object
   # # https://docs.github.com/en/actions/learn-github-actions/contexts
