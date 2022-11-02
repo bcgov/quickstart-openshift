@@ -35,64 +35,64 @@ jobs:
             Once merged, code will be promoted and handed off to following workflow run.
             [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
-  builds:
-    name: Builds
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_build.yml@v0.0.2
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        component: [backend, frontend]
-        include:
-          - component: backend
-            triggers: ('backend/')
-          - component: frontend
-            triggers: ('frontend/')
-    secrets:
-      gh_token: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      component: ${{ matrix.component }}
-      img_build: ${{ github.event.number }}
-      img_fallback: test
-      triggers: ${{ matrix.triggers }}
+  # builds:
+  #   name: Builds
+  #   uses: bcgov/nr-quickstart-helpers/.github/workflows/_build.yml@v0.0.2
+  #   permissions:
+  #     packages: write
+  #   strategy:
+  #     matrix:
+  #       component: [backend, frontend]
+  #       include:
+  #         - component: backend
+  #           triggers: ('backend/')
+  #         - component: frontend
+  #           triggers: ('frontend/')
+  #   secrets:
+  #     gh_token: ${{ secrets.GITHUB_TOKEN }}
+  #   with:
+  #     component: ${{ matrix.component }}
+  #     img_build: ${{ github.event.number }}
+  #     img_fallback: test
+  #     triggers: ${{ matrix.triggers }}
 
-  deploys:
-    name: Deploys
-    needs:
-      - builds
-    # # If any of the prerequs created a build, then deploy
-    # if: contains(needs.*.outputs.build, 'true')
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@v0.0.2
-    strategy:
-      matrix:
-        component: [backend, database, frontend]
-        include:
-          - component: database
-            overwrite: false
-            template_file: database/openshift.deploy.yml
-            template_vars: -p ZONE=${{ github.event.number }}
-          - component: backend
-            overwrite: true
-            template_file: backend/openshift.deploy.yml
-            template_vars:
-              -p ZONE=${{ github.event.number }} -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE=${{ github.repository }}/backend:${{ github.event.number }}
-          - component: frontend
-            overwrite: true
-            template_file: frontend/openshift.deploy.yml
-            template_vars:
-              -p ZONE=${{ github.event.number }} -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE=${{ github.repository }}/frontend:${{ github.event.number }}
-    secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_server: ${{ secrets.OC_SERVER }}
-      oc_token: ${{ secrets.OC_TOKEN }}
-    with:
-      component: ${{ matrix.component }}
-      overwrite: ${{ matrix.overwrite }}
-      penetration_test: false
-      template_file: ${{ matrix.template_file }}
-      template_vars: ${{ matrix.template_vars }}
+  # deploys:
+  #   name: Deploys
+  #   needs:
+  #     - builds
+  #   # # If any of the prerequs created a build, then deploy
+  #   # if: contains(needs.*.outputs.build, 'true')
+  #   uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@v0.0.2
+  #   strategy:
+  #     matrix:
+  #       component: [backend, database, frontend]
+  #       include:
+  #         - component: database
+  #           overwrite: false
+  #           template_file: database/openshift.deploy.yml
+  #           template_vars: -p ZONE=${{ github.event.number }}
+  #         - component: backend
+  #           overwrite: true
+  #           template_file: backend/openshift.deploy.yml
+  #           template_vars:
+  #             -p ZONE=${{ github.event.number }} -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #             -p PROMOTE=${{ github.repository }}/backend:${{ github.event.number }}
+  #         - component: frontend
+  #           overwrite: true
+  #           template_file: frontend/openshift.deploy.yml
+  #           template_vars:
+  #             -p ZONE=${{ github.event.number }} -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #             -p PROMOTE=${{ github.repository }}/frontend:${{ github.event.number }}
+  #   secrets:
+  #     oc_namespace: ${{ secrets.OC_NAMESPACE }}
+  #     oc_server: ${{ secrets.OC_SERVER }}
+  #     oc_token: ${{ secrets.OC_TOKEN }}
+  #   with:
+  #     component: ${{ matrix.component }}
+  #     overwrite: ${{ matrix.overwrite }}
+  #     penetration_test: false
+  #     template_file: ${{ matrix.template_file }}
+  #     template_vars: ${{ matrix.template_vars }}
 
   tests:
     name: Unit Tests
@@ -109,6 +109,9 @@ jobs:
     needs:
       - tests
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        component: [backend, frontend]
     steps:
       # Disable shallow clone for SonarCloud analysis
       - uses: actions/checkout@v3
@@ -118,18 +121,10 @@ jobs:
       - name: Get backend coverage from cache
         uses: actions/cache@v3
         with:
-          path: backend/coverage
-          key: coverage-backend-${{ github.run_number }}
+          path: ${{ matrix.component }}/coverage
+          key: coverage-${{ matrix.component }}-${{ github.run_number }}
           restore-keys: |
-            coverage-backend-
-
-      - name: Get frontend coverage from cache
-        uses: actions/cache@v3
-        with:
-          path: frontend/coverage
-          key: coverage-frontend-${{ github.run_number }}
-          restore-keys: |
-            coverage-frontend-
+            coverage-${{ matrix.component }}-
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -141,12 +136,12 @@ jobs:
           args: >
             -Dsonar.exclusions=**/test/**,.github/**/*,*.md
             -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info
-            -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml,frontend/coverage/cobertura-coverage.xml
+            -Dsonar.javascript.lcov.reportPaths=${{ matrix.component }}/coverage/lcov.info
+            -Dsonar.cobertura.reportPaths=${{ matrix.component }}/coverage/cobertura-coverage.xml
             -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=bcgov_${{ github.event.repository.name }}
-            -Dsonar.sources=backend,frontend
-            -Dsonar.tests=backend/test,frontend/test
+            -Dsonar.sources=${{ matrix.component }},frontend
+            -Dsonar.tests=${{ matrix.component }}/test
 
   # # Uncomment to view GitHub context object
   # # https://docs.github.com/en/actions/learn-github-actions/contexts
