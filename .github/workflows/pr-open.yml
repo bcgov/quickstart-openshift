@@ -112,6 +112,15 @@ jobs:
     strategy:
       matrix:
         component: [backend, frontend]
+        include:
+          - component: backend
+            organization: bcgov-sonarcloud
+            projectKey: bcgov_nr-quickstart-typescript_backend
+            token: ${{ secrets.SONAR_TOKEN_BACKEND }}
+          - component: frontend
+            organization: bcgov-sonarcloud
+            projectKey: bcgov_nr-quickstart-typescript_frontend
+            token: ${{ secrets.SONAR_TOKEN_FRONTEND }}
     steps:
       # Disable shallow clone for SonarCloud analysis
       - uses: actions/checkout@v3
@@ -130,16 +139,15 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@master
         env:
           # Needed to get PR information, if any
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ matrix.token }}
         with:
           args: >
-            -Dsonar.exclusions=**/test/**,.github/**/*,*.md
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.javascript.lcov.reportPaths=${{ matrix.component }}/coverage/lcov.info
             -Dsonar.cobertura.reportPaths=${{ matrix.component }}/coverage/cobertura-coverage.xml
+            -Dsonar.exclusions=**/test/**,.github/**/*,*.md
+            -Dsonar.javascript.lcov.reportPaths=${{ matrix.component }}/coverage/lcov.info
+            -Dsonar.organization=${{ matrix.organization }}
             -Dsonar.project.monorepo.enabled=true
-            -Dsonar.projectKey=bcgov_${{ github.event.repository.name }}
+            -Dsonar.projectKey=${{ matrix.projectKey }}
             -Dsonar.sources=${{ matrix.component }}
             -Dsonar.tests=${{ matrix.component }}/test
             -Dsonar.log.level=DEBUG
