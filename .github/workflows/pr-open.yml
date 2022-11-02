@@ -170,7 +170,7 @@ jobs:
           args: >
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.projectKey=bcgov_nr-quickstart-typescript_b
-            -Dsonar.sources=backend
+            -Dsonar.sources=frontend
             -Dsonar.verbose=true
   # -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
   # -Dsonar.exclusions=**/test/**,.github/**/*,*.md
