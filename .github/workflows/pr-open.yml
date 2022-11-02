@@ -142,41 +142,65 @@ jobs:
             -Dsonar.verbose=true
 
   sonarcloud-frontend:
-    name: Static Analysis Frontend
-    needs:
-      - tests
-    runs-on: ubuntu-22.04
+    name: SonarCloud Frontend
+    runs-on: ubuntu-latest
     steps:
-      # Disable shallow clone for SonarCloud analysis
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-
-      - name: Get Frontend coverage from cache
-        uses: actions/cache@v3
-        with:
-          path: frontend/coverage
-          key: coverage-frontend-${{ github.run_number }}
-          restore-keys: |
-            coverage-frontend-
-
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
-          # Needed to get PR information, if any
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
         with:
+          projectBaseDir: frontend
           args: >
+            -Dsonar.exclusions=**/test/**,.github/**/*,*.md
             -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.project.monorepo.enabled=true
+            -Dsonar.projectName=nr-quickstart-helpers
             -Dsonar.projectKey=bcgov_nr-quickstart-typescript_b
-            -Dsonar.sources=frontend
             -Dsonar.verbose=true
-  # -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
-  # -Dsonar.exclusions=**/test/**,.github/**/*,*.md
-  # -Dsonar.tests=backend/test
-  # -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml
-  # -Dsonar.project.monorepo.enabled=true
+          # -Dsonar.cobertura.reportPaths=coverage/cobertura-coverage.xml
+          # -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+  # sonarcloud-frontend:
+  #   name: Static Analysis Frontend
+  #   needs:
+  #     - tests
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     # Disable shallow clone for SonarCloud analysis
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+
+  #     - name: Get Frontend coverage from cache
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: frontend/coverage
+  #         key: coverage-frontend-${{ github.run_number }}
+  #         restore-keys: |
+  #           coverage-frontend-
+
+  #     - name: SonarCloud Scan
+  #       uses: SonarSource/sonarcloud-github-action@master
+  #       env:
+  #         # Needed to get PR information, if any
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
+  #       with:
+  #         args: >
+  #           -Dsonar.cobertura.reportPaths=frontend/coverage/cobertura-coverage.xml
+  #           -Dsonar.exclusions=**/test/**,.github/**/*,*.md
+  #           -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
+  #           -Dsonar.organization=bcgov-sonarcloud
+  #           -Dsonar.project.monorepo.enabled=true
+  #           -Dsonar.projectKey=bcgov_nr-quickstart-typescript_b
+  #           -Dsonar.sources=frontend
+  #           -Dsonar.tests=frontend/test
+  #           -Dsonar.verbose=true
 
   # # Uncomment to view GitHub context object
   # # https://docs.github.com/en/actions/learn-github-actions/contexts
