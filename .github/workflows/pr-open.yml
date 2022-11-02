@@ -102,12 +102,11 @@ jobs:
         component: [backend, frontend]
     with:
       component: ${{ matrix.component }}
-      test_cmd: npm run test
+      test_cmd: npm run test:cov
 
   sonarcloud:
     name: Static Analysis
     needs:
-      - deploys
       - tests
     runs-on: ubuntu-22.04
     steps:
