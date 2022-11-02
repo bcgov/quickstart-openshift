@@ -142,7 +142,7 @@ jobs:
             -Dsonar.log.level=DEBUG
 
   sonarcloud-frontend:
-    name: Static Analysis Fronthead
+    name: Static Analysis Frontend
     needs:
       - tests
     runs-on: ubuntu-22.04
@@ -177,6 +177,7 @@ jobs:
             -Dsonar.sources=frontend
             -Dsonar.tests=frontend/test
             -Dsonar.log.level=DEBUG
+            -Dsonar.verbose=true
 
   # # Uncomment to view GitHub context object
   # # https://docs.github.com/en/actions/learn-github-actions/contexts
