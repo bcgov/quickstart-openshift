@@ -131,15 +131,15 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
         with:
           args: >
+            -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml
+            -Dsonar.exclusions=**/test/**,.github/**/*,*.md
+            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
             -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=bcgov_nr-quickstart-typescript_a
             -Dsonar.sources=backend
+            -Dsonar.tests=backend/test
             -Dsonar.verbose=true
-  # -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
-  # -Dsonar.exclusions=**/test/**,.github/**/*,*.md
-  # -Dsonar.tests=backend/test
-  # -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml
-  # -Dsonar.project.monorepo.enabled=true
 
   sonarcloud-frontend:
     name: Static Analysis Frontend
@@ -168,15 +168,15 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
         with:
           args: >
-            -Dsonar.cobertura.reportPaths=frontend/coverage/cobertura-coverage.xml
-            -Dsonar.exclusions=**/test/**,.github/**/*,*.md
-            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
             -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.project.monorepo.enabled=true
-            -Dsonar.projectKey=bcgov_nr-quickstart-typescript_b
-            -Dsonar.sources=frontend
-            -Dsonar.tests=frontend/test
+            -Dsonar.projectKey=bcgov_nr-quickstart-typescript_a
+            -Dsonar.sources=backend
             -Dsonar.verbose=true
+  # -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
+  # -Dsonar.exclusions=**/test/**,.github/**/*,*.md
+  # -Dsonar.tests=backend/test
+  # -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml
+  # -Dsonar.project.monorepo.enabled=true
 
   # # Uncomment to view GitHub context object
   # # https://docs.github.com/en/actions/learn-github-actions/contexts
