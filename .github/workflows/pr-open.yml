@@ -105,7 +105,7 @@ jobs:
       test_cmd: npm run test:cov
 
   sonarcloud-backend:
-    name: Static Analysis
+    name: Static Analysis Backend
     needs:
       - tests
     runs-on: ubuntu-22.04
@@ -142,7 +142,7 @@ jobs:
             -Dsonar.log.level=DEBUG
 
   sonarcloud-frontend:
-    name: Static Analysis
+    name: Static Analysis Fronthead
     needs:
       - tests
     runs-on: ubuntu-22.04
@@ -173,7 +173,7 @@ jobs:
             -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.project.monorepo.enabled=true
-            -Dsonar.projectKey=bcgov_nr-quickstart-typescript_a
+            -Dsonar.projectKey=bcgov_nr-quickstart-typescript_b
             -Dsonar.sources=frontend
             -Dsonar.tests=frontend/test
             -Dsonar.log.level=DEBUG
