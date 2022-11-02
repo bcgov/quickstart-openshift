@@ -140,7 +140,7 @@ jobs:
             -Dsonar.cobertura.reportPaths=${{ matrix.component }}/coverage/cobertura-coverage.xml
             -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=bcgov_${{ github.event.repository.name }}
-            -Dsonar.sources=${{ matrix.component }},frontend
+            -Dsonar.sources=${{ matrix.component }}
             -Dsonar.tests=${{ matrix.component }}/test
 
   # # Uncomment to view GitHub context object
