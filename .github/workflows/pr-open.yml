@@ -138,7 +138,6 @@ jobs:
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=bcgov_nr-quickstart-typescript_backend
-            -Dsonar.projectName=backend
             -Dsonar.tests=test
 
   sonarcloud-frontend:
@@ -174,7 +173,6 @@ jobs:
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=bcgov_nr-quickstart-typescript_frontend
-            -Dsonar.projectName=backend
             -Dsonar.tests=test
 
   # # Uncomment to view GitHub context object
