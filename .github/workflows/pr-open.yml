@@ -144,9 +144,19 @@ jobs:
     name: SonarCloud Frontend
     runs-on: ubuntu-latest
     steps:
+      # Disable shallow clone for SonarCloud analysis
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
+
+      - name: Get Backend coverage from cache
+        uses: actions/cache@v3
+        with:
+          path: backend/coverage
+          key: coverage-backend-${{ github.run_number }}
+          restore-keys: |
+            coverage-backend-
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
