@@ -104,42 +104,41 @@ jobs:
       component: ${{ matrix.component }}
       test_cmd: npm run test:cov
 
-  # sonarcloud-backend:
-  #   name: Static Analysis Backend
-  #   needs:
-  #     - tests
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     # Disable shallow clone for SonarCloud analysis
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 0
+  sonarcloud-backend:
+    name: Static Analysis Backend
+    needs:
+      - tests
+    runs-on: ubuntu-22.04
+    steps:
+      # Disable shallow clone for SonarCloud analysis
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-  #     - name: Get Backend coverage from cache
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: backend/coverage
-  #         key: coverage-backend-${{ github.run_number }}
-  #         restore-keys: |
-  #           coverage-backend-
+      - name: Get Backend coverage from cache
+        uses: actions/cache@v3
+        with:
+          path: backend/coverage
+          key: coverage-backend-${{ github.run_number }}
+          restore-keys: |
+            coverage-backend-
 
-  #     - name: SonarCloud Scan
-  #       uses: SonarSource/sonarcloud-github-action@master
-  #       env:
-  #         # Needed to get PR information, if any
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
-  #       with:
-  #         args: >
-  #           -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml
-  #           -Dsonar.exclusions=**/test/**,.github/**/*,*.md
-  #           -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
-  #           -Dsonar.organization=bcgov-sonarcloud
-  #           -Dsonar.project.monorepo.enabled=true
-  #           -Dsonar.projectKey=bcgov_nr-quickstart-typescript_a
-  #           -Dsonar.sources=backend
-  #           -Dsonar.tests=backend/test
-  #           -Dsonar.verbose=true
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
+        with:
+          args: >
+            -Dsonar.cobertura.reportPaths=backend/coverage/cobertura-coverage.xml
+            -Dsonar.exclusions=**/test/**,.github/**/*,*.md
+            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.project.monorepo.enabled=true
+            -Dsonar.projectKey=bcgov_nr-quickstart-typescript_backend
+            -Dsonar.sources=backend
+            -Dsonar.tests=backend/test
 
   sonarcloud-frontend:
     name: SonarCloud Frontend
@@ -156,13 +155,14 @@ jobs:
         with:
           projectBaseDir: frontend
           args: >
+            -Dsonar.cobertura.reportPaths=frontend/coverage/cobertura-coverage.xml
+            -Dsonar.exclusions=**/test/**,.github/**/*,*.md
+            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
             -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=bcgov_nr-quickstart-typescript_b
-            -Dsonar.verbose=true
-          # -Dsonar.exclusions=**/test/**,.github/**/*,*.md
-          # -Dsonar.project.monorepo.enabled=true
-          # -Dsonar.cobertura.reportPaths=coverage/cobertura-coverage.xml
-          # -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.project.monorepo.enabled=true
+            -Dsonar.projectKey=bcgov_nr-quickstart-typescript_frontend
+            -Dsonar.sources=frontend
+            -Dsonar.tests=frontend/test
 
   # sonarcloud-frontend:
   #   name: Static Analysis Frontend
