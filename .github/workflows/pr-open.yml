@@ -18,8 +18,8 @@ jobs:
       pull-requests: write
     steps:
       - name: PR Greeting
-        # Run if PR opened or reopened
-        if: contains(github.event.action, 'opened')
+        # # Run if PR opened or reopened
+        # if: contains(github.event.action, 'opened')
         uses: DerekRoberts/action-pr-description-add@v0.0.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -95,14 +95,28 @@ jobs:
       template_vars: ${{ matrix.template_vars }}
 
   tests:
-    name: Unit Tests
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_unit-tests.yml@v0.0.2
+    name: Unit Tests and Analysis
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_unit-tests.yml@v0.0.3
     strategy:
       matrix:
-        component: [backend, frontend]
+        dir: [backend, frontend]
+        include:
+          - dir: backend
+            sonar_projectKey: bcgov_nr-quickstart-typescript_backend
+            sonar_token: SONAR_TOKEN_BACKEND
+          - dir: frontend
+            sonar_projectKey: bcgov_nr-quickstart-typescript_frontend
+            sonar_token: SONAR_TOKEN_FRONTEND
+    secrets:
+      sonar_token: ${{ secrets[matrix.sonar_token] }}
     with:
-      component: ${{ matrix.component }}
-      test_cmd: npm run test:cov
+      dir: ${{ matrix.dir }}
+      sonar_args: >
+        -Dsonar.organization=bcgov-sonarcloud
+        -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
+      test_cmd: |
+        npm ci
+        npm run test:cov
 
   sonarcloud:
     name: SonarCloud
