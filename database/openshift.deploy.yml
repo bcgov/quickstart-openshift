@@ -1,8 +1,5 @@
 apiVersion: template.openshift.io/v1
 kind: Template
-labels:
-  app: ${NAME}-${ZONE}
-  app.kubernetes.io/part-of: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Product name
@@ -16,10 +13,6 @@ parameters:
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
-  - description: Password for the PostgreSQL connection user.
-    from: "[a-zA-Z0-9]{16}"
-    generate: expression
-    name: DB_PASSWORD
   - description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
     name: DB_PVC_SIZE
@@ -31,16 +24,6 @@ parameters:
     description: Image (namespace/name:tag) to promote/import
     value: openshift/postgresql:12
 objects:
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
-    stringData:
-      database-name: ${NAME}
-      database-password: ${DB_PASSWORD}
-      database-user: ${NAME}
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
