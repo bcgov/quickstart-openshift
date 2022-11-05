@@ -42,15 +42,15 @@ This project is in active development.  Please visit our [issues](https://github
 
 ### Workflow 1 of 3: PR Open
 
-![1/3: PR Open](.github/graphics/pipeline1of3.png)
+![1/3: PR Open](common/graphics/pipeline1of3.png)
 
 ### Workflow 2 of 3: PR Close
 
-![2/3: PR Close](.github/graphics/pipeline2of3.png)
+![2/3: PR Close](common/graphics/pipeline2of3.png)
 
 ### Workflow 3 of 3: Main Merge
 
-![3/3: Main Merge](.github/graphics/pipeline3of3.png)
+![3/3: Main Merge](common/graphics/pipeline3of3.png)
 
 ### Deployments
 
@@ -62,13 +62,13 @@ Deployment to test, staging or pre-prod (pick a name!) is currently planned to b
 
 Successful deployments are linked in Pull Request comments.
 
-![Deployment Update](.github/graphics/deploymentUpdate.png)
+![Deployment Update](common/graphics/deploymentUpdate.png)
 
 ### Builds
 
 Builds are handled by Docker Actions and published to the GitHub Container Registry (ghcr.io).  This allows for publicly accessible builds that can be consumed by OpenShift, Amazon Web Services or any other container service.
 
-![Packages](.github/graphics/packages.png)
+![Packages](common/graphics/packages.png)
 
 ### Testing
 
@@ -83,7 +83,7 @@ Code quality is reporting are performed by:
 
 Sonar reports are provided as Pull Request comments.
 
-![Sonar Cloud Update](.github/graphics/sonarUpdate.png)
+![Sonar Cloud Update](common/graphics/sonarUpdate.png)
 
 ### Security Scanning
 
@@ -111,9 +111,9 @@ Higher-level environments come after DEV deployments and are usually called any 
 
 Optionally, higher-level deployments can be prevented until manually approved.
 
-![Prod Request](.github/graphics/prodRequest.png)
+![Prod Request](common/graphics/prodRequest.png)
 
-![Prod Accept](.github/graphics/prodAccept.png)
+![Prod Accept](common/graphics/prodAccept.png)
 
 ## Workflows
 
@@ -131,17 +131,17 @@ The workflow, located [here](https://github.com/bcgov/nr-quickstart-typescript/b
 * [Jest](https://jestjs.io/) JavaScript testing enforced in-pipeline
 * [SonarCloud](https://sonarcloud.io/) static analysis test coverage reporting
 
-![Pull Request Open](.github/graphics/pr-open.png)
+![Pull Request Open](common/graphics/pr-open.png)
 
 Triggers are used to determine whether images need to be built or previous ones consumed.  Partial or full skips, like when limited to documentation, are shown below.
 
-![Pull Request Partially Skipped](.github/graphics/skipPartial.png)
+![Pull Request Partially Skipped](common/graphics/skipPartial.png)
 
-![Pull Request Fully Skipped](.github/graphics/skipFull.png)
+![Pull Request Fully Skipped](common/graphics/skipFull.png)
 
 When a PR is merged, the message comment below is added.  Despite showing on this pull request it is actually handled by the next pipeline.
 
-![Merge Notification](.github/graphics/mergeNotification.png)
+![Merge Notification](common/graphics/mergeNotification.png)
 
 ### 2: Pull Request Close Pipeline
 
@@ -154,7 +154,7 @@ When a pull request is merged to main, one additional job is run.  This promotes
 
 * Image promotion to higher-level environments
 
-![Pull Request Close/Merge](.github/graphics/pr-cleanup.png)
+![Pull Request Close/Merge](common/graphics/pr-cleanup.png)
 
 If this closure was triggered by a merge to the main branch it will trigger the following workflow.
 
@@ -169,7 +169,7 @@ The workflow, located [here](https://github.com/bcgov/nr-quickstart-typescript/b
 * Higher-level deployments (e.g. TEST, STAGING, PRE-PROD, PROD)
 * Publishing of production images to the GitHub Container Registry (ghcr.io)
 
-![Main Merge](.github/graphics/main-merge.png)
+![Main Merge](common/graphics/main-merge.png)
 
 ## Starter Application
 
@@ -234,7 +234,7 @@ The following are required:
 
 ### Consuming This Template
 
-![image](./.github/graphics/newRepo.png)
+![image](./common/graphics/newRepo.png)
 
 Create a new repository using this repository as a template.
 * Select bcgov/nr-quickstart-typescript under Repository template
