@@ -39,7 +39,7 @@ objects:
         - ReadWriteOnce
       resources:
         requests:
-          storage: "${DB_PVC_SIZE}"
+          storage: ${DB_PVC_SIZE}
       storageClassName: netapp-file-standard
   - kind: ImageStream
     apiVersion: v1
@@ -104,9 +104,8 @@ objects:
                   command:
                     - /usr/bin/env
                     - bash
-                    - "-c"
-                    - >-
-                      psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                    - -c
+                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
 
                 failureThreshold: 5
                 initialDelaySeconds: 30
@@ -117,9 +116,8 @@ objects:
                   command:
                     - /usr/bin/env
                     - bash
-                    - "-c"
-                    - >-
-                      psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                    - -c
+                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
                 failureThreshold: 5
                 initialDelaySeconds: 30
                 periodSeconds: 15
@@ -143,7 +141,7 @@ objects:
               volumeMounts:
                 - name: ${NAME}-${ZONE}-${COMPONENT}
                   mountPath: ${PVC_MOUNT_PATH}
-              terminationMessagePath: "/dev/termination-log"
+              terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
               imagePullPolicy: Always
           restartPolicy: Always
