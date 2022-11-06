@@ -13,9 +13,12 @@ parameters:
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
-  - description: Volume space available for data, e.g. 512Mi, 2Gi.
+  - name: PVC_MOUNT_PATH
+    description: Where to mount the PVC, subpath (e.g. data/)
+    value: /var/lib/postgresql
+  - name: DB_PVC_SIZE
+    description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
-    name: DB_PVC_SIZE
     required: true
     value: 1Gi
   - name: REGISTRY
@@ -23,7 +26,7 @@ parameters:
     value: ghcr.io
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
-    value: openshift/postgresql:12
+    required: true
 objects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
@@ -140,7 +143,7 @@ objects:
                       key: database-user
               volumeMounts:
                 - name: ${NAME}-${ZONE}-${COMPONENT}
-                  mountPath: "/var/lib/pgsql/data"
+                  mountPath: ${PVC_MOUNT_PATH}
               terminationMessagePath: "/dev/termination-log"
               terminationMessagePolicy: File
               imagePullPolicy: Always
