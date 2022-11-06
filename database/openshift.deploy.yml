@@ -106,8 +106,8 @@ objects:
                     - bash
                     - "-c"
                     - >-
-                      psql -q -d
-                      $POSTGRESQL_DATABASE -c 'SELECT 1'
+                      psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+
                 failureThreshold: 5
                 initialDelaySeconds: 30
                 periodSeconds: 15
@@ -119,8 +119,7 @@ objects:
                     - bash
                     - "-c"
                     - >-
-                      psql -q -d
-                      $POSTGRESQL_DATABASE -c 'SELECT 1'
+                      psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
                 failureThreshold: 5
                 initialDelaySeconds: 30
                 periodSeconds: 15
@@ -136,7 +135,7 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-password
-                - name: POSTGRESQL_USER
+                - name: POSTGRES_USER
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
