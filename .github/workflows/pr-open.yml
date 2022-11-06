@@ -62,11 +62,15 @@ jobs:
       - builds
     # # If any of the prerequs created a build, then deploy
     # if: contains(needs.*.outputs.build, 'true')
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@v0.0.2
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@main
     strategy:
       matrix:
-        component: [backend, database, frontend]
+        component: [init, backend, database, frontend]
         include:
+          - component: init
+            overwrite: false
+            template_file: common/openshift.init.yml
+            template_vars: -p ZONE=${{ github.event.number }}
           - component: database
             overwrite: false
             template_file: database/openshift.deploy.yml
