@@ -25,9 +25,6 @@ parameters:
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
     value: openshift/postgresql:12
-  - name: IMAGE_NAMESPACE
-    description: OpenShift project/namespace containing backup container's imagestream
-    required: true
   - name: DATABASE_PORT
     description: The configured port for the database service
     value: "5432"
@@ -323,7 +320,7 @@ objects:
             spec:
               containers:
                 - name: ${NAME}-${ZONE}
-                  image: ${REGISTRY}/${IMAGE_NAMESPACE}/${NAME}-${ZONE}-${BACKUP_COMPONENT}:${ZONE}
+                  image: ${NAME}-${ZONE}-${BACKUP_COMPONENT}:${ZONE}
                   command:
                     - /bin/bash
                     - -c
