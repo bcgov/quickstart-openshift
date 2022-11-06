@@ -62,7 +62,7 @@ parameters:
     displayName: Number of Monthly Backups to Retain
     description: The number of monthly backup files to be retained.  Used for the `rolling` backup strategy.
     required: false
-    value: 1
+    value: "1"
   - name: JOB_SERVICE_ACCOUNT
     description: Name of the Service Account To Exeucte the Job As.
     value: default
