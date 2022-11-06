@@ -42,10 +42,12 @@ jobs:
       packages: write
     strategy:
       matrix:
-        component: [backend, frontend]
+        component: [backend, database, frontend]
         include:
           - component: backend
             triggers: ('backend/')
+          - component: database
+            triggers: ('database/')
           - component: frontend
             triggers: ('frontend/')
     secrets:
@@ -75,6 +77,7 @@ jobs:
             overwrite: false
             template_file: database/openshift.deploy.yml
             template_vars: -p ZONE=${{ github.event.number }}
+              -p PROMOTE=${{ github.repository }}/database:${{ github.event.number }}
           - component: backend
             overwrite: true
             template_file: backend/openshift.deploy.yml
