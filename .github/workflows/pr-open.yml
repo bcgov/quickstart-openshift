@@ -96,7 +96,7 @@ jobs:
 
   tests:
     name: Unit Tests and Analysis
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_unit-tests.yml@v0.0.3
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_unit-tests.yml@main
     strategy:
       matrix:
         dir: [backend, frontend]
