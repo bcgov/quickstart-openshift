@@ -62,7 +62,7 @@ jobs:
       - builds
     # # If any of the prerequs created a build, then deploy
     # if: contains(needs.*.outputs.build, 'true')
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@v0.0.3
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@main
     strategy:
       matrix:
         component: [init, backend, database, frontend]
