@@ -123,12 +123,12 @@ objects:
                 periodSeconds: 15
                 timeoutSeconds: 1
               env:
-                - name: POSTGRESQL_DATABASE
+                - name: POSTGRES_DB
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-name
-                - name: POSTGRESQL_PASSWORD
+                - name: POSTGRES_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
