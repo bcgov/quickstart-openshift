@@ -74,7 +74,7 @@ jobs:
           - component: database
             overwrite: false
             template_file: database/openshift.deploy.yml
-            template_vars: -p ZONE=${{ github.event.number }} -p IMAGE_NAMESPACE=\$( oc project -q
+            template_vars: -p ZONE=${{ github.event.number }} -p IMAGE_NAMESPACE=\$( oc project -q )
           - component: backend
             overwrite: true
             template_file: backend/openshift.deploy.yml
