@@ -5,7 +5,7 @@ on:
     types:
       - closed
     paths-ignore:
-      - ".github/ISSUE_TEMPLATE/*"
+      - ".github/**"
       - "**.md"
 
 concurrency:
