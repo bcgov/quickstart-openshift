@@ -13,16 +13,20 @@ parameters:
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
-  - description: Volume space available for data, e.g. 512Mi, 2Gi.
+  - name: PVC_MOUNT_PATH
+    description: Where to mount the PVC, subpath (e.g. data/)
+    value: /var/lib/postgresql
+  - name: DB_PVC_SIZE
+    description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
-    name: DB_PVC_SIZE
     required: true
     value: 1Gi
   - name: REGISTRY
-    value: image-registry.openshift-image-registry.svc:5000
+    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
+    value: ghcr.io
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
-    value: openshift/postgresql:12
+    required: true
 objects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
@@ -35,7 +39,7 @@ objects:
         - ReadWriteOnce
       resources:
         requests:
-          storage: "${DB_PVC_SIZE}"
+          storage: ${DB_PVC_SIZE}
       storageClassName: netapp-file-standard
   - kind: ImageStream
     apiVersion: v1
@@ -100,10 +104,9 @@ objects:
                   command:
                     - /usr/bin/env
                     - bash
-                    - "-c"
-                    - >-
-                      psql -q -d
-                      $POSTGRESQL_DATABASE -c 'SELECT 1'
+                    - -c
+                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+
                 failureThreshold: 5
                 initialDelaySeconds: 30
                 periodSeconds: 15
@@ -113,34 +116,32 @@ objects:
                   command:
                     - /usr/bin/env
                     - bash
-                    - "-c"
-                    - >-
-                      psql -q -d
-                      $POSTGRESQL_DATABASE -c 'SELECT 1'
+                    - -c
+                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
                 failureThreshold: 5
                 initialDelaySeconds: 30
                 periodSeconds: 15
                 timeoutSeconds: 1
               env:
-                - name: POSTGRESQL_DATABASE
+                - name: POSTGRES_DB
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-name
-                - name: POSTGRESQL_PASSWORD
+                - name: POSTGRES_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-password
-                - name: POSTGRESQL_USER
+                - name: POSTGRES_USER
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-user
               volumeMounts:
                 - name: ${NAME}-${ZONE}-${COMPONENT}
-                  mountPath: "/var/lib/pgsql/data"
-              terminationMessagePath: "/dev/termination-log"
+                  mountPath: ${PVC_MOUNT_PATH}
+              terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
               imagePullPolicy: Always
           restartPolicy: Always
