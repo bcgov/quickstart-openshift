@@ -10,6 +10,8 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: PROMOTE
+    description: Dummy param, for convenience in deployments
   - name: DB_PASSWORD
     description: Password for the PostgreSQL connection user.
     from: "[a-zA-Z0-9]{16}"
