@@ -56,19 +56,30 @@ jobs:
       img_fallback: test
       triggers: ${{ matrix.triggers }}
 
-  deploys:
-    name: Deploys
+  init:
+    name: Initialize
     needs:
       - builds
     uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@main
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_server: ${{ secrets.OC_SERVER }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+    with:
+      component: init
+      overwrite: false
+      template_file: common/openshift.init.yml
+      template_vars: -p ZONE=${{ github.event.number }}
+
+  deploys:
+    name: Deploys
+    needs:
+      - init
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@main
     strategy:
       matrix:
-        component: [init, backend, database, frontend]
+        component: [backend, database, frontend]
         include:
-          - component: init
-            overwrite: false
-            template_file: common/openshift.init.yml
-            template_vars: ""
           - component: database
             overwrite: false
             template_file: database/openshift.deploy.yml
