@@ -63,7 +63,7 @@ jobs:
     uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@main
     strategy:
       matrix:
-        component: [backend, database, database-backup, init, frontend]
+        component: [backend, database, init, frontend]
         include:
           - component: backend
             overwrite: true
@@ -72,9 +72,6 @@ jobs:
           - component: database
             overwrite: false
             template_file: database/openshift.deploy.yml
-          - component: database-backup
-            overwrite: true
-            template_file: database/openshift.backups.yml
           - component: frontend
             overwrite: true
             template_file: frontend/openshift.deploy.yml
