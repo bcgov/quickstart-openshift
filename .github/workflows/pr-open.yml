@@ -38,11 +38,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-        with:
-          repository: ${{ github.repository }}
-
       - name: secret-search
         uses: Hacks4Snacks/secret-search@v1.1
+        with:
+          exclude-file: docker-compose.yml
 
   builds:
     name: Builds
