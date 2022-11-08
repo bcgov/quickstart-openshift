@@ -1,4 +1,4 @@
-name: Pull Request Opened
+name: Pull Request
 
 on:
   pull_request:
@@ -93,27 +93,3 @@ jobs:
       template_vars:
         -p PROMOTE=${{ github.repository }}/${{ matrix.component }}:${{ github.event.number }}
         -p ZONE=${{ github.event.number }} ${{ matrix.template_vars }}
-
-  tests:
-    name: Unit Tests and Analysis
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_unit-tests.yml@main
-    strategy:
-      matrix:
-        dir: [backend, frontend]
-        include:
-          - dir: backend
-            sonar_projectKey: bcgov_nr-quickstart-typescript_backend
-            sonar_token: SONAR_TOKEN_BACKEND
-          - dir: frontend
-            sonar_projectKey: bcgov_nr-quickstart-typescript_frontend
-            sonar_token: SONAR_TOKEN_FRONTEND
-    secrets:
-      sonar_token: ${{ secrets[matrix.sonar_token] }}
-    with:
-      dir: ${{ matrix.dir }}
-      sonar_args: >
-        -Dsonar.organization=bcgov-sonarcloud
-        -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
-      test_cmd: |
-        npm ci
-        npm run test:cov
