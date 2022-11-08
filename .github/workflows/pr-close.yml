@@ -5,7 +5,7 @@ on:
     types:
       - closed
     paths-ignore:
-      - ".github/ISSUE_TEMPLATE/*"
+      - ".github/**"
       - "**.md"
 
 concurrency:
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        component: [backend, frontend]
+        component: [backend, database, frontend]
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
         with:

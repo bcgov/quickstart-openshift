@@ -18,8 +18,6 @@ jobs:
       pull-requests: write
     steps:
       - name: PR Greeting
-        # # Run if PR opened or reopened
-        # if: contains(github.event.action, 'opened')
         uses: DerekRoberts/action-pr-description-add@v0.0.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -42,10 +40,12 @@ jobs:
       packages: write
     strategy:
       matrix:
-        component: [backend, frontend]
+        component: [backend, database, frontend]
         include:
           - component: backend
             triggers: ('backend/')
+          - component: database
+            triggers: ('database/')
           - component: frontend
             triggers: ('frontend/')
     secrets:
@@ -60,33 +60,27 @@ jobs:
     name: Deploys
     needs:
       - builds
-    # # If any of the prerequs created a build, then deploy
-    # if: contains(needs.*.outputs.build, 'true')
     uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@main
     strategy:
       matrix:
-        component: [init, backend, database, frontend]
+        component: [backend, database, init, frontend]
         include:
-          - component: init
-            overwrite: false
-            template_file: common/openshift.init.yml
-            template_vars: -p ZONE=${{ github.event.number }}
           - component: database
             overwrite: false
             template_file: database/openshift.deploy.yml
-            template_vars: -p ZONE=${{ github.event.number }}
+            template_vars: ""
           - component: backend
             overwrite: true
             template_file: backend/openshift.deploy.yml
-            template_vars:
-              -p ZONE=${{ github.event.number }} -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE=${{ github.repository }}/backend:${{ github.event.number }}
+            template_vars: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+          - component: init
+            overwrite: false
+            template_file: common/openshift.init.yml
+            template_vars: ""
           - component: frontend
             overwrite: true
             template_file: frontend/openshift.deploy.yml
-            template_vars:
-              -p ZONE=${{ github.event.number }} -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE=${{ github.repository }}/frontend:${{ github.event.number }}
+            template_vars: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_server: ${{ secrets.OC_SERVER }}
@@ -96,89 +90,6 @@ jobs:
       overwrite: ${{ matrix.overwrite }}
       penetration_test: false
       template_file: ${{ matrix.template_file }}
-      template_vars: ${{ matrix.template_vars }}
-
-  tests:
-    name: Unit Tests and Analysis
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_unit-tests.yml@main
-    strategy:
-      matrix:
-        dir: [backend, frontend]
-        include:
-          - dir: backend
-            sonar_projectKey: bcgov_nr-quickstart-typescript_backend
-            sonar_token: SONAR_TOKEN_BACKEND
-          - dir: frontend
-            sonar_projectKey: bcgov_nr-quickstart-typescript_frontend
-            sonar_token: SONAR_TOKEN_FRONTEND
-    secrets:
-      sonar_token: ${{ secrets[matrix.sonar_token] }}
-    with:
-      dir: ${{ matrix.dir }}
-      sonar_args: >
-        -Dsonar.organization=bcgov-sonarcloud
-        -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
-      test_cmd: |
-        npm ci
-        npm run test:cov
-
-  sonarcloud:
-    name: SonarCloud
-    needs:
-      - tests
-    runs-on: ubuntu-22.04
-    env:
-      SONAR_TOKEN: ${{ secrets[matrix.token] }}
-    strategy:
-      matrix:
-        component: [backend, frontend]
-        include:
-          - component: backend
-            projectKey: bcgov_nr-quickstart-typescript_backend
-            token: SONAR_TOKEN_BACKEND
-          - component: frontend
-            projectKey: bcgov_nr-quickstart-typescript_frontend
-            token: SONAR_TOKEN_FRONTEND
-    steps:
-      # Disable shallow clone for SonarCloud analysis
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Get ${{ matrix.component }} coverage from cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ matrix.component }}/coverage
-          key: coverage-${{ matrix.component }}-${{ github.run_number }}
-          restore-keys: |
-            coverage-${{ matrix.component }}-
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          # Needed to get PR information, if any
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets[matrix.token] }}
-        with:
-          projectBaseDir: ${{ matrix.component }}
-          args: >
-            -Dsonar.cobertura.reportPaths=coverage/cobertura-coverage.xml
-            -Dsonar.exclusions=**/test/**,.github/**/*,*.md
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.project.monorepo.enabled=true
-            -Dsonar.projectKey=${{ matrix.projectKey }}
-            -Dsonar.tests=test
-
-  # # Uncomment to view GitHub context object
-  # # https://docs.github.com/en/actions/learn-github-actions/contexts
-  # view-context:
-  #   name: View GitHub Context
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - name: Echo GitHub context
-  #       uses: satackey/action-js-inline@v0.0.2
-  #       with:
-  #         script: |
-  #           const github = require('@actions/github');
-  #           console.log(JSON.stringify(github, null, 2));
+      template_vars:
+        -p PROMOTE=${{ github.repository }}/${{ matrix.component }}:${{ github.event.number }}
+        -p ZONE=${{ github.event.number }} ${{ matrix.template_vars }}
