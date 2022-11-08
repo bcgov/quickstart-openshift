@@ -20,7 +20,7 @@ parameters:
     description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
     required: true
-    value: 1Gi
+    value: 256Mi
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io

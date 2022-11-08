@@ -57,7 +57,7 @@ parameters:
     value: "0"
   - description: Volume space available for data, e.g. 512Mi, 2Gi.
     name: PVC_SIZE
-    value: 1Gi
+    value: 256Mi
   - name: CRON_MINUTES
     description: Random number, 0-60, for scheduling cronjobs
     from: "[0-5]{1}[0-9]{1}"
