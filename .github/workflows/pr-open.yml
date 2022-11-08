@@ -65,22 +65,20 @@ jobs:
       matrix:
         component: [backend, database, init, frontend]
         include:
-          - component: database
-            overwrite: false
-            template_file: database/openshift.deploy.yml
-            template_vars: ""
           - component: backend
             overwrite: true
             template_file: backend/openshift.deploy.yml
             template_vars: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-          - component: init
+          - component: database
             overwrite: false
-            template_file: common/openshift.init.yml
-            template_vars: ""
+            template_file: database/openshift.deploy.yml
           - component: frontend
             overwrite: true
             template_file: frontend/openshift.deploy.yml
             template_vars: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+          - component: init
+            overwrite: false
+            template_file: common/openshift.init.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_server: ${{ secrets.OC_SERVER }}
@@ -91,5 +89,6 @@ jobs:
       penetration_test: false
       template_file: ${{ matrix.template_file }}
       template_vars:
+        -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
         -p PROMOTE=${{ github.repository }}/${{ matrix.component }}:${{ github.event.number }}
-        -p ZONE=${{ github.event.number }} ${{ matrix.template_vars }}
+        ${{ matrix.template_vars }}

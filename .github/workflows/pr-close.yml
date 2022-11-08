@@ -4,9 +4,6 @@ on:
   pull_request:
     types:
       - closed
-    paths-ignore:
-      - ".github/**"
-      - "**.md"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
