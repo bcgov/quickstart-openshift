@@ -106,7 +106,6 @@ objects:
                     - bash
                     - -c
                     - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
-
                 failureThreshold: 5
                 initialDelaySeconds: 30
                 periodSeconds: 15
