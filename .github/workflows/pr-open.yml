@@ -43,6 +43,21 @@ jobs:
         with:
           exclude-file: docker-compose.yml
 
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy-repo:
+    name: Security Scan
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@0.8.0
+        with:
+          scan-type: fs
+          # format: "github"
+          # ignore-unfixed: true
+          # severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+
   builds:
     name: Builds
     uses: bcgov/nr-quickstart-helpers/.github/workflows/_build.yml@v0.0.2
