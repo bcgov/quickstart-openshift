@@ -1,0 +1,42 @@
+name: Unit Tests and Analysis
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - ".github/**"
+      - "**.md"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Unit Tests
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_unit-tests.yml@main
+    strategy:
+      matrix:
+        dir: [backend, frontend]
+        include:
+          - dir: backend
+            sonar_projectKey: bcgov_nr-quickstart-typescript_backend
+            token: SONAR_TOKEN_BACKEND
+          - dir: frontend
+            sonar_projectKey: bcgov_nr-quickstart-typescript_frontend
+            token: SONAR_TOKEN_FRONTEND
+    secrets:
+      sonar_token: ${{ secrets[matrix.token] }}
+    with:
+      dir: ${{ matrix.dir }}
+      sonar_args: |
+        -Dsonar.exclusions=**/coverage/**
+        -Dsonar.organization=bcgov-sonarcloud
+        -Dsonar.project.monorepo.enabled=true
+        -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
+      test_cmd: |
+        npm ci
+        npm run test:cov
