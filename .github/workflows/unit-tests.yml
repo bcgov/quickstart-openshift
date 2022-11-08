@@ -1,13 +1,13 @@
 name: Unit Tests and Analysis
 
 on:
-  pull_request:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - ".github/**"
-      - "**.md"
+  # pull_request:
+  # push:
+  #   branches:
+  #     - main
+  #   paths-ignore:
+  #     - ".github/**"
+  #     - "**.md"
   workflow_dispatch:
 
 concurrency:
