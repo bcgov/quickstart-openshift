@@ -2,11 +2,6 @@
 ---
 kind: "Template"
 apiVersion: template.openshift.io/v1
-metadata:
-  name: "${NAME}-${ZONE}-${COMPONENT}-cronjob-template"
-  annotations:
-    description: "Scheduled Task to perform a Database Backup"
-    tags: "cronjob,backup"
 parameters:
   - name: NAME
     description: Module name
@@ -17,28 +12,9 @@ parameters:
   - name: COMPONENT
     description: Component name
     value: database-backup
-  - name: "IMAGE_REGISTRY"
-    description: "The base OpenShift docker registry"
-    value: "image-registry.openshift-image-registry.svc:5000"
-  - name: "IMAGE_NAMESPACE"
-    description: "The namespace of the OpenShift project containing the imagestream for the application."
-    required: true
   - name: "DATABASE_DEFAULT_PORT"
     description: "The configured port for the database service"
     value: "5432"
-  - name: "DATABASE_NAME"
-    description: "The name of the database."
-    value: fom
-  - name: DATABASE_USER_KEY_NAME
-    description:
-      The database user key name stored in database deployment resources specified
-      by DATABASE_SECRET_NAME.
-    value: database-user
-  - name: DATABASE_PASSWORD_KEY_NAME
-    description:
-      The database password key name stored in database deployment resources
-      specified by DATABASE_SECRET_NAME.
-    value: database-password
   - name: "BACKUP_STRATEGY"
     description: "The strategy to use for backups; for example daily, or rolling."
     required: true
@@ -89,43 +65,6 @@ parameters:
   - name: PROMOTE
     description: Dummy param, for convenience in deployments
 objects:
-  - kind: ImageStream
-    apiVersion: v1
-    metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
-  - kind: BuildConfig
-    apiVersion: v1
-    metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
-    spec:
-      metadata:
-        labels:
-          app: ${NAME}-${ZONE}
-      triggers:
-        - type: ImageChange
-        - type: ConfigChange
-      runPolicy: Serial
-      source:
-        type: Git
-        git:
-          uri: https://github.com/BCDevOps/backup-container.git
-          ref: master
-        contextDir: /docker
-      strategy:
-        type: Docker
-        dockerStrategy:
-          from:
-            kind: DockerImage
-            name: docker.io/centos/postgresql-13-centos7:20210722-70dc4d3
-          dockerfilePath: Dockerfile
-      output:
-        to:
-          kind: ImageStreamTag
-          name: ${NAME}-${ZONE}-${COMPONENT}:latest
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
@@ -139,22 +78,6 @@ objects:
         requests:
           storage: "${PVC_SIZE}"
       storageClassName: netapp-file-standard
-  - kind: ConfigMap
-    apiVersion: v1
-    metadata:
-      name: ${NAME}-${ZONE}-config
-      labels:
-        app: ${NAME}-${ZONE}
-        cronjob: ${NAME}-${ZONE}
-    data:
-      DATABASE_SERVICE_NAME: "${NAME}-${ZONE}-database"
-      DEFAULT_PORT: "${DATABASE_DEFAULT_PORT}"
-      POSTGRESQL_DATABASE: "${DATABASE_NAME}"
-      BACKUP_STRATEGY: "${BACKUP_STRATEGY}"
-      RETENTION.NUM_BACKUPS: "${NUM_BACKUPS}"
-      RETENTION.DAILY_BACKUPS: "${DAILY_BACKUPS}"
-      RETENTION.WEEKLY_BACKUPS: "${WEEKLY_BACKUPS}"
-      RETENTION.MONTHLY_BACKUPS: "${MONTHLY_BACKUPS}"
   - kind: CronJob
     apiVersion: "batch/v1"
     metadata:
@@ -182,7 +105,7 @@ objects:
             spec:
               containers:
                 - name: ${NAME}-${ZONE}
-                  image: "${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/${NAME}-${ZONE}-${COMPONENT}:latest"
+                  image: "bcgovimages/backup-container:latest"
                   command:
                     - "/bin/bash"
                     - "-c"
@@ -194,60 +117,39 @@ objects:
                     - name: BACKUP_DIR
                       value: "${BACKUP_DIR}"
                     - name: BACKUP_STRATEGY
-                      valueFrom:
-                        configMapKeyRef:
-                          name: "${NAME}-${ZONE}-config"
-                          key: BACKUP_STRATEGY
+                      value: "${BACKUP_STRATEGY}"
+                      optional: true
                     - name: NUM_BACKUPS
-                      valueFrom:
-                        configMapKeyRef:
-                          name: "${NAME}-${ZONE}-config"
-                          key: RETENTION.NUM_BACKUPS
-                          optional: true
+                      value: "${NUM_BACKUPS}"
+                      optional: true
                     - name: DAILY_BACKUPS
-                      valueFrom:
-                        configMapKeyRef:
-                          name: "${NAME}-${ZONE}-config"
-                          key: RETENTION.DAILY_BACKUPS
-                          optional: true
+                      value: "${DAILY_BACKUPS}"
+                      optional: true
                     - name: WEEKLY_BACKUPS
-                      valueFrom:
-                        configMapKeyRef:
-                          name: "${NAME}-${ZONE}-config"
-                          key: RETENTION.WEEKLY_BACKUPS
-                          optional: true
+                      value: "${WEEKLY_BACKUPS}"
+                      optional: true
                     - name: MONTHLY_BACKUPS
-                      valueFrom:
-                        configMapKeyRef:
-                          name: "${NAME}-${ZONE}-config"
-                          key: RETENTION.MONTHLY_BACKUPS
-                          optional: true
+                      value: "${MONTHLY_BACKUPS}"
+                      optional: true
                     - name: DATABASE_SERVICE_NAME
-                      valueFrom:
-                        configMapKeyRef:
-                          name: "${NAME}-${ZONE}-config"
-                          key: DATABASE_SERVICE_NAME
+                      value: "${NAME}-${ZONE}-database"
                     - name: DEFAULT_PORT
-                      valueFrom:
-                        configMapKeyRef:
-                          name: "${NAME}-${ZONE}-config"
-                          key: DEFAULT_PORT
-                          optional: true
+                      value: ${DATABASE_DEFAULT_PORT}
                     - name: POSTGRESQL_DATABASE
                       valueFrom:
-                        configMapKeyRef:
-                          name: "${NAME}-${ZONE}-config"
-                          key: POSTGRESQL_DATABASE
+                        secretKeyRef:
+                          name: "${NAME}-${ZONE}-database"
+                          key: "database-name"
                     - name: DATABASE_USER
                       valueFrom:
                         secretKeyRef:
                           name: ${NAME}-${ZONE}-database
-                          key: "${DATABASE_USER_KEY_NAME}"
+                          key: "database-user"
                     - name: DATABASE_PASSWORD
                       valueFrom:
                         secretKeyRef:
                           name: ${NAME}-${ZONE}-database
-                          key: "${DATABASE_PASSWORD_KEY_NAME}"
+                          key: "database-password"
               volumes:
                 - name: backup
                   persistentVolumeClaim:

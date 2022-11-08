@@ -75,7 +75,6 @@ jobs:
           - component: database-backup
             overwrite: true
             template_file: database/openshift.backups.yml
-            template_vars: -p IMAGE_NAMESPACE=$( oc project -q )
           - component: frontend
             overwrite: true
             template_file: frontend/openshift.deploy.yml
