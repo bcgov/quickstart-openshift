@@ -5,6 +5,7 @@
 [![Unit Tests and Analysis](https://github.com/bcgov/nr-quickstart-typescript/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/bcgov/nr-quickstart-typescript/actions/workflows/unit-tests.yml)
 
 [![Issues](https://img.shields.io/github/issues/bcgov/nr-quickstart-typescript)](/../../issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/bcgov/nr-quickstart-typescript)](/../../pulls)
 [![MIT License](https://img.shields.io/github/license/bcgov/nr-quickstart-typescript.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
