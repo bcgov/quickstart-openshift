@@ -37,10 +37,33 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
 
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy:
+    name: Security Scan
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@0.8.0
+        with:
+          format: "sarif"
+          output: "trivy-results.sarif"
+          ignore-unfixed: true
+          scan-type: "fs"
+          security-checks: "vuln,secret,config"
+          severity: "CRITICAL,HIGH"
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "trivy-results.sarif"
+
   deploys-test:
     name: TEST Deployments
     needs:
       - codeql
+      - trivy
     uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@main
     strategy:
       matrix:
@@ -81,34 +104,10 @@ jobs:
       template_file: ${{ matrix.template_file }}
       template_vars: ${{ matrix.template_vars }}
 
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy-repo:
-    name: Repository Report
-    needs:
-      - deploys-test
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@0.8.0
-        with:
-          format: "sarif"
-          output: "trivy-results.sarif"
-          ignore-unfixed: true
-          scan-type: "fs"
-          security-checks: "vuln,secret,config"
-          severity: "CRITICAL,HIGH"
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: "trivy-results.sarif"
-
   deploys-prod:
     name: PROD Deployments
     needs:
-      - trivy-repo
+      - deploys-test
     uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@main
     strategy:
       matrix:

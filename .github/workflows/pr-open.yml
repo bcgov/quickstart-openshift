@@ -8,110 +8,97 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # pr-greeting:
-  #   name: PR Greeting
-  #   env:
-  #     DOMAIN: apps.silver.devops.gov.bc.ca
-  #     PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
-  #   runs-on: ubuntu-22.04
-  #   permissions:
-  #     pull-requests: write
-  #   steps:
-  #     - name: PR Greeting
-  #       uses: DerekRoberts/action-pr-description-add@v0.0.2
-  #       with:
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
-  #         add_markdown: |
-  #           ---
+  pr-greeting:
+    name: PR Greeting
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+    runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: write
+    steps:
+      - name: PR Greeting
+        uses: DerekRoberts/action-pr-description-add@v0.0.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          add_markdown: |
+            ---
 
-  #           Thanks for the PR!
+            Thanks for the PR!
 
-  #           Any successful deployments (not always required) will be available below.
-  #           [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/) available
-  #           [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/) available
+            Any successful deployments (not always required) will be available below.
+            [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/) available
+            [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/) available
 
-  #           Once merged, code will be promoted and handed off to following workflow run.
-  #           [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+            Once merged, code will be promoted and handed off to following workflow run.
+            [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
-  # secret-search:
-  #   name: Secret Search
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: secret-search
-  #       uses: Hacks4Snacks/secret-search@v1.1
-  #       with:
-  #         exclude-file: docker-compose.yml
-
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy-repo:
-    name: Security Scan
+  secret-search:
+    name: Secret Search
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-
-      - name: Run Trivy vulnerability scanner in fs mode
-        uses: aquasecurity/trivy-action@master
+      - name: secret-search
+        uses: Hacks4Snacks/secret-search@v1.1
         with:
-          scan-type: "fs"
-          scan-ref: "."
+          exclude-file: docker-compose.yml
 
-  # builds:
-  #   name: Builds
-  #   uses: bcgov/nr-quickstart-helpers/.github/workflows/_build.yml@v0.0.2
-  #   permissions:
-  #     packages: write
-  #   strategy:
-  #     matrix:
-  #       component: [backend, database, frontend]
-  #       include:
-  #         - component: backend
-  #           triggers: ('backend/')
-  #         - component: database
-  #           triggers: ('database/')
-  #         - component: frontend
-  #           triggers: ('frontend/')
-  #   secrets:
-  #     gh_token: ${{ secrets.GITHUB_TOKEN }}
-  #   with:
-  #     component: ${{ matrix.component }}
-  #     img_build: ${{ github.event.number }}
-  #     img_fallback: test
-  #     triggers: ${{ matrix.triggers }}
+  builds:
+    name: Builds
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_build.yml@v0.0.2
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        component: [backend, database, frontend]
+        include:
+          - component: backend
+            triggers: ('backend/')
+          - component: database
+            triggers: ('database/')
+          - component: frontend
+            triggers: ('frontend/')
+    secrets:
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      component: ${{ matrix.component }}
+      img_build: ${{ github.event.number }}
+      img_fallback: test
+      triggers: ${{ matrix.triggers }}
 
-  # deploys:
-  #   name: Deploys
-  #   needs:
-  #     - builds
-  #   uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@main
-  #   strategy:
-  #     matrix:
-  #       component: [backend, database, init, frontend]
-  #       include:
-  #         - component: backend
-  #           overwrite: true
-  #           template_file: backend/openshift.deploy.yml
-  #           template_vars: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-  #         - component: database
-  #           overwrite: false
-  #           template_file: database/openshift.deploy.yml
-  #         - component: frontend
-  #           overwrite: true
-  #           template_file: frontend/openshift.deploy.yml
-  #           template_vars: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-  #         - component: init
-  #           overwrite: false
-  #           template_file: common/openshift.init.yml
-  #   secrets:
-  #     oc_namespace: ${{ secrets.OC_NAMESPACE }}
-  #     oc_server: ${{ secrets.OC_SERVER }}
-  #     oc_token: ${{ secrets.OC_TOKEN }}
-  #   with:
-  #     component: ${{ matrix.component }}
-  #     overwrite: ${{ matrix.overwrite }}
-  #     penetration_test: false
-  #     template_file: ${{ matrix.template_file }}
-  #     template_vars:
-  #       -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
-  #       -p PROMOTE=${{ github.repository }}/${{ matrix.component }}:${{ github.event.number }}
-  #       ${{ matrix.template_vars }}
+  deploys:
+    name: Deploys
+    needs:
+      - builds
+    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@main
+    strategy:
+      matrix:
+        component: [backend, database, init, frontend]
+        include:
+          - component: backend
+            overwrite: true
+            template_file: backend/openshift.deploy.yml
+            template_vars: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+          - component: database
+            overwrite: false
+            template_file: database/openshift.deploy.yml
+          - component: frontend
+            overwrite: true
+            template_file: frontend/openshift.deploy.yml
+            template_vars: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+          - component: init
+            overwrite: false
+            template_file: common/openshift.init.yml
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_server: ${{ secrets.OC_SERVER }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+    with:
+      component: ${{ matrix.component }}
+      overwrite: ${{ matrix.overwrite }}
+      penetration_test: false
+      template_file: ${{ matrix.template_file }}
+      template_vars:
+        -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+        -p PROMOTE=${{ github.repository }}/${{ matrix.component }}:${{ github.event.number }}
+        ${{ matrix.template_vars }}
