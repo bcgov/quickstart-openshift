@@ -1,14 +1,12 @@
 <!-- PROJECT SHIELDS -->
 
-[![Contributors](https://img.shields.io/github/contributors/bcgov/nr-quickstart-typescript)](/../../graphs/contributors)
-[![Forks](https://img.shields.io/github/forks/bcgov/nr-quickstart-typescript)](/../../network/members)
-[![Stargazers](https://img.shields.io/github/stars/bcgov/nr-quickstart-typescript)](/../../stargazers)
-[![Issues](https://img.shields.io/github/issues/bcgov/nr-quickstart-typescript)](/../../issues)
-[![MIT License](https://img.shields.io/github/license/bcgov/nr-quickstart-typescript.svg)](/LICENSE.md)
-[![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-quickstart-typescript&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-quickstart-typescript)
 [![Merge to Main](https://github.com/bcgov/nr-quickstart-typescript/actions/workflows/merge-main.yml/badge.svg)](https://github.com/bcgov/nr-quickstart-typescript/actions/workflows/merge-main.yml)
 [![Unit Tests and Analysis](https://github.com/bcgov/nr-quickstart-typescript/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/bcgov/nr-quickstart-typescript/actions/workflows/unit-tests.yml)
+
+[![Issues](https://img.shields.io/github/issues/bcgov/nr-quickstart-typescript)](/../../issues)
+[![MIT License](https://img.shields.io/github/license/bcgov/nr-quickstart-typescript.svg)](/LICENSE.md)
+[![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
 # Natural Resources QuickStart
 
