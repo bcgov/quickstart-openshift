@@ -45,26 +45,25 @@ jobs:
 
   builds:
     name: Builds
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_build.yml@v0.0.2
-    permissions:
-      packages: write
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        component: [backend, database, frontend]
+        package: [backend, database, frontend]
         include:
-          - component: backend
+          - package: backend
             triggers: ('backend/')
-          - component: database
+          - package: database
             triggers: ('database/')
-          - component: frontend
+          - package: frontend
             triggers: ('frontend/')
-    secrets:
-      gh_token: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      component: ${{ matrix.component }}
-      img_build: ${{ github.event.number }}
-      img_fallback: test
-      triggers: ${{ matrix.triggers }}
+    steps:
+      - uses: bcgov-nr/action-conditional-container-builder@v0.0.1
+        with:
+          package: ${{ matrix.package }}
+          tag: ${{ github.event.number }}
+          tag_fallback: test
+          token: ${{ secrets.GITHUB_TOKEN }}
+          triggers: ${{ matrix.triggers }}
 
   deploys:
     name: Deploys
