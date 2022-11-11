@@ -46,6 +46,8 @@ jobs:
   builds:
     name: Builds
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     strategy:
       matrix:
         package: [backend, database, frontend]
