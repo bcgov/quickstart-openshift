@@ -30,11 +30,11 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        component: [backend, database, frontend]
+        package: [backend, database, frontend]
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
         with:
           registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.component }}
+          repository: ${{ github.repository }}/${{ matrix.package }}
           target: ${{ github.event.number }}
           tags: test

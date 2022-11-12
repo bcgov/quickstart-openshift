@@ -45,7 +45,7 @@ jobs:
 
   builds:
     name: Builds
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       packages: write
     strategy:
@@ -59,6 +59,7 @@ jobs:
           - package: frontend
             triggers: ('frontend/')
     steps:
+      - uses: actions/checkout@v3
       - uses: bcgov-nr/action-conditional-container-builder@v0.0.2
         with:
           package: ${{ matrix.package }}
@@ -71,35 +72,36 @@ jobs:
     name: Deploys
     needs:
       - builds
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_deploy.yml@main
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
-        component: [backend, database, init, frontend]
+        name: [backend, database, init, frontend]
         include:
-          - component: backend
+          - name: backend
+            file: backend/openshift.deploy.yml
             overwrite: true
-            template_file: backend/openshift.deploy.yml
-            template_vars: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-          - component: database
+            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+          - name: database
+            file: database/openshift.deploy.yml
             overwrite: false
-            template_file: database/openshift.deploy.yml
-          - component: frontend
+          - name: frontend
+            file: frontend/openshift.deploy.yml
             overwrite: true
-            template_file: frontend/openshift.deploy.yml
-            template_vars: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-          - component: init
+            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+          - name: init
+            file: common/openshift.init.yml
             overwrite: false
-            template_file: common/openshift.init.yml
-    secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_server: ${{ secrets.OC_SERVER }}
-      oc_token: ${{ secrets.OC_TOKEN }}
-    with:
-      component: ${{ matrix.component }}
-      overwrite: ${{ matrix.overwrite }}
-      penetration_test: false
-      template_file: ${{ matrix.template_file }}
-      template_vars:
-        -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
-        -p PROMOTE=${{ github.repository }}/${{ matrix.component }}:${{ github.event.number }}
-        ${{ matrix.template_vars }}
+    steps:
+      - uses: bcgov-nr/action-deployer-openshift@v0.0.1
+        with:
+          file: ${{ matrix.file }}
+          oc_namespace: ${{ secrets.OC_NAMESPACE }}
+          oc_server: ${{ secrets.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          name: ${{ matrix.name }}
+          overwrite: ${{ matrix.overwrite }}
+          penetration_test: false
+          parameters:
+            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
+            ${{ matrix.parameters }}
