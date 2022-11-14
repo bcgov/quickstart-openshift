@@ -128,7 +128,7 @@ jobs:
           parameters:
             -p ZONE=prod -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
             -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
-          penetration_test: true
+          penetration_test: false
 
   image-promotions:
     name: Promote images to PROD
