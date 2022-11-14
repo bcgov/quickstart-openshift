@@ -17,7 +17,7 @@ concurrency:
 jobs:
   tests:
     name: Unit Tests
-    uses: bcgov/nr-quickstart-helpers/.github/workflows/_unit-tests.yml@main
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         dir: [backend, frontend]
@@ -28,15 +28,16 @@ jobs:
           - dir: frontend
             sonar_projectKey: bcgov_nr-quickstart-typescript_frontend
             token: SONAR_TOKEN_FRONTEND
-    secrets:
-      sonar_token: ${{ secrets[matrix.token] }}
-    with:
-      dir: ${{ matrix.dir }}
-      sonar_args: |
-        -Dsonar.exclusions=**/coverage/**
-        -Dsonar.organization=bcgov-sonarcloud
-        -Dsonar.project.monorepo.enabled=true
-        -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
-      test_cmd: |
-        npm ci
-        npm run test:cov
+    steps:
+      - uses: bcgov-nr/action-test-and-analyse@v0.0.1
+        with:
+          commands: |
+            npm ci
+            npm run test:cov
+          dir: ${{ matrix.dir }}
+          sonar_args: >
+            -Dsonar.exclusions=**/coverage/**,**/node_modules/**
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.project.monorepo.enabled=true
+            -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
+          sonar_project_token: ${{ secrets[matrix.token] }}
