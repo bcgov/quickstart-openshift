@@ -1,6 +1,6 @@
 # RedHat UBI 8 with nodejs 14
 # https://catalog.redhat.com/software/container-stacks/detail/5ec53f50ef29fd35586d9a56
-FROM registry.access.redhat.com/ubi8/ubi:8 as builder
+FROM registry.access.redhat.com/ubi8/ubi:8.7 as builder
 RUN dnf module install -y nodejs:16
 
 # Install packages, build and keep only prod packages
@@ -10,7 +10,7 @@ RUN npm ci --only=prod && \
     npm run build
 
 # Deployment container
-FROM registry.access.redhat.com/ubi8/ubi-micro:8
+FROM registry.access.redhat.com/ubi8/ubi-micro:8.7
 
 # Set node to production 
 ENV NODE_ENV production
