@@ -60,7 +60,7 @@ jobs:
             triggers: ('frontend/')
     steps:
       - uses: actions/checkout@v3
-      - uses: bcgov-nr/action-conditional-container-builder@v0.0.2
+      - uses: bcgov-nr/action-builder-ghcr@v0.0.2
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
