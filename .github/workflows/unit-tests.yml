@@ -2,11 +2,15 @@ name: Unit Tests and Analysis
 
 on:
   pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
   push:
     branches:
       - main
     paths-ignore:
-      - ".github/**"
       - "**.md"
   workflow_dispatch:
 
@@ -17,6 +21,7 @@ concurrency:
 jobs:
   tests:
     name: Unit Tests
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     strategy:
       matrix:
