@@ -244,9 +244,18 @@ Don't forget to add your team members!
 4. Choose a role (read, triage, write, maintain, admin)
 5. Click Add
 
+
+# Natural Resources Kickstarter
+
+Members of the BC Government's Natural Resource minisistries are strongly recommended to follow the recommendations in their [Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md).  The linked document is generated from Confluence, so some links may be internal-only (sorry!).
+
+[Natural Resources Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md)
+
+
 # Feedback
 
 Please contribute your ideas!  [Issues] and [pull requests] are appreciated.
+
 
 # Acknowledgements
 
