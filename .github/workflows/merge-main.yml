@@ -41,7 +41,6 @@ jobs:
     name: TEST Deployments
     needs:
       - codeql
-      - trivy
     environment: test
     runs-on: ubuntu-22.04
     strategy:
