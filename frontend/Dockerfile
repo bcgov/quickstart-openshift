@@ -11,3 +11,4 @@ ARG DEPENDENCY=/app
 EXPOSE 2015
 COPY --from=build ${DEPENDENCY}/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build ${DEPENDENCY}/dist /srv
+USER 1001
