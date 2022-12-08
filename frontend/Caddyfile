@@ -3,7 +3,7 @@
         admin off
 }
 
-:2015
+:3000
 root * /srv
 respond /config 200 {
         body `{"APP_TITLE":{$VITE_APP_TITLE}}`
