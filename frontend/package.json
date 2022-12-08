@@ -9,6 +9,7 @@
     "test:cov": "vitest run --coverage --mode test",
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false"
   },
+  "name": "frontend",
   "dependencies": {
     "@quasar/extras": "^1.15.9",
     "axios": "^1.2.3",
@@ -50,7 +51,6 @@
     "vitest": "^0.26.1",
     "vue-tsc": "^1.0.19"
   },
-  "name": "frontend",
   "version": "0.0.0"
 >>>>>>> 555605d (Add vu3 starter template)
 }
