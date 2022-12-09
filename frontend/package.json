@@ -1,117 +1,48 @@
 {
-  "name": "nr-quickstart-typescript",
-  "version": "0.0.1",
-  "description": "BCGov devops quickstart template. For reference, testing and new projects.",
-  "main": "index.js",
+  "name": "frontend",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "prebuild": "rimraf dist",
-    "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "lint:staged": "./node_modules/.bin/lint-staged",
-    "make-badges": "istanbul-badges-readme --logo=jest --exitCode=1",
-    "make-badges:ci": "npm run make-badges -- --ci",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "dev": "vite --host",
+    "build": "run-p type-check build-only",
+    "preview": "vite preview",
+    "test:unit": "vitest --environment test jsdom --root src/",
+    "test:cov": "vitest run --coverage --mode test",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/bcgov/nr-quickstart-typescript.git"
-  },
-  "keywords": [
-    "openshift",
-    "pipeline",
-    "node",
-    "node",
-    "js",
-    "devops"
-  ],
-  "author": "Derek Roberts",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/bcgov/nr-quickstart-typescript/issues"
-  },
-  "homepage": "https://github.com/bcgov/nr-quickstart-typescript#readme",
   "dependencies": {
-    "@nestjs/cli": "^9.1.5",
-    "@nestjs/common": "^8.4.6",
-    "@nestjs/core": "^8.4.6",
-    "@nestjs/platform-express": "^8.4.7",
-    "@nestjs/schematics": "^9.0.3",
-    "@nestjs/testing": "^8.4.6",
-    "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.6.0"
+    "@quasar/extras": "^1.15.7",
+    "axios": "^1.2.1",
+    "pinia": "^2.0.27",
+    "quasar": "^2.10.2",
+    "vue": "^3.2.45",
+    "vue-router": "^4.1.6"
   },
   "devDependencies": {
-    "@types/express": "^4.17.14",
-    "@types/jest": "^27.0.2",
-    "@types/node": "^18.11.11",
-    "@types/supertest": "^2.0.12",
-    "@typescript-eslint/eslint-plugin": "^5.46.0",
-    "@typescript-eslint/parser": "^5.46.0",
-    "eslint": "^8.29.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-promise": "^6.1.1",
-    "istanbul-badges-readme": "^1.8.4",
-    "jest": "^27.3.0",
-    "jest-badges": "^0.1.3",
-    "jest-sonar-reporter": "^2.0.0",
-    "lint-staged": "^13.1.0",
-    "prettier": "^2.8.1",
-    "rimraf": "^3.0.2",
-    "source-map-support": "^0.5.20",
-    "supertest": "^6.3.3",
-    "ts-jest": "^27.0.7",
-    "ts-loader": "^9.4.2",
-    "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.1.1",
-    "typescript": "^4.9.4"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "/test/"
-    ],
-    "coverageReporters": [
-      "text",
-      "lcov",
-      "cobertura",
-      "jest-badges"
-    ],
-    "testEnvironment": "node",
-    "testResultsProcessor": "jest-sonar-reporter"
-  },
-  "lint-staged": {
-    "*.{js,ts}": "./node_modules/.bin/eslint --cache --fix"
-  },
-  "overrides": {
-    "minimist@<1.2.6": "1.2.6"
+    "@quasar/vite-plugin": "^1.2.3",
+    "@rushstack/eslint-patch": "^1.1.4",
+    "@types/jsdom": "^20.0.1",
+    "@types/node": "^18.11.9",
+    "@vitejs/plugin-vue": "^3.2.0",
+    "@vitest/coverage-c8": "^0.25.6",
+    "@vue/eslint-config-prettier": "^7.0.0",
+    "@vue/eslint-config-typescript": "^11.0.0",
+    "@vue/test-utils": "^2.2.4",
+    "@vue/tsconfig": "^0.1.3",
+    "autoprefixer": "^10.4.13",
+    "eslint": "^8.22.0",
+    "eslint-plugin-vue": "^9.3.0",
+    "jsdom": "^20.0.3",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.4.19",
+    "prettier": "^2.7.1",
+    "sass": "^1.56.1",
+    "tailwindcss": "^3.2.4",
+    "typescript": "~4.9.4",
+    "vite": "^3.2.5",
+    "vitest": "^0.25.6",
+    "vue-tsc": "^1.0.11"
   }
 }
