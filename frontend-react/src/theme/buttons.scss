@@ -1,0 +1,37 @@
+@use './colors.scss' as colors;
+
+$button-token-overrides: (
+  button-primary: colors.$blue-60,
+  button-primary-hover: colors.$blue-65,
+  button-primary-active: colors.$blue-80,
+  button-secondary: colors.$gray-80,
+  button-secondary-hover: colors.$gray-75,
+  button-secondary-active: colors.$gray-70,
+  button-tertiary: colors.$blue-70,
+  button-tertiary-hover: colors.$blue-75,
+  button-tertiary-active: colors.$blue-80,
+  button-danger-primary: colors.$red-60,
+  button-danger-secondary: colors.$red-70,
+  button-danger-hover: colors.$red-70,
+  button-danger-active: colors.$red-80,
+  button-separator: colors.$gray-20,
+  button-disabled: colors.$gray-30,
+
+  // These are the values for the dark theme, the implementation of the change of
+  // themes will come in the future, the tokens are going to stay here for future references
+  // button-primary: colors.$blue-60,
+  // button-primary-hover: colors.$blue-65,
+  // button-primary-active: colors.$blue-80,
+  // button-secondary: colors.$gray-60,
+  // button-secondary-hover: colors.$gray-65,
+  // button-secondary-active: colors.$gray-80,
+  // button-tertiary: colors.$white,
+  // button-tertiary-hover: colors.$gray-10,
+  // button-tertiary-active: colors.$gray-30,
+  // button-danger-primary: colors.$red-60,
+  // button-danger-secondary: colors.$red-40,
+  // button-danger-hover: colors.$red-70,
+  // button-danger-active: colors.$red-80,
+  // button-separator: colors.$gray-100,
+  // button-disabled: colors.$gray-70,
+);
