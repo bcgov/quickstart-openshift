@@ -1,0 +1,141 @@
+@use './colors.scss' as colors;
+
+// Buttons, tags and notifications tokens doesn't work correctly
+// when set on the theme, so we set them directly on the components tokens
+$light-theme: (
+  /////////////////////////////
+  // Background Tokens
+  /////////////////////////////
+  background: colors.$white,
+  background-active: rgba(colors.$gray-50, 0.5),
+  background-hover: rgba(colors.$gray-50, 0.12),
+  background-selected: rgba(colors.$gray-50, 0.20),
+  background-selected-hover: rgba(colors.$gray-50, 0.32),
+  background-brand: colors.$blue-60,
+  background-inverse: colors.$gray-90,
+  background-inverse-hover: colors.$gray-85,
+
+  /////////////////////////////
+  // Layer Tokens
+  /////////////////////////////
+  layer-01: colors.$gray-10,
+  layer-02: colors.$white,
+  layer-03: colors.$gray-10,
+  layer-hover-01: colors.$gray-15,
+  layer-hover-02: colors.$gray-15,
+  layer-hover-03: colors.$gray-15,
+  layer-active-01: colors.$gray-30,
+  layer-active-02: colors.$gray-30,
+  layer-active-03: colors.$gray-30,
+  layer-selected-01: colors.$gray-20,
+  layer-selected-02: colors.$gray-20,
+  layer-selected-03: colors.$gray-20,
+  layer-selected-hover-01: colors.$gray-25,
+  layer-selected-hover-02: colors.$gray-25,
+  layer-selected-hover-03: colors.$gray-25,
+  layer-selected-disabled: colors.$gray-50,
+
+  /////////////////////////////
+  // Layer Accent Tokens
+  /////////////////////////////
+  layer-accent-01: colors.$gray-20,
+  layer-accent-02: colors.$gray-20,
+  layer-accent-03: colors.$gray-20,
+  layer-accent-hover-01: colors.$gray-25,
+  layer-accent-hover-02: colors.$gray-25,
+  layer-accent-hover-03: colors.$gray-25,
+  layer-accent-active-01: colors.$gray-40,
+  layer-accent-active-02: colors.$gray-40,
+  layer-accent-active-03: colors.$gray-40,
+
+  /////////////////////////////
+  // Field Tokens
+  /////////////////////////////
+  field-01: colors.$gray-10,
+  field-02: colors.$white,
+  field-03: colors.$gray-10,
+  field-hover-01: colors.$gray-15,
+  field-hover-02: colors.$gray-15,
+  field-hover-03: colors.$gray-15,
+
+  /////////////////////////////
+  // Border Tokens
+  /////////////////////////////
+  border-subtle-00: colors.$gray-20,
+  border-subtle-01: colors.$gray-20,
+  border-subtle-02: colors.$gray-20,
+  border-subtle-03: colors.$gray-20,
+  border-subtle-selected-01: colors.$gray-30,
+  border-subtle-selected-02: colors.$gray-30,
+  border-subtle-selected-03: colors.$gray-30,
+  border-strong-01: colors.$gray-60,
+  border-strong-02: colors.$gray-60,
+  border-strong-03: colors.$gray-60,
+  border-inverse: colors.$gray-100,
+  border-interactive: colors.$blue-60,
+  border-disabled: colors.$gray-30,
+
+  /////////////////////////////
+  // Text Tokens
+  /////////////////////////////
+  text-primary: colors.$gray-100,
+  text-secondary: colors.$gray-70,
+  text-placeholder: colors.$gray-40,
+  text-on-color: colors.$white,
+  text-helper: colors.$gray-60,
+  text-error: colors.$red-70,
+  text-inverse: colors.$white,
+  text-disabled: rgba(colors.$gray-100, 0.25),
+  text-on-color-disabled: colors.$gray-50,
+
+  /////////////////////////////
+  // Link Tokens
+  /////////////////////////////
+  link-primary: colors.$blue-70,
+  link-primary-hover: colors.$blue-80,
+  link-secondary: colors.$blue-80,
+  link-inverse: colors.$blue-30,
+  link-visited: colors.$violet-50,
+
+  /////////////////////////////
+  // Icon Tokens
+  /////////////////////////////
+  icon-primary: colors.$gray-100,
+  icon-secondary: colors.$gray-70,
+  icon-on-color: colors.$white,
+  icon-inverse: colors.$white,
+  icon-on-color-disabled: colors.$gray-50,
+  icon-disabled: rgba(colors.$gray-100, 0.25),
+
+  /////////////////////////////
+  // Support Tokens
+  /////////////////////////////
+  support-error: colors.$red-60,
+  support-success: colors.$green-60,
+  support-warning: colors.$yellow-60,
+  support-info: colors.$blue-80,
+  support-error-inverse: colors.$red-40,
+  support-success-inverse: colors.$green-40,
+  support-warning-inverse: colors.$yellow-60,
+  support-info-inverse: colors.$blue-40,
+  support-caution-major: colors.$orange-50,
+  support-caution-minor: colors.$yellow-60,
+  support-undefined: colors.$violet-60,
+
+  /////////////////////////////
+  // Focus Tokens
+  /////////////////////////////
+  focus: colors.$blue-60,
+  focus-inset: colors.$white,
+  focus-inverse: colors.$white,
+
+  /////////////////////////////
+  // Misc Tokens
+  /////////////////////////////
+  interactive: colors.$blue-60,
+  highlight: colors.$blue-20,
+  overlay: rgba(colors.$gray-100, 0.50),
+  skeleton-background: colors.$gray-15,
+  skeleton-element: colors.$gray-30,
+  toggle-off: colors.$gray-50,
+);

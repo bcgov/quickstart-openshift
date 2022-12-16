@@ -1,0 +1,16 @@
+{
+	"confirm": {
+		"submit": "Submitted!",
+		"delete": "Deleted!"
+	},
+	"input": {
+		"empty": "Please enter a valid value",
+		"invalid": "Please, enter your first and last name!",
+		"charNumberFirst": "The first name must have at least 2 characters",
+		"charNumberLast": "The last name must have at least 2 characters"
+	},
+	"banner": {
+		"duplicate": "User already registered!",
+		"invalid": "Please, enter your first and last name!"
+	}
+}

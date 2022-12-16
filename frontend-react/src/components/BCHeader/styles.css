@@ -1,0 +1,13 @@
+.mainContainer {
+  margin-top: 50px;
+}
+
+.header-link {
+  margin-left: 15px;
+  color: #fff;
+}
+
+a.header-link:link {
+  text-decoration: none;
+  color: #fff;
+}

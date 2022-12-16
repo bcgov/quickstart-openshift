@@ -1,0 +1,53 @@
+@use 'sass:string';
+
+@font-face {
+  font-family: "BC Sans";
+  src: url('assets/font/BCSans-Regular.woff') format('woff'),
+       url('assets/font/BCSans-Regular.woff2') format('woff2');
+  font-style: normal;
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "BC Sans";
+  src: url('assets/font/BCSans-Italic.woff') format('woff'),
+       url('assets/font/BCSans-Italic.woff2') format('woff2');
+  font-style: italic;
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "BC Sans";
+  src: url('assets/font/BCSans-Bold.woff') format('woff'),
+       url('assets/font/BCSans-Bold.woff2') format('woff2');
+  font-style: normal;
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: "BC Sans";
+  src: url('assets/font/BCSans-BoldItalic.woff') format('woff'),
+       url('assets/font/BCSans-BoldItalic.woff2') format('woff2');
+  font-style: italic;
+  font-weight: bold;
+}
+
+$type-family: (
+  'mono':
+    string.unquote(
+      "'IBM Plex Mono', system-ui, -apple-system, BlinkMacSystemFont, '.SFNSText-Regular', monospace"
+    ),
+  'sans':
+    string.unquote(
+      "'BC Sans', 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, '.SFNSText-Regular', sans-serif"
+    ),
+);
+
+// Light and regular have the same value because we don't have a light value
+// for font-weight, so we use only the regular value whenever is intend to use
+// the ligth value
+$font-weights: (
+  'light': 400,
+  'regular': 400,
+  'bold': 700,
+);
