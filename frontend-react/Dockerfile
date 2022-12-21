@@ -1,13 +1,17 @@
 FROM node:16-bullseye
-LABEL maintainer="Paulo Gomes da Cruz Junior <paulo.cruz@encora.com>"
+LABEL maintainer="Ricardo Montania Prado de Campos <ricardo.campos@encora.com>"
 
-RUN yarn global add serve@14.1.2 react-inject-env@2.1.0
+RUN yarn global add serve@14.1.2
 
 WORKDIR /app
+RUN groupadd -g 10001 app && \
+   useradd -u 10000 -g app app \
+   && chown -R app:app /app
+
+USER app:app
+
 COPY build/ .
 
 EXPOSE 3000
 
-RUN chmod -R g+w .
-
-CMD react-inject-env set -d . && serve -s .
+CMD serve -s .
