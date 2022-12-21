@@ -10,8 +10,6 @@ import {
 } from '@carbon/react';
 import { TrashCan } from '@carbon/icons-react';
 
-import { hashObject } from 'react-hash-string';
-
 import LoadingButton from '../LoadingButton';
 import SampleUser from '../../types/SampleUser';
 import { useAuth } from '../../contexts/AuthContext';
@@ -33,9 +31,14 @@ const UserTable = ({ elements, deleteFn, headers }: TableProps) => {
 
   const hasWriteRole = (): boolean => {
     if ('roles' in user) {
+      // 'user_write' is the name of the required rule
       return user.roles.includes('user_write');
     }
     return false;
+  };
+
+  const hashObject = (str: string): number => {
+    return str.split('').reduce((s, c) => Math.imul(31, s) + c.charCodeAt(0) | 0, 0);
   };
 
   return (
@@ -51,7 +54,7 @@ const UserTable = ({ elements, deleteFn, headers }: TableProps) => {
       </TableHead>
       <TableBody>
         {elements.map((item, idx) => (
-          <TableRow key={hashObject(item)} id={`row${idx}`}>
+          <TableRow key={hashObject(JSON.stringify(item))} id={`row${idx}`}>
             <TableCell>{idx}</TableCell>
             <TableCell>{item.firstName}</TableCell>
             <TableCell>{item.lastName}</TableCell>

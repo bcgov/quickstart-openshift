@@ -35,13 +35,26 @@ const BCHeader = () => {
           >
             Logout
           </Button>
-          <HeaderGlobalAction aria-label="Search" data-testid="header-button__search">
-            <Search size={20} />
+          <HeaderGlobalAction
+            aria-label="Search"
+            tooltipAlignment="end"
+            data-testid="header-button__search"
+          >
+            <Search size={20}
+          />
           </HeaderGlobalAction>
-          <HeaderGlobalAction aria-label="Notifications" data-testid="header-button__notifications">
+          <HeaderGlobalAction
+            aria-label="Notifications"
+            tooltipAlignment="end"
+            data-testid="header-button__notifications"
+          >
             <Notification size={20} />
           </HeaderGlobalAction>
-          <HeaderGlobalAction aria-label="App Switcher" tooltipAlignment="end" data-testid="header-button__switcher">
+          <HeaderGlobalAction
+            aria-label="App Switcher"
+            tooltipAlignment="end"
+            data-testid="header-button__switcher"
+          >
             <Switcher size={20} />
           </HeaderGlobalAction>
         </HeaderGlobalBar>

@@ -56,7 +56,7 @@ const Landing = () => {
           <Row>
             <Column sm={4}>
               <Stack gap={3}>
-                <h1 data-testid="home-title">NR Sample App</h1>
+                <h1 data-testid="home-title">NR React Sample App</h1>
                 <p data-testid="home-desc">
                   Landing page
                 </p>

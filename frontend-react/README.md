@@ -44,6 +44,6 @@ yarn lint
 
 ### Pending
 
-- [ ] Replace Jest with Vitest
-- [ ] Fix Dockerfile to build with Vite
+- [x] Replace Jest with Vitest
+- [x] Fix Dockerfile to build with Vite
 - [ ] Ensure Cypress is working
