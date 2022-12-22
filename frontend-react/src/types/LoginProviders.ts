@@ -1,14 +1,21 @@
 /*
  * IDIR: idir
- * BCeID Basic: bceid-basic
- * BCeID Business: bceid-business
- * BCeID Basic or Business: bceid-basic-and-business
- * GitHub: github
- * From https://github.com/bcgov/sso-keycloak/wiki/Recommend-Skipping-the-Keycloak-Login-Page-and-if-you-ABSOLUTELY-need-it
+ * Azure IDIR: azureidir
+ * Basic BCeID: bceidbasic
+ * Business BCeID: bceidbusiness
+ * Basic or Business BCeID: bceidboth
+ * GitHub BC Gov: githubbcgov
+ * GitHub Public: githubpublic
+ * From https://github.com/bcgov/sso-keycloak/wiki/Using-Your-SSO-Client#do-skip-the-keycloak-login-page
  */
 enum LoginProviders {
   IDIR = 'idir',
-  BCEID_BUSINESS = 'bceid-business'
+  AZURE_IDIR = 'azureidir',
+  BASIC_BCEID = 'bceidbasic',
+  BUSINESS_BCEID = 'bceidbusiness',
+  BASIC_OR_BUSINESS_BCEID = 'bceidboth',
+  GITHUB_BCGOV = 'githubbcgov',
+  GITHUB_PUBLIC = 'githubpublic',
 }
 
 export default LoginProviders;

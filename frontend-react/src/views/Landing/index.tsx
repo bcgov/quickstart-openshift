@@ -32,10 +32,9 @@ const Landing = () => {
       return;
     }
 
-    const idpHint = provider === 'idir' ? 'idir' : 'bceid-business';
     const loginOptions: KeycloakLoginOptions = {
       redirectUri: `${window.location.origin}/home`,
-      idpHint
+      idpHint: provider
     };
 
     login(loginOptions);
@@ -74,7 +73,7 @@ const Landing = () => {
               </Button>
               &nbsp;
               <Button
-                onClick={() => { handleLogin(LoginProviders.BCEID_BUSINESS); }}
+                onClick={() => { handleLogin(LoginProviders.BUSINESS_BCEID); }}
                 size="lg"
                 data-testid="landing-button__bceid"
               >
