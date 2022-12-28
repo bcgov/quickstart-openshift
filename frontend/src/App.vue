@@ -3,9 +3,9 @@
     <Header />
     <!-- Main content -->
     <v-main>
-      <v-container fluid class="fill-height pa-0 ma-0" >
-            <!-- Render the component for the matching route -->
-            <router-view />
+      <v-container fluid class="fill-height pa-0 ma-0">
+        <!-- Render the component for the matching route -->
+        <router-view />
       </v-container>
     </v-main>
     <Footer />
@@ -25,8 +25,8 @@ export default defineComponent({
   data() {
     return {
       items: [],
-      drawer: false
+      drawer: false,
     };
-  }
+  },
 });
 </script>
