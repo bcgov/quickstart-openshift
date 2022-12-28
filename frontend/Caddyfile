@@ -44,4 +44,6 @@ log {
 }
 reverse_proxy /users* {$BACKEND_URL} {
 }
+reverse_proxy /users* {$BACKEND_URL} {
+}
 
