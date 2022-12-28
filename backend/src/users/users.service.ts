@@ -27,12 +27,12 @@ export class UsersService {
     return this.usersRepository.findOneOrFail(id);
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<Users> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<Users> {
     await this.usersRepository.update({ id }, updateUserDto);
     return this.findOne(id);
   }
 
-  async remove(id: number): Promise<{ deleted: boolean; message?: string }> {
+  async remove(id: string): Promise<{ deleted: boolean; message?: string }> {
     try {
       await this.usersRepository.delete(id);
       return { deleted: true };

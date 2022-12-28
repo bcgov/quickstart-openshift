@@ -133,6 +133,31 @@ objects:
                 initialDelaySeconds: 60
                 periodSeconds: 30
                 timeoutSeconds: 5
+          initContainers:
+            - name: "${APP_NAME}-migration"
+              image: "image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${APP_NAME}-migration:${TAG}"
+              env:
+                - name: FLYWAY_URL
+                  value: "jdbc:postgresql://${NAME}-${ZONE}-database:5432/${APP_NAME}"
+                - name: FLYWAY_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-user
+                - name: FLYWAY_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-password
+                - name: FLYWAY_BASELINE_ON_MIGRATE
+                  value: "true"
+              resources:
+                requests:
+                  cpu: ${CPU_REQUEST}
+                  memory: ${MEMORY_REQUEST}
+                limits:
+                  cpu: ${CPU_LIMIT}
+                  memory: ${MEMORY_LIMIT}
   - apiVersion: v1
     kind: Service
     metadata:

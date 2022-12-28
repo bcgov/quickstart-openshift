@@ -1,28 +1,29 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity()
+@Entity("USER")
 export class Users {
-  @ApiProperty({
-    example: "1",
-    description: "The ID of the user",
-  })
-  @PrimaryGeneratedColumn()
-  id: number;
+  @ApiProperty()
+  @PrimaryGeneratedColumn('uuid', { name: 'user_id' })
+  id: string;
 
-  @ApiProperty({ example: "Peter Green", description: "The name of the user" })
-  @Column()
-  name: string;
+  @Column({ name: 'first_name' })
+  firstName: string;
 
-  @ApiProperty({
-    example: "abc@gmail.com",
-    description: "The email of the user",
-  })
+  @Column({ name: 'last_name' })
+  lastName: string;
+
   @Column()
   email: string;
 
-  constructor(name?: string, email?: string) {
-    this.name = name || "";
-    this.email = email || "";
-  }
+  @Column({ name: 'company' })
+  company: string;
+
+  @Column({ name: 'hire_date', type: 'date' })
+  hire_date: Date;
+
+  @Column()
+  @ApiProperty()
+  salary: number;
+
 }

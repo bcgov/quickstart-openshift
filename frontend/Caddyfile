@@ -15,7 +15,7 @@ file_server
 @www_host {
         host www.{$HOST_ROUTE}
 }
-redir @www_host http://{$HOST_ROUTE}{path}
+redir @www_host https://{$HOST_ROUTE}{path}
 
 header {
         X-Frame-Options "SAMEORIGIN"
@@ -30,7 +30,8 @@ header {
 
 @unspecified_path {
         not path_regexp ^\/0.0.0.0
-        not path /api/*
+        not path /users/*
+        not path /users
 }
 handle @unspecified_path {
         try_files {path} {path}/ /?_url={uri}
@@ -43,5 +44,6 @@ encode {
 log {
         output stdout
 }
+reverse_proxy /users* {$BACKEND_URL} {
+}
 
-reverse_proxy /api/* {$HOST_ROUTE}

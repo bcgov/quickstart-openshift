@@ -10,21 +10,23 @@ describe("UserService", () => {
 
   const oneUserName = "Test Numone";
   const oneUserEamil = "numone@test.com";
-  const oneUser = new Users(oneUserName, oneUserEamil);
+  const oneUser = new Users();
   const updateUser = {
-    name: oneUserName,
+    firstName: oneUserName,
+    lastName: oneUserName,
     email: oneUserEamil,
   };
 
-  const twoUser = new Users("Test Numtwo", "numtwo@test.com");
+  const twoUser = new Users();
 
   const threeUserName = "Test Numthree";
   const threeUserEamil = "numthree@test.com";
   const newUser = {
-    name: threeUserName,
+    firstName: threeUserName,
+    lastName: threeUserName,
     email: threeUserEamil,
   };
-  const threeUser = new Users(threeUserName, threeUserEamil);
+  const threeUser = new Users();
 
   const userArray = [oneUser, twoUser];
 
@@ -85,26 +87,26 @@ describe("UserService", () => {
 
   describe("update", () => {
     it("should call the update method", async () => {
-      const user = await service.update(1, updateUser);
+      const user = await service.update('1', updateUser);
       expect(user).toEqual(oneUser);
       expect(repo.update).toBeCalledTimes(1);
-      expect(repo.update).toBeCalledWith({ id: 1 }, updateUser);
+      expect(repo.update).toBeCalledWith({ id: '1' }, updateUser);
     });
   });
 
   describe("remove", () => {
     it("should return {deleted: true}", () => {
-      expect(service.remove(2)).resolves.toEqual({ deleted: true });
+      expect(service.remove('2')).resolves.toEqual({ deleted: true });
     });
     it("should return {deleted: false, message: err.message}", () => {
       const repoSpy = jest
         .spyOn(repo, "delete")
         .mockRejectedValueOnce(new Error("Bad Delete Method."));
-      expect(service.remove(-1)).resolves.toEqual({
+      expect(service.remove('-1')).resolves.toEqual({
         deleted: false,
         message: "Bad Delete Method.",
       });
-      expect(repoSpy).toBeCalledWith(-1);
+      expect(repoSpy).toBeCalledWith('-1');
       expect(repoSpy).toBeCalledTimes(1);
     });
   });

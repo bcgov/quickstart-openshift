@@ -1,5 +1,5 @@
 ---
-version: "3.8"
+version: "3.9"
 
 services:
   database:
@@ -9,10 +9,37 @@ services:
       POSTGRES_PASSWORD: default
       POSTGRES_DB: default
     hostname: database
-    image: postgres:13
+    image: postgres:alpine
     restart: always
+    ports:
+      - "5432:5432"
     volumes:
       - /pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U default -d default'"]
+      interval: 5s
+      timeout: 5s
+      retries: 25
+
+  database-migrations:
+    image: flyway/flyway:latest-alpine
+    container_name: backend-migrations
+    command:
+      - info
+      - migrate
+      - info
+    volumes:
+      - "./backend/flyway/sql:/flyway/sql"
+    environment:
+      - FLYWAY_URL=jdbc:postgresql://database:5432/default
+      - FLYWAY_USER=default
+      - FLYWAY_PASSWORD=default
+      - FLYWAY_BASELINE_ON_MIGRATE=true
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - default
 
   backend:
     container_name: backend
@@ -28,12 +55,12 @@ services:
       POSTGRESQL_DATABASE: default
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      interval: 10s
+      timeout: 2s
+      retries: 20
+      start_period: 10s
     hostname: backend
-    image: node:14
+    image: node:18
     links:
       - database
     ports:
@@ -42,16 +69,20 @@ services:
       - ./backend:/app:z
       - /app/node_modules
     working_dir: "/app"
+    depends_on:
+      database :
+        condition: service_healthy
+    networks:
+      - default
 
-  frontend:
+  frontend: # run the prod build in local first using npm run build
+    build:
+      context: frontend
+    image: frontend:latest
     container_name: frontend
-    entrypoint:
-      - "sh"
-      - "-c"
-      - "npm i && npm run start"
     environment:
       NODE_ENV: development
-      BACKEND_URL: backend
+      BACKEND_URL: http://backend:3000
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 1m30s
@@ -59,12 +90,19 @@ services:
       retries: 3
       start_period: 40s
     hostname: frontend
-    image: node:14
+
     links:
       - backend
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app:z
-      - /app/node_modules
-    working_dir: "/app"
+      - ./frontend/Caddyfile:/etc/caddy/Caddyfile
+      - ./frontend/dist:/srv
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - default
+networks:
+  default:
+    driver: bridge

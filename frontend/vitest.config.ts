@@ -1,18 +1,20 @@
 import { defineConfig } from 'vitest/config'
 import vue from "@vitejs/plugin-vue";
-import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
-export default defineConfig({
-  plugins: [
-    vue({
-      template: { transformAssetUrls },
-    }),
-
-    quasar({
-      autoImportComponentCase: "pascal",
-      sassVariables: "src/quasar-variables.sass",
-    }),
-  ],
+import vuetify from "vite-plugin-vuetify";
+import viteConfig from './vite.config'
+import {mergeConfig} from "vite";
+export default mergeConfig(viteConfig, defineConfig({
   test: {
+    coverage: {provider:"istanbul",},
+    globals: true,
+    setupFiles: "vuetify.config.js",
+    deps:{
+      inline: ["vuetify"]
+    },
+
     environment: "jsdom",
   },
-})
+  optimizeDeps:{
+
+  }
+}));
