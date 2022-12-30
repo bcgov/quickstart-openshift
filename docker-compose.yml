@@ -22,7 +22,7 @@ services:
       retries: 25
 
   database-migrations:
-    image: flyway/flyway:latest-alpine
+    image: flyway/flyway:9.10-alpine
     container_name: backend-migrations
     command:
       - info
