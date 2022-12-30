@@ -1,4 +1,4 @@
-FROM flyway/flyway:latest-alpine
+FROM flyway/flyway:9.10-alpine
 COPY ./sql /flyway/sql
-USER 1000
+USER app
 CMD ["info","migrate","info"]
