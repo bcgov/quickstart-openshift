@@ -49,6 +49,8 @@ jobs:
             triggers: ('database/')
           - package: frontend
             triggers: ('frontend/')
+          - package: migrations
+            triggers: ('backend/flyway')
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.0.0
