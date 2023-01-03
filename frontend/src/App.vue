@@ -14,17 +14,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import {
-  VApp,
-  VCol,
-  VContainer,
-  VList,
-  VListItem,
-  VListItemTitle,
-  VNavigationDrawer,
-  VRow
-
-} from "vuetify/components";
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
 
@@ -41,4 +30,3 @@ export default defineComponent({
   }
 });
 </script>
-<style></style>
