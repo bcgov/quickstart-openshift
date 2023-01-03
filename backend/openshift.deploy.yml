@@ -10,6 +10,9 @@ parameters:
   - name: COMPONENT
     description: Component name
     value: backend
+  - name: COMPONENT_MIGRATION
+    description: Component name for migrations
+    value: migrations
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
@@ -35,6 +38,9 @@ parameters:
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
+  - name: ORG
+    description: GitHub organization for using ghcr.io
+    value: bcgov
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
     value: bcgov/nr-quickstart-typescript/backend:prod
@@ -134,11 +140,11 @@ objects:
                 periodSeconds: 30
                 timeoutSeconds: 5
           initContainers:
-            - name: "${APP_NAME}-migration"
-              image: "image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${APP_NAME}-migration:${TAG}"
+            - name: ${NAME}-${ZONE}-${COMPONENT_MIGRATION}
+              image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT_MIGRATION}:${ZONE}
               env:
                 - name: FLYWAY_URL
-                  value: "jdbc:postgresql://${NAME}-${ZONE}-database:5432/${APP_NAME}"
+                  value: "jdbc:postgresql://${NAME}-${ZONE}-database:5432/${NAME}"
                 - name: FLYWAY_USER
                   valueFrom:
                     secretKeyRef:
