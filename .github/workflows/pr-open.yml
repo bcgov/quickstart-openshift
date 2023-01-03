@@ -41,7 +41,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [backend, database, frontend]
+        package: [backend, database, frontend, migrations]
         include:
           - package: backend
             triggers: ('backend/')
@@ -50,7 +50,7 @@ jobs:
           - package: frontend
             triggers: ('frontend/')
           - package: migrations
-            triggers: ('backend/flyway')
+            triggers: ('migrations/')
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.0.0
