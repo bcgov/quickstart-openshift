@@ -5,7 +5,7 @@
     <v-table density="compact" fixed-header height="35em">
       <thead>
       <tr>
-        <th :key="headerItem.value" v-for="headerItem in headers" :class="headerItem.align">
+        <th :id="headerItem.value" :key="headerItem.value" v-for="headerItem in headers" :class="headerItem.align">
           {{ headerItem.text }}
         </th>
       </tr>
