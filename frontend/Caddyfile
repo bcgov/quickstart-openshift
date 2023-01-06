@@ -5,12 +5,8 @@
 
 :3000
 root * /srv
-respond /config 200 {
-        body `{"APP_TITLE":{$VITE_APP_TITLE}}`
-        close
-}
 
-file_server
+
 
 @www_host {
         host www.{$HOST_ROUTE}
@@ -43,6 +39,8 @@ encode {
 
 log {
         output stdout
+        format console
+        level DEBUG
 }
 reverse_proxy /users* {$BACKEND_URL} {
 }
