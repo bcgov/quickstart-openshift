@@ -33,16 +33,6 @@ jobs:
             Once merged, code will be promoted and handed off to following workflow run.
             [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
-  secret-search:
-    name: Secret Search
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: secret-search
-        uses: Hacks4Snacks/secret-search@v1.1
-        with:
-          exclude-file: docker-compose.yml
-
   builds:
     name: Builds
     runs-on: ubuntu-22.04
