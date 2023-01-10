@@ -1,0 +1,36 @@
+{
+        auto_https off
+        admin off
+}
+
+:3000
+root * /srv
+
+file_server
+
+@www_host {
+        host www.{$HOST_ROUTE}
+}
+redir @www_host http://{$HOST_ROUTE}{path}
+
+@unspecified_path {
+        not path_regexp ^\/0.0.0.0
+        not path /api/*
+}
+handle @unspecified_path {
+        try_files {path} {path}/ /?_url={uri}
+}
+handle /env-config.js {
+        header Content-Type text/javascript
+        respond `window.config = {"VITE_KC_URL": "{$VITE_KC_URL}", "VITE_KC_REALM": "{$VITE_KC_REALM}", "VITE_KC_CLIENT_ID": "{$VITE_KC_CLIENT_ID}"};`
+}
+
+encode {
+        gzip 7
+}
+
+log {
+        output stdout
+}
+
+reverse_proxy /api/* {$HOST_ROUTE}

@@ -1,17 +1,12 @@
-FROM node:16-bullseye
+FROM node:16-bullseye AS build
 LABEL maintainer="Ricardo Montania Prado de Campos <ricardo.campos@encora.com>"
-
-RUN yarn global add serve@14.1.2
-
 WORKDIR /app
-RUN groupadd -g 10001 app && \
-   useradd -u 10000 -g app app \
-   && chown -R app:app /app
-
-USER app:app
-
-COPY build/ .
-
+COPY . .
+RUN yarn install --frozen-lockfile
+RUN yarn build
+RUN ls /app
+FROM caddy:2.4.6-alpine AS deploy
 EXPOSE 3000
-
-CMD serve -s .
+COPY --from=build /app/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /app/build /srv
+USER 1001

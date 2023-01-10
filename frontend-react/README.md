@@ -13,7 +13,7 @@ See [Vite Configuration Reference](https://vitejs.dev/config/).
 ## Project Setup
 
 ```sh
-yarn install
+yarn install --frozen-lockfile
 ```
 
 ### Compile and Hot-Reload for Development
@@ -42,8 +42,18 @@ yarn lint
 
 > This project is configured with Airbnb Lint Style.
 
-### Pending
+### You can also try it with Docker
 
-- [x] Replace Jest with Vitest
-- [x] Fix Dockerfile to build with Vite
-- [ ] Ensure Cypress is working
+```sh
+docker build -t ghcr.io/bcgov/nr-quickstart-typescript/frontend-react:snapshot .
+```
+
+Then:
+
+```sh
+docker run -t -i -p 3000:3000 \
+  -e VITE_KC_URL=https://dev.loginproxy.gov.bc.ca/auth \
+  -e VITE_KC_REALM=standard \
+  -e VITE_KC_CLIENT_ID=seed-planning-test-4296 \
+  ghcr.io/bcgov/nr-quickstart-typescript/frontend-react:snapshot
+```

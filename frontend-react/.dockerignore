@@ -1,0 +1,4 @@
+build/
+cypress/
+node_modules/
+.env
