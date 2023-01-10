@@ -12,13 +12,23 @@ declare global {
   }
 }
 
-console.log(`window.config?.VITE_KC_URL=${window.config?.VITE_KC_URL}`);
-console.log(`window.config?.VITE_KC_REALM=${window.config?.VITE_KC_REALM}`);
-console.log(`window.config?.VITE_KC_CLIENT_ID=${window.config?.VITE_KC_CLIENT_ID}`);
+let url = window.config?.VITE_KC_URL || '';
+let realm = window.config?.VITE_KC_REALM || '';
+let clientId = window.config?.VITE_KC_CLIENT_ID || '';
 
-const url = window.config?.VITE_KC_URL || '';
-const realm = window.config?.VITE_KC_REALM || '';
-const clientId = window.config?.VITE_KC_CLIENT_ID || '';
+if (!url) {
+  url = import.meta.env.VITE_KC_URL;
+}
+if (!realm) {
+  realm = import.meta.env.VITE_KC_REALM;
+}
+if (!clientId) {
+  clientId = import.meta.env.VITE_KC_CLIENT_ID;
+}
+
+if (!url || !realm || !clientId) {
+  console.warn('One or more required environment variables are not set! (VITE_KC_URL, VITE_KC_REALM, VITE_KC_CLIENT_ID)');
+}
 
 const keycloak = new Keycloak({
   url,
