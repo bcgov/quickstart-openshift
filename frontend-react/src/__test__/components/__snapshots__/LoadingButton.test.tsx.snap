@@ -1,0 +1,19 @@
+// Vitest Snapshot v1
+
+exports[`the LoadingButton component > should match the snapshot 1`] = `
+<div>
+  <button
+    aria-describedby={null}
+    aria-pressed={null}
+    className="cds--btn cds--btn--md cds--btn--primary"
+    data-testid="button-test"
+    disabled={false}
+    id="button-test"
+    onClick={[Function]}
+    tabIndex={0}
+    type="button"
+  >
+    Submit
+  </button>
+</div>
+`;

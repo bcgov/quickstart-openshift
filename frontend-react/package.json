@@ -1,0 +1,93 @@
+{
+  "name": "nr-sample-frontend",
+  "version": "0.5.0",
+  "private": true,
+  "dependencies": {
+    "@carbon/icons-react": "^11.9.0",
+    "@carbon/react": "1.20.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.0.0",
+    "@testing-library/user-event": "^13.2.1",
+    "@types/carbon-components-react": "^7.55.2",
+    "@types/node": "^16.7.13",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@typescript-eslint/parser": "5.0.0",
+    "@vitejs/plugin-react": "3.0.1",
+    "eslint-config-airbnb-typescript": "^17.0.0",
+    "jsdom": "^20.0.3",
+    "keycloak-js": "^19.0.3",
+    "node-sass": "8.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.2.0",
+    "react-router-dom": "^6.3.0",
+    "react-test-renderer": "^18.2.0",
+    "sass": "^1.55.0",
+    "typescript": "*",
+    "vite": "^4.0.1",
+    "vitest": "^0.25.8",
+    "web-vitals": "^2.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bcgov/nr-frontend-starting-app.git"
+  },
+  "keywords": [
+    "fsa",
+    "nr",
+    "frontend",
+    "node",
+    "js",
+    "react"
+  ],
+  "author": "Encora Team",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/bcgov/nr-frontend-starting-app/issues"
+  },
+  "scripts": {
+    "build": "tsc && vite build",
+    "coverage": "vitest run --coverage",
+    "lint": "./node_modules/.bin/eslint",
+    "preview": "vite preview",
+    "start": "vite",
+    "test": "vitest"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@tsconfig/node16": "^1.0.3",
+    "@types/react-test-renderer": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "cypress": "12.3.0",
+    "eslint": "^8.24.0",
+    "eslint-config-airbnb": "19.0.4",
+    "eslint-config-standard-with-typescript": "^22.0.0",
+    "eslint-plugin-cypress": "^2.12.1",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-jsdoc": "^39.3.6",
+    "eslint-plugin-jsx-a11y": "6.6.0",
+    "eslint-plugin-n": "^15.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-react": "^7.31.8",
+    "eslint-plugin-react-hooks": "4.3.0",
+    "playwright-webkit": "^1.27.1"
+  }
+}

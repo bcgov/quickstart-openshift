@@ -1,0 +1,51 @@
+@use './theme/light-theme.scss' as light;
+@use './theme/colors.scss' as colors;
+@use './theme/type-family.scss' as types;
+
+@use './theme/components-overrides.scss';
+
+@use '@carbon/type/scss/_font-family.scss' with (
+  $font-families: types.$type-family,
+  $font-weights: types.$font-weights
+);
+
+// Set the correct light theme
+@use '@carbon/react/scss/themes';
+@use '@carbon/react/scss/theme' with (
+  $fallback: themes.$white,
+  $theme: light.$light-theme
+);
+@use '@carbon/themes/scss/utilities';
+
+// Buttons, tags and notifications components tokens doesn't work properly
+// when setting directly on the theme, so we override the tokens directly
+// on the components
+// (Open issue: https://github.com/carbon-design-system/carbon/issues/12376)
+@use '@carbon/react/scss/components/button/tokens' as button-tokens;
+@use './theme/buttons.scss' as button-overrides;
+
+@use '@carbon/react/scss/components/tag/tokens' as tag-tokens;
+@use './theme/tags.scss' as tag-overrides;
+
+@use '@carbon/react';
+@use '@carbon/grid';
+
+$button-tokens: utilities.merge(
+  button-tokens.$button-tokens,
+  button-overrides.$button-token-overrides
+);
+
+$tag-tokens: utilities.merge(
+  tag-tokens.$tag-tokens,
+  tag-overrides.$tag-token-overrides
+);
+
+@include theme.add-component-tokens($button-tokens);
+@include theme.add-component-tokens($tag-tokens);
+
+// Emit the flex-grid styles
+@include grid.flex-grid();
+
+:root {
+  @include theme.theme();
+}

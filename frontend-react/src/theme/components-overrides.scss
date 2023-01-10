@@ -1,0 +1,120 @@
+$bcgov-prefix: 'bcgov';
+
+@use '@carbon/styles/scss/config' with (
+  $prefix: $bcgov-prefix
+);
+
+@use '@carbon/styles/scss/components/button/vars' with (
+  $button-border-radius: 4px
+);
+
+.#{$bcgov-prefix}--data-table-header,
+.#{$bcgov-prefix}--date-picker__input,
+.#{$bcgov-prefix}--list-box__field,
+.#{$bcgov-prefix}--list-box,
+.#{$bcgov-prefix}--number input[type=number],
+.#{$bcgov-prefix}--pagination,
+.#{$bcgov-prefix}--search-input,
+.#{$bcgov-prefix}--select-input,
+.#{$bcgov-prefix}--text-input,
+.#{$bcgov-prefix}--text-area {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.#{$bcgov-prefix}--table-expand__button,
+.flatpickr-calendar,
+.numInputWrapper .numInput,
+.flatpickr-day,
+.flatpickr-prev-month,
+.flatpickr-next-month,
+.#{$bcgov-prefix}--list-box__menu,
+.#{$bcgov-prefix}--link,
+.#{$bcgov-prefix}--number__control-btn,
+.#{$bcgov-prefix}--pagination-nav__page,
+.#{$bcgov-prefix}--tab--overflow-nav-button,
+.#{$bcgov-prefix}--tile {
+  border-radius: 4px;
+}
+
+.#{$bcgov-prefix}--time-picker__input > .#{$bcgov-prefix}--text-input {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 0px;
+}
+
+.#{$bcgov-prefix}--time-picker__select > .#{$bcgov-prefix}--select-input {
+  border-radius: 0px;
+}
+
+.#{$bcgov-prefix}--time-picker :last-child > .#{$bcgov-prefix}--select-input {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 4px;
+}
+
+.#{$bcgov-prefix}--modal-container {
+  border-radius: 8px;
+}
+
+.#{$bcgov-prefix}--modal-close {
+  margin-right: 16px;
+  margin-top: 16px;
+  border-radius: 4px;
+}
+.#{$bcgov-prefix}--modal-footer {
+  height: auto;
+  margin: 0 16px 16px;
+}
+
+.#{$bcgov-prefix}--modal-footer .#{$bcgov-prefix}--btn {
+  max-width: none;
+  height: 48px;
+  padding-bottom: 16px;
+}
+
+.#{$bcgov-prefix}--modal-footer .#{$bcgov-prefix}--btn:not(.#{$bcgov-prefix}--btn--primary) {
+  margin-right: 4px;
+}
+
+
+.#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__item-count .#{$bcgov-prefix}--select-input__wrapper select.#{$bcgov-prefix}--select-input,
+.#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__page-number .#{$bcgov-prefix}--select-input__wrapper select.#{$bcgov-prefix}--select-input {
+  border-radius: 4px;
+  border: 0;
+}
+
+.#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__item-count .#{$bcgov-prefix}--select-input__wrapper,
+.#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__page-number .#{$bcgov-prefix}--select-input__wrapper {
+  margin: 4px;
+}
+
+.#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__item-count .#{$bcgov-prefix}--select-input--inline__wrapper {
+  border-right: 1px solid var(--#{$bcgov-prefix}-border-subtle);
+}
+
+.#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__page-number .#{$bcgov-prefix}--select-input--inline__wrapper {
+  border-left: 1px solid var(--#{$bcgov-prefix}-border-subtle);
+}
+
+.#{$bcgov-prefix}--pagination--sm,
+.#{$bcgov-prefix}--pagination--sm .#{$bcgov-prefix}--pagination__control-buttons .#{$bcgov-prefix}--popover-container {
+  height: 40px;
+}
+
+.#{$bcgov-prefix}--pagination--md,
+.#{$bcgov-prefix}--pagination--md .#{$bcgov-prefix}--pagination__control-buttons .#{$bcgov-prefix}--popover-container {
+  height: 48px;
+}
+
+.#{$bcgov-prefix}--pagination--lg,
+.#{$bcgov-prefix}--pagination--lg .#{$bcgov-prefix}--pagination__control-buttons .#{$bcgov-prefix}--popover-container {
+  height: 56px;
+}
+
+.#{$bcgov-prefix}--pagination__control-buttons .#{$bcgov-prefix}--popover-container {
+  border-left: 1px solid var(--#{$bcgov-prefix}-border-subtle);
+}
+
+.#{$bcgov-prefix}--pagination__control-buttons .#{$bcgov-prefix}--pagination__button {
+  margin: 4px;
+  border: 0;
+}

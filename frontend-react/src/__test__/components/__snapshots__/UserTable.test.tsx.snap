@@ -1,0 +1,87 @@
+// Vitest Snapshot v1
+
+exports[`the UserTable component > should match the snapshot 1`] = `
+<div
+  className="cds--data-table-content"
+>
+  <table
+    aria-describedby={null}
+    aria-labelledby={null}
+    className="cds--data-table cds--data-table--lg"
+  >
+    <thead>
+      <tr>
+        <th
+          data-testid="header-Column1-0"
+          id="header-Column1-0"
+          scope="col"
+        >
+          <div
+            className="cds--table-header-label"
+          >
+            Column1
+          </div>
+        </th>
+        <th
+          data-testid="header-Column2-1"
+          id="header-Column2-1"
+          scope="col"
+        >
+          <div
+            className="cds--table-header-label"
+          >
+            Column2
+          </div>
+        </th>
+        <th
+          data-testid="header-Column3-2"
+          id="header-Column3-2"
+          scope="col"
+        >
+          <div
+            className="cds--table-header-label"
+          >
+            Column3
+          </div>
+        </th>
+      </tr>
+    </thead>
+    <tbody
+      aria-live="polite"
+    >
+      <tr
+        id="row0"
+      >
+        <td>
+          0
+        </td>
+        <td>
+          User1FirstName
+        </td>
+        <td>
+          User1LastName
+        </td>
+        <td>
+          Some Text
+        </td>
+      </tr>
+      <tr
+        id="row1"
+      >
+        <td>
+          1
+        </td>
+        <td>
+          User2FirstName
+        </td>
+        <td>
+          User2LastName
+        </td>
+        <td>
+          Some Text
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
