@@ -60,7 +60,7 @@ jobs:
             file: common/openshift.init.yml
             overwrite: false
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v0.1.0
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.0
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -95,7 +95,7 @@ jobs:
             file: common/openshift.init.yml
             overwrite: false
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v0.1.0
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.0
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        component: [backend, frontend]
+        component: [backend, database, frontend]
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
         with:

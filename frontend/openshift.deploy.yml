@@ -37,7 +37,7 @@ parameters:
     value: ghcr.io
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
-    value: bcgov/nr-quickstart-typescript:prod-frontend
+    value: bcgov/nr-quickstart-typescript/frontend:prod
 objects:
   - apiVersion: v1
     kind: ImageStream
