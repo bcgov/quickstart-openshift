@@ -1,6 +1,6 @@
-import {fileURLToPath, URL} from "node:url";
+import { fileURLToPath, URL } from "node:url";
 
-import {defineConfig} from "vite";
+import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import vuetify from "vite-plugin-vuetify";
 
@@ -10,11 +10,11 @@ export default defineConfig({
   server: {
     port: 3001,
     proxy: {
-      '/users': {
-        target: 'http://localhost:3000',
+      "/users": {
+        target: "http://localhost:3000",
         changeOrigin: true,
       },
-    }
+    },
   },
   plugins: [
     vue(),
@@ -24,11 +24,11 @@ export default defineConfig({
       autoImport: true,
     }),
   ],
-  define: {"process.env": {}},
+  define: { "process.env": {} },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
-    extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx", ".vue",".css"],
+    extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx", ".vue", ".css"],
   },
 });

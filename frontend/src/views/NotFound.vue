@@ -8,13 +8,12 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: "NotFound"
+  name: "NotFound",
 });
 </script>
 
 <style scoped>
-.card-bg-color{
+.card-bg-color {
   background: rgb(231, 240, 246);
 }
 </style>
-
