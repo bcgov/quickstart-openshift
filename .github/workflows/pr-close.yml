@@ -6,6 +6,7 @@ on:
       - closed
 
 concurrency:
+  # PR open and close use the same group, allowing only one at a time
   group: pr-${{ github.ref }}
   cancel-in-progress: true
 
