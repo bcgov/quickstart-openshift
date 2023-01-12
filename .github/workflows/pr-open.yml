@@ -4,7 +4,8 @@ on:
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # PR open and close use the same group, allowing only one at a time
+  group: pr-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
