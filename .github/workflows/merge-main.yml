@@ -14,18 +14,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  wait:
-    name: Wait
+  codeql:
+    name: Semantic Code Analysis
     runs-on: ubuntu-22.04
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     steps:
-      - run: |
-          # Sleep 30 - let PR images promote
-          sleep 30
+      - uses: actions/checkout@v3
+
+      - name: Initialize
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+
+      # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
+      # If this step fails, then you should remove it and run the build manually (see below)
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
 
   deploys-test:
     name: TEST Deployments
     needs:
-      - wait
+      - codeql
     environment: test
     runs-on: ubuntu-22.04
     strategy:
