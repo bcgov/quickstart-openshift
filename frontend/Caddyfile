@@ -4,10 +4,6 @@
 }
 
 :3000
-@www_host {
-    host www.{$HOST_ROUTE}
-}
-redir @www_host https://{$HOST_ROUTE}{path}
 encode {
     gzip 7
 }
@@ -35,17 +31,4 @@ reverse_proxy /users* {$BACKEND_URL} {
 
 # Enable the reverse proxy
 reverse_proxy /user* {$BACKEND_URL} {
-    header_up Host {host}
-    header_up X-Real-IP {remote}
-    header_up X-Forwarded-For {remote}
-    header_up X-Forwarded-Port {server_port}
-    header_up X-Url-Scheme {scheme}
 }
-
-
-
-
-
-
-
-
