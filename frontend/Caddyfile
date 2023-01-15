@@ -4,6 +4,13 @@
 }
 
 :3000
+@www_host {
+    host www.{$HOST_ROUTE}
+}
+redir @www_host https://{$HOST_ROUTE}{path}
+encode {
+    gzip 7
+}
 log {
     output stdout
     format console
@@ -12,9 +19,6 @@ log {
 # Serve static files from the "srv" directory
 file_server {
     root /srv
-    # Enable gzip compression
-    encode gzip 7
-    header_up Cache-Control "no-cache"
 }
 header {
     X-Frame-Options "SAMEORIGIN"
@@ -30,9 +34,7 @@ reverse_proxy /users* {$BACKEND_URL} {
 }
 
 # Enable the reverse proxy
-reverse_proxy {
-    to {$BACKEND_URL}
-    path /users
+reverse_proxy /user* {$BACKEND_URL} {
     header_up Host {host}
     header_up X-Real-IP {remote}
     header_up X-Forwarded-Proto {scheme}
