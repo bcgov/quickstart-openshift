@@ -72,6 +72,8 @@ services:
     depends_on:
       database :
         condition: service_healthy
+      database-migrations:
+        condition: service_started
     networks:
       - default
 
