@@ -1,49 +1,50 @@
 {
-        auto_https off
-        admin off
+    auto_https off
+    admin off
 }
 
 :3000
-root * /srv
-
-
-
-@www_host {
-        host www.{$HOST_ROUTE}
-}
-redir @www_host https://{$HOST_ROUTE}{path}
-
-header {
-        X-Frame-Options "SAMEORIGIN"
-        X-XSS-Protection "1;mode=block"
-        Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
-        X-Content-Type-Options "nosniff"
-        Strict-Transport-Security "max-age=31536000"
-        Content-Security-Policy "default-src 'self' *.devops.gov.bc.ca https://nr-quickstart-typescript* https://spt.apps.gov.bc.ca data:; script-src 'self' 'unsafe-eval' https://www2.gov.bc.ca ;style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://use.fontawesome.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://fonts.googleapis.com http://www.w3.org https://spm.gov.bc.ca"
-        Referrer-Policy "same-origin"
-        Feature-Policy "fullscreen 'self'; camera 'none'; microphone 'none'"
-}
-
-@unspecified_path {
-        not path_regexp ^\/0.0.0.0
-        not path /users/*
-        not path /users
-}
-handle @unspecified_path {
-        try_files {path} {path}/ /?_url={uri}
-}
-
-encode {
-        gzip 7
-}
-
 log {
-        output stdout
-        format console
-        level DEBUG
+    output stdout
+    format console
+    level debug
+}
+# Serve static files from the "srv" directory
+file_server {
+    root /srv
+    # Enable gzip compression
+    encode gzip 7
+    header_up Cache-Control "no-cache"
+}
+header {
+    X-Frame-Options "SAMEORIGIN"
+    X-XSS-Protection "1;mode=block"
+    Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
+    X-Content-Type-Options "nosniff"
+    Strict-Transport-Security "max-age=31536000"
+    Content-Security-Policy "default-src 'self' *.devops.gov.bc.ca https://nr-quickstart-typescript* https://spt.apps.gov.bc.ca data:; script-src 'self' 'unsafe-eval' https://www2.gov.bc.ca ;style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://use.fontawesome.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://fonts.googleapis.com http://www.w3.org https://spm.gov.bc.ca"
+    Referrer-Policy "same-origin"
+    Feature-Policy "fullscreen 'self'; camera 'none'; microphone 'none'"
 }
 reverse_proxy /users* {$BACKEND_URL} {
 }
-reverse_proxy /users* {$BACKEND_URL} {
+
+# Enable the reverse proxy
+reverse_proxy {
+    to {$BACKEND_URL}
+    path /users
+    header_up Host {host}
+    header_up X-Real-IP {remote}
+    header_up X-Forwarded-Proto {scheme}
+    header_up X-Forwarded-For {remote}
+    header_up X-Forwarded-Port {server_port}
+    header_up X-Url-Scheme {scheme}
 }
+
+
+
+
+
+
+
 
