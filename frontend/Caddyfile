@@ -1,6 +1,7 @@
 {
     auto_https off
     admin off
+    debug
 }
 
 :3000
