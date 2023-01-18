@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.15.9",
-    "axios": "^1.2.2",
+    "axios": "^1.2.3",
     "pinia": "^2.0.29",
     "quasar": "^2.11.5",
     "vue": "^3.2.45",
