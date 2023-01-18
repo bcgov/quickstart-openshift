@@ -2,7 +2,7 @@
   "autodiscover": true,
   "autodiscoverFilter": "bcgov/nr-quickstart-typescript",
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
-  "onboarding": true,
+  "onboarding": false,
   "packageRules": [
     {
       "dependencyDashboardApproval": false,
