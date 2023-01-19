@@ -1,0 +1,26 @@
+name: Renovate
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - ".github/ISSUE_TEMPLATE/*"
+      - "**.md"
+  schedule:
+    # Quotes required for "*" (#42, asterisk), special semantics in YAML
+    - cron: "0 11 * * *" # 3 AM PST = 11 AM UDT
+  workflow_dispatch:
+
+jobs:
+  renovate:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Self-hosted Renovate
+        uses: renovatebot/github-action@v34.82.0
+        with:
+          configurationFile: renovate.json
+          token: ${{ secrets.RENOVATE_TOKEN }}

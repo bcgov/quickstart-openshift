@@ -1,0 +1,23 @@
+{
+  "autodiscover": true,
+  "autodiscoverFilter": "bcgov/nr-quickstart-typescript",
+  "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+  "onboarding": false,
+  "packageRules": [
+    {
+      "dependencyDashboardApproval": false,
+      "description": "lockFileMaintenance",
+      "matchUpdateTypes": [
+        "pin",
+        "digest",
+        "patch",
+        "minor",
+        "major",
+        "lockFileMaintenance"
+      ],
+      "stabilityDays": 0
+    }
+  ],
+  "platform": "github",
+  "username": "renovate-release"
+}
