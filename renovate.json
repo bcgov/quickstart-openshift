@@ -5,17 +5,34 @@
   "onboarding": false,
   "packageRules": [
     {
-      "dependencyDashboardApproval": false,
-      "description": "lockFileMaintenance",
+      "matchManagers": [
+        "npm"
+      ],
       "matchUpdateTypes": [
-        "pin",
-        "digest",
-        "patch",
         "minor",
-        "major",
+        "patch",
         "lockFileMaintenance"
       ],
-      "stabilityDays": 0
+      "groupName": "npm all non-major dependencies",
+      "groupSlug": "npm all-minor-patch"
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "github actions all non-major dependencies",
+      "groupSlug": "github actions all-minor-patch"
+    },
+    {
+      "matchManagers": [
+        "dockerfile",
+        "docker-compose"
+      ],
+      "enabled": false
     }
   ],
   "platform": "github",
