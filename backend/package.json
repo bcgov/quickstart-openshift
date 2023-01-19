@@ -4,7 +4,7 @@
   "description": "BCGov devops quickstart. For reference, testing and new projects.",
   "main": "index.js",
   "scripts": {
-    "prebuild": "./node_modules/.bin/rimraf dist",
+    "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -52,6 +52,7 @@
     "dotenv": "^16.0.1",
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",
+    "rimraf": "^4.0.0",
     "rxjs": "^7.8.0",
     "swagger-ui-express": "^4.6.0",
     "typeorm": "^0.3.11"
@@ -77,7 +78,6 @@
     "jest-sonar-reporter": "^2.0.0",
     "lint-staged": "^13.1.0",
     "prettier": "^2.8.3",
-    "rimraf": "^4.0.0",
     "source-map-support": "^0.5.20",
     "supertest": "^6.3.3",
     "ts-jest": "^27.0.7",
