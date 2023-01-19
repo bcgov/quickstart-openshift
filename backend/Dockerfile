@@ -6,7 +6,7 @@ RUN dnf module install -y nodejs:16
 # Install packages, build and keep only prod packages
 WORKDIR /app
 COPY . ./
-RUN npm ci --only=prod && \
+RUN npm ci --omit=dev && \
     npm run build
 
 # Deployment container
