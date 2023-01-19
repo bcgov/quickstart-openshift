@@ -5,7 +5,7 @@ COPY package-lock.json .
 RUN npm ci
 COPY . .
 RUN npm run build
-FROM caddy:2.4.6-alpine as deploy
+FROM caddy:2.6.2-alpine as deploy
 
 ARG DEPENDENCY=/app
 EXPOSE 3000
