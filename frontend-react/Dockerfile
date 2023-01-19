@@ -1,4 +1,4 @@
-FROM node:16-bullseye AS build
+FROM node:19-bullseye AS build
 LABEL maintainer="Ricardo Montania Prado de Campos <ricardo.campos@encora.com>"
 WORKDIR /app
 COPY . .

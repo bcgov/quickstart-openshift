@@ -33,7 +33,7 @@ services:
       retries: 3
       start_period: 40s
     hostname: backend
-    image: node:14
+    image: node:19
     links:
       - database
     ports:
@@ -59,7 +59,7 @@ services:
       retries: 3
       start_period: 40s
     hostname: frontend
-    image: node:14
+    image: node:19
     links:
       - backend
     ports:
