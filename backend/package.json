@@ -80,7 +80,7 @@
     "prettier": "^2.8.3",
     "source-map-support": "^0.5.20",
     "supertest": "^6.3.3",
-    "ts-jest": "^29.0.0",
+    "ts-jest": "^29.0.5",
     "ts-loader": "^9.4.2",
     "ts-node": "^10.3.0",
     "tsconfig-paths": "^4.1.2",
