@@ -15,7 +15,7 @@
     "@typescript-eslint/parser": "5.48.2",
     "@vitejs/plugin-react": "3.0.1",
     "eslint-config-airbnb-typescript": "^17.0.0",
-    "jsdom": "^20.0.3",
+    "jsdom": "^21.0.0",
     "keycloak-js": "^20.0.0",
     "node-sass": "8.0.0",
     "react": "^18.2.0",
