@@ -56,8 +56,23 @@ import type { AxiosRequestConfig } from "axios";
 
 const userData = ref([]);
 const rowsSelected = ref(15);
+interface IConfig {
+  VITE_BACKEND_URL: string;
+}
+
+declare global {
+  interface Window {
+    config?: IConfig;
+  }
+}
 export default {
+
   setup() {
+    let backendURL = window?.config?.VITE_BACKEND_URL || '';
+    if (!backendURL) {
+      backendURL = import.meta.env.VITE_BACKEND_URL;
+    }
+
     const page = ref(1);
     onMounted(async () => {
       const config: AxiosRequestConfig = {
@@ -65,7 +80,7 @@ export default {
           "Content-Type": "application/json",
         },
       };
-      const usersResponse = await getAxios().get("/users", config);
+      const usersResponse = await getAxios().get(`${backendURL}/users`, config);
       userData.value = usersResponse.data;
     });
     const numOfRecords = computed(() =>

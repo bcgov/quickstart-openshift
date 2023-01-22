@@ -109,3 +109,4 @@ test-report.xml
 
 # Docker/Podman volumes
 .volumes
+.idea

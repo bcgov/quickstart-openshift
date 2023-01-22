@@ -13,7 +13,7 @@ const localLoggerFormat = winston.format.combine(
 export const customLogger = WinstonModule.createLogger({
   transports: [
     new winston.transports.Console({
-      level: 'debug',
+      level: 'silly',
       format: winston.format.combine(
         globalLoggerFormat,
        localLoggerFormat
