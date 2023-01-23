@@ -13,7 +13,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "@quasar/extras": "^1.15.9",
+    "@quasar/extras": "^1.15.10",
     "axios": "^1.2.3",
     "pinia": "^2.0.29",
     "quasar": "^2.11.5",
