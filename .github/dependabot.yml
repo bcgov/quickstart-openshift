@@ -7,18 +7,18 @@ updates:
     schedule:
       interval: daily
 
-  - package-ecosystem: npm
-    directory: /backend
-    schedule:
-      interval: daily
-    commit-message:
-      prefix: "Backend"
-      include: "scope"
+  # - package-ecosystem: npm
+  #   directory: /backend
+  #   schedule:
+  #     interval: daily
+  #   commit-message:
+  #     prefix: "Backend"
+  #     include: "scope"
 
-  - package-ecosystem: npm
-    directory: /frontend
-    schedule:
-      interval: daily
-    commit-message:
-      prefix: "Frontend"
-      include: "scope"
+  # - package-ecosystem: npm
+  #   directory: /frontend
+  #   schedule:
+  #     interval: daily
+  #   commit-message:
+  #     prefix: "Frontend"
+  #     include: "scope"
