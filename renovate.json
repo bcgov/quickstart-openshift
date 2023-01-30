@@ -5,6 +5,7 @@
   "onboarding": false,
   "packageRules": [
     {
+      "dependencyDashboardApproval": true,
       "matchManagers": [
         "npm"
       ],
