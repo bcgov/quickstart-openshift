@@ -18,6 +18,7 @@
         "dependencies",
         "javascript"
       ],
+      "prConcurrentLimit": 5,
       "groupName": "npm all non-major dependencies",
       "groupSlug": "npm all-minor-patch"
     },
