@@ -6,6 +6,7 @@
   "autodiscoverFilter": "bcgov/nr-quickstart-typescript",
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
   "configMigration": true,
+  "configWarningReuseIssue": true,
   "onboarding": false,
   "packageRules": [
     {
