@@ -51,7 +51,7 @@ services:
     entrypoint:
       - "sh"
       - "-c"
-      - "npm i && npm run start"
+      - "chown -R root . && npm ci && npm run dev"
     environment:
       NODE_ENV: development
       BACKEND_URL: backend
@@ -62,7 +62,7 @@ services:
       retries: 3
       start_period: 40s
     hostname: frontend
-    image: node:14
+    image: registry.access.redhat.com/ubi8/nodejs-18-minimal
     links:
       - backend
     ports:
@@ -70,4 +70,5 @@ services:
     volumes:
       - ./frontend:/app:z
       - /app/node_modules
+    user: root
     working_dir: "/app"
