@@ -35,7 +35,7 @@ services:
       retries: 3
       start_period: 40s
     hostname: backend
-    image: node:14
+    image: registry.access.redhat.com/ubi8/nodejs-18-minimal
     links:
       - database
     ports:
@@ -43,6 +43,7 @@ services:
     volumes:
       - ./backend:/app:z
       - /app/node_modules
+    user: root
     working_dir: "/app"
 
   frontend:

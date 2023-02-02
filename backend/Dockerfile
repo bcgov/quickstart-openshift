@@ -1,9 +1,8 @@
-# RedHat UBI 8 with nodejs 14
-# https://catalog.redhat.com/software/container-stacks/detail/5ec53f50ef29fd35586d9a56
-FROM registry.access.redhat.com/ubi8/ubi:8.7 as builder
-RUN dnf module install -y nodejs:16
+# https://catalog.redhat.com/software/containers/ubi8/nodejs-18-minimal/627d1c38e35da88581633bf1
+FROM registry.access.redhat.com/ubi8/nodejs-18-minimal:1-25 as builder
 
 # Install packages, build and keep only prod packages
+USER root
 WORKDIR /app
 COPY . ./
 RUN npm ci --omit=dev && \
@@ -31,8 +30,9 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
-# Expose port - mostly a convention, for readability
+# Port and health check
 EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost/:3000
 
 # Non-privileged user
 USER app
