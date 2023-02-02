@@ -28,12 +28,6 @@ services:
       POSTGRESQL_USER: postgres
       POSTGRESQL_PASSWORD: default
       POSTGRESQL_DATABASE: default
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     hostname: backend
     image: registry.access.redhat.com/ubi8/nodejs-18-minimal
     links:
@@ -55,12 +49,6 @@ services:
     environment:
       NODE_ENV: development
       BACKEND_URL: backend
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     hostname: frontend
     image: registry.access.redhat.com/ubi8/nodejs-18-minimal
     links:
