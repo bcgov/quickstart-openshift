@@ -3,14 +3,16 @@ version: "3.8"
 
 services:
   database:
+    build:
+      context: database
     container_name: database
     environment:
-      POSTGRES_USER: default
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: default
       POSTGRES_DB: default
     hostname: database
-    image: postgres:13
     restart: always
+    user: postgres
     volumes:
       - /pgdata
 
@@ -23,7 +25,7 @@ services:
     environment:
       NODE_ENV: development
       POSTGRESQL_HOST: database
-      POSTGRESQL_USER: default
+      POSTGRESQL_USER: postgres
       POSTGRESQL_PASSWORD: default
       POSTGRESQL_DATABASE: default
     healthcheck:
