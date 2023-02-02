@@ -1,10 +1,10 @@
-FROM node:alpine3.16 as build
+FROM node:alpine3.16 AS build
 WORKDIR /app
 COPY . .
 RUN npm ci
 RUN npm run build
 
-FROM caddy:2.4.6-alpine as deploy
+FROM caddy:2.4.6-alpine
 EXPOSE 3000
 COPY --from=build /app/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/dist /srv
