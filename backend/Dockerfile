@@ -4,7 +4,8 @@ FROM registry.access.redhat.com/ubi8/nodejs-18-minimal:1-25 AS builder
 # Install packages, build and keep only prod packages
 USER root
 WORKDIR /app
-COPY . ./
+COPY *.json ./
+COPY ./src /app/src
 RUN npm ci --omit=dev && \
     npm run build
 
