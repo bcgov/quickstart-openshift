@@ -126,8 +126,8 @@ jobs:
 
   GitVersion:
     name: Mainline Versioning - GitVersion
-    needs:
-      - deploys-prod
+    # needs:
+    #   - deploys-prod
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
