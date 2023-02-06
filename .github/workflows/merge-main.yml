@@ -1,127 +1,128 @@
 name: Merge to Main
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - ".github/ISSUE_TEMPLATE/*"
-      - "**.md"
-  workflow_dispatch:
+  pull_request:
+  # push:
+  #   branches:
+  #     - main
+  #   paths-ignore:
+  #     - ".github/ISSUE_TEMPLATE/*"
+  #     - "**.md"
+  # workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
 
 jobs:
-  codeql:
-    name: Semantic Code Analysis
-    runs-on: ubuntu-22.04
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - uses: actions/checkout@v3
+  # codeql:
+  #   name: Semantic Code Analysis
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     actions: read
+  #     contents: read
+  #     security-events: write
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - name: Initialize
-        uses: github/codeql-action/init@v2
-        with:
-          languages: javascript
+  #     - name: Initialize
+  #       uses: github/codeql-action/init@v2
+  #       with:
+  #         languages: javascript
 
-      # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
-      # If this step fails, then you should remove it and run the build manually (see below)
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v2
+  #     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
+  #     # If this step fails, then you should remove it and run the build manually (see below)
+  #     - name: Autobuild
+  #       uses: github/codeql-action/autobuild@v2
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+  #     - name: Perform CodeQL Analysis
+  #       uses: github/codeql-action/analyze@v2
 
-  deploys-test:
-    name: TEST Deployments
-    needs:
-      - codeql
-    environment: test
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        name: [backend, database, frontend, init]
-        include:
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
-          - name: init
-            file: common/openshift.init.yml
-            overwrite: false
-    steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.1
-        with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ secrets.OC_NAMESPACE }}
-          oc_server: ${{ secrets.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          parameters:
-            -p ZONE=test -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
-            -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
-          penetration_test: true
+  # deploys-test:
+  #   name: TEST Deployments
+  #   needs:
+  #     - codeql
+  #   environment: test
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       name: [backend, database, frontend, init]
+  #       include:
+  #         - name: backend
+  #           file: backend/openshift.deploy.yml
+  #           overwrite: true
+  #         - name: database
+  #           file: database/openshift.deploy.yml
+  #           overwrite: false
+  #         - name: frontend
+  #           file: frontend/openshift.deploy.yml
+  #           overwrite: true
+  #         - name: init
+  #           file: common/openshift.init.yml
+  #           overwrite: false
+  #   steps:
+  #     - uses: bcgov-nr/action-deployer-openshift@v1.0.1
+  #       with:
+  #         file: ${{ matrix.file }}
+  #         oc_namespace: ${{ secrets.OC_NAMESPACE }}
+  #         oc_server: ${{ secrets.OC_SERVER }}
+  #         oc_token: ${{ secrets.OC_TOKEN }}
+  #         overwrite: ${{ matrix.overwrite }}
+  #         parameters:
+  #           -p ZONE=test -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
+  #           -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
+  #         penetration_test: true
 
-  deploys-prod:
-    name: PROD Deployments
-    needs:
-      - deploys-test
-    environment: prod
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        name: [backend, database, frontend, init]
-        include:
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
-          - name: init
-            file: common/openshift.init.yml
-            overwrite: false
-    steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.1
-        with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ secrets.OC_NAMESPACE }}
-          oc_server: ${{ secrets.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          parameters:
-            -p ZONE=prod -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
-            -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
-          penetration_test: false
+  # deploys-prod:
+  #   name: PROD Deployments
+  #   needs:
+  #     - deploys-test
+  #   environment: prod
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       name: [backend, database, frontend, init]
+  #       include:
+  #         - name: backend
+  #           file: backend/openshift.deploy.yml
+  #           overwrite: true
+  #         - name: database
+  #           file: database/openshift.deploy.yml
+  #           overwrite: false
+  #         - name: frontend
+  #           file: frontend/openshift.deploy.yml
+  #           overwrite: true
+  #         - name: init
+  #           file: common/openshift.init.yml
+  #           overwrite: false
+  #   steps:
+  #     - uses: bcgov-nr/action-deployer-openshift@v1.0.1
+  #       with:
+  #         file: ${{ matrix.file }}
+  #         oc_namespace: ${{ secrets.OC_NAMESPACE }}
+  #         oc_server: ${{ secrets.OC_SERVER }}
+  #         oc_token: ${{ secrets.OC_TOKEN }}
+  #         overwrite: ${{ matrix.overwrite }}
+  #         parameters:
+  #           -p ZONE=prod -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
+  #           -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
+  #         penetration_test: false
 
-  image-promotions:
-    name: Promote images to PROD
-    needs:
-      - deploys-prod
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        component: [backend, database, frontend]
-    steps:
-      - uses: shrink/actions-docker-registry-tag@v3
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.component }}
-          target: test
-          tags: prod
+  # image-promotions:
+  #   name: Promote images to PROD
+  #   needs:
+  #     - deploys-prod
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       component: [backend, database, frontend]
+  #   steps:
+  #     - uses: shrink/actions-docker-registry-tag@v3
+  #       with:
+  #         registry: ghcr.io
+  #         repository: ${{ github.repository }}/${{ matrix.component }}
+  #         target: test
+  #         tags: prod
 
   GitVersion:
     name: Mainline Versioning - GitVersion
