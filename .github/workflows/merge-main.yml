@@ -185,17 +185,65 @@ jobs:
     outputs:
       fullSemVer: ${{ steps.gitversion.outputs.fullSemVer}}
 
+  # release:
+  #   name: Create Release
+  #   runs-on: ubuntu-22.04
+  #   needs:
+  #     - GitVersion
+  #   steps:
+  #     - uses: actions/create-release@v1
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       with:
+  #         tag_name: ${{ needs.GitVersion.outputs.fullSemVer }}
+  #         release_name: Release ${{ needs.GitVersion.outputs.fullSemVer }}
+  #         draft: false
+  #         prerelease: false
+
   release:
-    name: Create Release
-    runs-on: ubuntu-22.04
-    needs:
-      - GitVersion
+    name: Release Notes
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.changelog.outputs.version }}
     steps:
-      - uses: actions/create-release@v1
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT }}
+          fetch-depth: 0
+
+      - name: Set Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: "yarn"
+
+      - name: Conventional Changelog Update
+        uses: TriPSs/conventional-changelog-action@v3
+        id: changelog
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          output-file: "CHANGELOG.md"
+          skip-version-file: "true"
+          skip-commit: "true"
+          git-push: "false"
+
+      - name: Set new version output
+        run: |
+          echo "::set-output name=version::${{ steps.changelog.outputs.version }}"
+          npm version ${{ steps.changelog.outputs.version }} --git-tag-version false
+      - name: Commit package and changelog
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: Ci Bot
+          author_email: cibot@users.noreply.github.com
+          message: "doc: updating package to ${{ steps.changelog.outputs.version }} [ci skip]"
+          add: '["package.json","CHANGELOG.md"]'
+
+      - name: Create Release
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.GitVersion.outputs.fullSemVer }}
-          release_name: Release ${{ needs.GitVersion.outputs.fullSemVer }}
-          draft: false
-          prerelease: false
+          tag_name: ${{ steps.changelog.outputs.tag }}
+          release_name: ${{ steps.changelog.outputs.tag }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
