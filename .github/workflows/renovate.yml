@@ -1,15 +1,16 @@
 name: Renovate
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - ".github/ISSUE_TEMPLATE/*"
-      - "**.md"
-  schedule:
-    # Quotes required for "*" (#42, asterisk), special semantics in YAML
-    - cron: "0 11 * * *" # 3 AM PST = 11 AM UDT
-  workflow_dispatch:
+  pull_request:
+  # push:
+  #   branches:
+  #     - main
+  #   paths-ignore:
+  #     - ".github/ISSUE_TEMPLATE/*"
+  #     - "**.md"
+  # schedule:
+  #   # Quotes required for "*" (#42, asterisk), special semantics in YAML
+  #   - cron: "0 11 * * *" # 3 AM PST = 11 AM UDT
+  # workflow_dispatch:
 
 jobs:
   renovate:

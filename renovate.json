@@ -1,16 +1,17 @@
 {
   "extends": [
-    "config:base"
+    "config:base",
+    ":disableDependencyDashboard"
   ],
-  "autodiscover": true,
-  "autodiscoverFilter": "bcgov/nr-quickstart-typescript",
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+  "repositories": [
+    "bcgov/nr-quickstart-typescript"
+  ],
   "configMigration": true,
   "configWarningReuseIssue": true,
-  "onboarding": false,
   "packageRules": [
     {
-      "dependencyDashboardApproval": true,
+      "dependencyDashboardApproval": false,
       "matchManagers": [
         "npm"
       ],
