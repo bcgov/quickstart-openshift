@@ -7,11 +7,11 @@
   "repositories": [
     "bcgov/nr-quickstart-typescript"
   ],
+  "dryRun": "full",
   "configMigration": true,
   "configWarningReuseIssue": true,
   "packageRules": [
     {
-      "dependencyDashboardApproval": false,
       "matchManagers": [
         "npm"
       ],
