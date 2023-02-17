@@ -6,7 +6,7 @@
     "@carbon/icons-react": "^11.9.0",
     "@carbon/react": "1.21.0",
     "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.0.0",
+    "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.0.0",
     "@types/carbon-components-react": "^7.55.2",
     "@types/node": "^18.0.0",
