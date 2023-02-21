@@ -9,6 +9,7 @@
   "repositories": [
     "bcgov/nr-quickstart-typescript"
   ],
+  "rebaseWhen": "behind-base-branch",
   "dryRun": "full",
   "configMigration": true,
   "configWarningReuseIssue": true,
@@ -53,5 +54,8 @@
     }
   ],
   "platform": "github",
-  "username": "renovate-release"
+  "username": "renovate-release",
+  "vulnerabilityAlerts": {
+    "enabled": true
+  }
 }
