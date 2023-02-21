@@ -1,9 +1,11 @@
 {
   "extends": [
     "config:base",
-    ":disableDependencyDashboard"
+    ":app",
+    ":library"
   ],
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+  "dependencyDashboard": false,
   "repositories": [
     "bcgov/nr-quickstart-typescript"
   ],
