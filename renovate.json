@@ -1,61 +1,55 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Default preset for use with Renovate's repos",
   "extends": [
     "config:base",
-    ":app",
-    ":library"
+    ":maintainLockFilesWeekly",
+    ":rebaseStalePrs",
+    ":semanticCommits",
+    ":semanticCommitScope(deps)",
+    "docker:enableMajor",
+    "docker:pinDigests",
+    "group:linters"
   ],
+  "username": "renovate-release",
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
-  "dependencyDashboard": false,
-  "repositories": [
-    "bcgov/nr-quickstart-typescript"
-  ],
-  "rebaseWhen": "behind-base-branch",
+  "onboarding": true,
+  "platform": "github",
+  "includeForks": false,
   "dryRun": "full",
   "configMigration": true,
-  "configWarningReuseIssue": true,
+  "dependencyDashboard": true,
+  "prCreation": "not-pending",
+  "rebaseWhen": "behind-base-branch",
+  "repositories": [
+    "bcgov/nr-quickstart-typescript",
+    "bcgov/nr-forest-client"
+  ],
   "packageRules": [
     {
-      "matchManagers": [
+      "description": "Require dashboard approval for major updates",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Group prettier packages",
+      "matchPackageNames": [
+        "prettier"
+      ],
+      "matchPackagePatterns": [
+        "^@prettier\\/",
+        "^prettier-plugin-"
+      ],
+      "groupName": "prettier packages"
+    },
+    {
+      "description": "One week stability period for npm packages",
+      "matchDatasources": [
         "npm"
       ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "lockFileMaintenance"
-      ],
-      "addLabels": [
-        "dependencies",
-        "javascript"
-      ],
-      "prConcurrentLimit": 5,
-      "groupName": "npm all non-major dependencies",
-      "groupSlug": "npm all-minor-patch"
-    },
-    {
-      "matchManagers": [
-        "github-actions"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "addLabels": [
-        "dependencies"
-      ],
-      "groupName": "github actions all non-major dependencies",
-      "groupSlug": "github actions all-minor-patch"
-    },
-    {
-      "matchManagers": [
-        "dockerfile",
-        "docker-compose"
-      ],
-      "enabled": false
+      "stabilityDays": 7
     }
-  ],
-  "platform": "github",
-  "username": "renovate-release",
-  "vulnerabilityAlerts": {
-    "enabled": true
-  }
+  ]
 }
