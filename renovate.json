@@ -1,16 +1,32 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Default preset for use with Renovate's repos",
   "extends": [
-    "config:base"
+    "config:base",
+    ":maintainLockFilesWeekly",
+    ":rebaseStalePrs",
+    ":semanticCommits",
+    ":semanticCommitScope(deps)",
+    "docker:enableMajor",
+    "docker:pinDigests",
+    "group:linters"
   ],
-  "autodiscover": true,
-  "autodiscoverFilter": "bcgov/nr-quickstart-typescript",
+  "username": "renovate-release",
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+  "onboarding": true,
+  "platform": "github",
+  "includeForks": false,
+  "dryRun": "full",
   "configMigration": true,
-  "configWarningReuseIssue": true,
-  "onboarding": false,
+  "dependencyDashboard": true,
+  "prCreation": "not-pending",
+  "rebaseWhen": "behind-base-branch",
+  "repositories": [
+    "bcgov/nr-quickstart-typescript",
+    "bcgov/nr-forest-client"
+  ],
   "packageRules": [
     {
-      "dependencyDashboardApproval": true,
       "matchManagers": [
         "npm"
       ],
@@ -19,11 +35,6 @@
         "patch",
         "lockFileMaintenance"
       ],
-      "addLabels": [
-        "dependencies",
-        "javascript"
-      ],
-      "prConcurrentLimit": 5,
       "groupName": "npm all non-major dependencies",
       "groupSlug": "npm all-minor-patch"
     },
@@ -35,20 +46,33 @@
         "minor",
         "patch"
       ],
-      "addLabels": [
-        "dependencies"
-      ],
       "groupName": "github actions all non-major dependencies",
       "groupSlug": "github actions all-minor-patch"
     },
     {
-      "matchManagers": [
-        "dockerfile",
-        "docker-compose"
+      "description": "Require dashboard approval for major updates",
+      "matchUpdateTypes": [
+        "major"
       ],
-      "enabled": false
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Group prettier packages",
+      "matchPackageNames": [
+        "prettier"
+      ],
+      "matchPackagePatterns": [
+        "^@prettier\\/",
+        "^prettier-plugin-"
+      ],
+      "groupName": "prettier packages"
+    },
+    {
+      "description": "One week stability period for npm packages",
+      "matchDatasources": [
+        "npm"
+      ],
+      "stabilityDays": 7
     }
-  ],
-  "platform": "github",
-  "username": "renovate-release"
+  ]
 }
