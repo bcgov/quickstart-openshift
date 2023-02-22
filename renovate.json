@@ -27,6 +27,29 @@
   ],
   "packageRules": [
     {
+      "matchManagers": [
+        "npm"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "lockFileMaintenance"
+      ],
+      "groupName": "npm all non-major dependencies",
+      "groupSlug": "npm all-minor-patch"
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "github actions all non-major dependencies",
+      "groupSlug": "github actions all-minor-patch"
+    },
+    {
       "description": "Require dashboard approval for major updates",
       "matchUpdateTypes": [
         "major"
