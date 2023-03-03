@@ -112,6 +112,8 @@ jobs:
     needs:
       - deploys-prod
     runs-on: ubuntu-22.04
+    permissions:
+      packages: write
     strategy:
       matrix:
         component: [backend, database, frontend]
