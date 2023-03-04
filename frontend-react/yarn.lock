@@ -3585,10 +3585,10 @@ jsprim@^2.0.2:
     array-includes "^3.1.5"
     object.assign "^4.1.3"
 
-keycloak-js@^20.0.0:
-  version "20.0.3"
-  resolved "https://registry.yarnpkg.com/keycloak-js/-/keycloak-js-20.0.3.tgz#1c1779e67b16bb2a1e7943e1d78557d3277bc705"
-  integrity sha512-XOOPip8M8K8BsHvk9hnyHuHQ49u9cDu42UXY187G6fM9wsFSvM2apYK3WQ0EUg90nlWt1oMykrWsCWJY10Ihkw==
+keycloak-js@^21.0.0:
+  version "21.0.1"
+  resolved "https://registry.yarnpkg.com/keycloak-js/-/keycloak-js-21.0.1.tgz#4893d43597b5b6e36b80dc4f7ef4119e64967221"
+  integrity sha512-ot0KW4qyDHl5AyDZNV0CkEkuvIZi+37y3BReNvqqfag7wqJeV13R/PcgECvbbd05+0NSOQjhBL8S+a4A++vNQw==
   dependencies:
     base64-js "^1.5.1"
     js-sha256 "^0.9.0"
