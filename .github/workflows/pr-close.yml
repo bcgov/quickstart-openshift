@@ -29,6 +29,8 @@ jobs:
     name: Image Promotions
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-22.04
+    permissions:
+      packages: write
     strategy:
       matrix:
         package: [backend, database, frontend]
