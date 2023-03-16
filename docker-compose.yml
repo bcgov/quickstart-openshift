@@ -60,3 +60,24 @@ services:
       - /app/node_modules
     user: root
     working_dir: "/app"
+
+  frontend-react:
+    container_name: frontend-react
+    entrypoint:
+      - "sh"
+      - "-c"
+      - "chown -R root . && npm i -g yarn && yarn install && yarn start"
+    environment:
+      NODE_ENV: development
+      BACKEND_URL: backend
+    hostname: frontend-react
+    image: registry.access.redhat.com/ubi8/nodejs-18-minimal
+    links:
+      - backend
+    ports:
+      - "3002:3000"
+    volumes:
+      - ./frontend-react:/app:z
+      - /app/node_modules
+    user: root
+    working_dir: "/app"
