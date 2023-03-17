@@ -60,7 +60,7 @@ jobs:
             file: common/openshift.init.yml
             overwrite: false
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.2
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.3
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -95,7 +95,7 @@ jobs:
             file: common/openshift.init.yml
             overwrite: false
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.2
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.3
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ secrets.OC_NAMESPACE }}
