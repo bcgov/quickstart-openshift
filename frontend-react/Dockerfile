@@ -1,4 +1,4 @@
-FROM node:19-bullseye@sha256:d903b23148dccca63152cb2bdf6fdfa062842dcce49f0d45558ca06a8ab14598 AS build
+FROM node:19-bullseye@sha256:2405a991a6d9f6ac1d991feefc0a4539d5187abd2ca532fd18f7185c98b32a45 AS build
 
 WORKDIR /app
 COPY . .
