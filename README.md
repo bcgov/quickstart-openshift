@@ -1,4 +1,4 @@
-<!-- PROJECT SHIELDS -->
+<!-- Project Shields -->
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-quickstart-typescript&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-quickstart-typescript)
 [![Merge to Main](https://github.com/bcgov/nr-quickstart-typescript/actions/workflows/merge-main.yml/badge.svg)](https://github.com/bcgov/nr-quickstart-typescript/actions/workflows/merge-main.yml)
@@ -121,59 +121,46 @@ Create a new repository using this repository as a template.
 ![](./common/graphics/template.png)
 
 
-## GitHub Secrets
+## GitHub Secrets, Variables and Environments
 
-Secrets are consumed by workflows.  There are multiple kinds.  Please expect to secrets to change across Environments, like PR/DEV, TEST and PROD.  Even Dependabot has its own set.
+Variables and secrets are consumed by workflows.  Environments provide their own sets of secrets and variables, overriding default sets.
 
-### Repository
+### Repository Secrets and Variables
 
-Repository secrets are available to all workflows, except pull requests triggered by Dependabot.
+Repository secrets and variables are available to all workflows, except pull requests triggered by Dependabot.
 
-> Click Settings > Secrets > Actions > New repository secret
+Secrets are hidden from logs and outputs, while variables are visible.  Using secrets exclusively can make troubeshooting more difficult.
+
+> Click Settings > Secrets and Variables > Actions > Secrets > New repository secret
+
+> Click Settings > Secrets and Variables > Actions > Variables > New repository variable
 
 ### Environment
 
-Environments are groups of secrets that can be gatekept.  This includes limting access to certain users or requiring manual approval before a requesting workflow can run.
+Environments are groups of secrets and variables that can be gatekept.  This includes limting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values override any default values.
 
-> Click Settings > Environments > Environment Name / New environment > Add secret
+> Click Settings > Environments > New environment
 
-Environements provide a [number of features](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment), including:
+Environments provide a [number of features](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment), including:
 
 * Required reviewers
 * Wait timer
 * Deployment branches
 
-### Dependabot
+## Secret and Variable Values
 
-Dependabot secrets are used by Dependabot's pull requests.  See [.github/dependabot.yml](./.github/dependabot.yml) for an example.
-
-> Click Settings > Secrets > Dependabot > New repository secret
-
-## Secret Values
+### Secrets
 
 **GITHUB_TOKEN**
 
 Default token.  Replaced every workflow run, available to all workflows.
-* Variable: `{{ secrets.GITHUB_TOKEN }}`
-
-**OC_SERVER**
-
-OpenShift server address.
-* Variable: `{{ secrets.OC_SERVER }}`
-* Value: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
-
-**OC_NAMESPACE**
-
-OpenShift project/namespace.  Provided by your OpenShift platform team.
-
-* Variable: `{{ secrets.OC_NAMESPACE }}`
-* Value: format `abc123-dev | test | prod`
+* Consume: `{{ secrets.GITHUB_TOKEN }}`
 
 **OC_TOKEN**
 
 OpenShift token, different for every project/namespace.  This guide assumes your OpenShift platform team has provisioned a pipeline account.
 
-* Variable: `{{ secrets.OC_TOKEN }}`
+* Consume: `{{ secrets.OC_TOKEN }}`
 
 Locate an OpenShift pipeline token:
 
@@ -182,14 +169,28 @@ Locate an OpenShift pipeline token:
 3. Click Workloads > Secrets (under Workloads for Administrator view)
 4. Select `pipeline-token-...` or a similarly privileged token
 5. Under Data, copy `token`
-6. Paste into the GitHub Environment Secret `OC_TOKEN` (see above)
+6. Paste into the GitHub Secret `OC_TOKEN` (see above)
 
-**Sonar Tokens**
+**SONAR_TOKEN and Other Sonar Tokens**
 
 If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, but monoreposities will have multiple, like `${{ secrets.SONAR_TOKEN_BACKEND }}` and `${{ secrets.SONAR_TOKEN_FRONTEND }}`.
 
 BC Government employees can request SonarCloud projects from [bcdevops/devops-requests](https://github.com/BCDevOps/devops-requests) by creating a SonarCloud request/[issue](https://github.com/BCDevOps/devops-requests/issues/new/choose).  This template expects a monorepo, so please ask for that and provide component names (e.g. backend, frontend).
 
+### Variables
+
+**OC_SERVER**
+
+OpenShift server address.
+* Consume: `{{ vars.OC_SERVER }}`
+* Value: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
+
+**OC_NAMESPACE**
+
+OpenShift project/namespace.  Provided by your OpenShift platform team.
+
+* Consume: `{{ vars.OC_NAMESPACE }}`
+* Value: format `abc123-dev | test | prod`
 
 ## Repository Configuration
 
@@ -254,7 +255,7 @@ Members of the BC Government's Natural Resource minisistries are strongly recomm
 
 # Feedback
 
-Please contribute your ideas!  [Issues] and [pull requests] are appreciated.
+Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.
 
 
 # Acknowledgements

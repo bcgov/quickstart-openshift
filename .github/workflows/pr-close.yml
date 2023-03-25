@@ -18,8 +18,8 @@ jobs:
     steps:
       - name: Remove OpenShift artifacts
         run: |
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.OC_NAMESPACE }}
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          oc project ${{ vars.OC_NAMESPACE }}
 
           # Remove old build runs, build pods and deployment pods
           oc delete all,pvc,secret -l app=${{ github.event.repository.name }}-${{ github.event.number }}
