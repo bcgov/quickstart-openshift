@@ -1,5 +1,5 @@
 # https://catalog.redhat.com/software/containers/ubi8/nodejs-18-minimal/627d1c38e35da88581633bf1
-FROM registry.access.redhat.com/ubi8/nodejs-18-minimal:1-25 AS builder
+FROM registry.access.redhat.com/ubi8/nodejs-18-minimal:1-33.1679485315@sha256:74af9dc2b620022c77fcd712b811f64a03c1444ff1e9b9596a242b2edf3cf96f AS builder
 
 # Install packages, build and keep only prod packages
 USER root
