@@ -1,4 +1,4 @@
-FROM postgres:15@sha256:9e3b538a581247a22f8e452d1b797373bb3e1bfae6e3273e9c49b637e080c797
+FROM postgres:15@sha256:5a90725b3751c2c7ac311c9384dfc1a8f6e41823e341fb1dceed96a11677303a
 
 # Enable extensions using this pattern on startup
 #RUN sed -i '/EXISTS postgis_tiger_geocoder;*/a CREATE EXTENSION IF NOT EXISTS pgcrypto;' \
