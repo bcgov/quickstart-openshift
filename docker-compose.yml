@@ -29,7 +29,7 @@ services:
       POSTGRESQL_PASSWORD: default
       POSTGRESQL_DATABASE: default
     hostname: backend
-    image: registry.access.redhat.com/ubi8/nodejs-18-minimal
+    image: registry.access.redhat.com/ubi8/nodejs-18-minimal@sha256:74af9dc2b620022c77fcd712b811f64a03c1444ff1e9b9596a242b2edf3cf96f
     links:
       - database
     ports:
@@ -50,7 +50,7 @@ services:
       NODE_ENV: development
       BACKEND_URL: backend
     hostname: frontend
-    image: registry.access.redhat.com/ubi8/nodejs-18-minimal
+    image: registry.access.redhat.com/ubi8/nodejs-18-minimal@sha256:74af9dc2b620022c77fcd712b811f64a03c1444ff1e9b9596a242b2edf3cf96f
     links:
       - backend
     ports:
