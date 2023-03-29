@@ -84,7 +84,7 @@ objects:
             deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           securityContext:
-            runAsUser: 1002750001
+            runAsUser: app
           containers:
             - image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
               imagePullPolicy: Always
