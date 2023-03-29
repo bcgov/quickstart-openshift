@@ -15,8 +15,10 @@ FROM caddy:2.6.4-alpine
 ARG PORT
 
 # Copy Caddyfile and static files
-COPY --from=build /app/Caddyfile /etc/caddy/Caddyfile
-COPY --from=build /app/dist /srv
+# COPY --from=build /app/Caddyfile /etc/caddy/Caddyfile
+# COPY --from=build /app/dist /srv
+COPY --from=build /app/dist /usr/share/caddy
+RUN ls /usr/share/caddy
 
 # Port, Healthcheck and user
 EXPOSE ${PORT}
