@@ -1,13 +1,13 @@
 ### Global args
 ARG PORT 3000
-ARG SRC
+ARG SRC /app
 
 ### Builder
 FROM node:alpine3.16 AS build
 ARG SRC
 
 # Build static files
-WORKDIR /${SRC}
+WORKDIR ${SRC}
 COPY . .
 RUN npm ci && \
     npm run build
@@ -18,8 +18,8 @@ ARG PORT
 ARG SRC
 
 # Copy Caddyfile and static files
-COPY --from=build /${SRC}/Caddyfile /etc/caddy/Caddyfile
-COPY --from=build /${SRC}/dist /srv
+COPY --from=build ${SRC}/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build ${SRC}/dist /srv
 
 # Port, Healthcheck and user
 EXPOSE ${PORT}
