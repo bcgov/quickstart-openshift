@@ -9,89 +9,110 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pr-greeting:
-    name: PR Greeting
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
-    runs-on: ubuntu-22.04
-    permissions:
-      pull-requests: write
+  notifier:
+    name: notifier
+    runs-on: ubuntu-latest
     steps:
-      - name: PR Greeting
-        uses: bcgov-nr/action-pr-description-add@v0.0.2
+      - uses: danthe1st/email-filechange-notif-action@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          add_markdown: |
-            ---
+          # Address to send E-Mails from
+          senderEmail: derek.roberts@gov.bc.ca
+          # optional, The subject of the E-Mails to send
+          subjectLine: "GitHub Actions Test"
+          # A file in the repository or HTTP address that contains file patterns with E-Mail addresses that should be notified on file changes
+          mailingList: derek.roberts@gmail.com
+          # The SMTP server used to send E-Mails
+          smtpServer: http://app.smtp.gov.bc.ca/
+          # optional, The SMTP port used to send E-Mails
+          smtpPort: 587
+          # The SMTP user name used to send E-Mails
+          smtpUsername: derek.roberts@gov.bc.ca
+          # The SMTP password used to send E-Mails
+          smtpPassword: ${{ secrets.SMTP_PASSWORD }}
 
-            Thanks for the PR!
+  # pr-greeting:
+  #   name: PR Greeting
+  #   env:
+  #     DOMAIN: apps.silver.devops.gov.bc.ca
+  #     PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     pull-requests: write
+  #   steps:
+  #     - name: PR Greeting
+  #       uses: bcgov-nr/action-pr-description-add@v0.0.2
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         add_markdown: |
+  #           ---
 
-            Any successful deployments (not always required) will be available below.
-            [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/) available
-            [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/) available
+  #           Thanks for the PR!
 
-            Once merged, code will be promoted and handed off to following workflow run.
-            [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+  #           Any successful deployments (not always required) will be available below.
+  #           [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/) available
+  #           [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/) available
 
-  builds:
-    name: Builds
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        package: [backend, database, frontend]
-        include:
-          - package: backend
-            triggers: ('backend/')
-          - package: database
-            triggers: ('database/')
-          - package: frontend
-            triggers: ('frontend/')
-    steps:
-      - uses: actions/checkout@v3
-      - uses: bcgov-nr/action-builder-ghcr@v1.1.0
-        with:
-          package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
-          tag_fallback: test
-          token: ${{ secrets.GITHUB_TOKEN }}
-          triggers: ${{ matrix.triggers }}
+  #           Once merged, code will be promoted and handed off to following workflow run.
+  #           [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
-  deploys:
-    name: Deploys
-    needs:
-      - builds
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        name: [backend, database, init, frontend]
-        include:
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-          - name: init
-            file: common/openshift.init.yml
-            overwrite: false
-    steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.3
-        with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          penetration_test: false
-          parameters:
-            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
-            ${{ matrix.parameters }}
+  # builds:
+  #   name: Builds
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     packages: write
+  #   strategy:
+  #     matrix:
+  #       package: [backend, database, frontend]
+  #       include:
+  #         - package: backend
+  #           triggers: ('backend/')
+  #         - package: database
+  #           triggers: ('database/')
+  #         - package: frontend
+  #           triggers: ('frontend/')
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: bcgov-nr/action-builder-ghcr@v1.1.0
+  #       with:
+  #         package: ${{ matrix.package }}
+  #         tag: ${{ github.event.number }}
+  #         tag_fallback: test
+  #         token: ${{ secrets.GITHUB_TOKEN }}
+  #         triggers: ${{ matrix.triggers }}
+
+  # deploys:
+  #   name: Deploys
+  #   needs:
+  #     - builds
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       name: [backend, database, init, frontend]
+  #       include:
+  #         - name: backend
+  #           file: backend/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #         - name: database
+  #           file: database/openshift.deploy.yml
+  #           overwrite: false
+  #         - name: frontend
+  #           file: frontend/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #         - name: init
+  #           file: common/openshift.init.yml
+  #           overwrite: false
+  #   steps:
+  #     - uses: bcgov-nr/action-deployer-openshift@v1.0.3
+  #       with:
+  #         file: ${{ matrix.file }}
+  #         oc_namespace: ${{ vars.OC_NAMESPACE }}
+  #         oc_server: ${{ vars.OC_SERVER }}
+  #         oc_token: ${{ secrets.OC_TOKEN }}
+  #         overwrite: ${{ matrix.overwrite }}
+  #         penetration_test: false
+  #         parameters:
+  #           -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+  #           -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
+  #           ${{ matrix.parameters }}
