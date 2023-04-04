@@ -20,7 +20,7 @@ jobs:
           # optional, The subject of the E-Mails to send
           subjectLine: "GitHub Actions Test"
           # A file in the repository or HTTP address that contains file patterns with E-Mail addresses that should be notified on file changes
-          mailingList: derek.roberts@gmail.com
+          mailingList: *.yml derek.roberts@gmail.com
           # The SMTP server used to send E-Mails
           smtpServer: http://app.smtp.gov.bc.ca/
           # optional, The SMTP port used to send E-Mails
@@ -28,7 +28,7 @@ jobs:
           # The SMTP user name used to send E-Mails
           smtpUsername: derek.roberts@gov.bc.ca
           # The SMTP password used to send E-Mails
-          smtpPassword: ${{ secrets.SMTP_PASSWORD }}
+          smtpPassword: ""
 
   # pr-greeting:
   #   name: PR Greeting
