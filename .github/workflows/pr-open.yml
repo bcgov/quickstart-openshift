@@ -17,17 +17,17 @@ jobs:
       - uses: danthe1st/email-filechange-notif-action@v1
         with:
           # Address to send E-Mails from
-          senderEmail: derek.roberts@gov.bc.ca
+          senderEmail: DoNotReply@gov.bc.ca
           # optional, The subject of the E-Mails to send
           subjectLine: "GitHub Actions Test"
           # A file in the repository or HTTP address that contains file patterns with E-Mail addresses that should be notified on file changes
           mailingList: "list.txt"
           # The SMTP server used to send E-Mails
-          smtpServer: http://app.smtp.gov.bc.ca/
+          smtpServer: app.smtp.gov.bc.ca
           # optional, The SMTP port used to send E-Mails
-          smtpPort: 587
+          smtpPort: 25
           # The SMTP user name used to send E-Mails
-          smtpUsername: derek.roberts@gov.bc.ca
+          smtpUsername: ""
           # The SMTP password used to send E-Mails
           smtpPassword: ""
 
