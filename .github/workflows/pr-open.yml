@@ -21,7 +21,7 @@ jobs:
           # optional, The subject of the E-Mails to send
           subjectLine: "GitHub Actions Test"
           # A file in the repository or HTTP address that contains file patterns with E-Mail addresses that should be notified on file changes
-          mailingList: "list.txt"
+          mailingList: ./list.txt
           # The SMTP server used to send E-Mails
           smtpServer: app.smtp.gov.bc.ca
           # optional, The SMTP port used to send E-Mails
