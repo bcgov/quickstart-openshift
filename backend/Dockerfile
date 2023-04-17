@@ -38,5 +38,5 @@ HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost/:3000
 # Non-privileged user
 USER app
 
-# Start up command
-ENTRYPOINT ["node", "dist/main"]
+# Start up command with 50MB of heap size, each application needs to determine what is the best value. DONT use default as it is 4GB.
+ENTRYPOINT ["node","--max-old-space-size=50", "dist/main"]
