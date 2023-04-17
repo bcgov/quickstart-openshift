@@ -11,6 +11,8 @@ services:
       POSTGRES_PASSWORD: default
       POSTGRES_DB: default
     hostname: database
+    ports:
+      - "5432:5432"    
     restart: always
     user: postgres
     volumes:
