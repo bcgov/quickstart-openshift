@@ -1,6 +1,6 @@
-import {Injectable} from "@nestjs/common";
+import {HttpException, Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
+import {Repository, SelectQueryBuilder} from "typeorm";
 import {Users} from "./entities/users.entity";
 
 import {CreateUserDto} from "./dto/create-user.dto";
@@ -55,24 +55,10 @@ export class UsersService {
 
     const queryBuilder = this.usersRepository.createQueryBuilder('users');
     if (filter) {
-      const filterObj = JSON.parse(filter);
-      for (const item of filterObj) {
-        if (item.operation === "like") {
-          queryBuilder.andWhere(`users.${item.key} ${item.operation} :${item.key}`, {[item.key]: `%${item.value}%`});
-        } else {
-          queryBuilder.andWhere(`users.${item.key} ${item.operation} :${item.key}`, {[item.key]: item.value});
-        }
-      }
+      this.setFilter(filter, queryBuilder);
     }
     if (sort) {
-      const sortObj = JSON.parse(sort);
-      Object.keys(sortObj).forEach((item, index) => {
-        if (index === 0) {
-          queryBuilder.orderBy(`users.${item}`, sortObj[item]);
-        } else {
-          queryBuilder.addOrderBy(`users.${item}`, sortObj[item]);
-        }
-      });
+      this.setSort(sort, queryBuilder);
     }
     // Apply pagination condition
     queryBuilder.skip((page - 1) * limit).take(limit);
@@ -84,5 +70,37 @@ export class UsersService {
       total: count,
       totalPages: Math.ceil(count / limit),
     };
+  }
+
+  private setSort(sort: string, queryBuilder: SelectQueryBuilder<Users>) {
+    let sortObj;
+    try {
+      sortObj = JSON.parse(sort);
+    } catch (e) {
+      throw new HttpException("Invalid query parameters as sort", 400);
+    }
+    Object.keys(sortObj).forEach((item, index) => {
+      if (index === 0) {
+        queryBuilder.orderBy(`users.${item}`, sortObj[item]);
+      } else {
+        queryBuilder.addOrderBy(`users.${item}`, sortObj[item]);
+      }
+    });
+  }
+
+  private setFilter(filter: string, queryBuilder: SelectQueryBuilder<Users>) {
+    let filterObj;
+    try {
+      filterObj = JSON.parse(filter);
+    } catch (e) {
+      throw new HttpException("Invalid query parameters as filter", 400);
+    }
+    for (const item of filterObj) {
+      if (item.operation === "like") {
+        queryBuilder.andWhere(`users.${item.key} ${item.operation} :${item.key}`, {[item.key]: `%${item.value}%`});
+      } else {
+        queryBuilder.andWhere(`users.${item.key} ${item.operation} :${item.key}`, {[item.key]: item.value});
+      }
+    }
   }
 }

@@ -5,7 +5,7 @@ import {
   Body,
   Patch,
   Param,
-  Delete, Query,
+  Delete, Query, HttpException,
 } from "@nestjs/common";
 import {ApiTags} from "@nestjs/swagger";
 import {UsersService} from "./users.service";
@@ -27,6 +27,7 @@ export class UsersController {
   findAll() {
     return this.usersService.findAll();
   }
+
   @Get("search") // it must be ahead of the below Get(":id") to avoid conflict
   async searchUsers(
     @Query("page") page: number,
@@ -34,8 +35,12 @@ export class UsersController {
     @Query("sort") sort: string, // JSON string to store sort key and sort value, ex: {name: "ASC"}
     @Query("filter") filter: string // JSON array for key, operation and value, ex: [{key: "name", operation: "like", value: "Peter"}]
   ) {
+    if (isNaN(page) || isNaN(limit)) {
+      throw new HttpException("Invalid query parameters", 400);
+    }
     return this.usersService.searchUsers(page, limit, sort, filter);
   }
+
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.usersService.findOne(+id);
