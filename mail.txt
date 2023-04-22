@@ -1,0 +1,17 @@
+Cc: derek.roberts@gov.bc.ca
+Subject: This is an HTML email
+From: derek.roberts@gov.bc.ca
+Content-Type: text/html; charset="utf8"
+
+
+<html>
+  <body>
+  <div style="
+    background-color:
+    #abcdef; width: 300px;
+    height: 300px;
+    ">
+  </div>
+  You can add any valid email HTML here.
+  </body>
+</html>
