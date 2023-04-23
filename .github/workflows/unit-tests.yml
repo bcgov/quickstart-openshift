@@ -45,6 +45,7 @@ jobs:
             -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
             -Dsonar.sources=src
             -Dsonar.tests.inclusions=**/*spec.ts
+            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_project_token: ${{ secrets[matrix.token] }}
 
   # https://github.com/marketplace/actions/aqua-security-trivy
