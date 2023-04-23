@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import {ApiProperty} from "@nestjs/swagger";
+import {Entity, Column, PrimaryGeneratedColumn} from "typeorm";
 
 @Entity()
 export class Users {
@@ -10,7 +10,7 @@ export class Users {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ApiProperty({ example: "Peter Green", description: "The name of the user" })
+  @ApiProperty({example: "Peter Green", description: "The name of the user"})
   @Column()
   name: string;
 
@@ -21,8 +21,8 @@ export class Users {
   @Column()
   email: string;
 
-  constructor(name?: string, email?: string) {
-    this.name = name || "";
-    this.email = email || "";
+  constructor(name: string, email: string) {
+    this.name = name;
+    this.email = email;
   }
 }

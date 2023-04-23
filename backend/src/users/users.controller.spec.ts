@@ -5,6 +5,9 @@ import {UsersService} from "./users.service";
 import {Users} from "./entities/users.entity";
 import * as request from 'supertest';
 import {HttpException, INestApplication} from "@nestjs/common";
+import {CreateUserDto} from "./dto/create-user.dto";
+import {UpdateUserDto} from "./dto/update-user.dto";
+import {UserDto} from "./dto/user.dto";
 
 describe("UserController", () => {
   let controller: UsersController;
@@ -36,6 +39,71 @@ describe("UserController", () => {
     expect(controller).toBeDefined();
   });
 
+  describe('create', () => {
+    it('should call the service create method with the given dto and return the result', async () => {
+      // Arrange
+      const createUserDto: CreateUserDto = {
+        email: 'test@example.com',
+        name: 'Test User',
+      };
+      const expectedResult = {
+        id: 1,
+        ...createUserDto,
+      };
+      jest.spyOn(usersService, 'create').mockResolvedValue(expectedResult);
+
+      // Act
+      const result = await controller.create(createUserDto);
+
+      // Assert
+      expect(usersService.create).toHaveBeenCalledWith(createUserDto);
+      expect(result).toEqual(expectedResult);
+    });
+  });
+  describe('findAll', () => {
+    it('should return an array of users', async () => {
+      const result: Users[] = [];
+      result.push({id: 1, name: 'Alice', email: 'test@gmail.com'});
+      jest.spyOn(usersService, 'findAll').mockResolvedValue(result);
+      expect(await controller.findAll()).toBe(result);
+    });
+  });
+  describe('findOne', () => {
+    it('should return a user object', async () => {
+      const result = new Users('john', 'John Doe');
+      result.id = 1;
+      jest.spyOn(usersService, 'findOne').mockResolvedValue(result);
+
+      expect(await controller.findOne('1')).toBe(result);
+    });
+  });
+  describe('update', () => {
+    it('should update and return a user object', async () => {
+      const id = '1';
+      const updateUserDto: UpdateUserDto = {
+        email: 'johndoe@example.com',
+        name: 'John Doe',
+      };
+      const userDto: UserDto = {
+        id: 1,
+        name: 'John Doe',
+        email: 'johndoe@example.com',
+      };
+      jest.spyOn(usersService, 'update').mockResolvedValue(userDto);
+
+      expect(await controller.update(id, updateUserDto)).toBe(userDto);
+      expect(usersService.update).toHaveBeenCalledWith(+id, updateUserDto);
+    });
+  });
+  describe('remove', () => {
+    it('should remove a user', async () => {
+      const id = '1';
+      jest.spyOn(usersService, 'remove').mockResolvedValue(undefined);
+
+      expect(await controller.remove(id)).toBeUndefined();
+      expect(usersService.remove).toHaveBeenCalledWith(+id);
+    });
+  });
   // Test the GET /users/search endpoint
   describe('GET /users/search', () => {
     // Test with valid query parameters

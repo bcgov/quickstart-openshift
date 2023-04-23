@@ -1,8 +1,8 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { getRepositoryToken } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { UsersService } from "./users.service";
-import { Users } from "./entities/users.entity";
+import {Test, TestingModule} from "@nestjs/testing";
+import {getRepositoryToken} from "@nestjs/typeorm";
+import {Repository} from "typeorm";
+import {UsersService} from "./users.service";
+import {Users} from "./entities/users.entity";
 
 describe("UserService", () => {
   let service: UsersService;
@@ -46,6 +46,8 @@ describe("UserService", () => {
             // as these do not actually use their return values in our sample
             // we just make sure that their resolve is true to not crash
             delete: jest.fn().mockResolvedValue(true),
+            createQueryBuilder: jest.fn(),
+            getManyAndCount: jest.fn(),
           },
         },
       ],
@@ -88,13 +90,13 @@ describe("UserService", () => {
       const user = await service.update(1, updateUser);
       expect(user).toEqual(oneUser);
       expect(repo.update).toBeCalledTimes(1);
-      expect(repo.update).toBeCalledWith({ id: 1 }, updateUser);
+      expect(repo.update).toBeCalledWith({id: 1}, updateUser);
     });
   });
 
   describe("remove", () => {
     it("should return {deleted: true}", () => {
-      expect(service.remove(2)).resolves.toEqual({ deleted: true });
+      expect(service.remove(2)).resolves.toEqual({deleted: true});
     });
     it("should return {deleted: false, message: err.message}", () => {
       const repoSpy = jest
@@ -106,6 +108,120 @@ describe("UserService", () => {
       });
       expect(repoSpy).toBeCalledWith(-1);
       expect(repoSpy).toBeCalledTimes(1);
+    });
+  });
+  describe('searchUsers', () => {
+    it('should return a list of users with pagination and filtering', async () => {
+      const page: number = 1;
+      const limit: number = 10;
+      const sort: any = '{ "name": "ASC" }';
+      const filter: any = '[{ "key": "name", "operation": "=", "value": "Peter" }]';
+      const queryBuilder = {
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValueOnce([[], 0]),
+      };
+      jest.spyOn(repo, 'createQueryBuilder').mockReturnValue(queryBuilder as any);
+
+      const result = await service.searchUsers(page, limit, sort, filter);
+
+      expect(repo.createQueryBuilder).toHaveBeenCalledWith('users');
+      expect(queryBuilder.skip).toHaveBeenCalledWith(0);
+      expect(queryBuilder.take).toHaveBeenCalledWith(limit);
+      expect(queryBuilder.getManyAndCount).toHaveBeenCalled();
+      expect(result).toEqual({
+        users: [],
+        page,
+        limit,
+        total: 0,
+        totalPages: 0,
+      });
+    });
+
+    it('given no page should return a list of users with pagination and filtering with default page 1', async () => {
+      const limit: number = 10;
+      const sort: any = '{ "name": "ASC" }';
+      const filter: any = '[{ "key": "name", "operation": "=", "value": "Peter" }]';
+      const queryBuilder = {
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValueOnce([[], 0]),
+      };
+      jest.spyOn(repo, 'createQueryBuilder').mockReturnValue(queryBuilder as any);
+
+      const result = await service.searchUsers(null, limit, sort, filter);
+
+      expect(repo.createQueryBuilder).toHaveBeenCalledWith('users');
+      expect(queryBuilder.skip).toHaveBeenCalledWith(0);
+      expect(queryBuilder.take).toHaveBeenCalledWith(limit);
+      expect(queryBuilder.getManyAndCount).toHaveBeenCalled();
+      expect(result).toEqual({
+        users: [],
+        page: 1,
+        limit,
+        total: 0,
+        totalPages: 0,
+      });
+    });
+    it('given no limit should return a list of users with pagination and filtering with default limit 10', async () => {
+      const page: number = 1;
+      const sort: any = '{ "name": "ASC" }';
+      const filter: any = '[{ "key": "name", "operation": "=", "value": "Peter" }]';
+      const queryBuilder = {
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValueOnce([[], 0]),
+      };
+      jest.spyOn(repo, 'createQueryBuilder').mockReturnValue(queryBuilder as any);
+
+      const result = await service.searchUsers(page, null, sort, filter);
+
+      expect(repo.createQueryBuilder).toHaveBeenCalledWith('users');
+      expect(queryBuilder.skip).toHaveBeenCalledWith(0);
+      expect(queryBuilder.take).toHaveBeenCalledWith(10);
+      expect(queryBuilder.getManyAndCount).toHaveBeenCalled();
+      expect(result).toEqual({
+        users: [],
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+      });
+    });
+
+    it('given  limit greater than 200 should return a list of users with pagination and filtering with default limit 10', async () => {
+      const page: number = 1;
+      const limit: number = 201;
+      const sort: any = '{ "name": "ASC" }';
+      const filter: any = '[{ "key": "name", "operation": "=", "value": "Peter" }]';
+      const queryBuilder = {
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValueOnce([[], 0]),
+      };
+      jest.spyOn(repo, 'createQueryBuilder').mockReturnValue(queryBuilder as any);
+
+      const result = await service.searchUsers(page, limit, sort, filter);
+
+      expect(repo.createQueryBuilder).toHaveBeenCalledWith('users');
+      expect(queryBuilder.skip).toHaveBeenCalledWith(0);
+      expect(queryBuilder.take).toHaveBeenCalledWith(10);
+      expect(queryBuilder.getManyAndCount).toHaveBeenCalled();
+      expect(result).toEqual({
+        users: [],
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+      });
     });
   });
 });
