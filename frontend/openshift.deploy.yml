@@ -6,7 +6,7 @@ labels:
 parameters:
   - name: NAME
     description: Module name
-    value: nr-quickstart-typescript
+    value: quickstart-openshift
   - name: COMPONENT
     description: Component name
     value: frontend
@@ -37,7 +37,7 @@ parameters:
     value: ghcr.io
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
-    value: bcgov/nr-quickstart-typescript/frontend:prod
+    value: bcgov/quickstart-openshift/frontend:prod
 objects:
   - apiVersion: v1
     kind: ImageStream
