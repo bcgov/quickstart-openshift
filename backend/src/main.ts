@@ -1,9 +1,23 @@
-import { NestFactory } from "@nestjs/core";
-import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
-import { AppModule } from "./app.module";
+import {NestFactory} from "@nestjs/core";
+import {SwaggerModule, DocumentBuilder} from "@nestjs/swagger";
+import {AppModule} from "./app.module";
+import {customLogger} from "./common/logger.config";
+import {NestExpressApplication} from "@nestjs/platform-express";
+import helmet from "helmet";
+import {Logger, VersioningType} from "@nestjs/common";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: customLogger,
+  });
+  app.use(helmet());
+  app.enableCors();
+  app.set("trust proxy", 1);
+  app.enableShutdownHooks();
+  app.enableVersioning({
+    type: VersioningType.URI,
+    prefix: "api/v",
+  });
   const config = new DocumentBuilder()
     .setTitle("Users example")
     .setDescription("The user API description")
@@ -15,5 +29,8 @@ async function bootstrap() {
   SwaggerModule.setup("api", app, document);
 
   await app.listen(3000);
+  const logger = new Logger('NestApplication');
+  logger.log(`Listening on ${await app.getUrl()}`);
 }
+
 bootstrap();

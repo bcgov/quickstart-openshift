@@ -1,18 +1,18 @@
 import "dotenv/config";
-import { Module } from "@nestjs/common";
+import {Logger, Module} from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { UsersModule } from "./users/users.module";
 
-console.log("Var check - POSTGRESQL_HOST", process.env.POSTGRESQL_HOST);
-console.log("Var check - POSTGRESQL_DATABASE", process.env.POSTGRESQL_DATABASE);
-console.log("Var check - POSTGRESQL_USER", process.env.POSTGRESQL_USER);
+Logger.log("Var check - POSTGRESQL_HOST", process.env.POSTGRESQL_HOST);
+Logger.log("Var check - POSTGRESQL_DATABASE", process.env.POSTGRESQL_DATABASE);
+Logger.log("Var check - POSTGRESQL_USER", process.env.POSTGRESQL_USER);
 if (process.env.POSTGRESQL_PASSWORD != null ){
-  console.log("Var check - POSTGRESQL_PASSWORD present");
+  Logger.log("Var check - POSTGRESQL_PASSWORD present");
 } else {
-  console.log("Var check - POSTGRESQL_PASSWORD not present");
+  Logger.log("Var check - POSTGRESQL_PASSWORD not present");
 }
 
 @Module({
