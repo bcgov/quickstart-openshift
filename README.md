@@ -255,6 +255,15 @@ Members of the BC Government's Natural Resource minisistries are strongly recomm
 [Natural Resources Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md)
 
 
+# Unit Testing / Integration Testing
+
+Currently, the unit testing and integration testing is done in the same stage. Please make sure the database container
+is up and running. please run this command from the root of the repository if the DB container is not running.
+
+```
+ docker-compose up -d database
+```
+
 # Feedback
 
 Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.

@@ -8,8 +8,8 @@ services:
     container_name: database
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: default
-      POSTGRES_DB: default
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
     hostname: database
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres" ]
@@ -30,8 +30,8 @@ services:
       NODE_ENV: development
       POSTGRESQL_HOST: database
       POSTGRESQL_USER: postgres
-      POSTGRESQL_PASSWORD: default
-      POSTGRESQL_DATABASE: default
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_DATABASE: postgres
     hostname: backend
     image: registry.access.redhat.com/ubi8/nodejs-18-minimal@sha256:74af9dc2b620022c77fcd712b811f64a03c1444ff1e9b9596a242b2edf3cf96f
     links:
