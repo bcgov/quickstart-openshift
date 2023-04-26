@@ -27,10 +27,11 @@ export async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);
+  return app;
+}
 
+bootstrap().then(async (app: NestExpressApplication) => {
   await app.listen(3000);
   const logger = new Logger('NestApplication');
   logger.log(`Listening on ${await app.getUrl()}`);
-}
-
-bootstrap();
+});
