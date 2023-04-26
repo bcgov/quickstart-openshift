@@ -6,7 +6,7 @@ import {NestExpressApplication} from "@nestjs/platform-express";
 import helmet from "helmet";
 import {Logger, VersioningType} from "@nestjs/common";
 
-async function bootstrap() {
+export async function bootstrap() {
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: customLogger,
   });

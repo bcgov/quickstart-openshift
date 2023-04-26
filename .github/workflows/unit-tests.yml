@@ -21,6 +21,20 @@ jobs:
     name: Unit Tests
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: default
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     strategy:
       matrix:
         dir: [backend, frontend]
@@ -35,11 +49,12 @@ jobs:
       - uses: bcgov-nr/action-test-and-analyse@v0.0.1
         with:
           commands: |
+            export POSTGRES_PASSWORD=default
             npm ci
             npm run test:cov
           dir: ${{ matrix.dir }}
           sonar_args: >
-            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts,main.ts
+            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
