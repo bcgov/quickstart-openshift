@@ -49,7 +49,6 @@ jobs:
       - uses: bcgov-nr/action-test-and-analyse@v0.0.1
         with:
           commands: |
-            export POSTGRES_PASSWORD=default
             npm ci
             npm run test:cov
           dir: ${{ matrix.dir }}
