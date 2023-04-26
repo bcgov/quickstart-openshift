@@ -1,5 +1,5 @@
 {
-  "name": "quickstart-openshift",
+  "name": "backend",
   "version": "0.0.1",
   "description": "BCGov devops quickstart. For reference, testing and new projects.",
   "main": "index.js",
