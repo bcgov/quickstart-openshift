@@ -1,7 +1,6 @@
 {
-  "name": "frontend",
-  "version": "0.0.0",
-  "private": true,
+  "author": "BC Government Forestry Suite of Applications Starter Template",
+  "license": "Apache-2.0",
   "scripts": {
     "dev": "vite --host",
     "build": "run-p type-check build-only",

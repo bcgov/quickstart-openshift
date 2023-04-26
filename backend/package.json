@@ -1,7 +1,6 @@
 {
-  "name": "backend",
-  "version": "0.0.1",
-  "description": "BCGov devops quickstart. For reference, testing and new projects.",
+  "author": "BC Government Forestry Suite of Applications Starter Template",
+  "license": "Apache-2.0",
   "main": "index.js",
   "scripts": {
     "prebuild": "rimraf dist",
@@ -21,24 +20,6 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/bcgov/quickstart-openshift.git"
-  },
-  "keywords": [
-    "openshift",
-    "pipeline",
-    "node",
-    "node",
-    "js",
-    "devops"
-  ],
-  "author": "Derek Roberts",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/bcgov/quickstart-openshift/issues"
-  },
-  "homepage": "https://github.com/bcgov/quickstart-openshift#readme",
   "dependencies": {
     "@nestjs/cli": "^9.3.0",
     "@nestjs/common": "^9.2.1",

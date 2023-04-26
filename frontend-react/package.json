@@ -1,7 +1,6 @@
 {
-  "name": "frontend-react",
-  "version": "0.5.0",
-  "private": true,
+  "author": "BC Government Forestry Suite of Applications Starter Template",
+  "license": "Apache-2.0",
   "dependencies": {
     "@carbon/icons-react": "^11.9.0",
     "@carbon/react": "1.27.0",
@@ -29,23 +28,6 @@
     "vite": "^4.0.1",
     "vitest": "^0.29.0",
     "web-vitals": "^3.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/bcgov/nr-frontend-starting-app.git"
-  },
-  "keywords": [
-    "fsa",
-    "nr",
-    "frontend",
-    "node",
-    "js",
-    "react"
-  ],
-  "author": "Encora Team",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/bcgov/nr-frontend-starting-app/issues"
   },
   "scripts": {
     "build": "tsc && vite build",
