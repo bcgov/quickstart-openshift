@@ -45,7 +45,7 @@ yarn lint
 ### You can also try it with Docker
 
 ```sh
-docker build -t ghcr.io/bcgov/nr-quickstart-typescript/frontend-react:snapshot .
+docker build -t ghcr.io/bcgov/quickstart-openshift/frontend-react:snapshot .
 ```
 
 Then:
@@ -55,5 +55,5 @@ docker run -t -i -p 3000:3000 \
   -e VITE_KC_URL=https://dev.loginproxy.gov.bc.ca/auth \
   -e VITE_KC_REALM=standard \
   -e VITE_KC_CLIENT_ID=seed-planning-test-4296 \
-  ghcr.io/bcgov/nr-quickstart-typescript/frontend-react:snapshot
+  ghcr.io/bcgov/quickstart-openshift/frontend-react:snapshot
 ```

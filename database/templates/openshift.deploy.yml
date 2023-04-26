@@ -3,7 +3,7 @@ kind: Template
 parameters:
   - name: NAME
     description: Product name
-    value: nr-quickstart-typescript
+    value: quickstart-openshift
   - name: COMPONENT
     description: Component name
     value: database

@@ -7,4 +7,4 @@ This product currently has no support and is experimental.  That could change in
 
 ## Reporting a Vulnerability
 
-Please report any issues or vulerabilities with an [issue](https://github.com/bcgov/nr-quickstart-typescript/issues).
+Please report any issues or vulerabilities with an [issue](https://github.com/bcgov/quickstart-openshift/issues).
