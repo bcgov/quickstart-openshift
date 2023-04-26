@@ -39,7 +39,7 @@ jobs:
             npm run test:cov
           dir: ${{ matrix.dir }}
           sonar_args: >
-            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
+            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts,main.ts
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
