@@ -235,6 +235,8 @@ This is required to prevent direct pushes and merges to the default branch.  The
     * `[check] Require conversation resolution before merging`
     * `[check] Include administrators` (optional)
 
+![](./common/graphics/branch-protection.png)
+
 ### Adding Team Members
 
 Don't forget to add your team members!  
