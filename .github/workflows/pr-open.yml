@@ -23,43 +23,43 @@ jobs:
           #
           #  * smtp://user:password@server:port
           #  * smtp+starttls://user:password@server:port
-          connection_url: ${{secrets.MAIL_CONNECTION}}
+          # connection_url: ${{secrets.MAIL_CONNECTION}}
           # Required mail server address if not connection_url:
-          server_address: smtp.gmail.com
+          server_address: apps.smtp.gov.bc.ca
           # Server port, default 25:
-          server_port: 465
+          server_port: 25
           # Optional whether this connection use TLS (default is true if server_port is 465)
-          secure: true
+          secure: false
           # Optional (recommended) mail server username:
-          username: ${{secrets.MAIL_USERNAME}}
+          username: ""
           # Optional (recommended) mail server password:
-          password: ${{secrets.MAIL_PASSWORD}}
+          password: ""
           # Required mail subject:
           subject: Github Actions job result
           # Required recipients' addresses:
-          to: obiwan@example.com,yoda@example.com
+          to: derek.roberts@gmail.com,derek.roberts@gov.bc.ca
           # Required sender full name (address can be skipped):
-          from: Luke Skywalker # <user@example.com>
+          # from: Luke Skywalker # <user@example.com>
           # Optional plain body:
           body: Build job of ${{github.repository}} completed successfully!
           # Optional HTML body read from file:
-          html_body: file://README.html
+          # html_body: file://README.html
           # Optional carbon copy recipients:
-          cc: kyloren@example.com,leia@example.com
+          # cc: kyloren@example.com,leia@example.com
           # Optional blind carbon copy recipients:
-          bcc: r2d2@example.com,hansolo@example.com
+          # bcc: r2d2@example.com,hansolo@example.com
           # Optional recipient of the email response:
-          reply_to: luke@example.com
+          reply_to: DoNotReploy@gov.bc.ca
           # Optional Message ID this message is replying to:
-          in_reply_to: <random-luke@example.com>
+          # in_reply_to: <random-luke@example.com>
           # Optional unsigned/invalid certificates allowance:
           ignore_cert: true
           # Optional converting Markdown to HTML (set content_type to text/html too):
           convert_markdown: true
           # Optional attachments:
-          attachments: attachments.zip,git.diff,./dist/static/*.js
+          # attachments: attachments.zip,git.diff,./dist/static/*.js
           # Optional priority: 'high', 'normal' (default) or 'low'
-          priority: low
+          # priority: low
 
   # pr-greeting:
   #   name: PR Greeting
