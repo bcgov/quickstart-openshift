@@ -39,7 +39,7 @@ jobs:
           # Required recipients' addresses:
           to: derek.roberts@gmail.com,derek.roberts@gov.bc.ca
           # Required sender full name (address can be skipped):
-          # from: Luke Skywalker # <user@example.com>
+          from: DoNotReploy@gov.bc.ca # <user@example.com>
           # Optional plain body:
           body: Build job of ${{github.repository}} completed successfully!
           # Optional HTML body read from file:
