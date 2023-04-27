@@ -2,7 +2,7 @@
 ARG PORT 3000
 
 ### Builder
-FROM node:alpine3.16@sha256:45e3f9aa6dcf7c814fbb3f23097d412792326c26f849f26fbd128f6a9d6222f8 AS build
+FROM node:alpine3.16@sha256:ed99329fe58da7a80ae65cf047414c578aadb4799fc270b94e7c2c92c88086bb AS build
 
 # Build static files
 WORKDIR /app
