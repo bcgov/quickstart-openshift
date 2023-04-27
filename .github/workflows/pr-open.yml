@@ -46,15 +46,19 @@ jobs:
           - package: backend
             triggers: ('backend/')
             build_file: ./backend/Dockerfile
+            build_context: ./backend
           - package: database
             triggers: ('database/')
             build_file: ./database/Dockerfile
+            build_context: ./database
           - package: frontend
             triggers: ('frontend/')
             build_file: ./frontend/Dockerfile
+            build_context: ./frontend
           - package: database-migrations
             triggers: ('backend/db')
             build_file: ./backend/db/Dockerfile
+            build_context: ./backend/db
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.0
@@ -65,6 +69,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ${{ matrix.triggers }}
           build_file: ${{ matrix.build_file }}
+          build_context: ${{ matrix.build_context }}
 
 
   deploys:
