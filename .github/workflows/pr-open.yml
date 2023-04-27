@@ -25,15 +25,15 @@ jobs:
           #  * smtp+starttls://user:password@server:port
           # connection_url: ${{secrets.MAIL_CONNECTION}}
           # Required mail server address if not connection_url:
-          server_address: apps.smtp.extest.gov.bc.ca
+          server_address: apps.smtp.gov.bc.ca
           # Server port, default 25:
           server_port: 25
           # Optional whether this connection use TLS (default is true if server_port is 465)
           secure: false
           # Optional (recommended) mail server username:
-          username: ""
+          username: "${{ secrets.SMTP_USER }}"
           # Optional (recommended) mail server password:
-          password: ""
+          password: "${{ secrets.SMTP_PASSWORD }}"
           # Required mail subject:
           subject: Github Actions job result
           # Required recipients' addresses:
