@@ -41,14 +41,20 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [backend, database, frontend]
+        package: [backend, database, database-migrations, frontend]
         include:
           - package: backend
             triggers: ('backend/')
+            build_file: ./backend/Dockerfile
           - package: database
             triggers: ('database/')
+            build_file: ./database/Dockerfile
           - package: frontend
             triggers: ('frontend/')
+            build_file: ./frontend/Dockerfile
+          - package: database-migrations
+            triggers: ('backend/db')
+            build_file: ./backend/db/Dockerfile
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.0
@@ -58,6 +64,8 @@ jobs:
           tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ${{ matrix.triggers }}
+          build_file: ${{ matrix.build_file }}
+
 
   deploys:
     name: Deploys
