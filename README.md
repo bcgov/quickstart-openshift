@@ -1,13 +1,13 @@
 <!-- Project Shields -->
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_quickstart-openshift&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov_quickstart-openshift)
-[![Merge to Main](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml)
-[![Unit Tests and Analysis](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml)
-
 [![Issues](https://img.shields.io/github/issues/bcgov/quickstart-openshift)](/../../issues)
 [![Pull Requests](https://img.shields.io/github/issues-pr/bcgov/quickstart-openshift)](/../../pulls)
 [![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
+
+[![Merge to Main](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml)
+[![Unit Tests and Analysis](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml)
+
 
 # QuickStart: OpenShift, TypeScript and Postgres/PostGIS
 
