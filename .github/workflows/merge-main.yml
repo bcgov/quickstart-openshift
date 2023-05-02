@@ -49,7 +49,7 @@ jobs:
         include:
           - name: backend
             file: backend/openshift.deploy.yml
-            parameters: -p DB_MIGRATION_IMAGE_TAG=test
+            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:test
             overwrite: true
           - name: database
             file: database/openshift.deploy.yml
@@ -61,7 +61,7 @@ jobs:
             file: common/openshift.init.yml
             overwrite: false
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.3
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -85,7 +85,7 @@ jobs:
         include:
           - name: backend
             file: backend/openshift.deploy.yml
-            parameters: -p DB_MIGRATION_IMAGE_TAG=test
+            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:test
             overwrite: true
           - name: database
             file: database/openshift.deploy.yml
@@ -97,7 +97,7 @@ jobs:
             file: common/openshift.init.yml
             overwrite: false
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.3
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
