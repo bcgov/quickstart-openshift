@@ -49,6 +49,7 @@ jobs:
         include:
           - name: backend
             file: backend/openshift.deploy.yml
+            parameters: -p DB_MIGRATION_IMAGE_TAG=test
             overwrite: true
           - name: database
             file: database/openshift.deploy.yml
@@ -84,6 +85,7 @@ jobs:
         include:
           - name: backend
             file: backend/openshift.deploy.yml
+            parameters: -p DB_MIGRATION_IMAGE_TAG=test
             overwrite: true
           - name: database
             file: database/openshift.deploy.yml

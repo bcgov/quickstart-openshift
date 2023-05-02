@@ -44,6 +44,9 @@ parameters:
   - name: COMPONENT_DB_MIGRATION
     description: Component name for database migrations
     value: database-migrations
+  - name: DB_MIGRATION_IMAGE_TAG
+    description: Image tag for db migrations
+    value: prod
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -74,7 +77,7 @@ objects:
         - name: ${IMAGE_TAG}
           from:
             kind: DockerImage
-            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT_DB_MIGRATION}:${IMAGE_TAG}
+            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT_DB_MIGRATION}:${DB_MIGRATION_IMAGE_TAG}
           referencePolicy:
             type: Local
   - apiVersion: v1

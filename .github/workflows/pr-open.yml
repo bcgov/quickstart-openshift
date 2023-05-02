@@ -84,7 +84,7 @@ jobs:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2 -p DB_MIGRATION_IMAGE_TAG=${{ github.event.number }}
           - name: database
             file: database/openshift.deploy.yml
             overwrite: false
