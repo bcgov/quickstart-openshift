@@ -19,7 +19,28 @@ services:
     user: postgres
     volumes:
       - "./data:/pgdata"
-
+    networks:
+      - default
+  database-migrations:
+    image: flyway/flyway:9.10-alpine
+    container_name: backend-migrations
+    command:
+      - info
+      - migrate
+      - info
+    volumes:
+      - "./backend/db/migrations:/flyway/sql"
+    environment:
+      - FLYWAY_URL=jdbc:postgresql://database:5432/postgres
+      - FLYWAY_USER=postgres
+      - FLYWAY_PASSWORD=postgres
+      - FLYWAY_BASELINE_ON_MIGRATE=true
+      - FLYWAY_DEFAULT_SCHEMA=USERS
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - default
   backend:
     container_name: backend
     entrypoint:
@@ -48,7 +69,10 @@ services:
     depends_on:
       database:
         condition: service_healthy
-
+      database-migrations:
+        condition: service_started
+    networks:
+      - default
   frontend:
     container_name: frontend
     entrypoint:
@@ -72,3 +96,9 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

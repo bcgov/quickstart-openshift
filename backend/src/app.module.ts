@@ -18,7 +18,7 @@ import {UsersModule} from "./users/users.module";
       password: process.env.POSTGRESQL_PASSWORD || "postgres", // helps in UT and e2e testing
       // entities: [User],
       autoLoadEntities: true, // Auto load all entities regiestered by typeorm forFeature method.
-      synchronize: true, // This changes the DB schema to match changes to entities, which we might not want.
+      schema: "users",
       //logging: "all"
     }),
     UsersModule,

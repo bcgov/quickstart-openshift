@@ -41,14 +41,24 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [backend, database, frontend]
+        package: [backend, database, database-migrations, frontend]
         include:
           - package: backend
             triggers: ('backend/')
+            build_file: ./backend/Dockerfile
+            build_context: ./backend
           - package: database
             triggers: ('database/')
+            build_file: ./database/Dockerfile
+            build_context: ./database
           - package: frontend
             triggers: ('frontend/')
+            build_file: ./frontend/Dockerfile
+            build_context: ./frontend
+          - package: database-migrations
+            triggers: ('backend/db')
+            build_file: ./backend/db/Dockerfile
+            build_context: ./backend/db
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.0
@@ -58,6 +68,9 @@ jobs:
           tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ${{ matrix.triggers }}
+          build_file: ${{ matrix.build_file }}
+          build_context: ${{ matrix.build_context }}
+
 
   deploys:
     name: Deploys
@@ -71,7 +84,9 @@ jobs:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+            parameters:
+              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
           - name: database
             file: database/openshift.deploy.yml
             overwrite: false
@@ -83,7 +98,7 @@ jobs:
             file: common/openshift.init.yml
             overwrite: false
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.3
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
