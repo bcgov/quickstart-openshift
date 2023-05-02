@@ -102,7 +102,7 @@ objects:
           imageChangeParams:
             automatic: true
             containerNames:
-              - ${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}
+              - ${NAME}-${COMPONENT_DB_MIGRATION}
             from:
               kind: ImageStreamTag
               name: ${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}:${IMAGE_TAG}
@@ -167,7 +167,7 @@ objects:
                 periodSeconds: 30
                 timeoutSeconds: 5
           initContainers:
-            - name: ${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}
+            - name: ${NAME}-${COMPONENT_DB_MIGRATION}
               image: ${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}:${IMAGE_TAG}
               env:
                 - name: FLYWAY_URL
