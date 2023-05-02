@@ -98,6 +98,14 @@ objects:
             from:
               kind: ImageStreamTag
               name: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - ${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}
+            from:
+              kind: ImageStreamTag
+              name: ${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}:${IMAGE_TAG}
       selector:
         deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
