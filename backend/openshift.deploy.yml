@@ -160,7 +160,7 @@ objects:
                 timeoutSeconds: 5
           initContainers:
             - name: ${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}
-              image: ${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}
+              image: ${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}:${IMAGE_TAG}
               env:
                 - name: FLYWAY_URL
                   value: "jdbc:postgresql://${NAME}-${ZONE}-database:5432/${NAME}"
