@@ -14,7 +14,7 @@
     "@vitejs/plugin-react": "4.0.0",
     "@typescript-eslint/parser": "5.59.1",
     "eslint-config-airbnb-typescript": "^17.0.0",
-    "jsdom": "^21.0.0",
+    "jsdom": "^22.0.0",
     "keycloak-js": "^21.0.0",
     "make-fetch-happen": "11.1.0",
     "node-sass": "8.0.0",
