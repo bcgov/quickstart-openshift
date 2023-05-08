@@ -61,7 +61,7 @@ jobs:
             file: common/openshift.init.yml
             overwrite: false
           - name: backend-py
-            file: backend-py/openshift.deploy.yml
+            file: backend-python/openshift.deploy.yml
             overwrite: true
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [backend, database, frontend, init]
+        name: [backend, database, frontend, init, backend-py]
         include:
           - name: backend
             file: backend/openshift.deploy.yml
@@ -104,7 +104,7 @@ jobs:
             file: common/openshift.init.yml
             overwrite: false
           - name: backend-py
-            file: backend-py/openshift.deploy.yml
+            file: backend-python/openshift.deploy.yml
             overwrite: true
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2

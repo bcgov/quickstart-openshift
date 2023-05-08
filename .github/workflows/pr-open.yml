@@ -60,13 +60,13 @@ jobs:
             build_file: ./backend/db/Dockerfile
             build_context: ./backend/db
           - package: database-migrations-py
-            triggers: ('backend-py/db')
-            build_file: ./backend-py/db/Dockerfile
-            build_context: ./backend-py/db
+            triggers: ('backend-python/db')
+            build_file: ./backend-python/db/Dockerfile
+            build_context: ./backend-python/db
           - package: backend-py
-            triggers: ('backend-py/db')
-            build_file: ./backend-py/Dockerfile
-            build_context: ./backend-py
+            triggers: ('backend-python')
+            build_file: ./backend-python/Dockerfile
+            build_context: ./backend-python
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.0
@@ -96,7 +96,7 @@ jobs:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
           - name: backend-py
-            file: backend-py/openshift.deploy.yml
+            file: backend-python/openshift.deploy.yml
             overwrite: true
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
