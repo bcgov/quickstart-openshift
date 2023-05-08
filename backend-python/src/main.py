@@ -1,0 +1,69 @@
+import logging
+import os
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from core.config import Configuration
+
+log = logging.getLogger("uvicorn.error")
+
+
+def get_logging_level() -> int:
+    """Get the logging level from the environment variable LOG_LEVEL
+    CRITICAL = 50
+    FATAL = CRITICAL
+    ERROR = 40
+    WARNING = 30
+    WARN = WARNING
+    INFO = 20
+    DEBUG = 10
+    NOTSET = 0
+    """
+    return int(os.getenv("LOG_LEVEL", "10"))
+
+
+log.setLevel(get_logging_level())  # Change this to DEBUG to see the SQL queries
+log.info(f"database url is {Configuration.SQLALCHEMY_DATABASE_URI}")
+log.info("Starting fastapi app")
+OpenAPIInfo = {
+    "title": "FastAPI Boilerplate",
+    "version": "0.1.0",
+    "description": "A boilerplate for FastAPI with SQLAlchemy, Postgres"
+}
+app = FastAPI(title=OpenAPIInfo["title"],
+              version=OpenAPIInfo["version"])
+origins: list[str] = [
+    "http://localhost*",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# Add filter to the logger
+
+
+@app.get("/")
+async def root():
+    return {"message": "Route verification endpoints"}
+
+
+# Define the filter
+class EndpointFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return record.args and len(record.args) >= 3 and record.args[2] != "/"
+
+
+# Add filter to the logger
+logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
+
+
+def get_app() -> FastAPI:
+    return app
+
+    return app

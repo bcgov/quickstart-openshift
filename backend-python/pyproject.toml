@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "backend-python"
+version = "0.1.0"
+description = "Starter template for Python backend projects"
+authors = ["NRIDS"]
+readme = "README.md"
+packages = [{ include = "backend_python" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.95.1"
+uvicorn = "^0.22.0"
+sqlalchemy = "^2.0.12"
+pydantic = "^1.10.7"
+requests = "^2.30.0"
+psycopg2 = "^2.9.1"
+
+[tool.poetry.dev-dependencies]
+prospector = "^1.5.1"
+pytest = "^7.3.1"
+pytest-cov = "^4.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.report]
+fail_under = 80
+
+[tool.prospector]
+strictness = "veryhigh"
+test-warnings = true
+doc-warnings = true
+
+[tool.pytest.ini_options]
+pythonpath = [
+    ".", "src"
+]
