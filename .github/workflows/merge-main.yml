@@ -60,6 +60,13 @@ jobs:
           - name: init
             file: common/openshift.init.yml
             overwrite: false
+          - name: backend-py
+            file: backend-py/openshift.deploy.yml
+            overwrite: true
+            parameters:
+              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
+
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
@@ -96,6 +103,12 @@ jobs:
           - name: init
             file: common/openshift.init.yml
             overwrite: false
+          - name: backend-py
+            file: backend-py/openshift.deploy.yml
+            overwrite: true
+            parameters:
+              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
@@ -118,7 +131,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        component: [backend, database,database-migrations, frontend]
+        component: [backend, database,database-migrations, frontend, database-migrations-py, backend-py]
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
         with:
