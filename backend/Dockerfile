@@ -1,5 +1,5 @@
 # https://catalog.redhat.com/software/containers/ubi8/nodejs-18-minimal/627d1c38e35da88581633bf1
-FROM registry.access.redhat.com/ubi8/nodejs-18-minimal:1-40@sha256:e09f31b4ff7cbddf784d3bc7af8636325137fd19f629605609c87071eeea017c AS builder
+FROM registry.access.redhat.com/ubi8/nodejs-18-minimal:1-40 AS builder
 
 # Install packages, build and keep only prod packages
 USER root
@@ -10,7 +10,7 @@ RUN npm ci --omit=dev && \
     npm run build
 
 # Deployment container
-FROM registry.access.redhat.com/ubi8/ubi-micro:8.7-8@sha256:6a56010de933f172b195a1a575855d37b70a4968be8edb35157f6ca193969ad2
+FROM registry.access.redhat.com/ubi8/ubi-micro:8.7-8
 
 # Set node to production 
 ENV NODE_ENV production
