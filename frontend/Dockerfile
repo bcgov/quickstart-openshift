@@ -11,7 +11,7 @@ RUN npm ci && \
     npm run build
 
 ### Deploy
-FROM caddy:2.4.6-alpine
+FROM caddy:2.6.4-alpine
 ARG PORT
 
 # Copy Caddyfile and static files
