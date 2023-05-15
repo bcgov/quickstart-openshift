@@ -126,3 +126,48 @@ jobs:
           repository: ${{ github.repository }}/${{ matrix.component }}
           target: test
           tags: prod
+
+
+  generate_schema_spy:
+    name: Generate SchemaSpy Documentation
+    runs-on: ubuntu-22.04
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: default
+          POSTGRES_USER: default
+          POSTGRES_PASSWORD: default
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: joshuaavalon/flyway-action@v3.0.0
+        name: generate schemaspy documentation for node/nest js backend
+        with:
+          url: jdbc:postgresql://postgres:5432/default
+          user: default
+          password: default
+        env:
+          FLYWAY_VALIDATE_MIGRATION_NAMING: true
+          FLYWAY_LOCATIONS: filesystem:./backend/db/migrations
+          FLYWAY_DEFAULT_SCHEMA: "USERS"
+      - name: Create Output Folder
+        run: |
+          mkdir output
+          chmod a+rwx -R output
+      - name: Run Schemaspy
+        run: docker run --network host -v "$PWD/output:/output" schemaspy/schemaspy:snapshot -t pgsql -db default -host 127.0.0.1 -port 5432 -u default -p default -schemas USERS
+      - name: Deploy to Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: output
+          target-folder: schemaspy
