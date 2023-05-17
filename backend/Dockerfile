@@ -6,7 +6,7 @@ USER root
 WORKDIR /app
 COPY *.json ./
 COPY ./src /app/src
-RUN npm ci --omit=dev && \
+RUN npm ci --omit=dev --ignore-scripts && \
     npm run build
 
 # Deployment container
