@@ -7,7 +7,7 @@ FROM node:alpine3.16 AS build
 # Build static files
 WORKDIR /app
 COPY . .
-RUN npm ci --omit=dev --ignore-scripts && \
+RUN npm ci --ignore-scripts && \
     npm run build
 
 ### Deploy
