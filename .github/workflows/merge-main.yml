@@ -172,13 +172,13 @@ jobs:
         env:
           FLYWAY_VALIDATE_MIGRATION_NAMING: true
           FLYWAY_LOCATIONS: filesystem:./backend/db/migrations
-          FLYWAY_DEFAULT_SCHEMA: "USERS"
+          FLYWAY_DEFAULT_SCHEMA: "users"
       - name: Create Output Folder
         run: |
           mkdir output
           chmod a+rwx -R output
       - name: Run Schemaspy
-        run: docker run --network host -v "$PWD/output:/output" schemaspy/schemaspy:snapshot -t pgsql -db default -host 127.0.0.1 -port 5432 -u default -p default -schemas USERS
+        run: docker run --network host -v "$PWD/output:/output" schemaspy/schemaspy:snapshot -t pgsql -db default -host 127.0.0.1 -port 5432 -u default -p default -schemas users
       - name: Deploy to Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
