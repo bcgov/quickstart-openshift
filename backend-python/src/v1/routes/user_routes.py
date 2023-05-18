@@ -1,12 +1,11 @@
-import logging
-import os
 from typing import Any, List
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+
 from src.db import session
-from src.v1.structs.user import User
 from src.v1.repository.user_repository import userRepository
+from src.v1.structs.user import User
 
 router = APIRouter()
 
@@ -20,7 +19,6 @@ def read_users(
     """
     Retrieve users.
     """
-    logging.error(f"skip: {skip}, limit: {limit}")
     users = userRepository.get_multi(db, skip=skip, limit=limit)
     return users
 
