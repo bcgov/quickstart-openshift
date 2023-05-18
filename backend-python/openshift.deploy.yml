@@ -138,6 +138,8 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
                       key: database-user
+                - name: PYTHONPATH
+                  value: /application/app/src
               ports:
                 - containerPort: 3000
                   protocol: TCP

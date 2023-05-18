@@ -3,8 +3,8 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from v1.routes.user_routes import router as user_router
-from core.config import Configuration
+from .v1.routes.user_routes import router as user_router
+from .core.config import Configuration
 
 log = logging.getLogger("uvicorn.error")
 api_prefix_v1 = "/api/v1"
