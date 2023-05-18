@@ -66,6 +66,7 @@ services:
       - ./backend-python/pyproject.toml:/application/pyproject.toml
       - ./backend-python/poetry.lock:/application/poetry.lock
       - ./backend-python/start-local.sh:/application/start-local.sh
+      - ./backend-python/logger.conf:/application/logger.conf
     environment:
       PIP_NO_CACHE_DIR: off
       PIP_DISABLE_PIP_VERSION_CHECK: on

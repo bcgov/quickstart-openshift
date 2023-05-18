@@ -6,4 +6,4 @@ poetry install --no-root -vvv
 cd app || exit
 DATE_TIME=$(date +'%Y-%m-%d %H:%M:%S.%3N')
 echo "Starting uvicorn at $DATE_TIME"
-uvicorn src.main:app --host 0.0.0.0 --port 3000 --workers 1 --log-level info --server-header --date-header --limit-concurrency 100 --reload
+uvicorn src.main:app --host 0.0.0.0 --port 3000 --workers 1 --log-level info --server-header --date-header --limit-concurrency 100 --reload --log-config /application/logger.conf
