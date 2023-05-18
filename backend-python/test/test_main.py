@@ -1,13 +1,9 @@
-import logging
 import os
 
-from fastapi.middleware.cors import CORSMiddleware
-
-from src.main import get_logging_level, EndpointFilter, get_app
+from src.main import get_logging_level, app
 
 
 def test_root():
-    app = get_app()
     assert app is not None
 
 
@@ -16,3 +12,6 @@ def test_get_logging_level():
     assert get_logging_level() == 40
 
 
+def test_get_logging_level_default():
+    del os.environ["LOG_LEVEL"]
+    assert get_logging_level() == 10

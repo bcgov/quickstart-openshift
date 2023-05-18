@@ -5,9 +5,8 @@ from pydantic import BaseModel
 from sqlalchemy import Row
 from sqlalchemy.orm import Session
 
-from src.db.base_class import Base
 
-ModelType = TypeVar("ModelType", bound=Base)
+ModelType = TypeVar("ModelType", bound=BaseModel)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 

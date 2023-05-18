@@ -15,7 +15,7 @@ services:
       test: [ "CMD", "pg_isready", "-U", "postgres" ]
     ports:
       - "5430:5432"
-    restart: always
+    restart: unless-stopped
     user: postgres
     volumes:
       - "./py-data:/pgdata"
@@ -39,6 +39,19 @@ services:
     depends_on:
       database-py:
         condition: service_healthy
+    networks:
+      - default
+  sqlalchemy-model-generator:
+    image: python:3.9-slim-buster
+    working_dir: /application
+    container_name: py-backend-model-generator
+    command: sh -c "chmod +x generate-models.sh && ./generate-models.sh"
+    volumes:
+      - "./backend-python/src/v1/models:/application/models"
+      - "./backend-python/generate-models.sh:/application/generate-models.sh"
+    depends_on:
+      database-py-migrations:
+        condition: service_completed_successfully
     networks:
       - default
   backend-py:
@@ -69,6 +82,8 @@ services:
       POSTGRESQL_USER: postgres
       POSTGRESQL_PASSWORD: postgres
       POSTGRESQL_DATABASE: postgres
+      PYTHONPATH: /application/app/src
+    restart: unless-stopped
     hostname: backend-py
     ports:
       - "3003:3000"
@@ -77,8 +92,8 @@ services:
     depends_on:
       database-py:
         condition: service_healthy
-      database-py-migrations:
-        condition: service_started
+      sqlalchemy-model-generator:
+        condition: service_completed_successfully
     networks:
       - default
   frontend:
@@ -99,6 +114,7 @@ services:
       - /app/node_modules
     user: root
     working_dir: "/app"
+    restart: unless-stopped
     depends_on:
       backend-py:
         condition: service_healthy

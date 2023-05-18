@@ -1,1 +1,1 @@
-from . import *
+from . import user_routes
