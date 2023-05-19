@@ -5,7 +5,7 @@ COPY . .
 RUN yarn install --frozen-lockfile
 RUN yarn build
 
-FROM caddy:2.4.6-alpine AS deploy
+FROM caddy:2.6.4-alpine AS deploy
 COPY --from=build /app/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/build /srv
 
