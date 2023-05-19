@@ -61,7 +61,7 @@ jobs:
             build_context: ./backend/db
     steps:
       - uses: actions/checkout@v3
-      - uses: bcgov-nr/action-builder-ghcr@v1.1.0
+      - uses: bcgov-nr/action-builder-ghcr@bug/fixSmartRebuild
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
