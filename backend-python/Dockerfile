@@ -43,5 +43,10 @@ RUN poetry install --no-root -vvv --without dev --sync
 COPY . /application/app
 COPY start-openshift.sh /application
 RUN chmod +x start-openshift.sh
+# Port and health check
+EXPOSE 3000
+HEALTHCHECK --interval=300s --timeout=10s CMD curl -f http://localhost/:3000
 
+# Non-privileged user
+USER app
 CMD ["./start-openshift.sh"]

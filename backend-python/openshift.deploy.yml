@@ -186,7 +186,7 @@ objects:
                 - name: PYTHONPATH
                   value: /application/app/src
               volumeMounts:
-                - mountPath: /application/app
+                - mountPath: /opt
                   name: logger-conf
 
               ports:
