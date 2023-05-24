@@ -6,27 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from .v1.routes.user_routes import router as user_router
 from .core.config import Configuration
 
-log = logging.getLogger("uvicorn.error")
 api_prefix_v1 = "/api/v1"
+logging.getLogger("uvicorn").handlers.clear()  # removes duplicated logs
 
-
-def get_logging_level() -> int:
-    """Get the logging level from the environment variable LOG_LEVEL
-    CRITICAL = 50
-    FATAL = CRITICAL
-    ERROR = 40
-    WARNING = 30
-    WARN = WARNING
-    INFO = 20
-    DEBUG = 10
-    NOTSET = 0
-    """
-    return int(os.getenv("LOG_LEVEL", "10"))
-
-
-log.setLevel(get_logging_level())  # Change this to DEBUG to see the SQL queries
-log.info(f"database url is {Configuration.SQLALCHEMY_DATABASE_URI}")
-log.info("Starting fastapi app")
 OpenAPIInfo = {
     "title": "FastAPI template for quickstart openshift",
     "version": "0.1.0",

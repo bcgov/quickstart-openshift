@@ -49,6 +49,51 @@ parameters:
     value: database-migrations-py
 objects:
   - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: ${COMPONENT}-configmap
+      namespace: logger.conf
+      labels:
+        app: ${NAME}-${ZONE}
+    data:
+      logger.conf: |
+        [loggers]
+        keys=root,sqlalchemy,psycopg2
+        
+        [handlers]
+        keys=console
+        
+        [formatters]
+        keys=default
+        
+        [logger_root]
+        level=INFO
+        handlers=console
+        qualname=root
+        propagate=0
+        
+        [logger_sqlalchemy]
+        level=DEBUG
+        handlers=console
+        qualname=sqlalchemy
+        propagate=0
+        
+        [logger_psycopg2]
+        level=DEBUG
+        handlers=console
+        qualname=psycopg2
+        propagate=0
+        
+        [handler_console]
+        class=StreamHandler
+        formatter=default
+        args=(sys.stdout,)
+        
+        [formatter_default]
+        format=%(asctime)s.%(msecs)03d | %(levelname)s | %(name)s | %(funcName)s:%(lineno)d | %(message)s
+        datefmt=%Y-%m-%d %H:%M:%S
+
+  - apiVersion: v1
     kind: ImageStream
     metadata:
       labels:
@@ -140,6 +185,10 @@ objects:
                       key: database-user
                 - name: PYTHONPATH
                   value: /application/app/src
+              volumeMounts:
+                - mountPath: /application/app
+                  name: logger.conf
+
               ports:
                 - containerPort: 3000
                   protocol: TCP
@@ -168,6 +217,10 @@ objects:
                 initialDelaySeconds: 60
                 periodSeconds: 30
                 timeoutSeconds: 5
+          volumes:
+            - name: logger.conf
+              configMap:
+                name: ${COMPONENT}-configmap
           initContainers:
             - name: ${NAME}-${COMPONENT_DB_MIGRATION}
               image: ${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}:${IMAGE_TAG}

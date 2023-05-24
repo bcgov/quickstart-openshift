@@ -41,7 +41,6 @@ RUN poetry install --no-root -vvv --without dev --sync
 
 # Copy python code
 COPY . /application/app
-COPY logger.conf /application/app
 COPY start-openshift.sh /application
 RUN chmod +x start-openshift.sh
 
