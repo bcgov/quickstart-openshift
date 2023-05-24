@@ -17,6 +17,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  tests-python:
+    name : Python API Unit Tests
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    working-directory: backend-python
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+        - uses: actions/checkout@v3
+        - name: Set up Python 3.11
+          uses: actions/setup-python@v4
+          with:
+            python-version: 3.11
+        - name: Add Poetry to PATH
+          uses: abatilo/actions-poetry@v2
+          with:
+            poetry-version: 1.2.2
+        - name: Install dependencies
+          run: |
+            poetry install --no-root -vvv
+            pip install -r requirements.txt
+        - name: Run tests
+          run: |
+            pytest
+
   tests:
     name: Unit Tests
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
