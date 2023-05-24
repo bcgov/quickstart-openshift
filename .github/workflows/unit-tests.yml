@@ -34,7 +34,7 @@ jobs:
             frontend: frontend/**
   tests:
     name: Unit Tests
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    if: (github.event_name != 'pull_request' || !github.event.pull_request.draft) && needs.changes.outputs.packages != ''
     needs: changes
     runs-on: ubuntu-22.04
     services:
