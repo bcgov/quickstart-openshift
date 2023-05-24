@@ -31,8 +31,7 @@ ENV PYTHONUNBUFFERED=1 \
 ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
 # Install external packages
-RUN apt update
-RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN apt update && curl -sSL https://install.python-poetry.org | python3 -
 
 # Install python dependencies
 WORKDIR /application
