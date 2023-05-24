@@ -1,0 +1,166 @@
+---
+version: "3.9"
+
+services:
+  database-py:
+    build:
+      context: database
+    container_name: py-api-database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    hostname: database-py
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+    ports:
+      - "5430:5432"
+    restart: unless-stopped
+    user: postgres
+    volumes:
+      - "./py-data:/pgdata"
+    networks:
+      - default
+  database-py-migrations:
+    image: flyway/flyway:9-alpine
+    container_name: py-backend-migrations
+    command:
+      - info
+      - migrate
+      - info
+    volumes:
+      - "./backend-python/db/migrations:/flyway/sql"
+    environment:
+      - FLYWAY_URL=jdbc:postgresql://database-py:5432/postgres
+      - FLYWAY_USER=postgres
+      - FLYWAY_PASSWORD=postgres
+      - FLYWAY_BASELINE_ON_MIGRATE=true
+      - FLYWAY_DEFAULT_SCHEMA=py_api
+    depends_on:
+      database-py:
+        condition: service_healthy
+    networks:
+      - default
+  sqlalchemy-model-generator:
+    image: python:3.9-slim-buster
+    working_dir: /application
+    container_name: py-backend-model-generator
+    command: sh -c "chmod +x generate-models.sh && ./generate-models.sh"
+    volumes:
+      - "./backend-python/src/v1/models:/application/models"
+      - "./backend-python/generate-models.sh:/application/generate-models.sh"
+    depends_on:
+      database-py-migrations:
+        condition: service_completed_successfully
+    networks:
+      - default
+  backend-py:
+    image: python:3.11
+    working_dir: /application
+    build:
+      context: backend-python
+    container_name: backend-py
+    command: sh -c "chmod +x start-local.sh && ./start-local.sh"
+    volumes: # don't volume mount the entire backend python as it would remove the venv
+      - ./backend-python/src:/application/app/src
+      - ./backend-python/pyproject.toml:/application/pyproject.toml
+      - ./backend-python/poetry.lock:/application/poetry.lock
+      - ./backend-python/start-local.sh:/application/start-local.sh
+      - ./backend-python/logger.conf:/application/logger.conf
+    environment:
+      PIP_NO_CACHE_DIR: off
+      PIP_DISABLE_PIP_VERSION_CHECK: on
+      PIP_DEFAULT_TIMEOUT: 100
+      POETRY_VERSION: 1.2.2
+      POETRY_HOME: /opt/poetry
+      POETRY_VIRTUALENVS_IN_PROJECT: true
+      POETRY_NO_INTERACTION: 1
+      PYSETUP_PATH: /application
+      VENV_PATH: /application/.venv
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+      POSTGRES_SERVER: database-py
+      POSTGRESQL_USER: postgres
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_DATABASE: postgres
+      PYTHONPATH: /application/app/src
+    restart: unless-stopped
+    hostname: backend-py
+    ports:
+      - "3003:3000"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
+    depends_on:
+      database-py:
+        condition: service_healthy
+      sqlalchemy-model-generator:
+        condition: service_completed_successfully
+    networks:
+      - default
+  backend-py-test:
+    image: python:3.11
+    working_dir: /application
+    build:
+      context: backend-python
+    container_name: backend-py-test
+    command: sh -c "chmod +x run-unit-tests.sh && ./run-unit-tests.sh"
+    volumes: # don't volume mount the entire backend python as it would remove the venv
+      - ./backend-python/src:/application/app/src
+      - ./backend-python/test:/application/app/test
+      - ./backend-python/pyproject.toml:/application/pyproject.toml
+      - ./backend-python/poetry.lock:/application/poetry.lock
+      - ./backend-python/run-unit-tests.sh:/application/run-unit-tests.sh
+      - ./backend-python/logger.conf:/application/logger.conf
+    environment:
+      PIP_NO_CACHE_DIR: off
+      PIP_DISABLE_PIP_VERSION_CHECK: on
+      PIP_DEFAULT_TIMEOUT: 100
+      POETRY_VERSION: 1.2.2
+      POETRY_HOME: /opt/poetry
+      POETRY_VIRTUALENVS_IN_PROJECT: true
+      POETRY_NO_INTERACTION: 1
+      PYSETUP_PATH: /application
+      VENV_PATH: /application/.venv
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+      POSTGRES_SERVER: database-py
+      POSTGRESQL_USER: postgres
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_DATABASE: postgres
+      PYTHONPATH: /application/app
+    hostname: backend-py-test
+    depends_on:
+      database-py:
+        condition: service_healthy
+      backend-py:
+        condition: service_healthy
+    networks:
+      - default
+  frontend:
+    container_name: frontend
+    entrypoint:
+      - "sh"
+      - "-c"
+      - "chown -R root . && npm ci && npm run dev"
+    environment:
+      NODE_ENV: development
+      BACKEND_URL: backend
+    hostname: frontend
+    image: registry.access.redhat.com/ubi8/nodejs-18-minimal@sha256:74af9dc2b620022c77fcd712b811f64a03c1444ff1e9b9596a242b2edf3cf96f
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app:z
+      - /app/node_modules
+    user: root
+    working_dir: "/app"
+    restart: unless-stopped
+    depends_on:
+      backend-py:
+        condition: service_healthy
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

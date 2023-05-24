@@ -254,8 +254,31 @@ Members of the BC Government's Natural Resource minisistries are strongly recomm
 
 [Natural Resources Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md)
 
+# Pluggable Backend
 
-# Unit Testing / Integration Testing
+The quickstart comes with several pluggable backend components. The following section outlines them. Please follow each individual readme.md for more details.
+
+1. [Node/Nest.js](backend)
+    To use this backend,  please remove the followings
+    1. Remove the `backend-python` folder
+    2. Remove the `backend-py, database-migrations-py` from pr-open.yml in the builds section
+    3. Remove the `backend-py` from pr-open.yml in the deployments section
+    4. Remove the `backend-py, database-migrations-py` from pr-close.yml in the image-promotions section
+    5. Remove the `backend-py, database-migrations-py` from merge-main.yml in the deployments
+    6. Remove the docker-compose.py.yml from the root of the repository
+2. [Python/FastAPI](backend-python)
+   To use this backend,  please remove the followings
+    1. Remove the `backend` folder
+    2. Remove the `backend, database-migrations` from pr-open.yml in the builds section
+    3. Remove the `backend` from pr-open.yml in the deployments section
+    4. Remove the `backend, database-migrations` from pr-close.yml in the image-promotions section
+    5. Remove the `backend, database-migrations` from merge-main.yml in the deployments
+    6. Remove the docker-compose.py.yml from the root of the repository
+3. [Java/Quarkus](backend-java) # TODO
+4. [Golang/Fiber](backend-go) # TODO
+5. [Rust/Actix](backend-rust) # TODO
+
+## Unit Testing / Integration Testing for Node/Nest Backend
 
 Currently, the unit testing and integration testing is done in the same stage. Please make sure the database container
 is up and running. please run this command from the root of the repository if the DB container is not running.

@@ -41,7 +41,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [backend, database, database-migrations, frontend]
+        package: [backend, database, database-migrations, frontend, backend-py, database-migrations-py]
         include:
           - package: backend
             triggers: ('backend/')
@@ -59,6 +59,14 @@ jobs:
             triggers: ('backend/db')
             build_file: ./backend/db/Dockerfile
             build_context: ./backend/db
+          - package: database-migrations-py
+            triggers: ('backend-python/db')
+            build_file: ./backend-python/db/Dockerfile
+            build_context: ./backend-python/db
+          - package: backend-py
+            triggers: ('backend-python')
+            build_file: ./backend-python/Dockerfile
+            build_context: ./backend-python
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.1
@@ -79,7 +87,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [backend, database, init, frontend]
+        name: [backend, database, init, frontend, backend-py]
         include:
           - name: backend
             file: backend/openshift.deploy.yml
@@ -87,6 +95,12 @@ jobs:
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
+          - name: backend-py
+            file: backend-python/openshift.deploy.yml
+            overwrite: true
+            parameters:
+              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:${{ github.event.number }}
           - name: database
             file: database/openshift.deploy.yml
             overwrite: false

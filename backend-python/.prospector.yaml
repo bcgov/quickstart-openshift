@@ -1,0 +1,35 @@
+output-format: json
+
+strictness: veryhigh
+test-warnings: true
+doc-warnings: false
+
+ignore-paths:
+  - docs
+
+ignore-patterns:
+  - (^|/)skip(this)?(/|$)
+
+pycodestyle:
+  disable:
+    - W602
+    - W603
+  enable:
+    - W601
+  options:
+    max-line-length: 120
+pylint:
+  disable:
+    - bad-builtin
+    - too-few-public-methods
+  options:
+    max-locals: 15
+    max-returns: 6
+    max-branches: 15
+    max-statements: 60
+    max-parents: 7
+    max-attributes: 7
+    min-public-methods: 1
+    max-public-methods: 20
+    max-module-lines: 1000
+    max-line-length: 120
