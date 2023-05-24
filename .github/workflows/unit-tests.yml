@@ -17,9 +17,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # JOB to run change detection
+  changes:
+    runs-on: ubuntu-22.04
+    # Required permissions
+    permissions:
+      pull-requests: read
+    outputs: # Expose matched filters as job 'packages' output variable
+      packages: ${{ steps.filter.outputs.changes }}
+    steps: # For pull requests it's not necessary to checkout the code
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            backend: backend/**
+            frontend: frontend/**
   tests:
     name: Unit Tests
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    needs: changes
     runs-on: ubuntu-22.04
     services:
       postgres:
@@ -37,7 +53,7 @@ jobs:
           - 5432:5432
     strategy:
       matrix:
-        dir: [backend, frontend]
+        dir: ${{ fromJSON(needs.changes.outputs.packages) }}
         include:
           - dir: backend
             sonar_projectKey: bcgov_quickstart-openshift_backend
