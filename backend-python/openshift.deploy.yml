@@ -52,7 +52,7 @@ objects:
     kind: ConfigMap
     metadata:
       name: ${COMPONENT}-configmap
-      namespace: logger.conf
+      namespace: logger-conf
       labels:
         app: ${NAME}-${ZONE}
     data:
@@ -187,7 +187,7 @@ objects:
                   value: /application/app/src
               volumeMounts:
                 - mountPath: /application/app
-                  name: logger.conf
+                  name: logger-conf
 
               ports:
                 - containerPort: 3000
@@ -218,7 +218,7 @@ objects:
                 periodSeconds: 30
                 timeoutSeconds: 5
           volumes:
-            - name: logger.conf
+            - name: logger-conf
               configMap:
                 name: ${COMPONENT}-configmap
           initContainers:
