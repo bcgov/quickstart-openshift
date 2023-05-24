@@ -20,7 +20,9 @@ jobs:
   tests-python:
     name : Python API Unit Tests
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    working-directory: backend-python
+    defaults:
+      run:
+        working-directory: backend-python
     runs-on: ubuntu-22.04
     services:
       postgres:
