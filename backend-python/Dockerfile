@@ -37,7 +37,7 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 # Install python dependencies
 WORKDIR /application
 COPY poetry.lock pyproject.toml /application/
-RUN poetry install --no-root -vvv
+RUN poetry install --no-root -vvv --without dev --sync
 
 # Copy python code
 COPY . /application/app

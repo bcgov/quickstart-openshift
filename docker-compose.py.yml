@@ -97,6 +97,45 @@ services:
         condition: service_completed_successfully
     networks:
       - default
+  backend-py-test:
+    image: python:3.11
+    working_dir: /application
+    build:
+      context: backend-python
+    container_name: backend-py-test
+    command: sh -c "chmod +x run-unit-tests.sh && ./run-unit-tests.sh"
+    volumes: # don't volume mount the entire backend python as it would remove the venv
+      - ./backend-python/src:/application/app/src
+      - ./backend-python/test:/application/app/test
+      - ./backend-python/pyproject.toml:/application/pyproject.toml
+      - ./backend-python/poetry.lock:/application/poetry.lock
+      - ./backend-python/run-unit-tests.sh:/application/run-unit-tests.sh
+      - ./backend-python/logger.conf:/application/logger.conf
+    environment:
+      PIP_NO_CACHE_DIR: off
+      PIP_DISABLE_PIP_VERSION_CHECK: on
+      PIP_DEFAULT_TIMEOUT: 100
+      POETRY_VERSION: 1.2.2
+      POETRY_HOME: /opt/poetry
+      POETRY_VIRTUALENVS_IN_PROJECT: true
+      POETRY_NO_INTERACTION: 1
+      PYSETUP_PATH: /application
+      VENV_PATH: /application/.venv
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+      POSTGRES_SERVER: database-py
+      POSTGRESQL_USER: postgres
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_DATABASE: postgres
+      PYTHONPATH: /application/app
+    hostname: backend-py-test
+    depends_on:
+      database-py:
+        condition: service_healthy
+      backend-py:
+        condition: service_healthy
+    networks:
+      - default
   frontend:
     container_name: frontend
     entrypoint:

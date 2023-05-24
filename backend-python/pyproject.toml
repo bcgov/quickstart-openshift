@@ -12,12 +12,14 @@ fastapi = "^0.95.2"
 uvicorn = "^0.22.0"
 sqlalchemy = "^2.0.13"
 pydantic = {version ="^1.10.7", extras = ["email"]}
-requests = "^2.30.0"
+requests = "^2.31.0"
 psycopg2 = "^2.9.1"
+
 [tool.poetry.dev-dependencies]
-prospector = "^1.10.0"
+prospector = "^1.10.1"
 pytest = "^7.3.1"
 pytest-cov = "^4.0.0"
+pytest-watch = "^4.2.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -32,6 +34,4 @@ test-warnings = true
 doc-warnings = true
 
 [tool.pytest.ini_options]
-pythonpath = [
-    ".", "src"
-]
+pythonpath = [".", "src"]

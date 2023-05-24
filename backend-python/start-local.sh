@@ -2,7 +2,7 @@
 apt update
 curl -sSL https://install.python-poetry.org | python3 -
 export PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
-poetry install --no-root -vvv
+poetry install --no-root -vvv --without dev --sync
 cd app || exit
 DATE_TIME=$(date +'%Y-%m-%d %H:%M:%S.%3N')
 echo "Starting uvicorn at $DATE_TIME"
