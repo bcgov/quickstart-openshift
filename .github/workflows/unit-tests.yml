@@ -45,7 +45,9 @@ jobs:
             python-version: 3.11
             cache: 'poetry'
         - run: |
+            cd backend-python
             poetry install
+            cd ..
             poetry run pytest
 
   tests:
