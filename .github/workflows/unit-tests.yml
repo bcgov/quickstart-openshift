@@ -51,8 +51,7 @@ jobs:
             poetry run coverage report
             poetry run coverage xml -o coverage-reports/coverage-report.xml
 
-
-tests:
+  tests:
     name: Unit Tests
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
