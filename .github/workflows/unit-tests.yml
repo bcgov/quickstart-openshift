@@ -44,9 +44,13 @@ jobs:
           with:
             python-version: 3.11
             cache: 'poetry'
-        - run: |
-            cd backend-python
+
+        - name: Install dependencies
+          working-directory: ./backend-python
+          run: |
             poetry install
+        - name: Run Tests
+          run: |
             poetry run coverage run --source=backend-python -m pytest backend-python/test -x -o log_cli=true --disable-warnings -vvv
             poetry run coverage report
             poetry run coverage xml -o coverage-reports/coverage-report.xml
