@@ -47,10 +47,12 @@ jobs:
         - run: |
             cd backend-python
             poetry install
-            cd ..
-            poetry run pytest
+            poetry run coverage run --source=backend-python -m pytest backend-python/test -x -o log_cli=true --disable-warnings -vvv
+            poetry run coverage report
+            poetry run coverage xml -o coverage-reports/coverage-report.xml
 
-  tests:
+
+tests:
     name: Unit Tests
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
