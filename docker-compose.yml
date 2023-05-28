@@ -22,7 +22,7 @@ services:
     networks:
       - default
   database-migrations:
-    image: flyway/flyway:9.10-alpine
+    image: flyway/flyway:9.19-alpine
     container_name: backend-migrations
     command:
       - info

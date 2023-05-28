@@ -1,4 +1,4 @@
-FROM flyway/flyway:9.10-alpine
+FROM flyway/flyway:9.19-alpine
 
 # Non-root user
 RUN adduser -D app
