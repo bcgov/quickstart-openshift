@@ -33,4 +33,12 @@ public record UserAddress(
     userAddressEntity.setUser(userEntity);
     return userAddressEntity;
   }
+  public static UserAddressEntity toUserAddressEntityAttached(UserAddress userAddress, UserEntity userEntity, UserAddressEntity userAddressEntity) {
+    userAddressEntity.setStreet(userAddress.street());
+    userAddressEntity.setCity(userAddress.city());
+    userAddressEntity.setState(userAddress.state());
+    userAddressEntity.setZipCode(userAddress.zipCode());
+    userAddressEntity.setUser(userEntity);
+    return userAddressEntity;
+  }
 }

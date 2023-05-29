@@ -45,16 +45,6 @@ public class UserService {
     userRepository.delete(userEntity);
   }
 
-  public long count() {
-    return userRepository.count();
-  }
-
-  public List<UserAddressEntity> findAllUserAddresses() {
-    return userAddressRepository.findAll().stream().toList();
-  }
-  public List<UserAddressEntity> findAllUserAddressesByUserId(Long userId) {
-    return userAddressRepository.findAllUserAddressesByUserId(userId);
-  }
 
   public Optional<UserAddressEntity> findUserAddressById(Long id) {
     return userAddressRepository.findByIdOptional(id);
@@ -69,11 +59,4 @@ public class UserService {
     userAddressRepository.deleteById(id);
   }
 
-  public void deleteUserAddress(UserAddressEntity userAddressEntity) {
-    userAddressRepository.delete(userAddressEntity);
-  }
-
-  public long countUserAddresses() {
-    return userAddressRepository.count();
-  }
 }

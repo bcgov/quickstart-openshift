@@ -1,13 +1,5 @@
 package ca.bc.gov.nrs.api.v1.endpoints;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-
 import ca.bc.gov.nrs.api.v1.entity.UserAddressEntity;
 import ca.bc.gov.nrs.api.v1.entity.UserEntity;
 import ca.bc.gov.nrs.api.v1.service.UserService;
@@ -16,15 +8,15 @@ import ca.bc.gov.nrs.api.v1.structs.UserAddress;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
+import java.util.List;
+import java.util.Optional;
 
 @Path("/api/v1/users")
 @Produces("application/json")
@@ -107,10 +99,10 @@ public class UserEndpoint {
   @APIResponse(responseCode = "200", description = "List of addresses")
   @APIResponse(responseCode = "404", description = "User not found")
   public Response getAllAddressesForUser(@PathParam("id") Long id) {
-    Optional<UserEntity> user = userService.findById(id);
-    if (user.isPresent()) {
-      List<UserAddress> addresses = userService.findAllUserAddressesByUserId(id).stream().map(UserAddress::toUserAddressRecord)
-          .toList();
+    Optional<UserEntity> optionalUserEntity = userService.findById(id);
+    if (optionalUserEntity.isPresent()) {
+      List<UserAddress> addresses = optionalUserEntity.get().getAddresses().stream().map(UserAddress::toUserAddressRecord)
+        .toList();
       return Response.ok(addresses).build();
     } else {
       return Response.status(Response.Status.NOT_FOUND).build();
@@ -142,11 +134,11 @@ public class UserEndpoint {
   @APIResponse(responseCode = "201", description = "Address created")
   @APIResponse(responseCode = "404", description = "User not found")
   public Response createAddressForUser(@PathParam("id") Long id,
-      @Valid @RequestBody(description = "Address to create") UserAddress address) {
+                                       @Valid @RequestBody(description = "Address to create") UserAddress address) {
     Optional<UserEntity> user = userService.findById(id);
     if (user.isPresent()) {
       UserAddress createdAddress = UserAddress
-          .toUserAddressRecord(userService.saveUserAddress(UserAddress.toUserAddressEntity(address, user.get())));
+        .toUserAddressRecord(userService.saveUserAddress(UserAddress.toUserAddressEntity(address, user.get())));
       return Response.status(Response.Status.CREATED).entity(createdAddress).build();
     } else {
       return Response.status(Response.Status.NOT_FOUND).build();
@@ -159,14 +151,14 @@ public class UserEndpoint {
   @APIResponse(responseCode = "200", description = "Address updated")
   @APIResponse(responseCode = "404", description = "Address not found")
   public Response updateAddressByIdForUser(@PathParam("id") Long id, @PathParam("addressId") Long addressId,
-      @Valid @RequestBody(description = "Address to update") UserAddress address) {
+                                           @Valid @RequestBody(description = "Address to update") UserAddress address) {
     Optional<UserEntity> user = userService.findById(id);
     if (user.isPresent()) {
       Optional<UserAddressEntity> existingAddress = userService.findUserAddressById(addressId);
       if (existingAddress.isPresent()) {
-        UserAddressEntity updatedAddressEntity = UserAddress.toUserAddressEntity(address, user.get());
-        userService.saveUserAddress(updatedAddressEntity);
-        return Response.ok().build();
+        UserAddressEntity updatedAddressEntity = UserAddress.toUserAddressEntityAttached(address, user.get(), existingAddress.get());
+        var addressEntity = userService.saveUserAddress(updatedAddressEntity);
+        return Response.ok(UserAddress.toUserAddressRecord(addressEntity)).build();
       } else {
         return Response.status(Response.Status.NOT_FOUND).build();
       }

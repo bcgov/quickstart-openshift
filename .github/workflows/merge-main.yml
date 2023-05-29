@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [backend, database, frontend, init]
+        name: [backend, database, frontend, init, backend-java]
         include:
           - name: backend
             file: backend/openshift.deploy.yml
@@ -66,7 +66,11 @@ jobs:
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
-
+          - name: backend-java
+            file: backend-java/openshift.deploy.yml
+            overwrite: true
+            parameters:
+              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.5
         with:
@@ -88,7 +92,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [backend, database, frontend, init, backend-py]
+        name: [backend, database, frontend, init, backend-py,  backend-java]
         include:
           - name: backend
             file: backend/openshift.deploy.yml
@@ -109,6 +113,11 @@ jobs:
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
+          - name: backend-java
+            file: backend-java/openshift.deploy.yml
+            overwrite: true
+            parameters:
+              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.5
         with:

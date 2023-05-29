@@ -42,7 +42,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [backend, database, database-migrations, frontend, backend-py, database-migrations-py]
+        package: [backend, database, database-migrations, frontend, backend-py, database-migrations-py, backend-java]
         include:
           - package: backend
             triggers: ('backend/')
@@ -68,6 +68,10 @@ jobs:
             triggers: ('backend-python')
             build_file: ./backend-python/Dockerfile
             build_context: ./backend-python
+          - package: backend-java
+            triggers: ('backend-java')
+            build_file: ./backend-java/Dockerfile
+            build_context: ./backend-java
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.1
@@ -88,7 +92,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [backend, database, init, frontend, backend-py]
+        name: [backend, database, init, frontend, backend-py, baceknd-java]
         include:
           - name: backend
             file: backend/openshift.deploy.yml
@@ -112,6 +116,11 @@ jobs:
           - name: init
             file: common/openshift.init.yml
             overwrite: false
+          - name: backend-java
+            file: backend-java/openshift.deploy.yml
+            overwrite: true
+            parameters:
+              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2              
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.5
         with:
