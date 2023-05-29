@@ -3,13 +3,13 @@ package ca.bc.gov.nrs.api.v1.entity;
 import jakarta.persistence.*;
 
 @Entity(name = "UserAddress")
-@Table(name = "user_addresses")
+@Table(name = "user_addresses", schema = "java_api")
 public class UserAddressEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_address_seq")
-  @SequenceGenerator(name = "user_address_seq", sequenceName = "user_addresses_id_seq", allocationSize = 1)
-  private Integer id;
+  @SequenceGenerator(schema = "java_api", name = "user_address_seq", sequenceName = "user_addresses_id_seq", allocationSize = 1)
+  private Long id;
 
   @Column(name = "street", nullable = false, length = 50)
   private String street;
@@ -38,11 +38,11 @@ public class UserAddressEntity {
     this.userEntity = userEntity;
   }
 
-  public Integer getId() {
+  public Long getId() {
     return id;
   }
 
-  public void setId(Integer id) {
+  public void setId(Long id) {
     this.id = id;
   }
 

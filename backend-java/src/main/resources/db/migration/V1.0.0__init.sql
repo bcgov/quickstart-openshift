@@ -1,6 +1,6 @@
-CREATE SCHEMA IF NOT EXISTS py_api;
-SET SEARCH_PATH TO py_api;
-CREATE SEQUENCE IF NOT EXISTS "users_id_seq"
+CREATE SCHEMA IF NOT EXISTS java_api;
+SET SEARCH_PATH TO java_api;
+CREATE SEQUENCE IF NOT EXISTS "user_id_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -13,7 +13,7 @@ CREATE SEQUENCE IF NOT EXISTS "user_addresses_id_seq"
 
 CREATE TABLE "users"
 (
-    id    INTEGER PRIMARY KEY DEFAULT nextval('users_id_seq'),
+    id    INTEGER PRIMARY KEY DEFAULT nextval('user_id_seq'),
     name  VARCHAR(50) NOT NULL,
     email VARCHAR(50) NOT NULL UNIQUE
 );
