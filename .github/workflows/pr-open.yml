@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [backend, database, init, frontend, backend-py, baceknd-java]
+        name: [backend, database, init, frontend, backend-py, backend-java]
         include:
           - name: backend
             file: backend/openshift.deploy.yml
@@ -120,7 +120,7 @@ jobs:
             file: backend-java/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2              
+              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.5
         with:
