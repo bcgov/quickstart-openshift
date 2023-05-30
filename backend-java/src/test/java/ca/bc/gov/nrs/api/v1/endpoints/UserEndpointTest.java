@@ -37,7 +37,7 @@ class UserEndpointTest {
   }
 
   @Test
-  void testGetAllUsers() {
+  void testGetAllUsers_noCondition_shouldReturnAllUsersAndStatusOK() {
     given()
       .basePath("/api/v1")
       .when().get("/users")
@@ -47,7 +47,7 @@ class UserEndpointTest {
   }
 
   @Test
-  void testGetUserById() {
+  void testGetUserById_givenValidID_shouldReturnTheUserAndStatusOK() {
 
     given()
       .basePath("/api/v1")
@@ -60,7 +60,17 @@ class UserEndpointTest {
   }
 
   @Test
-  void testCreateUser() {
+  void testGetUserById_givenRandomID_shouldReturnTheUserAndStatusOK() {
+
+    given()
+      .basePath("/api/v1")
+      .pathParam("id", 20000)
+      .when().get("/users/{id}")
+      .then()
+      .statusCode(404);
+  }
+  @Test
+  void testCreateUser_givenValidPayload_shouldReturnStatusCreated() {
     User user = new User(null, "Jane Doe", "janedoe@example.com");
     given()
       .basePath("/api/v1")
@@ -74,7 +84,19 @@ class UserEndpointTest {
   }
 
   @Test
-  void testUpdateUser() {
+  void testCreateUser_givenInValidPayload_shouldReturnStatusBadRequest() {
+    User user = new User(null, "Jane Doe", "random");
+    given()
+      .basePath("/api/v1")
+      .contentType(ContentType.JSON)
+      .body(user)
+      .when().post("/users")
+      .then()
+      .statusCode(400);
+  }
+
+  @Test
+  void testUpdateUser_givenValidPayload_shouldReturnStatusOK() {
     User user = new User(id, "John Do", "johndo@example.com");
     given()
       .basePath("/api/v1")
@@ -89,7 +111,7 @@ class UserEndpointTest {
   }
 
   @Test
-  void testDeleteUser() {
+  void testDeleteUser_givenValidID_shouldReturnStatusNoContent() {
     given()
       .basePath("/api/v1")
       .pathParam("id", id)
@@ -99,7 +121,17 @@ class UserEndpointTest {
   }
 
   @Test
-  void testGetUserAddresses() {
+  void testDeleteUser_givenInvalidID_shouldReturnStatusNotFound() {
+    given()
+      .basePath("/api/v1")
+      .pathParam("id", id)
+      .when().delete("/users/{id}")
+      .then()
+      .statusCode(204);
+  }
+
+  @Test
+  void testGetUserAddresses_noCondition_shouldReturnAllUsersAddressesAndStatusOK() {
     given()
       .basePath("/api/v1")
       .pathParam("id", id)
@@ -110,7 +142,7 @@ class UserEndpointTest {
   }
 
   @Test
-  void testCreateUserAddress() {
+  void testCreateUserAddress_givenValidPayload_shouldCreateTheUserAddressAndReturnStatusCreated() {
     UserAddress userAddress = new UserAddress(null, "123 Main St", "Vancouver", "BC", "V6B 2W9", id);
     given()
       .basePath("/api/v1")
@@ -127,7 +159,7 @@ class UserEndpointTest {
   }
 
   @Test
-  void testUpdateUserAddress() {
+  void testUpdateUserAddress_givenValidPayload_shouldUpdateTheUserAddressAndReturnStatusOK() {
     UserAddress userAddress = new UserAddress(addressId, "124 Main St", "Victoria", "BC", "V6B 2W9", id);
     given()
       .basePath("/api/v1")
@@ -145,7 +177,7 @@ class UserEndpointTest {
   }
 
   @Test
-  void testDeleteUserAddress() {
+  void testDeleteUserAddress_givenValidPayload_shouldDeleteTheUserAddressAndReturnStatusNoContent() {
     given()
       .basePath("/api/v1")
       .pathParam("id", id)
