@@ -8,7 +8,7 @@ RUN chmod +x mvnw
 RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
 COPY src /code/src
 RUN ./mvnw package -Pnative -DskipTests
-
+HEALTHCHECK --interval=300s --timeout=30s CMD ./mvnw --version  || exit 1
 ###
 FROM quay.io/quarkus/quarkus-micro-image:2.0
 WORKDIR /work/
