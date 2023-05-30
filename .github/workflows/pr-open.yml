@@ -100,12 +100,14 @@ jobs:
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
+            triggers: ('database/', 'backend/', 'frontend/')
           - name: backend-py
             file: backend-python/openshift.deploy.yml
             overwrite: true
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:${{ github.event.number }}
+            triggers: ('backend-py/')
           - name: database
             file: database/openshift.deploy.yml
             overwrite: false
@@ -113,6 +115,7 @@ jobs:
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+            triggers: ('database/', 'backend/', 'frontend/')
           - name: init
             file: common/openshift.init.yml
             overwrite: false
@@ -121,8 +124,9 @@ jobs:
             overwrite: true
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+            triggers: ('backend-java/')
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.5
+      - uses: bcgov-nr/action-deployer-openshift@v1.1.0
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -134,3 +138,4 @@ jobs:
             -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
             -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
             ${{ matrix.parameters }}
+          triggers: ${{ matrix.triggers }}
