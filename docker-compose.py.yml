@@ -42,7 +42,7 @@ services:
     networks:
       - default
   sqlalchemy-model-generator:
-    image: python:3.9-slim-buster
+    image: python:3.11-slim-buster
     working_dir: /application
     container_name: py-backend-model-generator
     command: sh -c "chmod +x generate-models.sh && ./generate-models.sh"
