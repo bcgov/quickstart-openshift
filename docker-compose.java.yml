@@ -1,0 +1,77 @@
+---
+version: "3.9"
+
+services:
+  database-java:
+    build:
+      context: database
+    container_name: java-api-database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    hostname: database-py
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+    ports:
+      - "5420:5432"
+    restart: unless-stopped
+    user: postgres
+    volumes:
+      - "./java-api-data:/pgdata"
+    networks:
+      - default
+  backend-java:
+    image: maven:3.8.7-eclipse-temurin-17
+    working_dir: /application
+    build:
+      context: backend-java
+    container_name: backend-java
+    command: ./mvnw compile quarkus:dev
+    volumes: # don't volume mount the entire backend python as it would remove the venv
+      - ./backend-java:/application
+      - ~/.m2:/root/.m2
+    environment:
+      POSTGRES_SERVER: database-py
+      POSTGRESQL_USER: postgres
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_DATABASE: postgres
+    restart: unless-stopped
+    hostname: backend-java
+    ports:
+      - "3004:3000"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
+    depends_on:
+      database-java:
+        condition: service_healthy
+    networks:
+      - default
+  frontend:
+    container_name: frontend
+    entrypoint:
+      - "sh"
+      - "-c"
+      - "chown -R root . && npm ci && npm run dev"
+    environment:
+      NODE_ENV: development
+      BACKEND_URL: backend
+    hostname: frontend
+    image: registry.access.redhat.com/ubi8/nodejs-18-minimal@sha256:74af9dc2b620022c77fcd712b811f64a03c1444ff1e9b9596a242b2edf3cf96f
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app:z
+      - /app/node_modules
+    user: root
+    working_dir: "/app"
+    restart: unless-stopped
+    depends_on:
+      backend-java:
+        condition: service_healthy
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
