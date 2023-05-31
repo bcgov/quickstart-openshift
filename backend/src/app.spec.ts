@@ -1,5 +1,5 @@
 import {NestExpressApplication} from '@nestjs/platform-express';
-import {bootstrap} from "./main";
+import {bootstrap} from "./app";
 
 describe('main', () => {
   let app: NestExpressApplication;
