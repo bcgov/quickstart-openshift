@@ -17,7 +17,7 @@ var (
 func Connect() (err error) {
 	user := utils.GetEnv("POSTGRESQL_USER", "postgres")
 	password := utils.GetEnv("POSTGRESQL_PASSWORD", "postgres")
-	host := utils.GetEnv("POSTGRES_SERVER", "localhost")
+	host := utils.GetEnv("POSTGRESQL_HOST", "localhost")
 	db := utils.GetEnv("POSTGRESQL_DATABASE", "postgres")
 	port := utils.GetEnv("POSTGRES_PORT", "5432")
 	maxConnections := utils.GetEnv("DB_MAX_CONNECTIONS", "10")

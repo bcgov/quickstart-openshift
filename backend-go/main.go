@@ -60,7 +60,7 @@ func main() {
 		TimeFormat: "2006-01-02T15:04:05",
 		TimeZone:   "America/Vancouver",
 	}))
-	app.Get("/health", HealthCheck)
+	app.Get("/", HealthCheck)
 	routes.EmployeeRoutes(app)
 	// Serve Swagger documentation
 	app.Get("/swagger/*", swagger.HandlerDefault) // default
