@@ -4,15 +4,16 @@ WORKDIR /workspace/app
 COPY go.mod ./
 RUN go mod download && go mod verify
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o /usr/local/bin/app ./...
+RUN mkdir  -p /workspace/app/target/application
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o /workspace/app/target/application ./...
 HEALTHCHECK --interval=3000s --timeout=30s CMD go version || exit 1
 
 FROM alpine:3.17
-ARG DEPENDENCY=/usr/local/bin
+ARG DEPENDENCY=/workspace/app/target/application
 RUN apk add --no-cache bash
 RUN addgroup -S appgroup && adduser -S 1001 -G appgroup
 USER 1001
-COPY --chown=1001 --from=build ${DEPENDENCY}/app /usr/local/bin/app
+COPY --chown=1001 --from=build ${DEPENDENCY}/backend-go /usr/local/bin/application
 EXPOSE 3000
 HEALTHCHECK --interval=300s --timeout=3s CMD curl -f http://127.0.0.1/:3000
-ENTRYPOINT  ["app"]
+ENTRYPOINT  ["application"]
