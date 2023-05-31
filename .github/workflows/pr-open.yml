@@ -42,7 +42,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [backend, database, database-migrations, frontend, backend-py, database-migrations-py, backend-java]
+        package: [backend, database, database-migrations, frontend, backend-py, database-migrations-py, backend-java, backend-go, database-migrations-go]
         include:
           - package: backend
             triggers: ('backend/')
@@ -72,6 +72,14 @@ jobs:
             triggers: ('backend-java')
             build_file: ./backend-java/Dockerfile
             build_context: ./backend-java
+          - package: database-migrations-go
+            triggers: ('backend-go/db')
+            build_file: ./backend-go/db/Dockerfile
+            build_context: ./backend-go/db
+          - package: backend-go
+            triggers: ('backend-go')
+            build_file: ./backend-go/Dockerfile
+            build_context: ./backend-go
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.1
@@ -92,7 +100,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [backend, database, init, frontend, backend-py, backend-java]
+        name: [backend, database, init, frontend, backend-py, backend-java, backend-go]
         include:
           - name: backend
             file: backend/openshift.deploy.yml
@@ -125,6 +133,12 @@ jobs:
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
             triggers: ('backend-java/')
+          - name: backend-go
+            file: backend-go/openshift.deploy.yml
+            overwrite: true
+            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:${{ github.event.number }}
+            triggers: ('backend-go/')
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.1.0
         with:
