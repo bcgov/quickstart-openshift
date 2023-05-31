@@ -72,7 +72,7 @@ jobs:
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.5
+      - uses: bcgov-nr/action-deployer-openshift@v1.1.0
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -119,7 +119,7 @@ jobs:
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.5
+      - uses: bcgov-nr/action-deployer-openshift@v1.1.0
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
