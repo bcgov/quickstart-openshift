@@ -1,0 +1,97 @@
+---
+version: "3.9"
+
+services:
+  database-go:
+    build:
+      context: database
+    container_name: go-api-database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    hostname: database-go
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+    ports:
+      - "5420:5432"
+    restart: unless-stopped
+    user: postgres
+    volumes:
+      - "./go-data:/pgdata"
+    networks:
+      - goapi
+  database-go-migrations:
+    image: flyway/flyway:9-alpine
+    container_name: go-api-migrations
+    command:
+      - info
+      - migrate
+      - info
+    volumes:
+      - "./backend-go/db/migrations:/flyway/sql"
+    environment:
+      - FLYWAY_URL=jdbc:postgresql://database-go:5432/postgres
+      - FLYWAY_USER=postgres
+      - FLYWAY_PASSWORD=postgres
+      - FLYWAY_BASELINE_ON_MIGRATE=true
+      - FLYWAY_DEFAULT_SCHEMA=go_api
+    depends_on:
+      database-go:
+        condition: service_healthy
+    networks:
+      - goapi
+  backend-go:
+    image: cosmtrek/air:latest
+    # working_dir value has to be the same of mapped volume
+    working_dir: /application
+    volumes:
+      - ./backend-go/:/application/
+    container_name: backend-go
+    environment:
+      POSTGRES_SERVER: database-go
+      POSTGRESQL_USER: postgres
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_DATABASE: postgres
+    restart: unless-stopped
+    hostname: backend-go
+    ports:
+      - "3005:3000"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
+    depends_on:
+      database-go:
+        condition: service_healthy
+      database-go-migrations:
+        condition: service_completed_successfully
+    networks:
+      - goapi
+
+  frontend:
+    container_name: frontend
+    entrypoint:
+      - "sh"
+      - "-c"
+      - "chown -R root . && npm ci && npm run dev"
+    environment:
+      NODE_ENV: development
+      BACKEND_URL: backend
+    hostname: frontend
+    image: registry.access.redhat.com/ubi8/nodejs-18-minimal@sha256:74af9dc2b620022c77fcd712b811f64a03c1444ff1e9b9596a242b2edf3cf96f
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app:z
+      - /app/node_modules
+    user: root
+    working_dir: "/app"
+    restart: unless-stopped
+    depends_on:
+      backend-go:
+        condition: service_healthy
+    networks:
+      - goapi
+
+networks:
+  goapi:
+    driver: bridge
