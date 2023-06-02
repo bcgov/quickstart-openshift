@@ -74,7 +74,7 @@ jobs:
             build_context: ./backend-java
     steps:
       - uses: actions/checkout@v3
-      - uses: bcgov-nr/action-builder-ghcr@v1.1.1
+      - uses: bcgov-nr/action-builder-ghcr@v1.1.2
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
