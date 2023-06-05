@@ -86,6 +86,17 @@
       <artifactId>rest-assured</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.instancio</groupId>
+      <artifactId>instancio-junit</artifactId>
+      <version>2.16.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.datafaker</groupId>
+      <artifactId>datafaker</artifactId>
+      <version>1.9.0</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
