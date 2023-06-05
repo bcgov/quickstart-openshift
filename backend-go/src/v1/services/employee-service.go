@@ -13,6 +13,7 @@ import (
 )
 
 var userRepo = repositories.NewUserRepository(database.DBConn)
+var userAddrRepo = repositories.NewUserAddressRepository(database.DBConn)
 
 func GetUsers(c *fiber.Ctx) error {
 	d := &[]entities.UserEntity{}
@@ -160,7 +161,6 @@ func DeleteUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusNoContent).JSON(nil)
 }
 
-/*
 func GetUserAddresses(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -169,7 +169,7 @@ func GetUserAddresses(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := models.GetUserById(uint(id))
+	user, err := userRepo.GetById(uint(id))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Internal Server Error",
@@ -182,19 +182,20 @@ func GetUserAddresses(c *fiber.Ctx) error {
 		})
 	}
 
-	addresses, err := models.GetUserAddresses(user)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Internal Server Error",
-		})
+	var users []structs.User
+	for _, element := range user.Addresses {
+		var userStruct = new(structs.User)
+		err = mapper.AutoMapper(&element, userStruct)
+		if err != nil {
+			break
+		}
+		users = append(users, *userStruct)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"addresses": addresses,
-	})
+	return c.JSON(users)
 }
 
-func GetUserAddressById(c *fiber.Ctx) error {
+func GetUserAddressByAddressId(c *fiber.Ctx) error {
 	userId, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -209,7 +210,7 @@ func GetUserAddressById(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := models.GetUserById(uint(userId))
+	user, err := userRepo.GetById(uint(userId))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Internal Server Error",
@@ -222,7 +223,7 @@ func GetUserAddressById(c *fiber.Ctx) error {
 		})
 	}
 
-	address, err := models.GetUserAddressById(uint(addressId))
+	address, err := userAddrRepo.GetUserAddressByAddressId(uint(addressId))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Internal Server Error",
@@ -234,10 +235,9 @@ func GetUserAddressById(c *fiber.Ctx) error {
 			"error": "Address not found",
 		})
 	}
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"address": address,
-	})
+	var addressStruct = new(structs.UserAddress)
+	_ = mapper.AutoMapper(&address, addressStruct)
+	return c.JSON(addressStruct)
 }
 
 func CreateUserAddress(c *fiber.Ctx) error {
@@ -248,7 +248,7 @@ func CreateUserAddress(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := models.GetUserById(uint(userId))
+	user, err := userRepo.GetById(uint(userId))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Internal Server Error",
@@ -261,14 +261,14 @@ func CreateUserAddress(c *fiber.Ctx) error {
 		})
 	}
 
-	var addressDto services.UserAddressDto
+	var addressDto structs.UserAddress
 	if err := c.BodyParser(&addressDto); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Bad Request",
 		})
 	}
 
-	address := models.UserAddress{
+	address := entities.UserAddressEntity{
 		Street:  addressDto.Street,
 		City:    addressDto.City,
 		State:   addressDto.State,
@@ -276,81 +276,14 @@ func CreateUserAddress(c *fiber.Ctx) error {
 		UserID:  uint(userId),
 	}
 
-	if err := models.CreateUserAddress(&address); err != nil {
+	if err := userAddrRepo.CreateUserAddress(&address); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Internal Server Error",
 		})
 	}
-
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "Address created successfully",
-		"address": address,
-	})
-}
-
-func UpdateUserAddress(c *fiber.Ctx) error {
-	userId, err := strconv.Atoi(c.Params("id"))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Bad Request",
-		})
-	}
-
-	addressId, err := strconv.Atoi(c.Params("addressId"))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Bad Request",
-		})
-	}
-
-	user, err := models.GetUserById(uint(userId))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Internal Server Error",
-		})
-	}
-
-	if user == nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "User not found",
-		})
-	}
-
-	address, err := models.GetUserAddressById(uint(addressId))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Internal Server Error",
-		})
-	}
-
-	if address == nil || address.UserID != uint(userId) {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Address not found",
-		})
-	}
-
-	var addressDto services.UserAddressDto
-	if err := c.BodyParser(&addressDto); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Bad Request",
-		})
-	}
-
-	address.Street = addressDto.Street
-	address.City = addressDto.City
-	address.State = addressDto.State
-	address.ZipCode = addressDto.ZipCode
-
-	if err := models.UpdateUserAddress(address); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Internal Server Error",
-		})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Address updated successfully",
-		"address": address,
-	})
+	var addressStruct = new(structs.UserAddress)
+	_ = mapper.AutoMapper(&address, addressStruct)
+	return c.JSON(addressStruct)
 }
 
 func DeleteUserAddress(c *fiber.Ctx) error {
@@ -368,7 +301,7 @@ func DeleteUserAddress(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := models.GetUserById(uint(userId))
+	user, err := userRepo.GetById(uint(userId))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Internal Server Error",
@@ -381,7 +314,7 @@ func DeleteUserAddress(c *fiber.Ctx) error {
 		})
 	}
 
-	address, err := models.GetUserAddressById(uint(addressId))
+	address, err := userAddrRepo.GetUserAddressByAddressId(uint(addressId))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Internal Server Error",
@@ -394,13 +327,11 @@ func DeleteUserAddress(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := models.DeleteUserAddress(address); err != nil {
+	if err := userAddrRepo.DeleteUserAddress(address); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Internal Server Error",
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Address deleted successfully",
-	})
-}*/
+	return c.Status(fiber.StatusNoContent).JSON(nil)
+}

@@ -49,7 +49,7 @@ services:
       - ./backend-go/:/application/
     container_name: backend-go
     environment:
-      POSTGRES_SERVER: database-go
+      POSTGRESQL_HOST: database-go
       POSTGRESQL_USER: postgres
       POSTGRESQL_PASSWORD: postgres
       POSTGRESQL_DATABASE: postgres

@@ -57,7 +57,7 @@ func NewUserAddressRepository(db *gorm.DB) *UserAddressRepository {
 	return &UserAddressRepository{db: db}
 }
 
-func (r *UserAddressRepository) Create(address *entities.UserAddressEntity) error {
+func (r *UserAddressRepository) CreateUserAddress(address *entities.UserAddressEntity) error {
 	result := r.db.Create(address)
 	if result.Error != nil {
 		return result.Error
@@ -65,7 +65,7 @@ func (r *UserAddressRepository) Create(address *entities.UserAddressEntity) erro
 	return nil
 }
 
-func (r *UserAddressRepository) GetById(id uint) (*entities.UserAddressEntity, error) {
+func (r *UserAddressRepository) GetUserAddressByAddressId(id uint) (*entities.UserAddressEntity, error) {
 	var address entities.UserAddressEntity
 	result := r.db.First(&address, id)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -76,7 +76,7 @@ func (r *UserAddressRepository) GetById(id uint) (*entities.UserAddressEntity, e
 	return &address, nil
 }
 
-func (r *UserAddressRepository) Update(address *entities.UserAddressEntity) error {
+func (r *UserAddressRepository) UpdateUserAddress(address *entities.UserAddressEntity) error {
 	result := r.db.Save(address)
 	if result.Error != nil {
 		return result.Error
@@ -84,7 +84,7 @@ func (r *UserAddressRepository) Update(address *entities.UserAddressEntity) erro
 	return nil
 }
 
-func (r *UserAddressRepository) Delete(address *entities.UserAddressEntity) error {
+func (r *UserAddressRepository) DeleteUserAddress(address *entities.UserAddressEntity) error {
 	result := r.db.Delete(address)
 	if result.Error != nil {
 		return result.Error
