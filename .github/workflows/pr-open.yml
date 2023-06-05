@@ -100,7 +100,7 @@ jobs:
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
-            triggers: ('database/', 'backend/', 'frontend/')
+            triggers: ('database/' 'backend/' 'frontend/')
           - name: backend-py
             file: backend-python/openshift.deploy.yml
             overwrite: true
@@ -115,7 +115,7 @@ jobs:
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-            triggers: ('database/', 'backend/', 'frontend/')
+            triggers: ('database/' 'backend/' 'frontend/')
           - name: init
             file: common/openshift.init.yml
             overwrite: false
