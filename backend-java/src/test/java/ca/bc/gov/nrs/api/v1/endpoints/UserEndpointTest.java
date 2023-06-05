@@ -1,12 +1,15 @@
 package ca.bc.gov.nrs.api.v1.endpoints;
 
 import ca.bc.gov.nrs.api.helpers.TestHelper;
+import ca.bc.gov.nrs.api.v1.entity.UserAddressEntity;
+import ca.bc.gov.nrs.api.v1.entity.UserEntity;
 import ca.bc.gov.nrs.api.v1.repository.UserRepository;
 import ca.bc.gov.nrs.api.v1.structs.User;
 import ca.bc.gov.nrs.api.v1.structs.UserAddress;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
+import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,8 +21,9 @@ class UserEndpointTest {
 
   private final TestHelper testHelper;
   private final UserRepository userRepository;
-  Long id;
-  Long addressId;
+  private final Faker faker = new Faker();
+  UserEntity userEntity;
+  UserAddressEntity addressEntity;
 
   @Inject
   UserEndpointTest(TestHelper testHelper, UserRepository userRepository) {
@@ -32,36 +36,35 @@ class UserEndpointTest {
     testHelper.clearDatabase();
     var user = testHelper.saveUser();
     testHelper.saveUserAddress(user);
-    id = this.userRepository.findAll().stream().findFirst().orElseThrow().getId();
-    addressId = this.userRepository.findAll().stream().findFirst().orElseThrow().getAddresses().stream().findFirst().orElseThrow().getId();
+    userEntity = this.userRepository.findAll().stream().findFirst().orElseThrow();
+    addressEntity = this.userRepository.findAll().stream().findFirst().orElseThrow().getAddresses().stream().findFirst().orElseThrow();
   }
 
   @Test
   void testGetAllUsers_noCondition_shouldReturnAllUsersAndStatusOK() {
+    this.testHelper.saveUsers(10);
     given()
       .basePath("/api/v1")
       .when().get("/users")
       .then()
       .statusCode(200)
-      .body("$.size()", equalTo(1));
+      .body("$.size()", equalTo(11));
   }
 
   @Test
   void testGetUserById_givenValidID_shouldReturnTheUserAndStatusOK() {
-
     given()
       .basePath("/api/v1")
-      .pathParam("id", id)
+      .pathParam("id", userEntity.getId())
       .when().get("/users/{id}")
       .then()
       .statusCode(200)
-      .body("name", equalTo("John Doe"))
-      .body("email", equalTo("johndoe@example.com"));
+      .body("name", equalTo(userEntity.getName()))
+      .body("email", equalTo(userEntity.getEmail()));
   }
 
   @Test
   void testGetUserById_givenRandomID_shouldReturnTheUserAndStatusOK() {
-
     given()
       .basePath("/api/v1")
       .pathParam("id", 20000)
@@ -69,9 +72,12 @@ class UserEndpointTest {
       .then()
       .statusCode(404);
   }
+
   @Test
   void testCreateUser_givenValidPayload_shouldReturnStatusCreated() {
-    User user = new User(null, "Jane Doe", "janedoe@example.com");
+    var name = faker.name().fullName();
+    var email = faker.internet().emailAddress();
+    User user = new User(null, name, email);
     given()
       .basePath("/api/v1")
       .contentType(ContentType.JSON)
@@ -79,13 +85,15 @@ class UserEndpointTest {
       .when().post("/users")
       .then()
       .statusCode(201)
-      .body("name", equalTo("Jane Doe"))
-      .body("email", equalTo("janedoe@example.com"));
+      .body("name", equalTo(name))
+      .body("email", equalTo(email));
   }
 
   @Test
   void testCreateUser_givenInValidPayload_shouldReturnStatusBadRequest() {
-    User user = new User(null, "Jane Doe", "random");
+    var name = faker.name().fullName();
+    var email = faker.internet().domainName();
+    User user = new User(null, name, email);
     given()
       .basePath("/api/v1")
       .contentType(ContentType.JSON)
@@ -97,24 +105,26 @@ class UserEndpointTest {
 
   @Test
   void testUpdateUser_givenValidPayload_shouldReturnStatusOK() {
-    User user = new User(id, "John Do", "johndo@example.com");
+    var name = faker.name().fullName();
+    var email = faker.internet().emailAddress();
+    User user = new User(userEntity.getId(), name, email);
     given()
       .basePath("/api/v1")
       .contentType(ContentType.JSON)
-      .pathParam("id", id)
+      .pathParam("id", userEntity.getId())
       .body(user)
       .when().put("/users/{id}")
       .then()
       .statusCode(200)
-      .body("name", equalTo("John Do"))
-      .body("email", equalTo("johndo@example.com"));
+      .body("name", equalTo(user.name()))
+      .body("email", equalTo(user.email()));
   }
 
   @Test
   void testDeleteUser_givenValidID_shouldReturnStatusNoContent() {
     given()
       .basePath("/api/v1")
-      .pathParam("id", id)
+      .pathParam("id", userEntity.getId())
       .when().delete("/users/{id}")
       .then()
       .statusCode(204);
@@ -124,17 +134,17 @@ class UserEndpointTest {
   void testDeleteUser_givenInvalidID_shouldReturnStatusNotFound() {
     given()
       .basePath("/api/v1")
-      .pathParam("id", id)
+      .pathParam("id", 100003330)
       .when().delete("/users/{id}")
       .then()
-      .statusCode(204);
+      .statusCode(404);
   }
 
   @Test
   void testGetUserAddresses_noCondition_shouldReturnAllUsersAddressesAndStatusOK() {
     given()
       .basePath("/api/v1")
-      .pathParam("id", id)
+      .pathParam("id", userEntity.getId())
       .when().get("/users/{id}/addresses")
       .then()
       .statusCode(200)
@@ -143,45 +153,53 @@ class UserEndpointTest {
 
   @Test
   void testCreateUserAddress_givenValidPayload_shouldCreateTheUserAddressAndReturnStatusCreated() {
-    UserAddress userAddress = new UserAddress(null, "123 Main St", "Vancouver", "BC", "V6B 2W9", id);
+    var street = faker.address().streetAddress();
+    var city =faker.address().city();
+    var state =faker.address().state();
+    var zipCode= faker.address().zipCode();
+    UserAddress userAddress = new UserAddress(null, street, city, state, zipCode, userEntity.getId());
     given()
       .basePath("/api/v1")
       .contentType(ContentType.JSON)
-      .pathParam("id", id)
+      .pathParam("id", userEntity.getId())
       .body(userAddress)
       .when().post("/users/{id}/addresses")
       .then()
       .statusCode(201)
-      .body("street", equalTo("123 Main St"))
-      .body("city", equalTo("Vancouver"))
-      .body("state", equalTo("BC"))
-      .body("zipCode", equalTo("V6B 2W9"));
+      .body("street", equalTo(street))
+      .body("city", equalTo(city))
+      .body("state", equalTo(state))
+      .body("zipCode", equalTo(zipCode));
   }
 
   @Test
   void testUpdateUserAddress_givenValidPayload_shouldUpdateTheUserAddressAndReturnStatusOK() {
-    UserAddress userAddress = new UserAddress(addressId, "124 Main St", "Victoria", "BC", "V6B 2W9", id);
+    var street = faker.address().streetAddress();
+    var city =faker.address().city();
+    var state =faker.address().state();
+    var zipCode= faker.address().zipCode();
+    UserAddress userAddress = new UserAddress(addressEntity.getId(), street, city, state, zipCode, userEntity.getId());
     given()
       .basePath("/api/v1")
       .contentType(ContentType.JSON)
-      .pathParam("id", id)
-      .pathParam("addressId", addressId)
+      .pathParam("id", userEntity.getId())
+      .pathParam("addressId", addressEntity.getId())
       .body(userAddress)
       .when().put("/users/{id}/addresses/{addressId}")
       .then()
       .statusCode(200)
-      .body("street", equalTo("124 Main St"))
-      .body("city", equalTo("Victoria"))
-      .body("state", equalTo("BC"))
-      .body("zipCode", equalTo("V6B 2W9"));
+      .body("street", equalTo(street))
+      .body("city", equalTo(city))
+      .body("state", equalTo(state))
+      .body("zipCode", equalTo(zipCode));
   }
 
   @Test
   void testDeleteUserAddress_givenValidPayload_shouldDeleteTheUserAddressAndReturnStatusNoContent() {
     given()
       .basePath("/api/v1")
-      .pathParam("id", id)
-      .pathParam("addressId", addressId)
+      .pathParam("id", userEntity.getId())
+      .pathParam("addressId", addressEntity.getId())
       .when().delete("/users/{id}/addresses/{addressId}")
       .then()
       .statusCode(204);
