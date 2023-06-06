@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [backend, database, frontend, init, backend-java]
+        name: [backend, database, frontend, init, backend-java, backend-py]
         include:
           - name: backend
             file: backend/openshift.deploy.yml

@@ -105,9 +105,11 @@ objects:
                   path: /
                   port: 3000
                   scheme: HTTP
-                initialDelaySeconds: 15
-                periodSeconds: 30
-                timeoutSeconds: 1
+                initialDelaySeconds: 5
+                periodSeconds: 2
+                timeoutSeconds: 2
+                successThreshold: 1
+                failureThreshold: 30
               livenessProbe:
                 successThreshold: 1
                 failureThreshold: 3
