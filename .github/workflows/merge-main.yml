@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [backend, database, frontend, init, backend-java, backend-py, backend-go]
+        name: [backend, database, frontend, init, backend-java, backend-py]
         include:
           - name: backend
             file: backend/openshift.deploy.yml
@@ -71,13 +71,8 @@ jobs:
             overwrite: true
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-          - name: backend-go
-            file: backend-go/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:test
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.1.0
+      - uses: bcgov-nr/action-deployer-openshift@v1.1.1
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -97,7 +92,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [backend, database, frontend, init, backend-py,  backend-java, backend-go]
+        name: [backend, database, frontend, init, backend-py,  backend-java]
         include:
           - name: backend
             file: backend/openshift.deploy.yml
@@ -123,13 +118,8 @@ jobs:
             overwrite: true
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-          - name: backend-go
-            file: backend-go/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:test
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.1.0
+      - uses: bcgov-nr/action-deployer-openshift@v1.1.1
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -150,7 +140,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        component: [backend, database,database-migrations, frontend, database-migrations-py, backend-py, backend-java, backend-go, database-migrations-go]
+        component: [backend, database,database-migrations, frontend, database-migrations-py, backend-py, backend-java]
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
         with:

@@ -82,7 +82,7 @@ jobs:
             build_context: ./backend-go
     steps:
       - uses: actions/checkout@v3
-      - uses: bcgov-nr/action-builder-ghcr@v1.1.1
+      - uses: bcgov-nr/action-builder-ghcr@v1.1.2
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
@@ -108,14 +108,14 @@ jobs:
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
-            triggers: ('database/', 'backend/', 'frontend/')
+            triggers: ('database/' 'backend/' 'frontend/')
           - name: backend-py
             file: backend-python/openshift.deploy.yml
             overwrite: true
             parameters:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:${{ github.event.number }}
-            triggers: ('backend-py/')
+            triggers: ('backend-python/')
           - name: database
             file: database/openshift.deploy.yml
             overwrite: false
@@ -123,7 +123,7 @@ jobs:
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-            triggers: ('database/', 'backend/', 'frontend/')
+            triggers: ('database/' 'backend/' 'frontend/')
           - name: init
             file: common/openshift.init.yml
             overwrite: false
@@ -140,7 +140,7 @@ jobs:
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:${{ github.event.number }}
             triggers: ('backend-go/')
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.1.0
+      - uses: bcgov-nr/action-deployer-openshift@v1.1.1
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
