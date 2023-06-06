@@ -20,9 +20,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// App @title QuickStart OpenShift Example GO API
+// App godoc
 // @version 1.0
-// @description This is a sample swagger for Fiber
+// @title Quickstart OpenShift Example GO API with Fiber
+// @description Quickstart OpenShift Example GO API with Fiber
 // @termsOfService http://swagger.io/terms/
 // @contact.name API Support
 // @contact.email fiber@swagger.io
@@ -55,7 +56,7 @@ func App() *fiber.App {
 	}))
 	app.Get("/", HealthCheck)
 	app.Use(monitor.New())
-	routes.EmployeeRoutes(app)
+	routes.UserRoutes(app)
 	// Serve Swagger documentation
 	app.Get("/swagger/*", swagger.HandlerDefault) // default
 	app.Use(func(c *fiber.Ctx) error {
