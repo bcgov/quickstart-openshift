@@ -1,4 +1,0 @@
-// Ignores test files when building the app
-{
-  "extends": "./tsconfig"
-}
