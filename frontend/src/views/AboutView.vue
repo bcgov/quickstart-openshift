@@ -1,15 +1,18 @@
 <template>
-  <div class="about">
+  <v-container class="about">
     <h1>This is an about page</h1>
-  </div>
+    <v-btn @click="showSnackbar('Test')">Snackbar test</v-btn>
+  </v-container>
 </template>
 
-<style>
-@media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
-}
-</style>
+<script lang="ts" setup>
+import { useGlobal } from '@/store';
+
+/** Global Store */
+const globalStore = useGlobal();
+
+/** Display snackbar */
+const showSnackbar = (message: string) => {
+  globalStore.setMessage(message);
+};
+</script>

@@ -1,12 +1,16 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.web.json",
+  "$schema": "https://json.schemastore.org/tsconfig.json",
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
   "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
     "composite": true,
+    "moduleResolution": "node",
+    "allowJs": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["vuetify"]
   }
 }

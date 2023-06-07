@@ -1,0 +1,77 @@
+root: true
+env:
+  browser: true
+  es2022: true # Vuetify recommended
+  node: true
+extends:
+  - eslint:recommended
+  - google
+  - plugin:@typescript-eslint/eslint-recommended
+  - plugin:import/recommended
+  - plugin:import/typescript
+  - plugin:jsdoc/recommended
+  - plugin:vue/vue3-recommended
+  - plugin:vuejs-accessibility/recommended
+  - plugin:vuetify/base
+  - plugin:yaml/recommended
+  - '@vue/eslint-config-prettier'
+plugins:
+  - '@typescript-eslint'
+  - jsdoc
+  - tsdoc
+  - html
+  - yaml
+  - vue
+parser: vue-eslint-parser
+parserOptions:
+  ecmaVersion: latest
+  parser: '@typescript-eslint/parser'
+  sourceType: module
+  createDefaultProgram: true
+  project:
+    - ./tsconfig.json
+rules:
+  new-cap: off
+  no-invalid-this: off
+  no-unused-vars: warn
+  require-jsdoc: warn
+  valid-jsdoc: off
+  jsdoc/require-param-type: off
+  jsdoc/require-param:
+    - off
+    - enableRootFixer: false
+  jsdoc/require-returns-description: off
+  jsdoc/require-returns-type: off
+  jsdoc/require-returns: off
+  tsdoc/syntax: warn
+  vue/html-self-closing:
+    - error
+    - html:
+        void: always
+  vue/multi-word-component-names: warn
+overrides:
+  - files:
+      - '*.html'
+    processor: vue/.vue
+settings:
+  import/parsers:
+    '@typescript-eslint/parser':
+      - '*.ts'
+      - '*.tsx'
+    vue-eslint-parser:
+      - '*.vue'
+  import/resolver:
+    typescript: true
+    node: true
+    alias:
+      map:
+        - ['@', './src']
+        - ['~', './node_modules']
+      extensions:
+        - .js
+        - .ts
+        - .jsx
+        - .tsx
+        - .vue
+  vite:
+    configPath: ./vite.config.ts
