@@ -55,7 +55,7 @@ services:
       POSTGRESQL_PASSWORD: postgres
       POSTGRESQL_DATABASE: postgres
     hostname: backend
-    image: node:alpine3.18
+    image: node:18-bullseye-slim
     links:
       - database
     ports:
