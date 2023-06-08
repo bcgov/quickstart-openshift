@@ -54,7 +54,7 @@ services:
       POSTGRESQL_PASSWORD: postgres
       POSTGRESQL_DATABASE: postgres
     hostname: backend
-    image: registry.access.redhat.com/ubi8/nodejs-18-minimal
+    image: node:alpine3.18
     links:
       - database
     ports:
