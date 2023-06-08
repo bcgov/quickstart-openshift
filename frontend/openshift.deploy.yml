@@ -102,8 +102,8 @@ objects:
                   memory: ${MEMORY_LIMIT}
               readinessProbe:
                 httpGet:
-                  path: /
-                  port: 3000
+                  path: /health
+                  port: 3001
                   scheme: HTTP
                 initialDelaySeconds: 5
                 periodSeconds: 2
@@ -114,8 +114,8 @@ objects:
                 successThreshold: 1
                 failureThreshold: 3
                 httpGet:
-                  path: /
-                  port: 3000
+                  path: /health
+                  port: 3001
                   scheme: HTTP
                 initialDelaySeconds: 15
                 periodSeconds: 30
