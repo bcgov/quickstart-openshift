@@ -7,8 +7,6 @@ RUN npm ci --ignore-scripts && \
 FROM caddy:2.4.6-alpine
 COPY --from=build /app/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/dist /app/dist
-RUN caddy fmt --overwrite /etc/caddy/Caddyfile
-RUN mkdir -p /config/caddy
 RUN chmod 777 /config/caddy
 EXPOSE 3000
 USER 1001
