@@ -1,77 +1,74 @@
-root: true
 env:
   browser: true
-  es2022: true # Vuetify recommended
+  es2021: true
   node: true
+
 extends:
-  - eslint:recommended
-  - google
-  - plugin:@typescript-eslint/eslint-recommended
-  - plugin:import/recommended
-  - plugin:import/typescript
-  - plugin:jsdoc/recommended
-  - plugin:vue/vue3-recommended
-  - plugin:vuejs-accessibility/recommended
-  - plugin:vuetify/base
-  - plugin:yaml/recommended
-  - '@vue/eslint-config-prettier'
-plugins:
-  - '@typescript-eslint'
-  - jsdoc
-  - tsdoc
-  - html
-  - yaml
-  - vue
-parser: vue-eslint-parser
+  - 'eslint:recommended'
+  - 'plugin:react/recommended'
+  - 'plugin:@typescript-eslint/recommended'
+  - 'prettier'
+  - 'plugin:prettier/recommended'
+
+parser: '@typescript-eslint/parser'
+
 parserOptions:
-  ecmaVersion: latest
-  parser: '@typescript-eslint/parser'
+  ecmaFeatures:
+    jsx: true
+  ecmaVersion: 12
   sourceType: module
-  createDefaultProgram: true
-  project:
-    - ./tsconfig.json
-rules:
-  new-cap: off
-  no-invalid-this: off
-  no-unused-vars: warn
-  require-jsdoc: warn
-  valid-jsdoc: off
-  jsdoc/require-param-type: off
-  jsdoc/require-param:
-    - off
-    - enableRootFixer: false
-  jsdoc/require-returns-description: off
-  jsdoc/require-returns-type: off
-  jsdoc/require-returns: off
-  tsdoc/syntax: warn
-  vue/html-self-closing:
-    - error
-    - html:
-        void: always
-  vue/multi-word-component-names: warn
-overrides:
-  - files:
-      - '*.html'
-    processor: vue/.vue
+  project: './tsconfig.json'
+
+plugins:
+  - 'react'
+  - 'react-hooks'
+  - '@typescript-eslint'
+  - 'prettier'
+
 settings:
-  import/parsers:
-    '@typescript-eslint/parser':
-      - '*.ts'
-      - '*.tsx'
-    vue-eslint-parser:
-      - '*.vue'
-  import/resolver:
-    typescript: true
-    node: true
-    alias:
-      map:
-        - ['@', './src']
-        - ['~', './node_modules']
-      extensions:
-        - .js
-        - .ts
-        - .jsx
-        - .tsx
-        - .vue
-  vite:
-    configPath: ./vite.config.ts
+  react:
+    version: 'detect'
+
+rules:
+  # General ESLint rules
+  'no-console': 'off'
+  'no-debugger': 'warn'
+  'no-unused-vars': 'off'
+  'no-empty': ['error', { allowEmptyCatch: true }]
+  'no-undef': 'off'
+  'no-use-before-define': 'off'
+  'no-restricted-imports': [
+    'error',
+    {
+      paths: [
+        {
+          name: 'react',
+          importNames: ['default'],
+          message: "Please import from 'react/jsx-runtime' instead.",
+        },
+      ],
+    },
+  ]
+
+  # React rules
+  'react/jsx-uses-react': 'off'
+  'react/react-in-jsx-scope': 'off'
+  'react/prop-types': 'off'
+  'react/display-name': 'off'
+  'react-hooks/rules-of-hooks': 'error'
+  'react-hooks/exhaustive-deps': 'warn'
+
+  # TypeScript rules
+  '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
+  '@typescript-eslint/explicit-module-boundary-types': 'off'
+  '@typescript-eslint/no-empty-interface': 'off'
+  '@typescript-eslint/no-explicit-any': 'off'
+  '@typescript-eslint/no-non-null-assertion': 'off'
+  '@typescript-eslint/ban-types': 'off'
+  '@typescript-eslint/no-use-before-define': ['error', { functions: false }]
+  '@typescript-eslint/no-var-requires': 'off'
+  '@typescript-eslint/explicit-function-return-type': 'off'
+  '@typescript-eslint/consistent-type-imports': [
+    'error',
+    { prefer: 'type-imports' },
+  ]

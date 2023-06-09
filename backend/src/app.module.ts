@@ -1,10 +1,11 @@
 import "dotenv/config";
-import {Module} from "@nestjs/common";
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {ConfigModule} from "@nestjs/config";
 import {AppController} from "./app.controller";
 import {AppService} from "./app.service";
 import {UsersModule} from "./users/users.module";
+import { HTTPLoggerMiddleware } from './middleware/req.res.logger';
 
 @Module({
   imports: [
@@ -26,4 +27,7 @@ import {UsersModule} from "./users/users.module";
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { // let's add a middleware on all routes
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(HTTPLoggerMiddleware).forRoutes("*");
+  }}
