@@ -88,8 +88,14 @@ objects:
               imagePullPolicy: Always
               name: ${NAME}
               env:
-                - name: BACKEND_URL
-                  value: http://${NAME}-${ZONE}-backend:3000
+                - name: WEB_HOST_NAME
+                  value: ${NAME}-${ZONE}-${COMPONENT}.${DOMAIN}
+                - name: WEB_HOST_PORT
+                  value: 443
+                - name: API_HOST
+                  value:  ${NAME}-${ZONE}-backend.${DOMAIN}
+                - name: API_PORT
+                  value: 443
               ports:
                 - containerPort: 3000
                   protocol: TCP

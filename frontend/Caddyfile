@@ -3,7 +3,7 @@
 	admin off
 	debug
 }
-:3000 {
+{$WEB_HOST_NAME}:{$WEB_HOST_PORT} {
 	log {
 		output stdout
 		format console {
@@ -12,30 +12,20 @@
 		}
 		level debug
 	}
-	encode gzip
-	handle_path /api/* {
-		rewrite * /api{path}
-		reverse_proxy {$BACKEND_URL}
-	}
-	handle /env-config.js {
-		header Content-Type text/javascript
-		respond `window.config = {"VITE_BACKEND_URL": "{$BACKEND_URL}"};`
-	}
-	handle {
-		root * /app/dist
-		try_files {path} {path}/ /index.html
-		file_server
-	}
-	header {
-		X-Frame-Options "SAMEORIGIN"
-		X-XSS-Protection "1;mode=block"
-		Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
-		X-Content-Type-Options "nosniff"
-		Strict-Transport-Security "max-age=31536000"
-		Content-Security-Policy https://raw.githubusercontent.com/bcgov/* "default-src 'self'  *.devops.gov.bc.ca data:; script-src 'self' 'unsafe-eval' https://www2.gov.bc.ca ;style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://use.fontawesome.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://fonts.googleapis.com http://www.w3.org"
-		Referrer-Policy "same-origin"
-		Feature-Policy "fullscreen 'self'; camera 'none'; microphone 'none'"
-	}
+	root * /app/dist
+	encode zstd gzip
+	file_server
+	@spa_router {
+        not path /api/*
+        file {
+            try_files {path} /index.html
+        }
+    }
+    rewrite @spa_router {http.matchers.file.relative}
+	# Proxy requests to API service
+    route /api/* {
+        reverse_proxy {$API_HOST}:{$API_PORT}
+    }
 }
 :3001 {
   handle /health {
