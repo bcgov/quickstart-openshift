@@ -145,6 +145,8 @@ objects:
               env:
                 - name: BACKEND_URL
                   value:  https://${NAME}-${ZONE}-backend.${DOMAIN}:443
+                - name: TEST
+                  value: test
               ports:
                 - containerPort: 3000
                   protocol: TCP
