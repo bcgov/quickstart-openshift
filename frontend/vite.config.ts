@@ -10,7 +10,14 @@ export default defineConfig(({ command, mode }): UserConfig => {
       fs: {
         // Allow serving files from one level up to the project root
         allow: ['..']
-      }
+      },
+      proxy: {
+        // Proxy API requests to the backend
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+        },
+      },
     },
     resolve: {
       // https://vitejs.dev/config/shared-options.html#resolve-alias

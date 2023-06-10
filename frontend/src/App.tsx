@@ -1,4 +1,3 @@
-import Container from '@mui/material/Container'
 import Box from '@mui/material/Box'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -16,7 +15,7 @@ const styles = {
     marginTop: '5em',
     marginRight: '1em',
     marginLeft: '1em',
-    marginBottom: '1em',
+    marginBottom: '5em',
     height: '100%',
   },
 }

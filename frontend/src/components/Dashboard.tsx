@@ -1,19 +1,31 @@
+import { useEffect, useState } from 'react'
 import MUIDataTable from 'mui-datatables'
+import apiService from '@/service/api-service'
+import type UserDto from '@/interfaces/UserDto'
+import type { AxiosResponse } from '~/axios'
 
-const columns = ['Name', 'Company', 'City', 'State']
-
-const data = [
-  ['Joe James', 'Test Corp', 'Yonkers', 'NY'],
-  ['John Walsh', 'Test Corp', 'Hartford', 'CT'],
-  ['Bob Herm', 'Test Corp', 'Tampa', 'FL'],
-  ['James Houston', 'Test Corp', 'Dallas', 'TX'],
-  ['Prabhakar Linwood', 'Test Corp', 'Hartford', 'CT'],
-  ['Kaui Ignace', 'Test Corp', 'Yonkers', 'NY'],
-  ['Esperanza Susanne', 'Test Corp', 'Hartford', 'CT'],
-  ['Christian Birgitte', 'Test Corp', 'Tampa', 'FL'],
-  ['Meral Elias', 'Test Corp', 'Hartford', 'CT'],
-]
+const columns: string[] = ['Id', 'Name', 'Email']
 
 export default function Dashboard() {
+  const [data, setData] = useState([])
+
+  useEffect(() => {
+    apiService
+      .getAxiosInstance()
+      .get('/v1/users')
+      .then((response: AxiosResponse) => {
+        setData(
+          response.data.map((user: UserDto) => [
+            user.id,
+            user.name,
+            user.email,
+          ]),
+        )
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }, [])
+
   return <MUIDataTable title={'User List'} data={data} columns={columns} />
 }
