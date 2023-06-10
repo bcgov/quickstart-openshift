@@ -3,7 +3,7 @@
 	admin off
 	debug
 }
-{$WEB_HOST_NAME}:{$WEB_HOST_PORT} {
+:3000 {
 	log {
 		output stdout
 		format console {
@@ -24,7 +24,7 @@
     rewrite @spa_router {http.matchers.file.relative}
 	# Proxy requests to API service
     route /api/* {
-        reverse_proxy {$API_HOST}:{$API_PORT}
+        reverse_proxy {$BACKEND_URL}
     }
 }
 :3001 {
