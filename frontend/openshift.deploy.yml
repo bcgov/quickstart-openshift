@@ -89,7 +89,7 @@ objects:
               name: ${NAME}
               env:
                 - name: BACKEND_URL
-                  value: ${NAME}-${ZONE}-backend.${DOMAIN}
+                  value: https://${NAME}-${ZONE}-backend.${DOMAIN}
               ports:
                 - containerPort: 3000
                   protocol: TCP

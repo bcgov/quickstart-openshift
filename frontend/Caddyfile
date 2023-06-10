@@ -32,7 +32,7 @@
 		Referrer-Policy "same-origin"
 		Feature-Policy "fullscreen 'self'; camera 'none'; microphone 'none'"
 	}
-	reverse_proxy /api/* {$BACKEND_URL}
+	reverse_proxy {$BACKEND_URL}
 }
 :3001 {
   handle /health {
