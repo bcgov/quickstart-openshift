@@ -14,6 +14,7 @@
 	}
 	encode gzip
 	handle_path /api/* {
+		rewrite * /api{path}
 		reverse_proxy {$BACKEND_URL}
 	}
 	handle /env-config.js {
