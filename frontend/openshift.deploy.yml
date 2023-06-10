@@ -56,6 +56,53 @@ objects:
           referencePolicy:
             type: Local
   - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
+    data:
+      Caddyfile: |
+        {
+          auto_https off
+          admin off
+          debug
+        }
+        :3000 {
+          log {
+            output stdout
+            format console {
+              time_format iso8601
+              level_format color
+            }
+            level debug
+          }
+          root * /app/dist
+          encode zstd gzip
+          file_server
+          @spa_router {
+                not path /api/*
+                file {
+                    try_files {path} /index.html
+                }
+            }
+            rewrite @spa_router {http.matchers.file.relative}
+          # Proxy requests to API service
+            reverse_proxy /api/* {$BACKEND_URL} {
+                header_up Host {http.reverse_proxy.upstream.hostport}
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
+                header_up X-Forwarded-Proto {scheme}
+                #header_up Connection {>Connection}
+            }
+        }
+        :3001 {
+          handle /health {
+            respond "OK"
+          }
+        }
+
+  - apiVersion: v1
     kind: DeploymentConfig
     metadata:
       labels:
@@ -120,6 +167,14 @@ objects:
                 initialDelaySeconds: 15
                 periodSeconds: 30
                 timeoutSeconds: 5
+              volumeMounts:
+                - name: config-vol
+                  mountPath: /etc/caddy/Caddyfile
+                  subPath: Caddyfile
+          volumes:
+          - name: config-vol
+            configMap:
+              name: ${NAME}-${ZONE}-${COMPONENT}
   - apiVersion: v1
     kind: Service
     metadata:
