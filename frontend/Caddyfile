@@ -13,6 +13,9 @@
 		level debug
 	}
 	encode gzip
+	handle_path /api/* {
+		reverse_proxy {$BACKEND_URL}
+	}
 	handle /env-config.js {
 		header Content-Type text/javascript
 		respond `window.config = {"VITE_BACKEND_URL": "{$BACKEND_URL}"};`
@@ -38,4 +41,3 @@
 	  respond "OK"
   }
 }
-reverse_proxy /api/* {$BACKEND_URL}
