@@ -109,6 +109,7 @@ jobs:
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
             triggers: ('database/' 'backend/' 'frontend/')
+            verification_path: /api
           - name: backend-py
             file: backend-python/openshift.deploy.yml
             overwrite: true
@@ -153,3 +154,4 @@ jobs:
             -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
+          verification_path: ${{ matrix.verification_path }}
