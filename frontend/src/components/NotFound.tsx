@@ -1,4 +1,3 @@
-import React from 'react'
 import { Box, Button, Container, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid'
 import { useNavigate } from 'react-router'
@@ -23,7 +22,12 @@ export default function NotFound() {
           <Typography variant="h6">
             The page you’re looking for does not exist.
           </Typography>
-          <Button onClick={() => buttonClicked()} variant="contained">
+          <Button
+            name="homeBtn"
+            id="homeBtn"
+            onClick={() => buttonClicked()}
+            variant="contained"
+          >
             Back Home
           </Button>
         </Grid>

@@ -16,8 +16,12 @@
     "strictNullChecks": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "types": ["vitest/globals"],
     "baseUrl": "./",
     "paths": {
+      "@": ["src"],
+      "test": ["test"],
+      "test/*": ["test/*"],
       "@/*": ["src/*"],
       "~/*": ["node_modules/*"]
     }
