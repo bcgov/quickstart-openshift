@@ -51,6 +51,7 @@ jobs:
             file: backend/openshift.deploy.yml
             parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:test
             overwrite: true
+            verification_path: /api
           - name: database
             file: database/openshift.deploy.yml
             overwrite: false
@@ -88,6 +89,7 @@ jobs:
             -p ZONE=test -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
             -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
           penetration_test: true
+          verification_path: ${{ matrix.verification_path }}
 
   deploys-prod:
     name: PROD Deployments
@@ -103,6 +105,7 @@ jobs:
             file: backend/openshift.deploy.yml
             parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:test
             overwrite: true
+            verification_path: /api
           - name: database
             file: database/openshift.deploy.yml
             overwrite: false
@@ -141,6 +144,7 @@ jobs:
             -p ZONE=prod -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
             -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
           penetration_test: false
+          verification_path: ${{ matrix.verification_path }}
 
   image-promotions:
     name: Promote images to PROD
