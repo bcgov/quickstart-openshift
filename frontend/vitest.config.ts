@@ -1,18 +1,18 @@
 import { defineConfig } from 'vitest/config'
-import vue from "@vitejs/plugin-vue";
-import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
-export default defineConfig({
-  plugins: [
-    vue({
-      template: { transformAssetUrls },
-    }),
+import tsconfigPaths from 'vite-tsconfig-paths'
 
-    quasar({
-      autoImportComponentCase: "pascal",
-      sassVariables: "src/quasar-variables.sass",
-    }),
-  ],
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [tsconfigPaths()],
   test: {
-    environment: "jsdom",
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: 'src/test-setup.ts',
+    // you might want to disable it, if you don't have tests that rely on CSS
+    // since parsing CSS is slow
+    css: false,
+    coverage: {
+      reporter: ['lcov', 'text-summary','text', 'json', 'html'],
+    },
   },
 })

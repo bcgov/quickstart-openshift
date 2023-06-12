@@ -150,7 +150,7 @@ objects:
                   memory: ${MEMORY_LIMIT}
               readinessProbe:
                 httpGet:
-                  path: /
+                  path: /api
                   port: 3000
                   scheme: HTTP
                 initialDelaySeconds: 5
@@ -162,7 +162,7 @@ objects:
                 successThreshold: 1
                 failureThreshold: 3
                 httpGet:
-                  path: /
+                  path: /api
                   port: 3000
                   scheme: HTTP
                 initialDelaySeconds: 60
