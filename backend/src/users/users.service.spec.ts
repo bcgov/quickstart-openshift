@@ -1,8 +1,9 @@
-import {Test, TestingModule} from "@nestjs/testing";
-import {getRepositoryToken} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
-import {UsersService} from "./users.service";
-import {Users} from "./entities/users.entity";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import type { Repository } from "typeorm";
+import { UsersService } from "./users.service";
+import { Users } from "./entities/users.entity";
 
 describe("UserService", () => {
   let service: UsersService;
@@ -37,7 +38,7 @@ describe("UserService", () => {
           useValue: {
             // mock repository functions for testing
             find: jest.fn().mockResolvedValue(userArray),
-            findOneOrFail: jest.fn().mockResolvedValue(oneUser),
+            findOne: jest.fn().mockResolvedValue(oneUser),
             create: jest.fn().mockReturnValue(threeUser),
             save: jest.fn(),
             // as these do not actually use their return values in our sample
@@ -79,9 +80,9 @@ describe("UserService", () => {
 
   describe("findOne", () => {
     it("should get a single user", () => {
-      const repoSpy = jest.spyOn(repo, "findOneOrFail");
+      const repoSpy = jest.spyOn(repo, "findOne");
       expect(service.findOne(1)).resolves.toEqual(oneUser);
-      expect(repoSpy).toBeCalledWith(1);
+      expect(repoSpy).toBeCalledWith({ where: { id: 1 } });
     });
   });
 
@@ -90,13 +91,13 @@ describe("UserService", () => {
       const user = await service.update(1, updateUser);
       expect(user).toEqual(oneUser);
       expect(repo.update).toBeCalledTimes(1);
-      expect(repo.update).toBeCalledWith({id: 1}, updateUser);
+      expect(repo.update).toBeCalledWith({ id: 1 }, updateUser);
     });
   });
 
   describe("remove", () => {
     it("should return {deleted: true}", () => {
-      expect(service.remove(2)).resolves.toEqual({deleted: true});
+      expect(service.remove(2)).resolves.toEqual({ deleted: true });
     });
     it("should return {deleted: false, message: err.message}", () => {
       const repoSpy = jest
@@ -110,12 +111,13 @@ describe("UserService", () => {
       expect(repoSpy).toBeCalledTimes(1);
     });
   });
-  describe('searchUsers', () => {
-    it('should return a list of users with pagination and filtering', async () => {
-      const page: number = 1;
-      const limit: number = 10;
+  describe("searchUsers", () => {
+    it("should return a list of users with pagination and filtering", async () => {
+      const page = 1;
+      const limit = 10;
       const sort: any = '{ "name": "ASC" }';
-      const filter: any = '[{ "key": "name", "operation": "=", "value": "Peter" }]';
+      const filter: any =
+        '[{ "key": "name", "operation": "=", "value": "Peter" }]';
       const queryBuilder = {
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
@@ -123,11 +125,13 @@ describe("UserService", () => {
         orderBy: jest.fn().mockReturnThis(),
         getManyAndCount: jest.fn().mockResolvedValueOnce([[], 0]),
       };
-      jest.spyOn(repo, 'createQueryBuilder').mockReturnValue(queryBuilder as any);
+      jest
+        .spyOn(repo, "createQueryBuilder")
+        .mockReturnValue(queryBuilder as any);
 
       const result = await service.searchUsers(page, limit, sort, filter);
 
-      expect(repo.createQueryBuilder).toHaveBeenCalledWith('users');
+      expect(repo.createQueryBuilder).toHaveBeenCalledWith("users");
       expect(queryBuilder.skip).toHaveBeenCalledWith(0);
       expect(queryBuilder.take).toHaveBeenCalledWith(limit);
       expect(queryBuilder.getManyAndCount).toHaveBeenCalled();
@@ -140,10 +144,11 @@ describe("UserService", () => {
       });
     });
 
-    it('given no page should return a list of users with pagination and filtering with default page 1', async () => {
-      const limit: number = 10;
+    it("given no page should return a list of users with pagination and filtering with default page 1", async () => {
+      const limit = 10;
       const sort: any = '{ "name": "ASC" }';
-      const filter: any = '[{ "key": "name", "operation": "=", "value": "Peter" }]';
+      const filter: any =
+        '[{ "key": "name", "operation": "=", "value": "Peter" }]';
       const queryBuilder = {
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
@@ -151,11 +156,13 @@ describe("UserService", () => {
         orderBy: jest.fn().mockReturnThis(),
         getManyAndCount: jest.fn().mockResolvedValueOnce([[], 0]),
       };
-      jest.spyOn(repo, 'createQueryBuilder').mockReturnValue(queryBuilder as any);
+      jest
+        .spyOn(repo, "createQueryBuilder")
+        .mockReturnValue(queryBuilder as any);
 
       const result = await service.searchUsers(null, limit, sort, filter);
 
-      expect(repo.createQueryBuilder).toHaveBeenCalledWith('users');
+      expect(repo.createQueryBuilder).toHaveBeenCalledWith("users");
       expect(queryBuilder.skip).toHaveBeenCalledWith(0);
       expect(queryBuilder.take).toHaveBeenCalledWith(limit);
       expect(queryBuilder.getManyAndCount).toHaveBeenCalled();
@@ -167,10 +174,11 @@ describe("UserService", () => {
         totalPages: 0,
       });
     });
-    it('given no limit should return a list of users with pagination and filtering with default limit 10', async () => {
-      const page: number = 1;
+    it("given no limit should return a list of users with pagination and filtering with default limit 10", async () => {
+      const page = 1;
       const sort: any = '{ "name": "ASC" }';
-      const filter: any = '[{ "key": "name", "operation": "=", "value": "Peter" }]';
+      const filter: any =
+        '[{ "key": "name", "operation": "=", "value": "Peter" }]';
       const queryBuilder = {
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
@@ -178,11 +186,13 @@ describe("UserService", () => {
         orderBy: jest.fn().mockReturnThis(),
         getManyAndCount: jest.fn().mockResolvedValueOnce([[], 0]),
       };
-      jest.spyOn(repo, 'createQueryBuilder').mockReturnValue(queryBuilder as any);
+      jest
+        .spyOn(repo, "createQueryBuilder")
+        .mockReturnValue(queryBuilder as any);
 
       const result = await service.searchUsers(page, null, sort, filter);
 
-      expect(repo.createQueryBuilder).toHaveBeenCalledWith('users');
+      expect(repo.createQueryBuilder).toHaveBeenCalledWith("users");
       expect(queryBuilder.skip).toHaveBeenCalledWith(0);
       expect(queryBuilder.take).toHaveBeenCalledWith(10);
       expect(queryBuilder.getManyAndCount).toHaveBeenCalled();
@@ -195,11 +205,12 @@ describe("UserService", () => {
       });
     });
 
-    it('given  limit greater than 200 should return a list of users with pagination and filtering with default limit 10', async () => {
-      const page: number = 1;
-      const limit: number = 201;
+    it("given  limit greater than 200 should return a list of users with pagination and filtering with default limit 10", async () => {
+      const page = 1;
+      const limit = 201;
       const sort: any = '{ "name": "ASC" }';
-      const filter: any = '[{ "key": "name", "operation": "=", "value": "Peter" }]';
+      const filter: any =
+        '[{ "key": "name", "operation": "=", "value": "Peter" }]';
       const queryBuilder = {
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
@@ -207,11 +218,13 @@ describe("UserService", () => {
         orderBy: jest.fn().mockReturnThis(),
         getManyAndCount: jest.fn().mockResolvedValueOnce([[], 0]),
       };
-      jest.spyOn(repo, 'createQueryBuilder').mockReturnValue(queryBuilder as any);
+      jest
+        .spyOn(repo, "createQueryBuilder")
+        .mockReturnValue(queryBuilder as any);
 
       const result = await service.searchUsers(page, limit, sort, filter);
 
-      expect(repo.createQueryBuilder).toHaveBeenCalledWith('users');
+      expect(repo.createQueryBuilder).toHaveBeenCalledWith("users");
       expect(queryBuilder.skip).toHaveBeenCalledWith(0);
       expect(queryBuilder.take).toHaveBeenCalledWith(10);
       expect(queryBuilder.getManyAndCount).toHaveBeenCalled();
