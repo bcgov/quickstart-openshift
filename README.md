@@ -9,7 +9,7 @@
 [![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
-# QuickStart: OpenShift, TypeScript and Postgres/PostGIS
+# QuickStart: OpenShift, TypeScript Frontend (React with Caddy WebServer), Pluggable Backend (Nest.js with Node Runtime, FastAPI with Python, Quarkus with Java On Native, Fiber with Golang), and Postgres/PostGIS
 
 The DevOps Quickstart is a fully functional set of pipeline workflows and a starter application stack intended to help Agile DevOps teams hit the ground running.  Currently OpenShift is supported with plans for AWS (Amazon Web Services).  Pipelines are run using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions).
 
