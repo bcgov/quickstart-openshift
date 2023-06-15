@@ -1,4 +1,3 @@
-import logging
 from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -51,6 +50,55 @@ def create_user(
         else:
             db.rollback()
             raise ie
+    except Exception as e:
+        db.rollback()
+        raise e
+
+
+@router.get("/{user_id}", response_model=User)
+def get_user(
+        *,
+        db: Session = Depends(session.get_db),
+        user_id: int
+) -> Any:
+    """
+    Get User By Id.
+    """
+
+    try:
+        db_object = userRepository.get(db, key=user_id)
+        if not db_object:
+            raise HTTPException(
+                status_code=404,
+                detail="User Not Found.",
+            )
+        ret_usr = User(user_id=db_object.id, email=db_object.email, name=db_object.name)
+        return ret_usr
+    except Exception as e:
+        db.rollback()
+        raise e
+
+
+@router.delete("/{user_id}", response_model=User)
+def delete_user(
+        *,
+        db: Session = Depends(session.get_db),
+        user_id: int
+) -> Any:
+    """
+    Delete User By Id.
+    """
+
+    try:
+        db_object = userRepository.get(db, key=user_id)
+        if not db_object:
+            raise HTTPException(
+                status_code=404,
+                detail="User Not Found.",
+            )
+        userRepository.remove(db, key=user_id)
+        ret_usr = User(user_id=db_object.id, email=db_object.email, name=db_object.name)
+        return ret_usr
     except Exception as e:
         db.rollback()
         raise e
