@@ -22,8 +22,8 @@ def read_users(
     """
     Retrieve users.
     """
-    users = userRepository.get_multi(db, skip=skip, limit=limit)
-    return users
+    # create User array from database objects by iterating over.
+    return [User(user_id=user.id, email=user.email, name=user.name) for user in users]
 
 
 @router.post("/", response_model=User)
