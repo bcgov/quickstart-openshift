@@ -55,10 +55,10 @@ func App() *fiber.App {
 		TimeZone:   "America/Vancouver",
 	}))
 	app.Get("/", HealthCheck)
-	app.Use(monitor.New())
 	routes.UserRoutes(app)
 	// Serve Swagger documentation
 	app.Get("/swagger/*", swagger.HandlerDefault) // default
+	app.Use(monitor.New())
 	app.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(404) // => 404 "Not Found"
 	})
