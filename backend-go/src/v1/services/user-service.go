@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/bcgov/quickstart-openshift/backend-go/src/database"
 	"github.com/bcgov/quickstart-openshift/backend-go/src/v1/entities"
@@ -17,8 +18,15 @@ import (
 const userNotFound = "User not found"
 const addressNotFound = "Address not found"
 
-var userRepo = repositories.NewUserRepository(database.DBConn)
-var userAddrRepo = repositories.NewUserAddressRepository(database.DBConn)
+var (
+	userRepo     *repositories.UserRepository
+	userAddrRepo *repositories.UserAddressRepository
+)
+
+func Init() {
+	userRepo = repositories.NewUserRepository(database.DBConn)
+	userAddrRepo = repositories.NewUserAddressRepository(database.DBConn)
+}
 
 // GetUsers godoc
 // @Summary Get all Users
@@ -43,12 +51,11 @@ func GetUsers(c *fiber.Ctx) error {
 	}
 	var users []structs.User
 	for _, element := range *d {
-		var emp = new(structs.User)
-		err = mapper.AutoMapper(&element, emp)
+		user := createUserFromUserEntity(&element)
 		if err != nil {
 			break
 		}
-		users = append(users, *emp)
+		users = append(users, *user)
 	}
 
 	if err != nil {
@@ -80,15 +87,10 @@ func GetUserById(c *fiber.Ctx) error {
 	if repoErr != nil {
 		return internalServerError(c, repoErr.Error())
 	}
-	var user = new(structs.User)
-	mappingErr := mapper.AutoMapper(&userEntity, user)
-	if mappingErr != nil {
-		return internalServerError(c, mappingErr.Error())
-	}
-
-	if user == nil {
+	if userEntity == nil {
 		return notFound(c, userNotFound)
 	}
+	user := createUserFromUserEntity(userEntity)
 	return success(c, "Got the user", *user, http.StatusOK)
 }
 
@@ -110,18 +112,19 @@ func CreateUser(c *fiber.Ctx) error {
 		return badRequest(c, err.Error())
 	}
 
-	userEntity := entities.UserEntity{
-		Name:  userDto.Name,
-		Email: userDto.Email,
-	}
+	userEntity := new(entities.UserEntity)
+	userEntity.Name = userDto.Name
+	userEntity.Email = userDto.Email
 
-	if err := userRepo.Create(&userEntity); err != nil {
+	if err := userRepo.Create(userEntity); err != nil {
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint \"users_email_key\"") {
+			return c.Status(http.StatusConflict).JSON(fiber.Map{
+				"message": "User with this email already exists",
+			})
+		}
 		return internalServerError(c, err.Error())
 	}
-	var user = new(structs.User)
-	if mappingErr := mapper.AutoMapper(&userEntity, user); mappingErr != nil {
-		return internalServerError(c, mappingErr.Error())
-	}
+	user := createUserFromUserEntity(userEntity)
 	return success(c, "Created the user", *user, http.StatusCreated)
 }
 
@@ -164,11 +167,16 @@ func UpdateUser(c *fiber.Ctx) error {
 	if err := userRepo.Update(userEntity); err != nil {
 		return internalServerError(c, err.Error())
 	}
-	var updatedUser = new(structs.User)
-	if mappingErr := mapper.AutoMapper(&userEntity, updatedUser); mappingErr != nil {
-		return internalServerError(c, mappingErr.Error())
-	}
+	updatedUser := createUserFromUserEntity(userEntity)
 	return success(c, "Updated the user", *updatedUser, http.StatusOK)
+}
+
+func createUserFromUserEntity(userEntity *entities.UserEntity) *structs.User {
+	var updatedUser = new(structs.User)
+	updatedUser.Id = userEntity.Id
+	updatedUser.Name = userEntity.Name
+	updatedUser.Email = userEntity.Email
+	return updatedUser
 }
 
 // DeleteUser godoc
@@ -286,11 +294,19 @@ func GetUserAddressByAddressId(c *fiber.Ctx) error {
 	if address == nil || address.UserID != uint(userId) {
 		return notFound(c, addressNotFound)
 	}
-	var addressStruct = new(structs.UserAddress)
-	if err := mapper.AutoMapper(&address, addressStruct); err != nil {
-		return internalServerError(c, err.Error())
-	}
+	addressStruct := createAddressStructFromEntity(address)
 	return success(c, "Got the user address by id", addressStruct, http.StatusOK)
+}
+
+func createAddressStructFromEntity(address *entities.UserAddressEntity) *structs.UserAddress {
+	var addressStruct = new(structs.UserAddress)
+	addressStruct.Id = address.Id
+	addressStruct.UserID = address.UserID
+	addressStruct.City = address.City
+	addressStruct.Street = address.Street
+	addressStruct.ZipCode = address.ZipCode
+	addressStruct.State = address.State
+	return addressStruct
 }
 
 // CreateUserAddress godoc
@@ -337,11 +353,7 @@ func CreateUserAddress(c *fiber.Ctx) error {
 	if err := userAddrRepo.CreateUserAddress(&address); err != nil {
 		return internalServerError(c, err.Error())
 	}
-	var addressStruct = new(structs.UserAddress)
-	_ = mapper.AutoMapper(&address, addressStruct)
-	if err := mapper.AutoMapper(&address, addressStruct); err != nil {
-		return internalServerError(c, err.Error())
-	}
+	addressStruct := createAddressStructFromEntity(&address)
 	return success(c, "Created User Address", addressStruct, http.StatusCreated)
 }
 
