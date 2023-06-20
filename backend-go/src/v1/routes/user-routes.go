@@ -6,7 +6,8 @@ import (
 )
 
 func UserRoutes(app fiber.Router) {
-	r := app.Group("/users")
+	r := app.Group("/api/v1/users")
+	services.Init()
 	r.Get("/", services.GetUsers)
 	r.Get("/:id", services.GetUserById)
 	r.Post("/", services.CreateUser)

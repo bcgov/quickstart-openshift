@@ -1,0 +1,62 @@
+{
+  "api_name": "fastapi",
+  "api_version": "1.0.0",
+  "base_url": "${BASE_URL}",
+  "tests": [
+    {
+      "name": "User Endpoint TEST",
+      "methods": [
+        "GET",
+        "POST",
+        "GET",
+        "DELETE"
+      ],
+      "path": "/api/v1/user/",
+      "headers": {
+        "Content-Type": "application/json",
+        "accept": "application/json"
+      },
+      "data": {
+        "id_field": "user_id",
+        "post_payload": {
+          "name": "John",
+          "email": "John.ipsum@test.com"
+        },
+        "put_payload": {
+          "name": "Jane",
+          "email": "Jane.ipsum@test.com"
+        },
+        "patch_payload": {
+          "name": "Jane",
+          "email": "Jane.ipsum@test.com"
+        }
+      },
+      "assertions": [
+        {
+          "method": "POST",
+          "status_code": 201,
+          "body": {
+            "name": "John",
+            "email": "John.ipsum@test.com"
+          }
+        },
+        {
+          "method": "GET",
+          "status_code": 200
+        },
+        {
+          "method": "PUT",
+          "status_code": 200,
+          "body": {
+            "name": "Jane",
+            "email": "Jane.ipsum@test.com"
+          }
+        },
+        {
+          "method": "DELETE",
+          "status_code": 200
+        }
+      ]
+    }
+  ]
+}

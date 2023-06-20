@@ -1,0 +1,62 @@
+{
+  "api_name": "nest",
+  "api_version": "1.0.0",
+  "base_url": "${BASE_URL}",
+  "tests": [
+    {
+      "name": "User Endpoint TEST",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "GET",
+        "DELETE"
+      ],
+      "path": "/api/v1/users",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "data": {
+        "id_field": "id",
+        "post_payload": {
+          "name": "John",
+          "email": "John.ipsum@test.com"
+        },
+        "put_payload": {
+          "name": "Jane",
+          "email": "Jane.ipsum@test.com"
+        },
+        "patch_payload": {
+          "name": "Jane",
+          "email": "Jane.ipsum@test.com"
+        }
+      },
+      "assertions": [
+        {
+          "method": "POST",
+          "status_code": 201,
+          "body": {
+            "name": "John",
+            "email": "John.ipsum@test.com"
+          }
+        },
+        {
+          "method": "GET",
+          "status_code": 200
+        },
+        {
+          "method": "PUT",
+          "status_code": 200,
+          "body": {
+            "name": "Jane",
+            "email": "Jane.ipsum@test.com"
+          }
+        },
+        {
+          "method": "DELETE",
+          "status_code": 200
+        }
+      ]
+    }
+  ]
+}
