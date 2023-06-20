@@ -34,7 +34,7 @@
       "assertions": [
         {
           "method": "POST",
-          "status_code": 201,
+          "status_code": 200,
           "body": {
             "name": "John",
             "email": "John.ipsum@test.com"

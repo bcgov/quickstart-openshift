@@ -6,8 +6,9 @@
     {
       "name": "User Endpoint TEST",
       "methods": [
+        "GET",
         "POST",
-        "PATCH",
+        "PUT",
         "GET",
         "DELETE"
       ],
