@@ -170,6 +170,7 @@ jobs:
         name: Cypress run
         with:
           config: pageLoadTimeout=10000,baseUrl=https://quickstart-openshift-test-frontend.apps.silver.devops.gov.bc.ca/
+          working-directory: ./frontend
           browser: ${{ matrix.browser }}
       - uses: actions/upload-artifact@v3
         if: failure()
