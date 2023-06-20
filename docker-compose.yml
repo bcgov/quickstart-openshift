@@ -40,7 +40,7 @@ services:
         condition: service_healthy
 
   database-migrations-go:
-    profiles: ["go"]
+    profiles: ["go", "all"]
     image: flyway/flyway:9-alpine
     container_name: go-api-migrations
     command: info migrate info
@@ -55,6 +55,22 @@ services:
       database:
         condition: service_healthy
 
+  database-py-migrations:
+    profiles: ["python", "all"]
+    image: flyway/flyway:9-alpine
+    container_name: py-backend-migrations
+    command: info migrate info
+    volumes: ["./backend-python/db/migrations:/flyway/sql"]
+    environment:
+      FLYWAY_URL: jdbc:postgresql://database:5432/postgres
+      FLYWAY_USER: *POSTGRES_USER
+      FLYWAY_PASSWORD: *POSTGRES_PW
+      FLYWAY_BASELINE_ON_MIGRATE: true
+      FLYWAY_DEFAULT_SCHEMA: py_api
+    depends_on:
+      database:
+        condition: service_healthy
+
   backend:
     container_name: backend
     entrypoint: sh -c "npm i && npm run start"
@@ -65,8 +81,6 @@ services:
       POSTGRESQL_PASSWORD: *POSTGRES_PW
       POSTGRESQL_DATABASE: *POSTGRES_DB
     image: node:18-bullseye
-    # links:
-    #   - database
     ports:
       - "3001:3000"
     volumes:
@@ -81,8 +95,9 @@ services:
         condition: service_healthy
       database-migrations:
         condition: service_started
-      
+
   backend-go:
+    profiles: ["go", "all"]
     image: cosmtrek/air:latest
     working_dir: /application # has to be the same as mapped vol
     volumes: ["./backend-go/:/application/"]
@@ -105,6 +120,101 @@ services:
         condition: service_healthy
       database-migrations-go:
         condition: service_completed_successfully
+
+  sqlalchemy-model-generator:
+    profiles: ["python", "all"]
+    image: python:3.9-slim-buster # DO NOT change, as it breaks the module.
+    working_dir: /application
+    container_name: py-backend-model-generator
+    command: sh -c "chmod +x generate-models.sh && ./generate-models.sh"
+    volumes:
+      - "./backend-python/src/v1/models:/application/models"
+      - "./backend-python/generate-models.sh:/application/generate-models.sh"
+    depends_on:
+      database-py-migrations:
+        condition: service_completed_successfully
+
+  backend-py:
+    profiles: ["python", "all"]
+    image: python:3.11
+    working_dir: /application
+    build:
+      context: backend-python
+    container_name: backend-py
+    command: sh -c "chmod +x start-local.sh && ./start-local.sh"
+    volumes: # don't volume mount the entire backend python as it would remove the venv
+      - ./backend-python/src:/application/app/src
+      - ./backend-python/pyproject.toml:/application/pyproject.toml
+      - ./backend-python/poetry.lock:/application/poetry.lock
+      - ./backend-python/start-local.sh:/application/start-local.sh
+      - ./backend-python/logger.conf:/application/logger.conf
+      # - ./frontend:/application:z
+      # - /application/.venv
+    environment:
+      PIP_NO_CACHE_DIR: off
+      PIP_DISABLE_PIP_VERSION_CHECK: on
+      PIP_DEFAULT_TIMEOUT: 100
+      POETRY_VERSION: 1.2.2
+      POETRY_HOME: /opt/poetry
+      POETRY_VIRTUALENVS_IN_PROJECT: true
+      POETRY_NO_INTERACTION: 1
+      PYSETUP_PATH: /application
+      VENV_PATH: /application/.venv
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+      POSTGRES_SERVER: database
+      POSTGRESQL_USER: *POSTGRES_USER
+      POSTGRESQL_PASSWORD: *POSTGRES_PW
+      POSTGRESQL_DATABASE: *POSTGRES_DB
+      PYTHONPATH: /application/app/src
+    ports:
+      - "3003:3000"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
+    depends_on:
+      database:
+        condition: service_healthy
+      sqlalchemy-model-generator:
+        condition: service_completed_successfully
+
+  backend-py-test:
+    profiles: ["python", "all"]
+    image: python:3.11
+    working_dir: /application
+    build:
+      context: backend-python
+    container_name: backend-py-test
+    command: sh -c "chmod +x run-unit-tests.sh && ./run-unit-tests.sh"
+    volumes: # don't volume mount the entire backend python as it would remove the venv
+      - ./backend-python/src:/application/app/src
+      - ./backend-python/test:/application/app/test
+      - ./backend-python/pyproject.toml:/application/pyproject.toml
+      - ./backend-python/poetry.lock:/application/poetry.lock
+      - ./backend-python/run-unit-tests.sh:/application/run-unit-tests.sh
+      - ./backend-python/logger.conf:/application/logger.conf
+    environment:
+      PIP_NO_CACHE_DIR: off
+      PIP_DISABLE_PIP_VERSION_CHECK: on
+      PIP_DEFAULT_TIMEOUT: 100
+      POETRY_VERSION: 1.2.2
+      POETRY_HOME: /opt/poetry
+      POETRY_VIRTUALENVS_IN_PROJECT: true
+      POETRY_NO_INTERACTION: 1
+      PYSETUP_PATH: /application
+      VENV_PATH: /application/.venv
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+      POSTGRES_SERVER: database-py
+      POSTGRESQL_USER: *POSTGRES_USER
+      POSTGRESQL_PASSWORD: *POSTGRES_PW
+      POSTGRESQL_DATABASE: *POSTGRES_DB
+      PYTHONPATH: /application/app
+    hostname: backend-py-test
+    depends_on:
+      database:
+        condition: service_healthy
+      backend-py:
+        condition: service_healthy
 
   frontend:
     container_name: frontend
