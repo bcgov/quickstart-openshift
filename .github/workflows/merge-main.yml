@@ -258,6 +258,9 @@ jobs:
     needs:
       - deploys-test
     runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: frontend
     strategy:
       matrix:
         browser: [ chrome, firefox, edge ]
@@ -284,11 +287,10 @@ jobs:
         name: Cypress run
         with:
           config: pageLoadTimeout=10000,baseUrl=https://quickstart-openshift-test-frontend.apps.silver.devops.gov.bc.ca/
-          working-directory: ./frontend
           browser: ${{ matrix.browser }}
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: cypress-screenshots
-          path: ./frontend/cypress/screenshots
+          path: ./cypress/screenshots
           if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
