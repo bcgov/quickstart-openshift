@@ -1,5 +1,13 @@
 ---
-version: "3.8"
+version: "3.9"
+
+x-var:
+  - &POSTGRES_USER
+    postgres
+  - &POSTGRES_PW
+    default
+  - &POSTGRES_DB
+    postgres
 
 services:
   database:
@@ -7,72 +15,97 @@ services:
       context: database
     container_name: database
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    hostname: database
+      POSTGRES_USER: *POSTGRES_USER
+      POSTGRES_PASSWORD: *POSTGRES_PW
+      POSTGRES_DB: *POSTGRES_DB
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      test: ["CMD", "pg_isready", "-U", *POSTGRES_USER]
     ports:
       - "5432:5432"
-    restart: always
-    user: postgres
-    volumes:
-      - "./data:/pgdata"
-    networks:
-      - default
+    user: *POSTGRES_USER
+
   database-migrations:
     image: flyway/flyway:9.19-alpine
     container_name: backend-migrations
-    command:
-      - info
-      - migrate
-      - info
-    volumes:
-      - "./backend/db/migrations:/flyway/sql"
+    command: info migrate info
+    volumes: ["./backend/db/migrations:/flyway/sql:ro"]
     environment:
-      - FLYWAY_URL=jdbc:postgresql://database:5432/postgres
-      - FLYWAY_USER=postgres
-      - FLYWAY_PASSWORD=postgres
-      - FLYWAY_BASELINE_ON_MIGRATE=true
-      - FLYWAY_DEFAULT_SCHEMA=USERS
+      FLYWAY_URL: jdbc:postgresql://database:5432/postgres
+      FLYWAY_USER: *POSTGRES_USER
+      FLYWAY_PASSWORD: *POSTGRES_PW
+      FLYWAY_BASELINE_ON_MIGRATE: true
+      FLYWAY_DEFAULT_SCHEMA: USERS
     depends_on:
       database:
         condition: service_healthy
-    networks:
-      - default
+
+  database-migrations-go:
+    profiles: ["go"]
+    image: flyway/flyway:9-alpine
+    container_name: go-api-migrations
+    command: info migrate info
+    volumes: ["./backend-go/db/migrations:/flyway/sql:ro"]
+    environment:
+      FLYWAY_URL: jdbc:postgresql://database:5432/postgres
+      FLYWAY_USER: *POSTGRES_USER
+      FLYWAY_PASSWORD: *POSTGRES_PW
+      FLYWAY_BASELINE_ON_MIGRATE: true
+      FLYWAY_DEFAULT_SCHEMA: go_api
+    depends_on:
+      database:
+        condition: service_healthy
+
   backend:
     container_name: backend
-    entrypoint:
-      - "sh"
-      - "-c"
-      - "npm i && npm run start"
+    entrypoint: sh -c "npm i && npm run start"
     environment:
       NODE_ENV: development
       POSTGRESQL_HOST: database
-      POSTGRESQL_USER: postgres
-      POSTGRESQL_PASSWORD: postgres
-      POSTGRESQL_DATABASE: postgres
-    hostname: backend
-    image: registry.access.redhat.com/ubi8/nodejs-18-minimal
-    links:
-      - database
+      POSTGRESQL_USER: *POSTGRES_USER
+      POSTGRESQL_PASSWORD: *POSTGRES_PW
+      POSTGRESQL_DATABASE: *POSTGRES_DB
+    image: node:18-bullseye
+    # links:
+    #   - database
     ports:
       - "3001:3000"
     volumes:
-      - ./backend:/app:z
+      - ./backend:/app
       - /app/node_modules
     user: root
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
     working_dir: "/app"
     depends_on:
       database:
         condition: service_healthy
       database-migrations:
         condition: service_started
-    networks:
-      - default
+      
+  backend-go:
+    image: cosmtrek/air:latest
+    working_dir: /application # has to be the same as mapped vol
+    volumes: ["./backend-go/:/application/"]
+    container_name: backend-go
+    environment:
+      POSTGRESQL_HOST: database
+      POSTGRESQL_USER: *POSTGRES_USER
+      POSTGRESQL_PASSWORD: *POSTGRES_PW
+      POSTGRESQL_DATABASE: *POSTGRES_DB
+    entrypoint:
+      - "sh"
+      - "-c"
+      - "go install github.com/swaggo/swag/cmd/swag@latest && swag init && swag fmt && /go/bin/air"
+    ports:
+      - "3005:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+    depends_on:
+      database:
+        condition: service_healthy
+      database-migrations-go:
+        condition: service_completed_successfully
+
   frontend:
     container_name: frontend
     entrypoint:
@@ -82,10 +115,7 @@ services:
     environment:
       NODE_ENV: development
       BACKEND_URL: backend
-    hostname: frontend
     image: registry.access.redhat.com/ubi8/nodejs-18-minimal
-    links:
-      - backend
     ports:
       - "3000:3000"
     volumes:
@@ -96,9 +126,3 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    networks:
-      - default
-
-networks:
-  default:
-    driver: bridge
