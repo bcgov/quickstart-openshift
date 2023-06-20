@@ -88,6 +88,7 @@ try {
     process.exit(137);
   }
   console.error(e);
+  process.exit(137);
 }
 
 

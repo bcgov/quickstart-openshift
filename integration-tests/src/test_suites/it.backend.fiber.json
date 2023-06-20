@@ -20,11 +20,15 @@
         "id_field": "id",
         "post_payload": {
           "name": "John",
-          "email": "John.ipsum@test.com"
+          "email": "John.ipsum@test.com",
+          "addresses": [
+          ]
         },
         "put_payload": {
           "name": "Jane",
-          "email": "Jane.ipsum@test.com"
+          "email": "Jane.ipsum@test.com",
+          "addresses": [
+          ]
         },
         "patch_payload": {
           "name": "Jane",

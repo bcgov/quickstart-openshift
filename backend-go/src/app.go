@@ -7,7 +7,6 @@ import (
 	"github.com/bcgov/quickstart-openshift/backend-go/src/v1/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/csrf"
 	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
@@ -48,7 +47,6 @@ func App() *fiber.App {
 	app.Use(favicon.New())
 	app.Use(recover.New())
 	app.Use(cors.New())
-	app.Use(csrf.New())
 
 	app.Use(logger.New(logger.Config{
 		TimeFormat: "2006-01-02T15:04:05",
