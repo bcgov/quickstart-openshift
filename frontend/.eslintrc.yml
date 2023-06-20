@@ -24,6 +24,7 @@ plugins:
   - 'react-hooks'
   - '@typescript-eslint'
   - 'prettier'
+  - 'cypress'
 
 settings:
   react:
