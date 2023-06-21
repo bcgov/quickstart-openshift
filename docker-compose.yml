@@ -186,9 +186,10 @@ services:
       - "chown -R root . && npm ci && npm run dev"
     environment:
       NODE_ENV: development
-      BACKEND_URL: backend
+      PORT: 3000
+      BACKEND_URL: http://backend:3000
     image: node:18-bullseye
-    ports: ["3000:5173"]
+    ports: ["3010:3000"]
     volumes:
       - ./frontend:/app:z
       - /app/node_modules
