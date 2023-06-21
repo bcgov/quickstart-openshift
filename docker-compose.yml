@@ -92,8 +92,6 @@ services:
     image: node:18-bullseye
     ports: ["3001:3000"]
     volumes: ["./backend:/app", "/app/node_modules"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api"]
     working_dir: "/app"
     depends_on:
       migrations:
@@ -109,8 +107,6 @@ services:
       <<: *postgres-vars
     entrypoint: sh -c "go install github.com/swaggo/swag/cmd/swag@latest && swag init && swag fmt && /go/bin/air"
     ports: ["3005:3000"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
     depends_on:
       migrations-go:
         condition: service_started
@@ -138,8 +134,6 @@ services:
     environment:
       <<: [*postgres-vars, *python-vars]
     ports: ["3003:3000"]
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
     depends_on:
       backend-python-model-generator:
         condition: service_started
