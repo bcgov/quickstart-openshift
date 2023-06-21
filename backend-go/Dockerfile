@@ -1,8 +1,10 @@
 FROM golang:1.20 AS build
 WORKDIR /workspace/app
 # pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
-COPY go.mod ./
-RUN go mod download && go mod verify
+COPY go.mod go.sum ./
+RUN go mod download && \
+    go mod verify
+# required for swagger generation
 RUN go install github.com/swaggo/swag/cmd/swag@latest
 COPY . .
 RUN swag init && swag fmt
