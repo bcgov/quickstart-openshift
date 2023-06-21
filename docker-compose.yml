@@ -22,7 +22,6 @@ x-postgres-vars: &postgres-vars
   POSTGRES_DATABASE: *POSTGRES_DATABASE
 
 x-python-vars: &python-vars
-  <<: *postgres-vars
   PIP_NO_CACHE_DIR: off
   PIP_DISABLE_PIP_VERSION_CHECK: on
   PIP_DEFAULT_TIMEOUT: 100
@@ -38,8 +37,7 @@ x-python-vars: &python-vars
 
 services:
   database:
-    build:
-      context: database
+    image: postgres:15
     container_name: database
     environment:
       <<: *postgres-vars
@@ -48,7 +46,7 @@ services:
     ports: ["5432:5432"]
 
   database-migrations:
-    image: flyway/flyway:9.19-alpine
+    image: flyway/flyway:9-alpine
     container_name: backend-migrations
     command: info migrate info
     volumes: ["./backend/db/migrations:/flyway/sql:ro"]
@@ -109,8 +107,7 @@ services:
     container_name: backend-go
     environment:
       <<: *postgres-vars
-      SWAG: github.com/swaggo/swag/cmd/swag@latest
-    entrypoint: sh -c "go install ${SWAG} && swag init && swag fmt && /go/bin/air"
+    entrypoint: sh -c "go install github.com/swaggo/swag/cmd/swag@latest && swag init && swag fmt && /go/bin/air"
     ports: ["3005:3000"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
@@ -139,7 +136,7 @@ services:
     entrypoint: /application/start-local.sh
     volumes: ["./backend-python:/application", "/application/.venv"]
     environment:
-      <<: *python-vars
+      <<: [*postgres-vars, *python-vars]
     ports: ["3003:3000"]
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
@@ -154,7 +151,7 @@ services:
     entrypoint: /application/run-unit-tests.sh
     volumes: ["./backend-python:/application", "/application/.venv"]
     environment:
-      <<: *python-vars
+      <<: [*postgres-vars, *python-vars]
     depends_on:
       backend-py:
         condition: service_healthy
