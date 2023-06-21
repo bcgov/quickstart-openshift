@@ -1,6 +1,9 @@
 #!/bin/bash
 set -eu
 
+# Change to script dir
+cd $(dirname ${BASH_SOURCE[0]})
+
 # setup
 python3 -m venv venv-py
 source venv-py/bin/activate
