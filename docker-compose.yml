@@ -35,7 +35,6 @@ x-python-vars: &python-vars
   PYTHONDONTWRITEBYTECODE: 1
   PYTHONUNBUFFERED: 1
   PYTHONPATH: /application/app/src
-  POSTGRES_SERVER: database
 
 services:
   database:
@@ -49,7 +48,6 @@ services:
     healthcheck:
       test: ["CMD", "pg_isready", "-U", *POSTGRES_USER]
     ports: ["5432:5432"]
-    user: *POSTGRES_USER
 
   database-migrations:
     image: flyway/flyway:9.19-alpine
@@ -142,7 +140,7 @@ services:
     image: python:3.11
     container_name: backend-py
     entrypoint: /application/start-local.sh
-    volumes: ["./backend-python:/application:z", "/application/.venv"]
+    volumes: ["./backend-python:/application", "/application/.venv"]
     environment:
       <<: *python-vars
     ports: ["3003:3000"]
@@ -157,7 +155,7 @@ services:
     image: python:3.11
     container_name: backend-py-test
     entrypoint: /application/run-unit-tests.sh
-    volumes: ["./backend-python:/application:z", "/application/.venv"]
+    volumes: ["./backend-python:/application", "/application/.venv"]
     environment:
       <<: *python-vars
     depends_on:
@@ -166,14 +164,14 @@ services:
 
   frontend:
     container_name: frontend
-    entrypoint: ["sh", "-c", "chown -R root . && npm ci && npm run dev"]
+    entrypoint: sh -c "npm ci && npm run dev"
     environment:
       NODE_ENV: development
       PORT: 3000
       BACKEND_URL: http://backend:3000
     image: node:18-bullseye
-    ports: ["3010:3000"]
-    volumes: ["./frontend:/app:z", "/app/node_modules"]
+    ports: ["3000:3000"]
+    volumes: ["./frontend:/app", "/app/node_modules"]
     user: root
     working_dir: "/app"
     depends_on:
