@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eux
+set -eu
 
 # setup
 python3 -m venv venv-py
@@ -14,4 +14,4 @@ POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD:-default}
 POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE:-postgres}
 
 # Generate
-sqlacodegen --schema py_api postgresql://${POSTGRESQL_USER}:${POSTGRESQL_PASSWORD}@${POSTGRESQL_HOST}:5432/postgres > /application/models/model.py
+sqlacodegen --schema py_api postgresql://${POSTGRESQL_USER}:${POSTGRESQL_PASSWORD}@${POSTGRESQL_HOST}:5432/postgres > ./models/model.py
