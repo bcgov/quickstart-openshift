@@ -9,7 +9,7 @@ require (
 	github.com/gofiber/swagger v0.1.12
 	github.com/golang-migrate/migrate/v4 v4.16.0
 	github.com/joho/godotenv v1.5.1
-	github.com/sirupsen/logrus v1.9.2
+	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.1
 	github.com/swaggo/swag v1.16.1
 	gorm.io/driver/postgres v1.5.2
