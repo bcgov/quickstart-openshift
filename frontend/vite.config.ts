@@ -6,6 +6,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
+    port: parseInt(process.env.PORT),
     fs: {
       // Allow serving files from one level up to the project root
       allow: ['..'],
@@ -13,7 +14,7 @@ export default defineConfig({
     proxy: {
       // Proxy API requests to the backend
       '/api': {
-        target: 'http://localhost:3000',
+        target: process.env.BACKEND_URL,
         changeOrigin: true,
       },
     },

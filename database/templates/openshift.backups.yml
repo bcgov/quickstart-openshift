@@ -135,7 +135,7 @@ objects:
                       value: "${NAME}-${ZONE}-database"
                     - name: DEFAULT_PORT
                       value: ${DATABASE_DEFAULT_PORT}
-                    - name: POSTGRESQL_DATABASE
+                    - name: POSTGRES_DATABASE
                       valueFrom:
                         secretKeyRef:
                           name: "${NAME}-${ZONE}-database"

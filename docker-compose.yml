@@ -1,104 +1,166 @@
 ---
-version: "3.8"
+version: "3.9"
+
+x-var:
+  - &POSTGRES_USER
+    postgres
+  - &POSTGRES_PASSWORD
+    default
+  - &POSTGRES_DATABASE
+    postgres
+
+x-flyway-vars: &flyway-vars
+  FLYWAY_URL: jdbc:postgresql://database:5432/postgres
+  FLYWAY_USER: *POSTGRES_USER
+  FLYWAY_PASSWORD: *POSTGRES_PASSWORD
+  FLYWAY_BASELINE_ON_MIGRATE: true
+
+x-postgres-vars: &postgres-vars
+  POSTGRES_HOST: database
+  POSTGRES_USER: *POSTGRES_USER
+  POSTGRES_PASSWORD: *POSTGRES_PASSWORD
+  POSTGRES_DATABASE: *POSTGRES_DATABASE
+
+x-python-vars: &python-vars
+  PIP_NO_CACHE_DIR: off
+  PIP_DISABLE_PIP_VERSION_CHECK: on
+  PIP_DEFAULT_TIMEOUT: 100
+  POETRY_VERSION: 1.2.2
+  POETRY_HOME: /opt/poetry
+  POETRY_VIRTUALENVS_IN_PROJECT: true
+  POETRY_NO_INTERACTION: 1
+  PYSETUP_PATH: /application
+  VENV_PATH: /application/.venv
+  PYTHONDONTWRITEBYTECODE: 1
+  PYTHONUNBUFFERED: 1
+  PYTHONPATH: /application/app/src
 
 services:
   database:
-    build:
-      context: database
+    image: postgres:15
     container_name: database
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    hostname: database
+      <<: *postgres-vars
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "postgres" ]
-    ports:
-      - "5432:5432"
-    restart: always
-    user: postgres
-    volumes:
-      - "./data:/pgdata"
-    networks:
-      - default
-  database-migrations:
-    image: flyway/flyway:9.19-alpine
-    container_name: backend-migrations
-    command:
-      - info
-      - migrate
-      - info
-    volumes:
-      - "./backend/db/migrations:/flyway/sql"
+      test: ["CMD", "pg_isready", "-U", *POSTGRES_USER]
+    ports: ["5432:5432"]
+
+  migrations:
+    image: flyway/flyway:9-alpine
+    container_name: migrations
+    command: info migrate info
+    volumes: ["./backend/db/migrations:/flyway/sql:ro"]
     environment:
-      - FLYWAY_URL=jdbc:postgresql://database:5432/postgres
-      - FLYWAY_USER=postgres
-      - FLYWAY_PASSWORD=postgres
-      - FLYWAY_BASELINE_ON_MIGRATE=true
-      - FLYWAY_DEFAULT_SCHEMA=USERS
+      <<: *flyway-vars
+      FLYWAY_DEFAULT_SCHEMA: USERS
     depends_on:
       database:
         condition: service_healthy
-    networks:
-      - default
+
+  migrations-go:
+    profiles: ["go", "all"]
+    image: flyway/flyway:9-alpine
+    container_name: migrations-go
+    command: info migrate info
+    volumes: ["./backend-go/db/migrations:/flyway/sql:ro"]
+    environment:
+      <<: *flyway-vars
+      FLYWAY_DEFAULT_SCHEMA: go_api
+    depends_on:
+      database:
+        condition: service_healthy
+
+  migrations-python:
+    profiles: ["python", "all"]
+    image: flyway/flyway:9-alpine
+    container_name: migrations-python
+    command: info migrate info
+    volumes: ["./backend-python/db/migrations:/flyway/sql:ro"]
+    environment:
+      <<: *flyway-vars
+      FLYWAY_DEFAULT_SCHEMA: py_api
+    depends_on:
+      database:
+        condition: service_healthy
+
   backend:
     container_name: backend
-    entrypoint:
-      - "sh"
-      - "-c"
-      - "npm i && npm run start"
+    entrypoint: sh -c "npm i && npm run start:dev"
     environment:
+      <<: *postgres-vars
       NODE_ENV: development
-      POSTGRESQL_HOST: database
-      POSTGRESQL_USER: postgres
-      POSTGRESQL_PASSWORD: postgres
-      POSTGRESQL_DATABASE: postgres
-    hostname: backend
-    image: registry.access.redhat.com/ubi8/nodejs-18-minimal
-    links:
-      - database
-    ports:
-      - "3001:3000"
-    volumes:
-      - ./backend:/app:z
-      - /app/node_modules
-    user: root
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
+    image: node:18-bullseye
+    ports: ["3001:3000"]
+    volumes: ["./backend:/app", "/app/node_modules"]
     working_dir: "/app"
     depends_on:
-      database:
-        condition: service_healthy
-      database-migrations:
+      migrations:
         condition: service_started
-    networks:
-      - default
+
+  backend-go:
+    profiles: ["go", "all"]
+    image: cosmtrek/air:latest
+    working_dir: /app # has to be the same as mapped vol
+    volumes: ["./backend-go/:/app", "/app/docs", "/app/tmp"]
+    container_name: backend-go
+    environment:
+      <<: *postgres-vars
+    entrypoint: sh -c "go install github.com/swaggo/swag/cmd/swag@latest && swag init && swag fmt && /go/bin/air"
+    ports: ["3005:3000"]
+    depends_on:
+      migrations-go:
+        condition: service_started
+
+  backend-python-model-generator:
+    profiles: ["python", "all"]
+    image: python:3.9-slim-buster # DO NOT change, as it breaks the module.
+    container_name: backend-python-model-generator
+    environment:
+      <<: *postgres-vars
+    entrypoint: /app/generate-models.sh
+    volumes: 
+      - "./backend-python/src/v1/models:/app/models"
+      - "./backend-python/generate-models.sh:/app/generate-models.sh"
+    depends_on:
+      migrations-python:
+        condition: service_completed_successfully
+
+  backend-python:
+    profiles: ["python", "all"]
+    image: python:3.11
+    container_name: backend-python
+    entrypoint: /application/start-local.sh
+    volumes: ["./backend-python:/application", "/application/.venv"]
+    environment:
+      <<: [*postgres-vars, *python-vars]
+    ports: ["3003:3000"]
+    depends_on:
+      backend-python-model-generator:
+        condition: service_started
+
+  backend-python-test:
+    profiles: ["python", "all"]
+    image: python:3.11
+    container_name: backend-python-test
+    entrypoint: /application/run-unit-tests.sh
+    volumes: ["./backend-python:/application", "/application/.venv"]
+    environment:
+      <<: [*postgres-vars, *python-vars]
+    depends_on:
+      backend-python:
+        condition: service_healthy
+
   frontend:
     container_name: frontend
-    entrypoint:
-      - "sh"
-      - "-c"
-      - "chown -R root . && npm ci && npm run dev"
+    entrypoint: sh -c "npm ci && npm run dev"
     environment:
       NODE_ENV: development
-      BACKEND_URL: backend
-    hostname: frontend
-    image: registry.access.redhat.com/ubi8/nodejs-18-minimal
-    links:
-      - backend
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app:z
-      - /app/node_modules
-    user: root
+      PORT: 3000
+      BACKEND_URL: http://backend:3000
+    image: node:18-bullseye
+    ports: ["3000:3000"]
+    volumes: ["./frontend:/app", "/app/node_modules"]
     working_dir: "/app"
     depends_on:
       backend:
         condition: service_healthy
-    networks:
-      - default
-
-networks:
-  default:
-    driver: bridge

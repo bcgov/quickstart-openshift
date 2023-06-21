@@ -121,19 +121,19 @@ objects:
               imagePullPolicy: Always
               name: ${NAME}
               env:
-                - name: POSTGRESQL_HOST
+                - name: POSTGRES_HOST
                   value: ${NAME}-${ZONE}-database
-                - name: POSTGRESQL_DATABASE
+                - name: POSTGRES_DATABASE
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
                       key: database-name
-                - name: POSTGRESQL_PASSWORD
+                - name: POSTGRES_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
                       key: database-password
-                - name: POSTGRESQL_USER
+                - name: POSTGRES_USER
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
