@@ -6,7 +6,7 @@ from pydantic import BaseSettings, PostgresDsn, validator
 
 class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
-    POSTGRES_SERVER: str = os.getenv("POSTGRESQL_HOST", "127.0.0.1:5432")
+    POSTGRES_SERVER: str = os.getenv("POSTGRES_HOST", "127.0.0.1:5432")
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "postgres")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "postgres")
@@ -14,7 +14,7 @@ class Settings(BaseSettings):
         scheme="postgresql",
         user=os.getenv("POSTGRES_USER", "postgres"),
         password=os.getenv("POSTGRES_PASSWORD", "postgres"),
-        host=os.getenv("POSTGRESQL_HOST", "127.0.0.1:5432"),
+        host=os.getenv("POSTGRES_HOST", "127.0.0.1:5432"),
         path=f"/{os.getenv('POSTGRES_DB', 'postgres')}",
     )
 

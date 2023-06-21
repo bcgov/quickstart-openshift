@@ -4,25 +4,25 @@ version: "3.9"
 x-var:
   - &POSTGRES_USER
     postgres
-  - &POSTGRES_PW
+  - &POSTGRES_PASSWORD
     default
-  - &POSTGRES_DB
+  - &POSTGRES_DATABASE
     postgres
 
 x-flyway-vars: &flyway-vars
   FLYWAY_URL: jdbc:postgresql://database:5432/postgres
   FLYWAY_USER: *POSTGRES_USER
-  FLYWAY_PASSWORD: *POSTGRES_PW
+  FLYWAY_PASSWORD: *POSTGRES_PASSWORD
   FLYWAY_BASELINE_ON_MIGRATE: true
 
-x-backend-vars: &backend-vars
-  POSTGRESQL_HOST: database
-  POSTGRESQL_USER: *POSTGRES_USER
-  POSTGRESQL_PASSWORD: *POSTGRES_PW
-  POSTGRESQL_DATABASE: *POSTGRES_DB
+x-postgres-vars: &postgres-vars
+  POSTGRES_HOST: database
+  POSTGRES_USER: *POSTGRES_USER
+  POSTGRES_PASSWORD: *POSTGRES_PASSWORD
+  POSTGRES_DATABASE: *POSTGRES_DATABASE
 
 x-python-vars: &python-vars
-  <<: *backend-vars
+  <<: *postgres-vars
   PIP_NO_CACHE_DIR: off
   PIP_DISABLE_PIP_VERSION_CHECK: on
   PIP_DEFAULT_TIMEOUT: 100
@@ -42,9 +42,7 @@ services:
       context: database
     container_name: database
     environment:
-      POSTGRES_USER: *POSTGRES_USER
-      POSTGRES_PASSWORD: *POSTGRES_PW
-      POSTGRES_DB: *POSTGRES_DB
+      <<: *postgres-vars
     healthcheck:
       test: ["CMD", "pg_isready", "-U", *POSTGRES_USER]
     ports: ["5432:5432"]
@@ -91,7 +89,7 @@ services:
     container_name: backend
     entrypoint: sh -c "npm i && npm run start:dev"
     environment:
-      <<: *backend-vars
+      <<: *postgres-vars
       NODE_ENV: development
     image: node:18-bullseye
     ports: ["3001:3000"]
@@ -110,9 +108,9 @@ services:
     volumes: ["./backend-go/:/app", "/app/docs", "/app/tmp"]
     container_name: backend-go
     environment:
-      <<: *backend-vars
+      <<: *postgres-vars
       SWAG: github.com/swaggo/swag/cmd/swag@latest
-    entrypoint: ["sh", "-c", "go install $SWAG && swag init && swag fmt && /go/bin/air"]
+    entrypoint: sh -c "go install ${SWAG} && swag init && swag fmt && /go/bin/air"
     ports: ["3005:3000"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
@@ -125,7 +123,7 @@ services:
     image: python:3.9-slim-buster # DO NOT change, as it breaks the module.
     container_name: backend-py-model-generator
     environment:
-      <<: *backend-vars
+      <<: *postgres-vars
     entrypoint: /app/generate-models.sh
     volumes: 
       - "./backend-python/src/v1/models:/app/models"

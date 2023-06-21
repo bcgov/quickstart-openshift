@@ -8,10 +8,10 @@ pip install --upgrade pip
 pip install sqlalchemy sqlacodegen psycopg2-binary sqlacodegen[citext]
 
 # Envars
-POSTGRESQL_HOST=${POSTGRESQL_HOST:-database}
-POSTGRESQL_USER=${POSTGRESQL_USER:-postgres}
-POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD:-default}
-POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE:-postgres}
+POSTGRES_HOST=${POSTGRES_HOST:-database}
+POSTGRES_USER=${POSTGRES_USER:-postgres}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-default}
+POSTGRES_DATABASE=${POSTGRES_DATABASE:-postgres}
 
 # Generate
-sqlacodegen --schema py_api postgresql://${POSTGRESQL_USER}:${POSTGRESQL_PASSWORD}@${POSTGRESQL_HOST}:5432/postgres > ./models/model.py
+sqlacodegen --schema py_api postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres > ./models/model.py

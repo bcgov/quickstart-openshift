@@ -166,7 +166,7 @@ objects:
               imagePullPolicy: Always
               name: ${NAME}
               env:
-                - name: POSTGRESQL_HOST
+                - name: POSTGRES_HOST
                   value: ${NAME}-${ZONE}-database:5432
                 - name: POSTGRES_DB
                   valueFrom:
