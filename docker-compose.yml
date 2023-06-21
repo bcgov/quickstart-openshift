@@ -30,11 +30,11 @@ x-python-vars: &python-vars
   POETRY_HOME: /opt/poetry
   POETRY_VIRTUALENVS_IN_PROJECT: true
   POETRY_NO_INTERACTION: 1
-  PYSETUP_PATH: /application
-  VENV_PATH: /application/.venv
+  PYSETUP_PATH: /app
+  VENV_PATH: /app/.venv
   PYTHONDONTWRITEBYTECODE: 1
   PYTHONUNBUFFERED: 1
-  PYTHONPATH: /application/app/src
+  PYTHONPATH: /app/app/src
 
 services:
   database:
@@ -47,8 +47,7 @@ services:
       POSTGRES_DB: *POSTGRES_DB
     healthcheck:
       test: ["CMD", "pg_isready", "-U", *POSTGRES_USER]
-    ports:
-      - "5432:5432"
+    ports: ["5432:5432"]
     user: *POSTGRES_USER
 
   database-migrations:
@@ -91,19 +90,16 @@ services:
 
   backend:
     container_name: backend
-    entrypoint: sh -c "npm i && npm run start"
+    entrypoint: sh -c "npm i && npm run start:dev"
     environment:
       <<: *backend-vars
       NODE_ENV: development
     image: node:18-bullseye
-    ports:
-      - "3001:3000"
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
+    ports: ["3001:3000"]
+    volumes: ["./backend:/app", "/app/node_modules"]
     user: root
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api"]
     working_dir: "/app"
     depends_on:
       database-migrations:
@@ -112,8 +108,8 @@ services:
   backend-go:
     profiles: ["go", "all"]
     image: cosmtrek/air:latest
-    working_dir: /application # has to be the same as mapped vol
-    volumes: ["./backend-go/:/application/"]
+    working_dir: /app # has to be the same as mapped vol
+    volumes: ["./backend-go/:/app", "/app/docs", "/app/tmp"]
     container_name: backend-go
     environment:
       <<: *backend-vars
@@ -121,8 +117,7 @@ services:
       - "sh"
       - "-c"
       - "go install github.com/swaggo/swag/cmd/swag@latest && swag init && swag fmt && /go/bin/air"
-    ports:
-      - "3005:3000"
+    ports: ["3005:3000"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
     depends_on:
@@ -132,14 +127,14 @@ services:
   sqlalchemy-model-generator:
     profiles: ["python", "all"]
     image: python:3.9-slim-buster # DO NOT change, as it breaks the module.
-    working_dir: /application
+    working_dir: /app
     container_name: backend-py-model-generator
     environment:
       <<: *backend-vars
     command: ./generate-models.sh
     volumes:
-      - "./backend-python/src/v1/models:/application/models"
-      - "./backend-python/generate-models.sh:/application/generate-models.sh"
+      - "./backend-python/src/v1/models:/app/models"
+      - "./backend-python/generate-models.sh:/app/generate-models.sh"
     depends_on:
       database-py-migrations:
         condition: service_completed_successfully
@@ -147,18 +142,17 @@ services:
   backend-py:
     profiles: ["python", "all"]
     image: python:3.11
-    working_dir: /application
+    working_dir: /app
     build:
       context: backend-python
     container_name: backend-py
     command: sh -c "chmod +x start-local.sh && ./start-local.sh"
     volumes: # don't volume mount the entire backend python as it would remove the venv
-      - ./frontend:/application:z
-      - /application/.venv
+      - ./backend-py:/app:z
+      - /app/.venv
     environment:
       <<: *python-vars
-    ports:
-      - "3003:3000"
+    ports: ["3003:3000"]
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
     depends_on:
@@ -168,14 +162,14 @@ services:
   backend-py-test:
     profiles: ["python", "all"]
     image: python:3.11
-    working_dir: /application
+    working_dir: /app
     build:
       context: backend-python
     container_name: backend-py-test
     command: sh -c "chmod +x run-unit-tests.sh && ./run-unit-tests.sh"
     volumes: # don't volume mount the entire backend python as it would remove the venv
-      - ./frontend:/application:z
-      - /application/.venv
+      - ./backend-py:/app:z
+      - /app/.venv
     environment:
       <<: *python-vars
     depends_on:
@@ -191,9 +185,8 @@ services:
     environment:
       NODE_ENV: development
       BACKEND_URL: backend
-    image: registry.access.redhat.com/ubi8/nodejs-18-minimal
-    ports:
-      - "3000:3000"
+    image: node:18-bullseye
+    ports: ["3000:3000"]
     volumes:
       - ./frontend:/app:z
       - /app/node_modules
