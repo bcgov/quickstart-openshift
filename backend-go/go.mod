@@ -10,7 +10,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.16.0
 	github.com/joho/godotenv v1.5.1
 	github.com/sirupsen/logrus v1.9.2
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/swag v1.16.1
 	gorm.io/driver/postgres v1.5.2
 	gorm.io/gorm v1.25.1
