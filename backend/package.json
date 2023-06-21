@@ -39,7 +39,7 @@
     "typeorm": "^0.3.14",
     "winston": "^3.9.0",
     "nest-winston": "^1.9.3",
-    "helmet": "^6.1.5"
+    "helmet": "^7.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.15",
