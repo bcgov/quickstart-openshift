@@ -7,7 +7,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.46.0
 	github.com/gofiber/helmet/v2 v2.2.26
 	github.com/gofiber/swagger v0.1.12
-	github.com/golang-migrate/migrate/v4 v4.16.0
+	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/joho/godotenv v1.5.1
 	github.com/sirupsen/logrus v1.9.2
 	github.com/stretchr/testify v1.8.1
