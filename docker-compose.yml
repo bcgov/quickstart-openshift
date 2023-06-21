@@ -96,7 +96,6 @@ services:
     image: node:18-bullseye
     ports: ["3001:3000"]
     volumes: ["./backend:/app", "/app/node_modules"]
-    user: root
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api"]
     working_dir: "/app"
@@ -172,7 +171,6 @@ services:
     image: node:18-bullseye
     ports: ["3000:3000"]
     volumes: ["./frontend:/app", "/app/node_modules"]
-    user: root
     working_dir: "/app"
     depends_on:
       backend:
