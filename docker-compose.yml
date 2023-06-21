@@ -105,7 +105,7 @@ services:
     working_dir: /app # has to be the same as mapped vol
     volumes: ["./backend-go/:/app", "/app/docs", "/app/tmp"]
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
     container_name: backend-go
     environment:
       <<: *postgres-vars
@@ -136,7 +136,7 @@ services:
     entrypoint: /application/start-local.sh
     volumes: ["./backend-python:/application", "/application/.venv"]
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
     environment:
       <<: [*postgres-vars, *python-vars]
     ports: ["3003:3000"]
@@ -166,6 +166,8 @@ services:
     image: node:18-bullseye
     ports: ["3000:3000"]
     volumes: ["./frontend:/app", "/app/node_modules"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
     working_dir: "/app"
     depends_on:
       backend:
