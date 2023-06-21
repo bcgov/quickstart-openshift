@@ -92,6 +92,8 @@ services:
     image: node:18-bullseye
     ports: ["3001:3000"]
     volumes: ["./backend:/app", "/app/node_modules"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api"]
     working_dir: "/app"
     depends_on:
       migrations:
@@ -102,6 +104,8 @@ services:
     image: cosmtrek/air:latest
     working_dir: /app # has to be the same as mapped vol
     volumes: ["./backend-go/:/app", "/app/docs", "/app/tmp"]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
     container_name: backend-go
     environment:
       <<: *postgres-vars
@@ -131,6 +135,8 @@ services:
     container_name: backend-python
     entrypoint: /application/start-local.sh
     volumes: ["./backend-python:/application", "/application/.venv"]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
     environment:
       <<: [*postgres-vars, *python-vars]
     ports: ["3003:3000"]
