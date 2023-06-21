@@ -30,11 +30,12 @@ x-python-vars: &python-vars
   POETRY_HOME: /opt/poetry
   POETRY_VIRTUALENVS_IN_PROJECT: true
   POETRY_NO_INTERACTION: 1
-  PYSETUP_PATH: /app
-  VENV_PATH: /app/.venv
+  PYSETUP_PATH: /application
+  VENV_PATH: /application/.venv
   PYTHONDONTWRITEBYTECODE: 1
   PYTHONUNBUFFERED: 1
-  PYTHONPATH: /app/app/src
+  PYTHONPATH: /application/app/src
+  POSTGRES_SERVER: database
 
 services:
   database:
@@ -124,7 +125,7 @@ services:
       database-migrations-go:
         condition: service_started
 
-  sqlalchemy-model-generator:
+  backend-py-model-generator:
     profiles: ["python", "all"]
     image: python:3.9-slim-buster # DO NOT change, as it breaks the module.
     working_dir: /app
@@ -142,34 +143,35 @@ services:
   backend-py:
     profiles: ["python", "all"]
     image: python:3.11
-    working_dir: /app
     build:
       context: backend-python
     container_name: backend-py
-    command: sh -c "chmod +x start-local.sh && ./start-local.sh"
+    command: /application/start-local.sh
     volumes: # don't volume mount the entire backend python as it would remove the venv
-      - ./backend-py:/app:z
-      - /app/.venv
+      - ./backend-python:/application:z
+      - /application/.venv
     environment:
       <<: *python-vars
     ports: ["3003:3000"]
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
     depends_on:
-      sqlalchemy-model-generator:
+      database:
+        condition: service_healthy
+      backend-py-model-generator:
         condition: service_completed_successfully
 
   backend-py-test:
     profiles: ["python", "all"]
     image: python:3.11
-    working_dir: /app
+    working_dir: /application
     build:
       context: backend-python
     container_name: backend-py-test
     command: sh -c "chmod +x run-unit-tests.sh && ./run-unit-tests.sh"
     volumes: # don't volume mount the entire backend python as it would remove the venv
-      - ./backend-py:/app:z
-      - /app/.venv
+      - ./backend-py:/application:z
+      - /application/.venv
     environment:
       <<: *python-vars
     depends_on:
@@ -186,7 +188,7 @@ services:
       NODE_ENV: development
       BACKEND_URL: backend
     image: node:18-bullseye
-    ports: ["3000:3000"]
+    ports: ["3000:5173"]
     volumes:
       - ./frontend:/app:z
       - /app/node_modules
