@@ -93,8 +93,8 @@ objects:
               env:
                 - name: BACKEND_URL
                   value: https://${NAME}-${ZONE}-backend.${DOMAIN}:443
-                - name: TEST
-                  value: test
+                - name: LOG_LEVEL # Set to debug to see all logs
+                  value: info
               ports:
                 - containerPort: 3000
                   protocol: TCP

@@ -1,7 +1,6 @@
 {
   auto_https off
   admin off
-  debug
 }
 :3000 {
   log {
@@ -10,7 +9,7 @@
       time_format iso8601
       level_format color
     }
-    level debug
+    level {$LOG_LEVEL}
   }
   root * /app/dist
   encode zstd gzip
