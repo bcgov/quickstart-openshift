@@ -120,6 +120,7 @@ jobs:
           - name: database
             file: database/openshift.deploy.yml
             overwrite: false
+            triggers: ('database/' 'backend/' 'backend-go' 'backend-java' 'backend-python' 'frontend/')
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
