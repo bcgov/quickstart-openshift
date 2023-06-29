@@ -19,19 +19,19 @@ parameters:
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
-    value: '25m'
+    value: "25m"
   - name: MEMORY_REQUEST
-    value: '50Mi'
+    value: "50Mi"
   - name: CPU_LIMIT
-    value: '75m'
+    value: "75m"
   - name: MEMORY_LIMIT
-    value: '150Mi'
+    value: "150Mi"
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
-    value: '3'
+    value: "3"
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
-    value: '5'
+    value: "5"
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
@@ -55,61 +55,6 @@ objects:
             name: ${REGISTRY}/${PROMOTE}
           referencePolicy:
             type: Local
-  - apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}
-    data:
-      Caddyfile: |
-        {
-          auto_https off
-          admin off
-          debug
-        }
-        :3000 {
-          log {
-            output stdout
-            format console {
-              time_format iso8601
-              level_format color
-            }
-            level debug
-          }
-          root * /app/dist
-          encode zstd gzip
-          file_server
-          @spa_router {
-            not path /api/*
-            file {
-                try_files {path} /index.html
-            }
-          }
-          rewrite @spa_router {http.matchers.file.relative}
-          # Proxy requests to API service
-          reverse_proxy /api/* {$BACKEND_URL} {
-            header_up Host {http.reverse_proxy.upstream.hostport}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-For {remote_host}
-          }
-          header {
-            X-Frame-Options "SAMEORIGIN"
-            X-XSS-Protection "1;mode=block"
-            Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
-            X-Content-Type-Options "nosniff"
-            Strict-Transport-Security "max-age=31536000"
-            Content-Security-Policy "default-src 'self' https://spt.apps.gov.bc.ca data:; script-src 'self' 'unsafe-eval' https://www2.gov.bc.ca ;style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://use.fontawesome.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://fonts.googleapis.com http://www.w3.org https://*.gov.bc.ca"
-            Referrer-Policy "same-origin"
-            Feature-Policy "fullscreen 'self'; camera 'none'; microphone 'none'"
-          }
-        }
-        :3001 {
-          handle /health {
-            respond "OK"
-          }
-        }
-
   - apiVersion: v1
     kind: DeploymentConfig
     metadata:
@@ -140,11 +85,14 @@ objects:
         spec:
           containers:
             - image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+              securityContext:
+                capabilities:
+                  add: ["NET_BIND_SERVICE"]
               imagePullPolicy: Always
               name: ${NAME}
               env:
                 - name: BACKEND_URL
-                  value:  https://${NAME}-${ZONE}-backend.${DOMAIN}:443
+                  value: https://${NAME}-${ZONE}-backend.${DOMAIN}:443
                 - name: TEST
                   value: test
               ports:
@@ -177,14 +125,6 @@ objects:
                 initialDelaySeconds: 15
                 periodSeconds: 30
                 timeoutSeconds: 5
-              volumeMounts:
-                - name: config-vol
-                  mountPath: /etc/caddy/Caddyfile
-                  subPath: Caddyfile
-          volumes:
-          - name: config-vol
-            configMap:
-              name: ${NAME}-${ZONE}-${COMPONENT}
   - apiVersion: v1
     kind: Service
     metadata:
