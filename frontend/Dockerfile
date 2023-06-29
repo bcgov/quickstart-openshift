@@ -4,7 +4,7 @@ COPY . .
 RUN npm ci --ignore-scripts && \
     npm run build
 
-FROM caddy:2.4.6-alpine
+FROM caddy:2.6.4-alpine
 COPY --from=build /app/dist /app/dist
 RUN chmod 777 /config/caddy
 EXPOSE 3000

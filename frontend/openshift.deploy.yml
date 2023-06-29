@@ -19,19 +19,19 @@ parameters:
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
-    value: '25m'
+    value: "25m"
   - name: MEMORY_REQUEST
-    value: '50Mi'
+    value: "50Mi"
   - name: CPU_LIMIT
-    value: '75m'
+    value: "75m"
   - name: MEMORY_LIMIT
-    value: '150Mi'
+    value: "150Mi"
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
-    value: '3'
+    value: "3"
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
-    value: '5'
+    value: "5"
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
@@ -140,11 +140,14 @@ objects:
         spec:
           containers:
             - image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+              securityContext:
+                capabilities:
+                  add: ["NET_BIND_SERVICE"]
               imagePullPolicy: Always
               name: ${NAME}
               env:
                 - name: BACKEND_URL
-                  value:  https://${NAME}-${ZONE}-backend.${DOMAIN}:443
+                  value: https://${NAME}-${ZONE}-backend.${DOMAIN}:443
                 - name: TEST
                   value: test
               ports:
@@ -182,9 +185,9 @@ objects:
                   mountPath: /etc/caddy/Caddyfile
                   subPath: Caddyfile
           volumes:
-          - name: config-vol
-            configMap:
-              name: ${NAME}-${ZONE}-${COMPONENT}
+            - name: config-vol
+              configMap:
+                name: ${NAME}-${ZONE}-${COMPONENT}
   - apiVersion: v1
     kind: Service
     metadata:
