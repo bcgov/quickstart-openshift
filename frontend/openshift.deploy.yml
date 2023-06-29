@@ -38,6 +38,9 @@ parameters:
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
     value: bcgov/quickstart-openshift/frontend:prod
+  - name: LOG_LEVEL
+    description: Caddy logging level DEBUG, INFO, WARN, ERROR, PANIC, and FATAL (https://github.com/caddyserver/caddy/blob/master/logging.go)
+    value: "info"
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -93,8 +96,8 @@ objects:
               env:
                 - name: BACKEND_URL
                   value: https://${NAME}-${ZONE}-backend.${DOMAIN}:443
-                - name: TEST
-                  value: test
+                - name: LOG_LEVEL
+                  value: ${LOG_LEVEL}
               ports:
                 - containerPort: 3000
                   protocol: TCP
