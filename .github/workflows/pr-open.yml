@@ -11,7 +11,6 @@ concurrency:
 jobs:
   pr-greeting:
     name: PR Greeting
-    if: github.event.action == 'opened' || github.event.action == 'reopened'
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
@@ -20,7 +19,7 @@ jobs:
       pull-requests: write
     steps:
       - name: PR Greeting
-        uses: bcgov-nr/action-pr-description-add@v0.0.2
+        uses: bcgov-nr/action-pr-description-add@v0.1.0-rc1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_markdown: |
