@@ -5,8 +5,6 @@
 [![Pull Requests](https://img.shields.io/github/issues-pr/bcgov/quickstart-openshift)](/../../pulls)
 [![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
-
-##### Workflows
 [![Merge to Main](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml)
 [![Unit Tests and Analysis](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml)
 
@@ -48,7 +46,7 @@ Features:
 * Gated production deployments
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure and container scan tools
-* Automatic Dependabot dependency patching with Pull Requests
+* Automatic dependency patching provided from [bcgov/nr-renovate](https://github.com/bcgov/nr-renovate)
 * Enforced code reviews and pipeline checks
 * Templates and setup documentation
 * Starter TypeScript application stack
@@ -59,10 +57,6 @@ Features:
     * Backend: Java, Quarkus, Cloud Native
     * Backend: Go, Fiber
     * Backend: Python, FastAPI
-
-## Sonar Cloud badges
-
-
 
 # Workflows
 
