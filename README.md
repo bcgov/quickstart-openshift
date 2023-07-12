@@ -1,13 +1,41 @@
 <!-- Project Shields -->
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_quickstart-openshift&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov_quickstart-openshift)
-[![Merge to Main](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml)
-[![Unit Tests and Analysis](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml)
-
+##### Project
 [![Issues](https://img.shields.io/github/issues/bcgov/quickstart-openshift)](/../../issues)
 [![Pull Requests](https://img.shields.io/github/issues-pr/bcgov/quickstart-openshift)](/../../pulls)
 [![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
+
+##### Workflows
+[![Merge to Main](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml)
+[![Unit Tests and Analysis](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml)
+
+##### Frontend (JavaScript/TypeScript)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+
+##### Backend (JavaScript/TypeScript)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+
 
 # QuickStart: OpenShift, TypeScript Frontend (React with Caddy WebServer), Pluggable Backend (Nest.js with Node Runtime, FastAPI with Python, Quarkus with Java On Native, Fiber with Golang), and Postgres/PostGIS
 
