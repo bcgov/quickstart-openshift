@@ -36,9 +36,11 @@
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
 
-# QuickStart: OpenShift with TypeScript, Go, Java, Python, Postges and PostGIS
+# QuickStart: Pipeline and Sample Application Stack
 
-The DevOps Quickstart is a fully functional set of pipeline workflows and a starter application stack intended to help Agile DevOps teams hit the ground running.  Currently OpenShift is supported with plans for AWS (Amazon Web Services).  Pipelines are run using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions).
+## OpenShift, TypeScript, Go, Java, Python, Postges, PostGIS
+
+The is a fully functional set of workflows and a starter application stack intended to help Agile DevOps teams hit the ground running on OpenShift.  Pipelines are run using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions).
 
 Features:
 * Pull Request-based pipeline
