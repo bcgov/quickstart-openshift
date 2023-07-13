@@ -1,17 +1,44 @@
 <!-- Project Shields -->
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_quickstart-openshift&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov_quickstart-openshift)
-[![Merge to Main](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml)
-[![Unit Tests and Analysis](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml)
-
+##### Project
 [![Issues](https://img.shields.io/github/issues/bcgov/quickstart-openshift)](/../../issues)
 [![Pull Requests](https://img.shields.io/github/issues-pr/bcgov/quickstart-openshift)](/../../pulls)
 [![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
+[![Merge to Main](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml)
+[![Unit Tests and Analysis](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/unit-tests.yml)
 
-# QuickStart: OpenShift, TypeScript Frontend (React with Caddy WebServer), Pluggable Backend (Nest.js with Node Runtime, FastAPI with Python, Quarkus with Java On Native, Fiber with Golang), and Postgres/PostGIS
+##### Frontend (JavaScript/TypeScript)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
 
-The DevOps Quickstart is a fully functional set of pipeline workflows and a starter application stack intended to help Agile DevOps teams hit the ground running.  Currently OpenShift is supported with plans for AWS (Amazon Web Services).  Pipelines are run using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions).
+##### Backend (JavaScript/TypeScript)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+
+# QuickStart: Pipeline and Sample Application Stack
+
+## OpenShift, TypeScript, Go, Java, Python, Postges, PostGIS
+
+The is a fully functional set of workflows and a starter application stack intended to help Agile DevOps teams hit the ground running on OpenShift.  Pipelines are run using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions).
 
 Features:
 * Pull Request-based pipeline
@@ -19,10 +46,16 @@ Features:
 * Gated production deployments
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure and container scan tools
-* Automatic Dependabot dependency patching with Pull Requests
+* Automatic dependency patching provided from [bcgov/nr-renovate](https://github.com/bcgov/nr-renovate)
 * Enforced code reviews and pipeline checks
 * Templates and setup documentation
-* Starter TypeScript application stack
+* Full stack with pluggable backends:
+    * Database: Postgres, PostGIS, backups
+    * Frontend: TypeScript, Caddy Server
+    * Backend: TypeScript, Nest.js
+    * Backend: Java, Quarkus, Cloud Native
+    * Backend: Go, Fiber
+    * Backend: Python, FastAPI
 
 # Workflows
 
@@ -70,6 +103,7 @@ Runs on pull request submission or merge to main.
 
 ![](common/graphics/unit-tests.png)
 
+
 # Starter Application
 
 The starter stack includes a (React, MUI, Vite, Caddy) frontend, Pluggable backend(Nest/Node, Quarkus/Java On Native, FastAPI/Python, Fiber/Golang) and postgres database.  See subfolder for source, including Dockerfiles and OpenShift templates.
@@ -87,6 +121,8 @@ Postgres is default.  Switch to PostGIS by copying the appropriate Dockerfile to
 
 > cp ./database/postgis/Dockerfile ./database
 
+The quickstart comes with several pluggable backend components. Please delete the extra backends and remove them from any related workflows.
+
 
 # Getting Started
 
@@ -102,8 +138,7 @@ The following are required:
 * Membership in the BCGov GitHub organization
     * Provide GitHub IDs to [BCGov's Just Ask](https://just-ask.developer.gov.bc.ca/)
 * Project namespaces:
-    * OpenShift - [Register a New Project](https://registry.developer.gov.bc.ca/public-landing)
-
+    * OpenShift - [Register a New Project](https://registry.developer.gov.bc.ca)
 
 
 ## GitHub Repository from Template
@@ -131,9 +166,35 @@ Secrets are hidden from logs and outputs, while variables are visible.  Using se
 
 > Click Settings > Secrets and Variables > Actions > Variables > New repository variable
 
+### Dependency Pull Requests
+
+Dependabot and Mend Renovate can both provide dependency updates using pull requests.  Dependabot is simpler to configure, while Renovate is much more configurable.
+
+#### Self-Hosted Renovate
+
+Renovate is provided by DevOps at the Natural Resources.  Support is best effort.
+
+To opt-in:
+ * Provide our bot, `bcgov-renovate`, write access to a repository
+ * Sign up with us by [pick one]:
+    * Add your repository to our [list](https://github.com/bcgov/nr-renovate/blob/main/renovate.json#L21) using a pull request
+    * OR write us [an issue](https://github.com/bcgov/nr-renovate/issues/new/choose) providing your repository name
+
+#### Dependabot
+
+Dependabot is configurable from the following file.  More information is available [here](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot).
+
+[./workflows/dependabot.yml](./workflows/dependabot.yml)
+
+Please be aware that Dependabot requires its own set of secrets to be configured.  Navigation:
+
+> Click Settings > Secrets and Variables > Actions > Variables > New repository variable
+
 ### Environment
 
 Environments are groups of secrets and variables that can be gatekept.  This includes limting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values override any default values.
+
+For pull requests and development surrounding lower-level, sandboxed environments it is best not to use an environment at all.  Higher level environments, like TEST and PROD, will override those values as necessary.
 
 > Click Settings > Environments > New environment
 
@@ -167,7 +228,7 @@ Locate an OpenShift pipeline token:
 5. Under Data, copy `token`
 6. Paste into the GitHub Secret `OC_TOKEN` (see above)
 
-**SONAR_TOKEN and Other Sonar Tokens**
+**SONAR_TOKENs**
 
 If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, but monoreposities will have multiple, like `${{ secrets.SONAR_TOKEN_BACKEND }}` and `${{ secrets.SONAR_TOKEN_FRONTEND }}`.
 
@@ -249,10 +310,6 @@ Don't forget to add your team members!
 Members of the BC Government's Natural Resource minisistries are strongly recommended to follow the recommendations in their [Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md).  The linked document is generated from Confluence, so some links may be internal-only (sorry!).
 
 [Natural Resources Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md)
-
-# Pluggable Backends
-
-The quickstart comes with several pluggable backend components. Please delete the extra backends and remove them from any related workflows.
 
 
 ## Unit Testing / Integration Testing for Node/Nest Backend
