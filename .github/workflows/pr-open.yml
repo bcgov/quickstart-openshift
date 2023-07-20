@@ -18,12 +18,11 @@ jobs:
       with:
         token: ${{ secrets.PACKAGE_TOKEN }}
         organization: ${{ github.repository_owner }}
-        container: frontend
+        # container: frontend
         dry-run: true
         keep-younger-than: 14
         keep-last: 5
         prune-untagged: true
-
 
   # pr-greeting:
   #   name: PR Greeting
