@@ -88,6 +88,8 @@ parameters:
 objects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
+    metadata:
+      name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       accessModes:
         - ReadWriteOnce
@@ -97,6 +99,8 @@ objects:
       storageClassName: netapp-file-standard
   - kind: ImageStream
     apiVersion: v1
+    metadata:
+      name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       lookupPolicy:
         local: false
@@ -109,6 +113,8 @@ objects:
             type: Local
   - kind: DeploymentConfig
     apiVersion: v1
+    metadata:
+      name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       replicas: 1
       triggers:
@@ -195,6 +201,8 @@ objects:
           schedulerName: default-scheduler
   - apiVersion: v1
     kind: Service
+    metadata:
+      name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       ports:
         - name: postgresql
@@ -209,6 +217,9 @@ objects:
   ### Backup-Container starts here ###
   - kind: PersistentVolumeClaim
     apiVersion: v1
+    metadata:
+      name: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
+
     spec:
       accessModes:
         - ReadWriteOnce
@@ -218,6 +229,8 @@ objects:
       storageClassName: netapp-file-standard
   - kind: CronJob
     apiVersion: "batch/v1"
+    metadata:
+      name: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
     spec:
       schedule: "${CRON_MINUTES} 8 * * *" # Run daily at 8:xx AM UTC
       concurrencyPolicy: "Replace"
@@ -233,6 +246,7 @@ objects:
             metadata:
               labels:
                 app: ${NAME}-${ZONE}
+                cronjob: ${NAME}-${ZONE}
             spec:
               containers:
                 - name: ${NAME}-${ZONE}
