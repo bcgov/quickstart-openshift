@@ -22,7 +22,7 @@ jobs:
         owner-type: org # or user
         repository-name: ${{ github.repository }}
         repository-owner: ${{ github.repository_owner }}
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.PACKAGE_TOKEN }}
 
   # pr-greeting:
   #   name: PR Greeting
