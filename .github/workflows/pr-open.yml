@@ -21,7 +21,6 @@ jobs:
         keep-at-most: 20
         owner-type: org # or user
         repository-name: ${{ github.repository }}
-        repository_owner: ${{ github.repository_owner }}
         token: ${{ secrets.PACKAGE_TOKEN }}
 
   # pr-greeting:
