@@ -14,13 +14,16 @@ jobs:
     runs-on: ubuntu-22.04
     permissions: write-all
     steps:
-    - uses: Chizkiyahu/delete-untagged-ghcr-action@v2
+    - uses: vlaurin/action-ghcr-prune@v0.5.0
       with:
         token: ${{ secrets.PACKAGE_TOKEN }}
-        repository: ${{ github.repository }}
-        repository_owner: ${{ github.repository_owner }}
-        untagged_only: true
-        owner_type: org
+        organization: ${{ github.repository_owner }}
+        container: frontend
+        dry-run: true
+        keep-younger-than: 14
+        keep-last: 5
+        prune-untagged: true
+
 
   # pr-greeting:
   #   name: PR Greeting
