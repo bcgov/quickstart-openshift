@@ -14,14 +14,13 @@ jobs:
     runs-on: ubuntu-22.04
     permissions: write-all
     steps:
-    - uses: quartx-analytics/ghcr-cleaner@v1
+    - uses: Chizkiyahu/delete-untagged-ghcr-action@v2
       with:
-        delete-untagged: true
-        dry-run: true
-        keep-at-most: 20
-        owner-type: org # or user
-        repository-name: ${{ github.repository }}
         token: ${{ secrets.PACKAGE_TOKEN }}
+        repository: ${{ github.repository }}
+        repository_owner: ${{ github.repository_owner }}
+        untagged_only: true
+        owner_type: org
 
   # pr-greeting:
   #   name: PR Greeting
