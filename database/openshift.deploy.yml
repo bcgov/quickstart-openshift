@@ -1,5 +1,9 @@
 apiVersion: template.openshift.io/v1
 kind: Template
+metadata:
+  name: ${NAME}-${ZONE}-${COMPONENT}
+  labels:
+    app: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Product name
@@ -84,10 +88,6 @@ parameters:
 objects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
-    metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
     spec:
       accessModes:
         - ReadWriteOnce
@@ -97,10 +97,6 @@ objects:
       storageClassName: netapp-file-standard
   - kind: ImageStream
     apiVersion: v1
-    metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
     spec:
       lookupPolicy:
         local: false
@@ -113,10 +109,6 @@ objects:
             type: Local
   - kind: DeploymentConfig
     apiVersion: v1
-    metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
     spec:
       replicas: 1
       triggers:
@@ -203,10 +195,6 @@ objects:
           schedulerName: default-scheduler
   - apiVersion: v1
     kind: Service
-    metadata:
-      labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       ports:
         - name: postgresql
@@ -221,10 +209,6 @@ objects:
   ### Backup-Container starts here ###
   - kind: PersistentVolumeClaim
     apiVersion: v1
-    metadata:
-      name: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
     spec:
       accessModes:
         - ReadWriteOnce
@@ -234,11 +218,6 @@ objects:
       storageClassName: netapp-file-standard
   - kind: CronJob
     apiVersion: "batch/v1"
-    metadata:
-      name: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
-        cronjob: ${NAME}-${ZONE}
     spec:
       schedule: "${CRON_MINUTES} 8 * * *" # Run daily at 8:xx AM UTC
       concurrencyPolicy: "Replace"
@@ -248,14 +227,12 @@ objects:
         metadata:
           labels:
             app: ${NAME}-${ZONE}
-            cronjob: ${NAME}-${ZONE}
         spec:
           backoffLimit: ${{JOB_BACKOFF_LIMIT}}
           template:
             metadata:
               labels:
                 app: ${NAME}-${ZONE}
-                cronjob: ${NAME}-${ZONE}
             spec:
               containers:
                 - name: ${NAME}-${ZONE}
