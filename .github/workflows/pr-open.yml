@@ -18,7 +18,7 @@ jobs:
       with:
         token: ${{ secrets.PACKAGE_TOKEN }}
         # organization: ${{ github.repository_owner }}
-        container: backend-py
+        container: bcgov/quickstart-openshift/backend-py
         dry-run: true
         keep-younger-than: 14
         keep-last: 5
