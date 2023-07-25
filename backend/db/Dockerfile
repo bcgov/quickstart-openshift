@@ -7,5 +7,6 @@ USER app
 # Copy migrations
 COPY ./migrations /flyway/sql
 
-# Startup
+# Startup and health check
 CMD ["info","migrate","info"]
+HEALTHCHECK --interval=300s --timeout=30s CMD info

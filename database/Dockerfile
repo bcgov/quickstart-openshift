@@ -5,7 +5,7 @@ FROM postgres:15
 #        /docker-entrypoint-initdb.d/10_postgis.sh
 
 # Health check - recommended for local dev
-HEALTHCHECK --interval=15s --timeout=5s --retries=3 CMD [ "pg_isready" ]
+HEALTHCHECK --interval=15s --timeout=15s --retries=3 CMD [ "pg_isready" ]
 
 # Non-privileged user
 USER postgres
