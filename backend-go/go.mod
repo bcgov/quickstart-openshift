@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/devfeel/mapper v0.7.13
-	github.com/gofiber/fiber/v2 v2.47.0
+	github.com/gofiber/fiber/v2 v2.48.0
 	github.com/gofiber/helmet/v2 v2.2.26
 	github.com/gofiber/swagger v0.1.12
 	github.com/golang-migrate/migrate/v4 v4.16.2
