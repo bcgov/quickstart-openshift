@@ -1,0 +1,135 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+  labels:
+    app: {{ .Values.repo }}-{{ .Values.zone }}
+objects:
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: ${DB_PVC_SIZE}
+      storageClassName: netapp-file-standard
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+        - name: ${IMAGE_TAG}
+          from:
+            kind: DockerImage
+            name: ${REGISTRY}/${PROMOTE}
+          referencePolicy:
+            type: Local
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+    spec:
+      replicas: 1
+      triggers:
+        - type: ConfigChange
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - {{ .Values.repo }}
+            from:
+              kind: ImageStreamTag
+              name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}:${IMAGE_TAG}
+      selector:
+        deploymentconfig: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+      strategy:
+        type: Recreate
+        recreateParams:
+          timeoutSeconds: 600
+        activeDeadlineSeconds: 21600
+      template:
+        metadata:
+          name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+          labels:
+            app: {{ .Values.repo }}-{{ .Values.zone }}
+            deploymentconfig: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+        spec:
+          volumes:
+            - name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+              persistentVolumeClaim:
+                claimName: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+          containers:
+            - name: {{ .Values.repo }}
+              image: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}:${IMAGE_TAG}
+              ports:
+                - containerPort: 5432
+                  protocol: TCP
+              readinessProbe:
+                exec:
+                  command:
+                    - /usr/bin/env
+                    - bash
+                    - -c
+                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                failureThreshold: 5
+                initialDelaySeconds: 30
+                periodSeconds: 15
+                timeoutSeconds: 1
+              livenessProbe:
+                exec:
+                  command:
+                    - /usr/bin/env
+                    - bash
+                    - -c
+                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                failureThreshold: 5
+                initialDelaySeconds: 30
+                periodSeconds: 15
+                timeoutSeconds: 1
+              env:
+                - name: POSTGRES_DB
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+                      key: database-name
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+                      key: database-password
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+                      key: database-user
+              volumeMounts:
+                - name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+                  mountPath: ${PVC_MOUNT_PATH}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              imagePullPolicy: Always
+          restartPolicy: Always
+          terminationGracePeriodSeconds: 30
+          dnsPolicy: ClusterFirst
+          schedulerName: default-scheduler
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+    spec:
+      ports:
+        - name: postgresql
+          nodePort: 0
+          port: 5432
+          protocol: TCP
+          targetPort: 5432
+      selector:
+        deploymentconfig: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+      sessionAffinity: None
+      type: ClusterIP
