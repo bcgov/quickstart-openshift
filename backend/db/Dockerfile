@@ -1,4 +1,4 @@
-FROM flyway/flyway:9.20-alpine
+FROM flyway/flyway:9.21-alpine
 
 # Non-root user
 RUN adduser -D app
@@ -7,5 +7,6 @@ USER app
 # Copy migrations
 COPY ./migrations /flyway/sql
 
-# Startup
+# Startup and health check
 CMD ["info","migrate","info"]
+HEALTHCHECK --interval=300s --timeout=30s CMD info
