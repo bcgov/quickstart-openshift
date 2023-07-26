@@ -44,44 +44,44 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [backend, database, database-migrations, frontend, backend-py, database-migrations-py, backend-java, backend-go, database-migrations-go]
+        # package: [backend, database, database-migrations, frontend, backend-py, database-migrations-py, backend-java, backend-go, database-migrations-go]
         include:
-          - package: backend
-            triggers: ('backend/')
-            build_file: ./backend/Dockerfile
-            build_context: ./backend
+          # - package: backend
+          #   triggers: ('backend/')
+          #   build_file: ./backend/Dockerfile
+          #   build_context: ./backend
           - package: database
             triggers: ('database/')
             build_file: ./database/Dockerfile
             build_context: ./database
-          - package: frontend
-            triggers: ('frontend/')
-            build_file: ./frontend/Dockerfile
-            build_context: ./frontend
-          - package: database-migrations
-            triggers: ('backend/db')
-            build_file: ./backend/db/Dockerfile
-            build_context: ./backend/db
-          - package: database-migrations-py
-            triggers: ('backend-python/db')
-            build_file: ./backend-python/db/Dockerfile
-            build_context: ./backend-python/db
-          - package: backend-py
-            triggers: ('backend-python/')
-            build_file: ./backend-python/Dockerfile
-            build_context: ./backend-python
-          - package: backend-java
-            triggers: ('backend-java/')
-            build_file: ./backend-java/Dockerfile
-            build_context: ./backend-java
-          - package: database-migrations-go
-            triggers: ('backend-go/db')
-            build_file: ./backend-go/db/Dockerfile
-            build_context: ./backend-go/db
-          - package: backend-go
-            triggers: ('backend-go/')
-            build_file: ./backend-go/Dockerfile
-            build_context: ./backend-go
+          # - package: frontend
+          #   triggers: ('frontend/')
+          #   build_file: ./frontend/Dockerfile
+          #   build_context: ./frontend
+          # - package: database-migrations
+          #   triggers: ('backend/db')
+          #   build_file: ./backend/db/Dockerfile
+          #   build_context: ./backend/db
+          # - package: database-migrations-py
+          #   triggers: ('backend-python/db')
+          #   build_file: ./backend-python/db/Dockerfile
+          #   build_context: ./backend-python/db
+          # - package: backend-py
+          #   triggers: ('backend-python/')
+          #   build_file: ./backend-python/Dockerfile
+          #   build_context: ./backend-python
+          # - package: backend-java
+          #   triggers: ('backend-java/')
+          #   build_file: ./backend-java/Dockerfile
+          #   build_context: ./backend-java
+          # - package: database-migrations-go
+          #   triggers: ('backend-go/db')
+          #   build_file: ./backend-go/db/Dockerfile
+          #   build_context: ./backend-go/db
+          # - package: backend-go
+          #   triggers: ('backend-go/')
+          #   build_file: ./backend-go/Dockerfile
+          #   build_context: ./backend-go
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.2
@@ -94,68 +94,74 @@ jobs:
           build_file: ${{ matrix.build_file }}
           build_context: ${{ matrix.build_context }}
 
-
-  deploys:
-    name: Deploys
+  deploys-helm:
+    name: Helm Deploys
     if: '!github.event.pull_request.head.repo.fork'
+    runs-on: ubuntu-22.04
     needs:
       - builds
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        name: [backend, database, init, frontend, backend-py, backend-java, backend-go]
-        include:
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-            parameters:
-              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
-            triggers: ('database/' 'backend/' 'frontend/')
-            verification_path: /api
-          - name: backend-py
-            file: backend-python/openshift.deploy.yml
-            overwrite: true
-            parameters:
-              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:${{ github.event.number }}
-            triggers: ('backend-python/')
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-            triggers: ('database/' 'backend/' 'backend-go' 'backend-java' 'backend-python' 'frontend/')
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-            triggers: ('database/' 'backend/' 'frontend/')
-          - name: init
-            file: common/openshift.init.yml
-            overwrite: false
-          - name: backend-java
-            file: backend-java/openshift.deploy.yml
-            overwrite: true
-            parameters:
-              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-            triggers: ('backend-java/')
-          - name: backend-go
-            file: backend-go/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:${{ github.event.number }}
-            triggers: ('backend-go/')
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.1.1
-        with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          penetration_test: false
-          parameters:
-            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
-            ${{ matrix.parameters }}
-          triggers: ${{ matrix.triggers }}
-          verification_path: ${{ matrix.verification_path }}
+      - run: |
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          oc project ${{ vars.OC_NAMESPACE }}
+          helm upgrade quickstart-openshift-${{ github.event.number }} database/charts --install --atomic --wait --timeout 10m --debug --set image.promote=PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }} --set zone=${{ github.event.number }}
+
+  # deploys:
+  #   name: Deploys
+  #   needs:
+  #     - builds
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       name: [backend, init, frontend, backend-py, backend-java, backend-go]
+  #       include:
+  #         - name: backend
+  #           file: backend/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters:
+  #             -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #             -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
+  #           triggers: ('database/' 'backend/' 'frontend/')
+  #           verification_path: /api
+  #         - name: backend-py
+  #           file: backend-python/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters:
+  #             -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #             -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:${{ github.event.number }}
+  #           triggers: ('backend-python/')
+  #         - name: frontend
+  #           file: frontend/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #           triggers: ('database/' 'backend/' 'frontend/')
+  #         - name: init
+  #           file: common/openshift.init.yml
+  #           overwrite: false
+  #         - name: backend-java
+  #           file: backend-java/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters:
+  #             -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #           triggers: ('backend-java/')
+  #         - name: backend-go
+  #           file: backend-go/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #             -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:${{ github.event.number }}
+  #           triggers: ('backend-go/')
+  #   steps:
+  #     - uses: bcgov-nr/action-deployer-openshift@v1.1.1
+  #       with:
+  #         file: ${{ matrix.file }}
+  #         oc_namespace: ${{ vars.OC_NAMESPACE }}
+  #         oc_server: ${{ vars.OC_SERVER }}
+  #         oc_token: ${{ secrets.OC_TOKEN }}
+  #         overwrite: ${{ matrix.overwrite }}
+  #         penetration_test: false
+  #         parameters:
+  #           -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+  #           -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
+  #           ${{ matrix.parameters }}
+  #         triggers: ${{ matrix.triggers }}
+  #         verification_path: ${{ matrix.verification_path }}
