@@ -30,7 +30,7 @@ objects:
           labels:
             app: "{{ .Values.repo }}-{{ .Values.zone }}"
         spec:
-          backoffLimit: "{{ .Values.backups.retries }}"
+          backoffLimit: "{{ .Values.backups.job.retries }}"
           template:
             metadata:
               labels:

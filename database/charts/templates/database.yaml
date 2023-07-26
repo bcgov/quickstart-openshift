@@ -1,39 +1,39 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
   labels:
-    app: {{ .Values.repo }}-{{ .Values.zone }}
+    app: "{{ .Values.repo }}-{{ .Values.zone }}"
 objects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
-      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
     spec:
       accessModes:
         - ReadWriteOnce
       resources:
         requests:
-          storage: ${DB_PVC_SIZE}
+          storage: "{{ .Values.resources.pvc.size }}"
       storageClassName: netapp-file-standard
   - kind: ImageStream
     apiVersion: v1
     metadata:
-      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
     spec:
       lookupPolicy:
         local: false
       tags:
-        - name: ${IMAGE_TAG}
+        - name: "{{ .Values.image.tag }}"
           from:
             kind: DockerImage
-            name: ${REGISTRY}/${PROMOTE}
+            name: "{{ .Values.image.registry }}/{{ .Values.image.tag }}"
           referencePolicy:
             type: Local
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
-      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
     spec:
       replicas: 1
       triggers:
@@ -42,12 +42,12 @@ objects:
           imageChangeParams:
             automatic: true
             containerNames:
-              - {{ .Values.repo }}
+              - "{{ .Values.repo }}"
             from:
               kind: ImageStreamTag
-              name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}:${IMAGE_TAG}
+              name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}:{{ .Values.image.tag }}"
       selector:
-        deploymentconfig: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+        deploymentconfig: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
       strategy:
         type: Recreate
         recreateParams:
@@ -55,18 +55,18 @@ objects:
         activeDeadlineSeconds: 21600
       template:
         metadata:
-          name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+          name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
           labels:
-            app: {{ .Values.repo }}-{{ .Values.zone }}
-            deploymentconfig: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+            app: "{{ .Values.repo }}-{{ .Values.zone }}"
+            deploymentconfig: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
         spec:
           volumes:
-            - name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+            - name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
               persistentVolumeClaim:
-                claimName: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+                claimName: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
           containers:
-            - name: {{ .Values.repo }}
-              image: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}:${IMAGE_TAG}
+            - name: "{{ .Values.repo }}"
+              image: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}:{{ .Values.image.tag }}"
               ports:
                 - containerPort: 5432
                   protocol: TCP
@@ -96,21 +96,21 @@ objects:
                 - name: POSTGRES_DB
                   valueFrom:
                     secretKeyRef:
-                      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+                      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
                       key: database-name
                 - name: POSTGRES_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+                      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
                       key: database-password
                 - name: POSTGRES_USER
                   valueFrom:
                     secretKeyRef:
-                      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+                      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
                       key: database-user
               volumeMounts:
-                - name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
-                  mountPath: ${PVC_MOUNT_PATH}
+                - name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+                  mountPath: "{{ .Values.resources.pvc.mount }}"
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
               imagePullPolicy: Always
@@ -121,7 +121,7 @@ objects:
   - apiVersion: v1
     kind: Service
     metadata:
-      name: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
     spec:
       ports:
         - name: postgresql
@@ -130,6 +130,6 @@ objects:
           protocol: TCP
           targetPort: 5432
       selector:
-        deploymentconfig: {{ .Values.repo }}-{{ .Values.zone }}-{{ .Chart.Name }}
+        deploymentconfig: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
       sessionAffinity: None
       type: ClusterIP
