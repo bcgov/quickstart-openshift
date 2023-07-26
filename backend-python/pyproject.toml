@@ -8,8 +8,8 @@ packages = [{ include = "backend_python" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "^0.98.0"
-uvicorn = "^0.22.0"
+fastapi = "^0.100.0"
+uvicorn = "^0.23.0"
 sqlalchemy = "^2.0.15"
 pydantic = {version ="^1.10.9", extras = ["email"]}
 requests = "^2.31.0"
