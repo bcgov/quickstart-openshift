@@ -1,7 +1,7 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.name }}"
+  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
   labels:
     app: "{{ .Values.repo }}-{{ .Values.zone }}"
 objects:
@@ -66,23 +66,23 @@ objects:
                       value: "{{ .Values.backups.retain.monthlies }}"
                       optional: true
                     - name: DATABASE_SERVICE_NAME
-                      value: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.name }}"
+                      value: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
                     - name: DEFAULT_PORT
                       value: "{{ .Values.backups.port }}"
                     - name: POSTGRES_DATABASE
                       valueFrom:
                         secretKeyRef:
-                          name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.name }}"
+                          name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
                           key: "database-name"
                     - name: DATABASE_USER
                       valueFrom:
                         secretKeyRef:
-                          name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.name }}"
+                          name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
                           key: "database-user"
                     - name: DATABASE_PASSWORD
                       valueFrom:
                         secretKeyRef:
-                          name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.name }}"
+                          name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
                           key: "database-password"
               volumes:
                 - name: backup
