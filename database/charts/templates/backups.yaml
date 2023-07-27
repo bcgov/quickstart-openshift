@@ -1,91 +1,86 @@
-# ---
-# kind: PersistentVolumeClaim
-# apiVersion: v1
-# metadata:
-#   name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.backups.component }}"
-# spec:
-#   accessModes:
-#     - ReadWriteOnce
-#   resources:
-#     requests:
-#       storage: "{{ .Values.resources.pvc.size }}"
-#   storageClassName: netapp-file-standard
-# ---
-# kind: CronJob
-# apiVersion: "batch/v1"
-# metadata:
-#   name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.backups.component }}"
-# spec:
-#   schedule: "05 8 * * *" # Run daily at 8:xx AM UTC
-#   concurrencyPolicy: "Replace"
-#   successfulJobsHistoryLimit: "{{ .Values.backups.job.history }}"
-#   failedJobsHistoryLimit: "{{ .Values.backups.job.keep.failed }}"
-#   jobTemplate:
-#     metadata:
-#       labels:
-#         app: "{{ .Values.repo }}-{{ .Values.zone }}"
-#     spec:
-#       backoffLimit: "{{ .Values.backups.job.retries }}"
-#       template:
-#         metadata:
-#           labels:
-#             app: "{{ .Values.repo }}-{{ .Values.zone }}"
-#             cronjob: "{{ .Values.repo }}-{{ .Values.zone }}"
-#         spec:
-#           containers:
-#             - name: "{{ .Values.repo }}-{{ .Values.zone }}"
-#               image: "bcgovimages/backup-container:latest"
-#               command:
-#                 - "/bin/bash"
-#                 - "-c"
-#                 - "/backup.sh -1"
-#               volumeMounts:
-#                 - mountPath: "{{ .Values.backups.dir }}"
-#                   name: "backup"
-#               env:
-#                 - name: BACKUP_DIR
-#                   value: "{{ .Values.backups.dir }}"
-#                 - name: BACKUP_STRATEGY
-#                   value: "{{ .Values.backups.dir }}"
-#                   optional: true
-#                 - name: NUM_BACKUPS
-#                   value: "{{ .Values.backups.retain.count }}"
-#                   optional: true
-#                 - name: DAILY_BACKUPS
-#                   value: "{{ .Values.backups.retain.dailies }}"
-#                   optional: true
-#                 - name: WEEKLY_BACKUPS
-#                   value: "{{ .Values.backups.retain.weeklies }}"
-#                   optional: true
-#                 - name: MONTHLY_BACKUPS
-#                   value: "{{ .Values.backups.retain.monthlies }}"
-#                   optional: true
-#                 - name: DATABASE_SERVICE_NAME
-#                   value: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-#                 - name: DEFAULT_PORT
-#                   value: "{{ .Values.backups.port }}"
-#                 - name: POSTGRES_DATABASE
-#                   valueFrom:
-#                     secretKeyRef:
-#                       name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-#                       key: "database-name"
-#                 - name: DATABASE_USER
-#                   valueFrom:
-#                     secretKeyRef:
-#                       name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-#                       key: "database-user"
-#                 - name: DATABASE_PASSWORD
-#                   valueFrom:
-#                     secretKeyRef:
-#                       name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-#                       key: "database-password"
-#           volumes:
-#             - name: backup
-#               persistentVolumeClaim:
-#                 claimName: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.backups.component }}"
-#           restartPolicy: "Never"
-#           terminationGracePeriodSeconds: 30
-#           activeDeadlineSeconds: 1600
-#           dnsPolicy: "ClusterFirst"
-#           serviceAccountName: "{{ .Values.backups.job.name }}"
-#           serviceAccount: "{{ .Values.backups.job.name }}"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.backups.component }}"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: "{{ .Values.resources.pvc.size }}"
+  storageClassName: netapp-file-standard
+---
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.backups.component }}"
+spec:
+  schedule: "05 8 * * *" # Run daily at 8:xx AM UTC
+  concurrencyPolicy: "Replace"
+  successfulJobsHistoryLimit: {{ .Values.backups.job.history }}
+  failedJobsHistoryLimit: {{ .Values.backups.job.keep.failed }}
+  jobTemplate:
+    metadata:
+      labels:
+        app: "{{ .Values.repo }}-{{ .Values.zone }}"
+    spec:
+      backoffLimit: {{ .Values.backups.job.retries }}
+      template:
+        metadata:
+          labels:
+            app: "{{ .Values.repo }}-{{ .Values.zone }}"
+            cronjob: "{{ .Values.repo }}-{{ .Values.zone }}"
+        spec:
+          containers:
+            - name: "{{ .Values.repo }}-{{ .Values.zone }}"
+              image: "bcgovimages/backup-container:latest"
+              command:
+                - "/bin/bash"
+                - "-c"
+                - "/backup.sh -1"
+              volumeMounts:
+                - mountPath: "{{ .Values.backups.dir }}"
+                  name: "backup"
+              env:
+                - name: BACKUP_DIR
+                  value: "{{ .Values.backups.dir }}"
+                - name: BACKUP_STRATEGY
+                  value: "{{ .Values.backups.dir }}"
+                - name: NUM_BACKUPS
+                  value: "{{ .Values.backups.retain.count }}"
+                - name: DAILY_BACKUPS
+                  value: "{{ .Values.backups.retain.dailies }}"
+                - name: WEEKLY_BACKUPS
+                  value: "{{ .Values.backups.retain.weeklies }}"
+                - name: MONTHLY_BACKUPS
+                  value: "{{ .Values.backups.retain.monthlies }}"
+                - name: DATABASE_SERVICE_NAME
+                  value: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+                - name: DEFAULT_PORT
+                  value: "{{ .Values.backups.port }}"
+                - name: POSTGRES_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+                      key: "database-name"
+                - name: DATABASE_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+                      key: "database-user"
+                - name: DATABASE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+                      key: "database-password"
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.backups.component }}"
+          restartPolicy: "Never"
+          terminationGracePeriodSeconds: 30
+          activeDeadlineSeconds: 1600
+          dnsPolicy: "ClusterFirst"
+          serviceAccountName: "{{ .Values.backups.job.name }}"
+          serviceAccount: "{{ .Values.backups.job.name }}"
