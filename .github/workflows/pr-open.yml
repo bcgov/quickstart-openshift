@@ -10,6 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+<<<<<<< HEAD
   pr-greeting:
     if: '!github.event.pull_request.head.repo.fork'
     name: PR Greeting
@@ -26,34 +27,51 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_markdown: |
             ---
+=======
+  # pr-greeting:
+  #   name: PR Greeting
+  #   env:
+  #     DOMAIN: apps.silver.devops.gov.bc.ca
+  #     PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     pull-requests: write
+  #   steps:
+  #     - name: PR Greeting
+  #       uses: bcgov-nr/action-pr-description-add@v0.1.0-rc1
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         add_markdown: |
+  #           ---
+>>>>>>> 707372f (Provide apiVersion changes for OpenShift)
 
-            Thanks for the PR!
+  #           Thanks for the PR!
 
-            Any successful deployments (not always required) will be available below.
-            [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/) available
-            [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/) available
+  #           Any successful deployments (not always required) will be available below.
+  #           [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/) available
+  #           [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/) available
 
-            Once merged, code will be promoted and handed off to following workflow run.
-            [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+  #           Once merged, code will be promoted and handed off to following workflow run.
+  #           [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
-  builds:
-    name: Builds
-    if: '!github.event.pull_request.head.repo.fork'
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
+  # builds:
+  #   name: Builds
+  #   if: '!github.event.pull_request.head.repo.fork'
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     packages: write
+  #   strategy:
+  #     matrix:
         # package: [backend, database, database-migrations, frontend, backend-py, database-migrations-py, backend-java, backend-go, database-migrations-go]
-        include:
+        # include:
           # - package: backend
           #   triggers: ('backend/')
           #   build_file: ./backend/Dockerfile
           #   build_context: ./backend
-          - package: database
-            triggers: ('database/')
-            build_file: ./database/Dockerfile
-            build_context: ./database
+          # - package: database
+          #   triggers: ('database/')
+          #   build_file: ./database/Dockerfile
+          #   build_context: ./database
           # - package: frontend
           #   triggers: ('frontend/')
           #   build_file: ./frontend/Dockerfile
@@ -82,20 +100,21 @@ jobs:
           #   triggers: ('backend-go/')
           #   build_file: ./backend-go/Dockerfile
           #   build_context: ./backend-go
-    steps:
-      - uses: actions/checkout@v3
-      - uses: bcgov-nr/action-builder-ghcr@v1.1.2
-        with:
-          package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
-          tag_fallback: test
-          token: ${{ secrets.GITHUB_TOKEN }}
-          triggers: ${{ matrix.triggers }}
-          build_file: ${{ matrix.build_file }}
-          build_context: ${{ matrix.build_context }}
+    # steps:
+    #   - uses: actions/checkout@v3
+    #   - uses: bcgov-nr/action-builder-ghcr@v1.1.2
+    #     with:
+    #       package: ${{ matrix.package }}
+    #       tag: ${{ github.event.number }}
+    #       tag_fallback: test
+    #       token: ${{ secrets.GITHUB_TOKEN }}
+    #       triggers: ${{ matrix.triggers }}
+    #       build_file: ${{ matrix.build_file }}
+    #       build_context: ${{ matrix.build_context }}
 
   deploys-helm:
     name: Helm Deploys
+<<<<<<< HEAD
     if: '!github.event.pull_request.head.repo.fork'
     runs-on: ubuntu-22.04
     needs:
@@ -122,11 +141,27 @@ jobs:
     name: Deploys
     needs:
       - builds
+=======
+>>>>>>> 707372f (Provide apiVersion changes for OpenShift)
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
+    # needs:
+    #   - builds
+    steps:
+      - run: |
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          oc project ${{ vars.OC_NAMESPACE }}
+          # helm repo add stable https://charts.helm.sh/stable
+          helm upgrade quickstart-openshift-${{ github.event.number }} database/charts --install --atomic --wait --timeout 10m --debug --set image.promote=${{ github.repository }}/database:${{ github.event.number }} --set zone=${{ github.event.number }}
+
+  # deploys:
+  #   name: Deploys
+    # needs:
+    #   - builds
+    # runs-on: ubuntu-22.04
+    # strategy:
+    #   matrix:
         # name: [backend, init, frontend, backend-py, backend-java, backend-go]
-        include:
+        # include:
           # - name: backend
           #   file: backend/openshift.deploy.yml
           #   overwrite: true
@@ -147,9 +182,9 @@ jobs:
           #   overwrite: true
           #   parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
           #   triggers: ('database/' 'backend/' 'frontend/')
-          - name: init
-            file: common/openshift.init.yml
-            overwrite: false
+          # - name: init
+          #   file: common/openshift.init.yml
+          #   overwrite: false
           # - name: backend-java
           #   file: backend-java/openshift.deploy.yml
           #   overwrite: true
@@ -162,18 +197,18 @@ jobs:
           #   parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
           #     -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:${{ github.event.number }}
           #   triggers: ('backend-go/')
-    steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.1.1
-        with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          penetration_test: false
-          parameters:
-            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
-            ${{ matrix.parameters }}
-          triggers: ${{ matrix.triggers }}
-          verification_path: ${{ matrix.verification_path }}
+    # steps:
+    #   - uses: bcgov-nr/action-deployer-openshift@v1.1.1
+    #     with:
+    #       file: ${{ matrix.file }}
+    #       oc_namespace: ${{ vars.OC_NAMESPACE }}
+    #       oc_server: ${{ vars.OC_SERVER }}
+    #       oc_token: ${{ secrets.OC_TOKEN }}
+    #       overwrite: ${{ matrix.overwrite }}
+    #       penetration_test: false
+    #       parameters:
+    #         -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+    #         -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
+    #         ${{ matrix.parameters }}
+    #       triggers: ${{ matrix.triggers }}
+    #       verification_path: ${{ matrix.verification_path }}
