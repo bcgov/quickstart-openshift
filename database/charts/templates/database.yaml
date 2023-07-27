@@ -1,15 +1,15 @@
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: "{{ .Values.resources.pvc.size }}"
-  storageClassName: netapp-file-standard
+# ---
+# kind: PersistentVolumeClaim
+# apiVersion: v1
+# metadata:
+#   name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: "{{ .Values.resources.pvc.size }}"
+#   storageClassName: netapp-file-standard
 ---
 kind: ImageStream
 apiVersion: image.openshift.io/v1
@@ -25,108 +25,108 @@ spec:
         name: "{{ .Values.image.registry }}/{{ .Values.image.promote }}"
       referencePolicy:
         type: Local
----
-kind: DeploymentConfig
-apiVersion: apps.openshift.io/v1
-metadata:
-  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-spec:
-  replicas: 1
-  triggers:
-    - type: ConfigChange
-    - type: ImageChange
-      imageChangeParams:
-        automatic: true
-        containerNames:
-          - "{{ .Values.repo }}"
-        from:
-          kind: ImageStreamTag
-          name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}:{{ .Values.image.tag }}"
-  selector:
-    deploymentconfig: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-  strategy:
-    type: Recreate
-    recreateParams:
-      timeoutSeconds: 600
-    activeDeadlineSeconds: 21600
-  template:
-    metadata:
-      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-      labels:
-        app: "{{ .Values.repo }}-{{ .Values.zone }}"
-        deploymentconfig: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-    spec:
-      volumes:
-        - name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-          persistentVolumeClaim:
-            claimName: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-      containers:
-        - name: "{{ .Values.repo }}"
-          image: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}:{{ .Values.image.tag }}"
-          ports:
-            - containerPort: 5432
-              protocol: TCP
-          readinessProbe:
-            exec:
-              command:
-                - /usr/bin/env
-                - bash
-                - -c
-                - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
-            failureThreshold: 5
-            initialDelaySeconds: 30
-            periodSeconds: 15
-            timeoutSeconds: 1
-          livenessProbe:
-            exec:
-              command:
-                - /usr/bin/env
-                - bash
-                - -c
-                - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
-            failureThreshold: 5
-            initialDelaySeconds: 30
-            periodSeconds: 15
-            timeoutSeconds: 1
-          env:
-            - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-                  key: database-name
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-                  key: database-password
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-                  key: database-user
-          volumeMounts:
-            - name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-              mountPath: "{{ .Values.resources.pvc.mount }}"
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          imagePullPolicy: Always
-      restartPolicy: Always
-      terminationGracePeriodSeconds: 30
-      dnsPolicy: ClusterFirst
-      schedulerName: default-scheduler
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-spec:
-  ports:
-    - name: postgresql
-      nodePort: 0
-      port: 5432
-      protocol: TCP
-      targetPort: 5432
-  selector:
-    deploymentconfig: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-  sessionAffinity: None
-  type: ClusterIP
+# ---
+# kind: DeploymentConfig
+# apiVersion: apps.openshift.io/v1
+# metadata:
+#   name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+# spec:
+#   replicas: 1
+#   triggers:
+#     - type: ConfigChange
+#     - type: ImageChange
+#       imageChangeParams:
+#         automatic: true
+#         containerNames:
+#           - "{{ .Values.repo }}"
+#         from:
+#           kind: ImageStreamTag
+#           name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}:{{ .Values.image.tag }}"
+#   selector:
+#     deploymentconfig: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+#   strategy:
+#     type: Recreate
+#     recreateParams:
+#       timeoutSeconds: 600
+#     activeDeadlineSeconds: 21600
+#   template:
+#     metadata:
+#       name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+#       labels:
+#         app: "{{ .Values.repo }}-{{ .Values.zone }}"
+#         deploymentconfig: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+#     spec:
+#       volumes:
+#         - name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+#           persistentVolumeClaim:
+#             claimName: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+#       containers:
+#         - name: "{{ .Values.repo }}"
+#           image: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}:{{ .Values.image.tag }}"
+#           ports:
+#             - containerPort: 5432
+#               protocol: TCP
+#           readinessProbe:
+#             exec:
+#               command:
+#                 - /usr/bin/env
+#                 - bash
+#                 - -c
+#                 - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+#             failureThreshold: 5
+#             initialDelaySeconds: 30
+#             periodSeconds: 15
+#             timeoutSeconds: 1
+#           livenessProbe:
+#             exec:
+#               command:
+#                 - /usr/bin/env
+#                 - bash
+#                 - -c
+#                 - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+#             failureThreshold: 5
+#             initialDelaySeconds: 30
+#             periodSeconds: 15
+#             timeoutSeconds: 1
+#           env:
+#             - name: POSTGRES_DB
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+#                   key: database-name
+#             - name: POSTGRES_PASSWORD
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+#                   key: database-password
+#             - name: POSTGRES_USER
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+#                   key: database-user
+#           volumeMounts:
+#             - name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+#               mountPath: "{{ .Values.resources.pvc.mount }}"
+#           terminationMessagePath: /dev/termination-log
+#           terminationMessagePolicy: File
+#           imagePullPolicy: Always
+#       restartPolicy: Always
+#       terminationGracePeriodSeconds: 30
+#       dnsPolicy: ClusterFirst
+#       schedulerName: default-scheduler
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+# spec:
+#   ports:
+#     - name: postgresql
+#       nodePort: 0
+#       port: 5432
+#       protocol: TCP
+#       targetPort: 5432
+#   selector:
+#     deploymentconfig: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+#   sessionAffinity: None
+#   type: ClusterIP

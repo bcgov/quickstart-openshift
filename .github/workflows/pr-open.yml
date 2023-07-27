@@ -104,7 +104,6 @@ jobs:
       - run: |
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
-          # helm repo add stable https://charts.helm.sh/stable
           helm upgrade quickstart-openshift-${{ github.event.number }} database/charts --install --atomic --wait --timeout 10m --debug --set image.promote=${{ github.repository }}/database:${{ github.event.number }} --set zone=${{ github.event.number }}
 
   # deploys:

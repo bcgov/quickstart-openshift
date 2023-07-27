@@ -2,7 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-name: quickstart-openshift
 component: database
 image:
   tag: latest
@@ -19,17 +18,10 @@ backups:
   component: database-backup
   dir: /backups/
   job:
-    name: default
     retries: 0
     history: 5
     keep:
       successful: 5
       failed: 2
-  port: 5432
   pvc-size: 256Mi
-  retain:
-    count: 5
-    dailies: 7
-    weeklies: 4
-    monthlies: 1
   strategy: rolling
