@@ -2,7 +2,8 @@ name: Pull Request
 
 on:
   pull_request:
-
+    branches:
+      - main
 concurrency:
   # PR open and close use the same group, allowing only one at a time
   group: pr-${{ github.workflow }}-${{ github.event.number }}
@@ -10,6 +11,7 @@ concurrency:
 
 jobs:
   pr-greeting:
+    if: '!github.event.pull_request.head.repo.fork'
     name: PR Greeting
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
@@ -36,6 +38,7 @@ jobs:
 
   builds:
     name: Builds
+    if: '!github.event.pull_request.head.repo.fork'
     runs-on: ubuntu-22.04
     permissions:
       packages: write
@@ -94,6 +97,7 @@ jobs:
 
   deploys:
     name: Deploys
+    if: '!github.event.pull_request.head.repo.fork'
     needs:
       - builds
     runs-on: ubuntu-22.04
