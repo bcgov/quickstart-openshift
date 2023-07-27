@@ -25,6 +25,7 @@ spec:
         name: "{{ .Values.image.registry }}/{{ .Values.image.tag }}"
       referencePolicy:
         type: Local
+---
 kind: DeploymentConfig
 apiVersion: v1
 metadata:
@@ -113,7 +114,8 @@ spec:
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
       schedulerName: default-scheduler
-- apiVersion: v1
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
