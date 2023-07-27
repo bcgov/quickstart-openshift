@@ -130,7 +130,7 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
           cd database/charts
-          helm upgrade quickstart-openshift-database . --install --atomic --wait --timeout 10m --debug --set image.promote=${{ github.repository }}/database:${{ github.event.number }} --set zone=${{ github.event.number }}
+          helm upgrade --install --atomic --wait --timeout 10m --debug --set image.promote=${{ github.repository }}/database:${{ github.event.number }} --set zone=${{ github.event.number }} ${{ github.repository }}-${{ github.event.number }} .
 
   # deploys:
   #   name: Deploys
