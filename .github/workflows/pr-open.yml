@@ -10,25 +10,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-<<<<<<< HEAD
-  pr-greeting:
-    if: '!github.event.pull_request.head.repo.fork'
-    name: PR Greeting
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
-    runs-on: ubuntu-22.04
-    permissions:
-      pull-requests: write
-    steps:
-      - name: PR Greeting
-        uses: bcgov-nr/action-pr-description-add@v0.1.0-rc1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          add_markdown: |
-            ---
-=======
   # pr-greeting:
+  #   if: '!github.event.pull_request.head.repo.fork'
   #   name: PR Greeting
   #   env:
   #     DOMAIN: apps.silver.devops.gov.bc.ca
@@ -43,7 +26,6 @@ jobs:
   #         github_token: ${{ secrets.GITHUB_TOKEN }}
   #         add_markdown: |
   #           ---
->>>>>>> 707372f (Provide apiVersion changes for OpenShift)
 
   #           Thanks for the PR!
 
@@ -114,11 +96,10 @@ jobs:
 
   deploys-helm:
     name: Helm Deploys
-<<<<<<< HEAD
     if: '!github.event.pull_request.head.repo.fork'
     runs-on: ubuntu-22.04
-    needs:
-      - builds
+    # needs:
+    #   - builds
     steps:
       - run: |
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
@@ -141,8 +122,6 @@ jobs:
     name: Deploys
     needs:
       - builds
-=======
->>>>>>> 707372f (Provide apiVersion changes for OpenShift)
     runs-on: ubuntu-22.04
     # needs:
     #   - builds
