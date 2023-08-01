@@ -7,3 +7,5 @@ zone: ~
 
 database:
   component: database
+  name: default
+  user: default
