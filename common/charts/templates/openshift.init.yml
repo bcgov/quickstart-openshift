@@ -5,15 +5,20 @@ metadata:
   name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.database.component }}"
   labels:
     app: {{ .Values.repo }}-{{ .Values.zone }}
-  # Do not delete secret
+  {{- if or (eq .Values.zone "test") (eq .Values.zone "prod") }}
+  # Do not delete secrets for test or prod
   annotations:
-    "helm.sh/resource-policy": "keep"
+    "helm.sh/resource-policy": "keep" 
+{{ end }}
 stringData:
   database-name: {{ .Values.repo }}
   database-user: {{ .Values.repo }}
+data:
   # retrieve the secret data using lookup function and when not exists, return an empty dictionary / map as result
-  {{- $secretObj := (lookup "v1" "Secret" .Release.Namespace "database-password") | default dict }}
+  {{- $secretObj := (lookup "v1" "Secret" .Release.Namespace "quickstart-openshift-prod-database") | default dict }}
   {{- $secretData := (get $secretObj "data") | default dict }}
   # set $database-password to existing secret data or generate a random one when not exists
   {{- $databasePassword := (get $secretData "database-password") | default (randAlphaNum 32 | b64enc) }}
   database-password: {{ $databasePassword | quote }}
+  test: {{ index (lookup "v1" "Secret" .Release.Namespace "quickstart-openshift-prod-database")
+    "data" "database-password" | default (randAlphaNum 32 | b64enc) }}
