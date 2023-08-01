@@ -19,10 +19,10 @@ spec:
   lookupPolicy:
     local: false
   tags:
-    - name: {{ if eq .Values.image.tag "latest" }}{{ .Values.image.tag | upper | quote }}{{ end }}
+    - name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
       from:
         kind: DockerImage
-        name: "{{ .Values.image.registry }}/{{ .Values.image.promote }}"
+        name: "{{ .Values.image.registry }}/{{ .Values.org }}/{{ .Values.repo }}/{{ .Values.component }}:{{ .Values.image.tag }}"
       referencePolicy:
         type: Local
 ---

@@ -6,12 +6,12 @@ component: database
 image:
   tag: latest
   registry: ghcr.io
-  promote: ~
+org: ~
+repo: ~
 resources:
   pvc:
     mount: /var/lib/postgresql
     size: 256Mi
-repo: ~
 zone: ~
 
 backups:
