@@ -93,7 +93,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-                  key: database-name
+                  key: database-user
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:

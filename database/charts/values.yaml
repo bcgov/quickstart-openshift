@@ -11,7 +11,7 @@ resources:
   pvc:
     mount: /var/lib/postgresql
     size: 256Mi
-repo: quickstart-openshift
+repo: ~
 zone: ~
 
 backups:

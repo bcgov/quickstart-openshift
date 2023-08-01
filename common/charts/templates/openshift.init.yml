@@ -11,7 +11,6 @@ metadata:
     "helm.sh/resource-policy": "keep"
 {{- end }}
 stringData:
-  database-name: {{ .Values.repo }}
   database-user: {{ .Values.repo }}
 data:
   # Reuse or create secret
