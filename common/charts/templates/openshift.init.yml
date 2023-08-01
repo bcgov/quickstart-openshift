@@ -4,8 +4,8 @@ kind: Secret
 metadata:
   name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.database.component }}"
   labels:
-    app: {{ .Values.repo }}-{{ .Values.zone }}
-  {{- if or (eq .Values.zone "test") (eq .Values.zone "prod") }}
+    app: "{{ .Values.repo }}-{{ .Values.zone }}"
+  {{- if or (eq (.Values.zone | toString ) "test") (eq (.Values.zone | toString ) "prod") }}
   # Do not delete secrets for test or prod
   annotations:
     "helm.sh/resource-policy": "keep" 
