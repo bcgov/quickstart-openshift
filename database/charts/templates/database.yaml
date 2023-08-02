@@ -1,25 +1,27 @@
+{{- $name := printf "%s-%s-%s" .Values.repo (.Values.zone | toString) .Values.database.component }}
+{{- $label := printf "%s-%s" .Values.repo (.Values.zone | toString) }}
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+  name: {{ $name }}
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: "{{ .Values.resources.pvc.size }}"
+      storage: {{ .Values.resources.pvc.size }}
   storageClassName: netapp-file-standard
 ---
 kind: ImageStream
 apiVersion: image.openshift.io/v1
 metadata:
-  name: "{{- .Values.repo }}-{{- .Values.zone }}-{{ .Values.component }}"
+  name: {{ $name }}
 spec:
   lookupPolicy:
     local: false
   tags:
-    - name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+    - name: {{ $name }}
       from:
         kind: DockerImage
         name: "{{ .Values.image.registry }}/{{ .Values.org }}/{{ .Values.repo }}/{{ .Values.component }}:{{ .Values.image.tag }}"
@@ -29,7 +31,7 @@ spec:
 kind: DeploymentConfig
 apiVersion: apps.openshift.io/v1
 metadata:
-  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+  name: {{ $name }}
 spec:
   replicas: 1
   triggers:
@@ -38,12 +40,12 @@ spec:
       imageChangeParams:
         automatic: true
         containerNames:
-          - "{{ .Values.repo }}"
+          - {{ $name }}
         from:
           kind: ImageStreamTag
-          name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}:{{ .Values.image.tag }}"
+          name: "{{ $name }}:{{ .Values.image.tag }}"
   selector:
-    deploymentconfig: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+    deploymentconfig: {{ $name }}
   strategy:
     type: Recreate
     recreateParams:
@@ -51,18 +53,18 @@ spec:
     activeDeadlineSeconds: 21600
   template:
     metadata:
-      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+      name: {{ $name }}
       labels:
-        app: "{{ .Values.repo }}-{{ .Values.zone }}"
-        deploymentconfig: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+        app: {{ $label }}
+        deploymentconfig: {{ $name }}
     spec:
       volumes:
-        - name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+        - name: {{ $name }}
           persistentVolumeClaim:
-            claimName: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+            claimName: {{ $name }}
       containers:
-        - name: "{{ .Values.repo }}"
-          image: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}:{{ .Values.image.tag }}"
+        - name: {{ $name }}
+          image: "{{ $name }}:{{ .Values.image.tag }}"
           ports:
             - containerPort: 5432
               protocol: TCP
@@ -92,21 +94,21 @@ spec:
             - name: POSTGRES_DB
               valueFrom:
                 secretKeyRef:
-                  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+                  name: {{ $name }}
                   key: database-user
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+                  name: {{ $name }}
                   key: database-password
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+                  name: {{ $name }}
                   key: database-user
           volumeMounts:
-            - name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
-              mountPath: "{{ .Values.resources.pvc.mount }}"
+            - name: {{ $name }}
+              mountPath: {{ .Values.resources.pvc.mount }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           imagePullPolicy: Always
@@ -118,7 +120,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+  name: {{ $name }}
 spec:
   ports:
     - name: postgresql
@@ -127,6 +129,6 @@ spec:
       protocol: TCP
       targetPort: 5432
   selector:
-    deploymentconfig: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+    deploymentconfig: {{ $name }}
   sessionAffinity: None
   type: ClusterIP

@@ -60,3 +60,14 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Custom content (non-boilerplate) starts here
+*/}}
+{{- $name := printf "%s-%s-%s" .Values.repo (.Values.zone | toString) .Values.database.component }}
+{{- define "metadata" }}
+metadata:
+  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.database.component }}"
+  labels:
+    app: "{{ .Values.repo }}-{{ .Values.zone }}"
+{{- end }}
