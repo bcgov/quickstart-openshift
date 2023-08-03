@@ -70,3 +70,7 @@ metadata:
   labels:
     app: "{{ .Values.repo }}-{{ .Values.zone }}"
 {{- end }}
+
+{{- define "id" }}
+{{- printf "%s-%s-%s" .Values.repo (.Values.zone | toString) .Values.database.component }}
+{{- end }}

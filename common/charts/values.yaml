@@ -2,9 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-id: |-
-  {{- printf "%s-%s-%s" .Values.repo (.Values.zone | toString) .Values.database.component }}
-
 repo: ~
 zone: ~
 
@@ -12,3 +9,7 @@ database:
   component: database
   name: default
   user: default
+
+# Templated/calculated values
+# - Consume with: {{ tpl "whatever" . }}
+id: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.database.component }}"
