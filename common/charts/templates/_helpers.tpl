@@ -71,6 +71,7 @@ metadata:
     app: "{{ .Values.repo }}-{{ .Values.zone }}"
 {{- end }}
 
-{{- define "id" }}
-{{- printf "%s-%s-%s" .Values.repo (.Values.zone | toString) .Values.database.component }}
-{{- end }}
+# Reference with {{ include "id" . }}
+# {{- define "id" }}
+# {{- printf "%s-%s-%s" .Values.repo (.Values.zone | toString) .Values.database.component }}
+# {{- end }}
