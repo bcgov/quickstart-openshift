@@ -25,3 +25,9 @@ backups:
       failed: 2
   pvc-size: 256Mi
   strategy: rolling
+
+# Templated/calculated values
+# - Consume with: {{ tpl "whatever" . }}
+id:
+  database: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+  backups: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.backups.component }}"

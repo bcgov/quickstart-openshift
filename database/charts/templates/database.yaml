@@ -1,10 +1,7 @@
-{{- $name := printf "%s-%s-%s" .Values.repo (.Values.zone | toString) .Values.database.component }}
-{{- $label := printf "%s-%s" .Values.repo (.Values.zone | toString) }}
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
-metadata:
-  name: {{ $name }}
+{{- include "metadata" . }}
 spec:
   accessModes:
     - ReadWriteOnce
@@ -15,13 +12,12 @@ spec:
 ---
 kind: ImageStream
 apiVersion: image.openshift.io/v1
-metadata:
-  name: {{ $name }}
+{{- include "metadata" . }}
 spec:
   lookupPolicy:
     local: false
   tags:
-    - name: {{ $name }}
+    - name: {{ tpl .Values.id.database . }}
       from:
         kind: DockerImage
         name: "{{ .Values.image.registry }}/{{ .Values.org }}/{{ .Values.repo }}/{{ .Values.component }}:{{ .Values.image.tag }}"
@@ -30,8 +26,7 @@ spec:
 ---
 kind: DeploymentConfig
 apiVersion: apps.openshift.io/v1
-metadata:
-  name: {{ $name }}
+{{- include "metadata" . }}
 spec:
   replicas: 1
   triggers:
@@ -40,31 +35,28 @@ spec:
       imageChangeParams:
         automatic: true
         containerNames:
-          - {{ $name }}
+          - {{ tpl .Values.id.database . }}
         from:
           kind: ImageStreamTag
-          name: "{{ $name }}:{{ .Values.image.tag }}"
+          name: "{{ tpl .Values.id.database . }}:{{ .Values.image.tag }}"
   selector:
-    deploymentconfig: {{ $name }}
+    deploymentconfig: {{ tpl .Values.id.database . }}
   strategy:
     type: Recreate
     recreateParams:
       timeoutSeconds: 600
     activeDeadlineSeconds: 21600
   template:
-    metadata:
-      name: {{ $name }}
-      labels:
-        app: {{ $label }}
-        deploymentconfig: {{ $name }}
+    {{- include "metadata" . | indent 4 }}
+        deploymentconfig: {{ tpl .Values.id.database . }}
     spec:
       volumes:
-        - name: {{ $name }}
+        - name: {{ tpl .Values.id.database . }}
           persistentVolumeClaim:
-            claimName: {{ $name }}
+            claimName: {{ tpl .Values.id.database . }}
       containers:
-        - name: {{ $name }}
-          image: "{{ $name }}:{{ .Values.image.tag }}"
+        - name: {{ tpl .Values.id.database . }}
+          image: "{{ tpl .Values.id.database . }}:{{ .Values.image.tag }}"
           ports:
             - containerPort: 5432
               protocol: TCP
@@ -94,20 +86,20 @@ spec:
             - name: POSTGRES_DB
               valueFrom:
                 secretKeyRef:
-                  name: {{ $name }}
+                  name: {{ tpl .Values.id.database . }}
                   key: database-user
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ $name }}
+                  name: {{ tpl .Values.id.database . }}
                   key: database-password
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ $name }}
+                  name: {{ tpl .Values.id.database . }}
                   key: database-user
           volumeMounts:
-            - name: {{ $name }}
+            - name: {{ tpl .Values.id.database . }}
               mountPath: {{ .Values.resources.pvc.mount }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
@@ -119,8 +111,7 @@ spec:
 ---
 apiVersion: v1
 kind: Service
-metadata:
-  name: {{ $name }}
+{{- include "metadata" . }}
 spec:
   ports:
     - name: postgresql
@@ -129,6 +120,6 @@ spec:
       protocol: TCP
       targetPort: 5432
   selector:
-    deploymentconfig: {{ $name }}
+    deploymentconfig: {{ tpl .Values.id.database . }}
   sessionAffinity: None
   type: ClusterIP
