@@ -2,6 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+id: |-
+  {{- printf "%s-%s-%s" .Values.repo (.Values.zone | toString) .Values.database.component }}
+
 repo: ~
 zone: ~
 
