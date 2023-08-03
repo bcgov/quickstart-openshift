@@ -57,6 +57,8 @@ spec:
       containers:
         - name: {{ tpl .Values.id.database . }}
           image: "{{ tpl .Values.id.database . }}:{{ .Values.image.tag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 5432
               protocol: TCP
