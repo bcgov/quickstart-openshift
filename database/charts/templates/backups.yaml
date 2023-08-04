@@ -2,82 +2,78 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.backups.component }}"
+  name: {{ tpl .Values.id.backups . }}
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: "{{ .Values.resources.pvc.size }}"
+      storage: {{ .Values.resources.pvc.size }}
   storageClassName: netapp-file-standard
 ---
 kind: CronJob
 apiVersion: batch/v1
 metadata:
-  name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.backups.component }}"
+  name: {{ tpl .Values.id.backups . }}
 spec:
-  schedule: "05 8 * * *" # Run daily at 8:xx AM UTC
+  schedule: {{ .Values.backups.schedule | quote }}
   concurrencyPolicy: "Replace"
   successfulJobsHistoryLimit: {{ .Values.backups.job.history }}
   failedJobsHistoryLimit: {{ .Values.backups.job.keep.failed }}
   jobTemplate:
-    metadata:
-      labels:
-        app: "{{ .Values.repo }}-{{ .Values.zone }}"
+    {{- include "metadata" . | indent 4 }}
     spec:
       backoffLimit: {{ .Values.backups.job.retries }}
       template:
-        metadata:
-          labels:
-            app: "{{ .Values.repo }}-{{ .Values.zone }}"
-            cronjob: "{{ .Values.repo }}-{{ .Values.zone }}"
+        {{- include "metadata" . | indent 8 }}
+            cronjob: {{ tpl .Values.id.backups . }}
         spec:
           containers:
-            - name: "{{ .Values.repo }}-{{ .Values.zone }}"
-              image: "bcgovimages/backup-container:latest"
+            - name: {{ tpl .Values.id.backups . }}
+              image: {{ .Values.backups.image }}
               command:
                 - "/bin/bash"
                 - "-c"
                 - "/backup.sh -1"
               volumeMounts:
-                - mountPath: "{{ .Values.backups.dir }}"
+                - mountPath: {{ .Values.backups.dir }}
                   name: "backup"
               env:
                 - name: BACKUP_DIR
-                  value: "{{ .Values.backups.dir }}"
+                  value: {{ .Values.backups.dir }}
                 - name: BACKUP_STRATEGY
-                  value: "{{ .Values.backups.dir }}"
+                  value: {{ .Values.backups.dir }}
                 - name: NUM_BACKUPS
-                  value: {{ .Values.backups.count | default 5 }}
+                  value: {{ .Values.backups.count | default 5 | quote }}
                 - name: DAILY_BACKUPS
-                  value: {{ .Values.backups.dailies | default 7 }}
+                  value: {{ .Values.backups.dailies | default 7 | quote }}
                 - name: WEEKLY_BACKUPS
-                  value: {{ .Values.backups.weeklies | default 4 }}
+                  value: {{ .Values.backups.weeklies | default 4 | quote }}
                 - name: MONTHLY_BACKUPS
-                  value: {{ .Values.backups.monthlies | default 1 }}
+                  value: {{ .Values.backups.monthlies | default 1 | quote }}
                 - name: DATABASE_SERVICE_NAME
-                  value: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+                  value: {{ tpl .Values.id.database . }}
                 - name: DEFAULT_PORT
-                  value: {{ .Values.backups.port | default 5432 }}
+                  value: {{ .Values.backups.port | default 5432 | quote }}
                 - name: POSTGRES_DATABASE
                   valueFrom:
                     secretKeyRef:
-                      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+                      name: {{ tpl .Values.id.database . }}
                       key: "database-name"
                 - name: DATABASE_USER
                   valueFrom:
                     secretKeyRef:
-                      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+                      name: {{ tpl .Values.id.database . }}
                       key: "database-user"
                 - name: DATABASE_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.component }}"
+                      name: {{ tpl .Values.id.database . }}
                       key: "database-password"
           volumes:
             - name: backup
               persistentVolumeClaim:
-                claimName: "{{ .Values.repo }}-{{ .Values.zone }}-{{ .Values.backups.component }}"
+                claimName: {{ tpl .Values.id.backups . }}
           restartPolicy: "Never"
           terminationGracePeriodSeconds: 30
           activeDeadlineSeconds: 1600

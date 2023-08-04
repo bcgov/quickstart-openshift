@@ -17,6 +17,7 @@ zone: ~
 backups:
   component: database-backup
   dir: /backups/
+  image: bcgovimages/backup-container:latest
   job:
     retries: 0
     history: 5
@@ -24,6 +25,7 @@ backups:
       successful: 5
       failed: 2
   pvc-size: 256Mi
+  schedule: "05 8 * * *" # Run daily at 8:05 AM UTC
   strategy: rolling
 
 # Templated/calculated values
