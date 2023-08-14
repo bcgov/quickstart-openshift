@@ -148,7 +148,7 @@ jobs:
             sonar_projectKey: quickstart-openshift_frontend
             token: SONAR_TOKEN_FRONTEND
     steps:
-      - uses: bcgov-nr/action-test-and-analyse@v0.0.1
+      - uses: bcgov-nr/action-test-and-analyse@v1.0.0
         with:
           commands: |
             npm ci
