@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   tests-java:
-    name : Quarkus API Unit Tests
+    name: Quarkus API Unit Tests
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     defaults:
@@ -40,8 +40,8 @@ jobs:
           - 5432:5432
     strategy:
       matrix:
-        distribution: [ "temurin" ]
-        java-version: [ "17" ]
+        distribution: ["temurin"]
+        java-version: ["17"]
     steps:
       - uses: actions/checkout@v3
 
@@ -60,7 +60,7 @@ jobs:
         run: mvn -f pom.xml clean package
 
   tests-python:
-    name : Python API Unit Tests
+    name: Python API Unit Tests
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     defaults:
@@ -82,7 +82,7 @@ jobs:
           - 5432:5432
     strategy:
       matrix:
-        python-version: [ "3.11" ]
+        python-version: ["3.11"]
 
     steps:
       - uses: actions/checkout@v3
@@ -144,11 +144,13 @@ jobs:
           - dir: backend
             sonar_projectKey: quickstart-openshift_backend
             token: SONAR_TOKEN_BACKEND
+            triggers: ('backend/')
           - dir: frontend
             sonar_projectKey: quickstart-openshift_frontend
             token: SONAR_TOKEN_FRONTEND
+            triggers: ('frontend/')
     steps:
-      - uses: bcgov-nr/action-test-and-analyse@v0.0.1
+      - uses: bcgov-nr/action-test-and-analyse@v1.0.0
         with:
           commands: |
             npm ci
@@ -163,7 +165,8 @@ jobs:
             -Dsonar.sources=src
             -Dsonar.tests.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
-          sonar_project_token: ${{ secrets[matrix.token] }}
+          sonar_token: ${{ secrets[matrix.token] }}
+          triggers: ${{ matrix.triggers }}
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
