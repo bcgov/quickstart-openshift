@@ -21,7 +21,7 @@ jobs:
       pull-requests: write
     steps:
       - name: PR Greeting
-        uses: bcgov-nr/action-pr-description-add@v1
+        uses: bcgov-nr/action-pr-description-add@v1.0.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_markdown: |
