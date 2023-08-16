@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   pr-greeting:
-    if: '!github.event.pull_request.head.repo.fork'
+    if: "!github.event.pull_request.head.repo.fork"
     name: PR Greeting
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
@@ -21,7 +21,7 @@ jobs:
       pull-requests: write
     steps:
       - name: PR Greeting
-        uses: bcgov-nr/action-pr-description-add@v0.1.0-rc1
+        uses: bcgov-nr/action-pr-description-add@v1.0.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_markdown: |
@@ -38,13 +38,24 @@ jobs:
 
   builds:
     name: Builds
-    if: '!github.event.pull_request.head.repo.fork'
+    if: "!github.event.pull_request.head.repo.fork"
     runs-on: ubuntu-22.04
     permissions:
       packages: write
     strategy:
       matrix:
-        package: [backend, database, database-migrations, frontend, backend-py, database-migrations-py, backend-java, backend-go, database-migrations-go]
+        package:
+          [
+            backend,
+            database,
+            database-migrations,
+            frontend,
+            backend-py,
+            database-migrations-py,
+            backend-java,
+            backend-go,
+            database-migrations-go,
+          ]
         include:
           - package: backend
             triggers: ('backend/')
@@ -94,30 +105,36 @@ jobs:
           build_file: ${{ matrix.build_file }}
           build_context: ${{ matrix.build_context }}
 
-
   deploys:
     name: Deploys
-    if: '!github.event.pull_request.head.repo.fork'
+    if: "!github.event.pull_request.head.repo.fork"
     needs:
       - builds
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [backend, database, init, frontend, backend-py, backend-java, backend-go]
+        name:
+          [
+            backend,
+            database,
+            init,
+            frontend,
+            backend-py,
+            backend-java,
+            backend-go,
+          ]
         include:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
-            parameters:
-              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
             triggers: ('database/' 'backend/' 'frontend/')
             verification_path: /api
           - name: backend-py
             file: backend-python/openshift.deploy.yml
             overwrite: true
-            parameters:
-              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:${{ github.event.number }}
             triggers: ('backend-python/')
           - name: database
@@ -135,8 +152,7 @@ jobs:
           - name: backend-java
             file: backend-java/openshift.deploy.yml
             overwrite: true
-            parameters:
-              -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
             triggers: ('backend-java/')
           - name: backend-go
             file: backend-go/openshift.deploy.yml
