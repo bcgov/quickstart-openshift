@@ -1,4 +1,4 @@
-name: Unit Tests and Analysis
+name: Analysis
 
 on:
   pull_request:

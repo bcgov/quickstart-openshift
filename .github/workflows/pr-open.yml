@@ -1,9 +1,10 @@
 name: Pull Request
 
 on:
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+  # pull_request:
+  #   branches:
+  #     - main
 concurrency:
   # PR open and close use the same group, allowing only one at a time
   group: pr-${{ github.workflow }}-${{ github.event.number }}
