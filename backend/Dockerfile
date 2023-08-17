@@ -9,7 +9,7 @@ RUN npm ci --omit=dev --ignore-scripts && \
 
 
 # Deployment container
-FROM gcr.io/distroless/nodejs:20
+FROM gcr.io/distroless/nodejs20-debian11
 ENV NODE_ENV production
 
 # Copy over app
