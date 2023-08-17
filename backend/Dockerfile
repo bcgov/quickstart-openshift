@@ -1,4 +1,4 @@
-FROM node:18-bullseye-slim AS build
+FROM node:20-bullseye-slim AS build
 
 # Install packages, build and keep only prod packages
 WORKDIR /app
@@ -9,7 +9,7 @@ RUN npm ci --omit=dev --ignore-scripts && \
 
 
 # Deployment container
-FROM gcr.io/distroless/nodejs:18
+FROM gcr.io/distroless/nodejs20-debian11:nonroot
 ENV NODE_ENV production
 
 # Copy over app

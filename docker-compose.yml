@@ -89,7 +89,7 @@ services:
     environment:
       <<: *postgres-vars
       NODE_ENV: development
-    image: node:18-bullseye
+    image: node:20-bullseye
     ports: ["3001:3000"]
     volumes: ["./backend:/app", "/app/node_modules"]
     healthcheck:
@@ -163,7 +163,7 @@ services:
       NODE_ENV: development
       PORT: 3000
       BACKEND_URL: http://backend:3000
-    image: node:18-bullseye
+    image: node:20-bullseye
     ports: ["3000:3000"]
     volumes: ["./frontend:/app", "/app/node_modules"]
     healthcheck:
