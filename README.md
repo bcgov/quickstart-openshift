@@ -1,3 +1,41 @@
+# Table of Contents
+
+- [Project Status](#####-Project)
+   - [Frontend (JavaScript/TypeScript)](#####-Frontend-(JavaScript/TypeScript))
+   - [Backend (JavaScript/TypeScript)](#####-Backend-(JavaScript/TypeScript))
+- [QuickStart: Pipeline and Sample Application Stack](#-QuickStart:-Pipeline-and-Sample-Application-Stack)
+   - [OpenShift, TypeScript, Go, Java, Python, Postges, PostGIS](##-OpenShift,-TypeScript,-Go,-Java,-Python,-Postges,-PostGIS)
+- [Workflows](#-Workflows)
+   - [Pull Request Opened](##-Pull-Request-Opened)
+   - [Pull Request Closed](##-Pull-Request-Closed)
+   - [Merge to Main](##-Merge-to-Main)
+   - [Unit Tests](##-Unit-Tests)
+- [Starter Application](#-Starter-Application)
+- [Getting Started](#-Getting-Started)
+   - [Pre-requisties](##-Prerequisites)
+   - [GitHub Repository from Template](##-GitHub-Repository-from-Template)
+   - [GitHub Secrets, Variables and Environments](##-GitHub-Secrets,-Variables-and-Environments)
+        - [Repository Secrets and Variables](###-Repository-Secrets-and-Variables)
+        - [Dependency Pull Requests](###-Dependency-Pull-Requests)
+             - [Self-Hosted Renovate](####-Self-Hosted-Renovate)
+             - [Dependabot](####-Dependabot)
+        - [Environment](###-Environment)
+   - [Secret and Variable Values](##-Secret-and-Variable-Values)
+        - [Secrets](###-Secrets)
+        - [Variables](###-Variables)
+   - [Repository Configuration](##-Repository-Configuration)
+        - [Pull Request Handling](###-Pull-Request-Handling)
+        - [Packages](###-Packages)
+        - [Branch Protection](###-Branch-Protection)
+        - [Adding Team Members](###-Adding-Team-Members)
+- [Natural Resources Kickstarter](#-Natural-Resources-Kickstarter)
+   - [Unit Testing / Integration Testing for Node/Nest Backend](##-Unit-Testing-/-Integration-Testing-for-Node/Nest-Backend)
+   - [Database Documentation using SchemaSpy](##-Database-Documentation-using-SchemaSpy)
+- [Feedback](#-Feedback)
+- [Acknowledgements](#-Acknowledgements)
+             
+        
+
 <!-- Project Shields -->
 
 ##### Project
@@ -38,7 +76,8 @@
 
 ## OpenShift, TypeScript, Go, Java, Python, Postges, PostGIS
 
-The is a fully functional set of workflows and a starter application stack intended to help Agile DevOps teams hit the ground running on OpenShift.  Pipelines are run using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions).
+These workflows help Agile DevOps teams to contribute immediately to OpenShift. They proved functional as a starter application stack. We run technical pipelines using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions).
+
 
 Features:
 * Pull Request-based pipeline
