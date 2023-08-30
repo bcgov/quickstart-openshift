@@ -28,7 +28,7 @@ parameters:
     value: "150Mi"
   - name: CPU_REQUEST_INIT
     value: "125m"
-  - name: MEMORY_REQUEST
+  - name: MEMORY_REQUEST_INIT
     value: "100Mi"
   - name: CPU_LIMIT_INIT
     value: "250m"
