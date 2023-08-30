@@ -26,6 +26,14 @@ parameters:
     value: "75m"
   - name: MEMORY_LIMIT
     value: "150Mi"
+  - name: CPU_REQUEST_INIT
+    value: "125m"
+  - name: MEMORY_REQUEST
+    value: "100Mi"
+  - name: CPU_LIMIT_INIT
+    value: "250m"
+  - name: MEMORY_LIMIT_INIT
+    value: "250Mi"
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "3"
@@ -190,11 +198,11 @@ objects:
                   value: "go_api"
               resources:
                 requests:
-                  cpu: ${CPU_REQUEST}
-                  memory: ${MEMORY_REQUEST}
+                  cpu: ${CPU_REQUEST_INIT}
+                  memory: ${MEMORY_REQUEST_INIT}
                 limits:
-                  cpu: ${CPU_LIMIT}
-                  memory: ${MEMORY_LIMIT}
+                  cpu: ${CPU_LIMIT_INIT}
+                  memory: ${MEMORY_LIMIT_INIT}
   - apiVersion: v1
     kind: Service
     metadata:
