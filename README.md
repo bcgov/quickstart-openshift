@@ -1,8 +1,6 @@
 # Table of Contents
 
 - [Project Status](#####-Project)
-   - [Frontend (JavaScript/TypeScript)](#####-Frontend-(JavaScript/TypeScript))
-   - [Backend (JavaScript/TypeScript)](#####-Backend-(JavaScript/TypeScript))
 - [QuickStart: Pipeline and Sample Application Stack](#-QuickStart:-Pipeline-and-Sample-Application-Stack)
    - [OpenShift, TypeScript, Go, Java, Python, Postges, PostGIS](##-OpenShift,-TypeScript,-Go,-Java,-Python,-Postges,-PostGIS)
 - [Workflows](#-Workflows)
