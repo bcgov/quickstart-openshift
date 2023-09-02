@@ -8,7 +8,7 @@ RUN go mod download && \
 RUN go install github.com/swaggo/swag/cmd/swag@latest
 COPY . .
 RUN swag init && swag fmt
-RUN mkdir  -p /workspace/app/target/application
+RUN mkdir -p /workspace/app/target/application
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o /workspace/app/target/application ./...
 HEALTHCHECK --interval=3000s --timeout=30s CMD go version || exit 1
 

@@ -33,11 +33,11 @@ jobs:
           languages: go
 
       - name: Go Build
+        working-directory: backend-go
         run: |
-          cd backend-go
+          sed -i '/^toolchain .*$/d' go.mod
           go install github.com/swaggo/swag/cmd/swag@latest
-          mkdir -p /workspace/app/target/application
-          CGO_ENABLED=0 GOOS=linux go build -v -o /workspace/app/target/application ./...
+          CGO_ENABLED=0 GOOS=linux go build -v
 
   # go:
   #   name: Go
