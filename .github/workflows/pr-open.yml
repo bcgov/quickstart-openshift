@@ -94,7 +94,7 @@ jobs:
             build_file: ./backend-go/Dockerfile
             build_context: ./backend-go
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: bcgov-nr/action-builder-ghcr@v1.2.0
         with:
           package: ${{ matrix.package }}
