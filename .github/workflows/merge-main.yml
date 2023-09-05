@@ -20,7 +20,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Initialize
         uses: github/codeql-action/init@v2
@@ -118,7 +118,7 @@ jobs:
           - name: fastapi
             baseUrl: https://quickstart-openshift-test-backend-py.apps.silver.devops.gov.bc.ca
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout
       - name: Cache node modules
         id: cache-npm
@@ -154,7 +154,7 @@ jobs:
       matrix:
         browser: [chrome, firefox, edge]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout
       - name: Cache node modules
         id: cache-npm
@@ -296,7 +296,7 @@ jobs:
           - 5432:5432
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: joshuaavalon/flyway-action@v3.0.0
         name: generate schemaspy documentation for node/nest js backend
