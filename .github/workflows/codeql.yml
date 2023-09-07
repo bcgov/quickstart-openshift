@@ -39,11 +39,16 @@ jobs:
           go install github.com/swaggo/swag/cmd/swag@latest
           CGO_ENABLED=0 GOOS=linux go build -v
 
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:go"
+
   # go:
   #   name: Go
   #   runs-on: ubuntu-22.04
   #   steps:
-  #     - name: Checkout repository
+  #     - name: Checkout repositoryz
   #       uses: actions/checkout@v3
 
   # analyze:
