@@ -68,12 +68,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Java Build 1
-        working-directory: backend-java
-        run: |
-          ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
-
-      - name: Java Build 2
+      - name: Java Build
         working-directory: backend-java
         run: |
           ./mvnw package -Pnative -DskipTests
