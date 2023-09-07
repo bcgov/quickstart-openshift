@@ -1,15 +1,10 @@
 name: Analysis
 
 on:
-  # pull_request:
-  #   types:
-  #     - opened
-  #     - reopened
-  #     - synchronize
-  #     - ready_for_review
-  # push:
-  #   branches:
-  #     - main
+  pull_request:
+    types: ["opened", "reopened", "synchronize", "ready_for_review"]
+  push:
+    branches: ["${{ github.event.repository.default_branch }}"]
   workflow_dispatch:
 
 concurrency:
