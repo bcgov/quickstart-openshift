@@ -85,7 +85,7 @@ jobs:
       fail-fast: false
       matrix:
         language: ["java", "javascript", "python"]
-        with:
+        include:
           - language: "java"
             build: ./mvnw package -Pnative -DskipTests
           - language: "javascript"
