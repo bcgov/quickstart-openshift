@@ -7,10 +7,11 @@ on:
     types: ["opened", "reopened", "synchronize", "ready_for_review"]
   schedule:
     - cron: "0 12 * * 0" # 4 AM PST = 12 PM UDT, runs sundays
+  workflow_dispatch:
 
 jobs:
   CodeQL:
-    name: CodeQL Vulnerability Scan
+    name: CodeQL
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     strategy:
@@ -25,8 +26,7 @@ jobs:
               CGO_ENABLED=0 GOOS=linux go build -v
           - language: "java"
             working-directory: backend-java
-            build: |
-              ./mvnw package -Pnative -DskipTests
+            build: ./mvnw package -Pnative -DskipTests
           - language: "javascript"
           - language: "python"
     steps:
