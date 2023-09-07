@@ -4,7 +4,7 @@ on:
   pull_request:
     types: ["opened", "reopened", "synchronize", "ready_for_review"]
   push:
-    branches: ["${{ github.event.repository.default_branch }}"]
+    branches: ["main"]
   workflow_dispatch:
 
 concurrency:
