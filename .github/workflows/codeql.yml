@@ -87,7 +87,9 @@ jobs:
         language: ["java", "javascript", "python"]
         include:
           - language: "java"
-            build: ./mvnw package -Pnative -DskipTests
+            build: |
+              cd backend-java
+              ./mvnw package -Pnative -DskipTests
           - language: "javascript"
           - language: "python"
     steps:
