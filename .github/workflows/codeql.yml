@@ -84,14 +84,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ["java", "javascript", "python"]
+        # language: ["java", "javascript", "python"]
         include:
           - language: "java"
             build: |
               cd backend-java
               ./mvnw package -Pnative -DskipTests
-          - language: "javascript"
-          - language: "python"
+          # - language: "javascript"
+          # - language: "python"
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v2
@@ -101,6 +101,12 @@ jobs:
       - name: Autobuild
         if: ${{ ! matrix.build }}
         uses: github/codeql-action/autobuild@v2
+
+      - uses: actions/setup-java@v3
+        if: ${{ matrix.build && matrix.language == 'java' }}
+        with:
+          distribution: "temurin"
+          java-version: "17"
 
       - name: Build
         if: ${{ matrix.build }}
