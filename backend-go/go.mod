@@ -1,8 +1,8 @@
 module github.com/bcgov/quickstart-openshift/backend-go
 
-go 1.21
+toolchain go1.21.0
 
-
+toolchain g
 require (
 	github.com/devfeel/mapper v0.7.13
 	github.com/gofiber/fiber/v2 v2.49.0
