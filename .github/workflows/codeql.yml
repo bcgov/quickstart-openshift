@@ -21,29 +21,68 @@ on:
     - cron: "0 12 * * 0" # 4 AM PST = 12 PM UDT, runs sundays
 
 jobs:
+  # go:
+  #   name: Go
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Initialize CodeQL
+  #       uses: github/codeql-action/init@v2
+  #       with:
+  #         languages: go
+
+  #     - name: Go Build
+  #       working-directory: backend-go
+  #       run: |
+  #         sed -i '/^toolchain .*$/d' go.mod
+  #         go install github.com/swaggo/swag/cmd/swag@latest
+  #         CGO_ENABLED=0 GOOS=linux go build -v
+
+  #     - name: Perform CodeQL Analysis
+  #       uses: github/codeql-action/analyze@v2
+  #       with:
+  #         category: "/language:go"
+
   java:
-    name: Go
+    name: Java
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
-          languages: go
+          languages: java
 
-      - name: Go Build
-        working-directory: backend-go
+      - uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Java Build 1
+        working-directory: backend-java
         run: |
-          sed -i '/^toolchain .*$/d' go.mod
-          go install github.com/swaggo/swag/cmd/swag@latest
-          CGO_ENABLED=0 GOOS=linux go build -v
+          ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
+
+      - name: Java Build 2
+        working-directory: backend-java
+        run: |
+          ./mvnw package -Pnative -DskipTests
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
         with:
-          category: "/language:go"
-
+          working-directory: backend-java
+          category: "/language:java"
   # go:
   #   name: Go
   #   runs-on: ubuntu-22.04
