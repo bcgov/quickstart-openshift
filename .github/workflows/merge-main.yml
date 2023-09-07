@@ -2,9 +2,8 @@ name: Merge to Main
 
 on:
   workflow_run:
-    workflows: ["Pull Request Closed"]
-    types:
-      - completed
+    workflows: ["PR Closed"]
+    types: ["completed"]
   workflow_dispatch:
 
 concurrency:
