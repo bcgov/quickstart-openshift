@@ -26,7 +26,7 @@ RUN apt update && \
 
 # Dependencies, config and app
 COPY --from=build /app/.venv /app/.venv
-COPY logger.conf .
+COPY logger.conf ./
 COPY ./src ./src
 
 # Start with non-privileged user
