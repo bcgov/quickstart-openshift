@@ -1,34 +1,40 @@
-FROM python:slim-bullseye
+### Build
+#
+FROM python:bullseye AS build
+
+# https://python-poetry.org/docs/configuration/#using-environment-variables
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1
+
+# # Pip cache dir off to save space, disable upgrade messages, 
+ENV PIP_NO_CACHE_DIR=off \
+    PIP_DISABLE_PIP_VERSION_CHECK=on
+
+# Install poetry, then dependencies
+WORKDIR /app
+COPY pyproject.toml poetry.lock .
+RUN pip install poetry==1.2.2 && \
+    poetry install --no-root -vvv --without dev --sync
+
+### Deploy
+#
+FROM python:slim-bullseye AS deploy
 ENV PORT=3000
 
 # Output to stdout/stderr, don't create .pyc files, etc.
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    VENV_PATH="/application/.venv"
-
-# Pip cache dir off to save space, disable upgrade messages, 
-ENV PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on
-
-# https://python-poetry.org/docs/configuration/#using-environment-variables
-ENV POETRY_VERSION=1.2.2 \
-    POETRY_HOME="/opt/poetry" \
-    POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    POETRY_VIRTUALENVS_CREATE=1
-
-# Path
-ENV PATH="${POETRY_HOME}/bin:${VENV_PATH}/bin:$PATH"
-
-# Packages
-RUN apt update && \
-    apt install -y --no-install-recommends curl build-essential libpq-dev python-dev && \
-    pip install poetry==1.2.2
+    VENV=/app/.venv \
+    PATH="/app/.venv/bin:$PATH"
 
 # Dependencies and app
-WORKDIR /application
-COPY . .
-RUN poetry install --no-root -vvv --without dev --sync
+COPY --from=build ${VENV} ${VENV}
+COPY logger.conf .
+COPY ./src ./src
+
+RUN apt update && \
+    apt install -y --no-install-recommends curl libpq-dev
 
 # Non-privileged user, port and health check
 USER 1001
