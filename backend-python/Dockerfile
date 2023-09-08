@@ -13,8 +13,9 @@ ENV PIP_NO_CACHE_DIR=off \
 # https://python-poetry.org/docs/configuration/#using-environment-variables
 ENV POETRY_VERSION=1.2.2 \
     POETRY_HOME="/opt/poetry" \
-    POETRY_VIRTUALENVS_IN_PROJECT=true \
-    POETRY_NO_INTERACTION=1
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1
 
 # Path
 ENV PATH="${POETRY_HOME}/bin:${VENV_PATH}/bin:$PATH"
@@ -22,7 +23,7 @@ ENV PATH="${POETRY_HOME}/bin:${VENV_PATH}/bin:$PATH"
 # Packages
 RUN apt update && \
     apt install -y --no-install-recommends curl build-essential libpq-dev python-dev && \
-    curl -sSL https://install.python-poetry.org | python3 -
+    pip install poetry==1.2.2
 
 # Dependencies and app
 WORKDIR /application
