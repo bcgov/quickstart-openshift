@@ -1,51 +1,38 @@
-FROM python:bullseye
+FROM python:slim-bullseye
+ENV PORT=3000
 
-    # python
+# Output to stdout/stderr, don't create .pyc files, etc.
 ENV PYTHONUNBUFFERED=1 \
-    # prevents python creating .pyc files
     PYTHONDONTWRITEBYTECODE=1 \
-    \
-    # pip
-    PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=100 \
-    \
-    # poetry
-    # https://python-poetry.org/docs/configuration/#using-environment-variables
-    POETRY_VERSION=1.2.2 \
-    # make poetry install to this location
-    POETRY_HOME="/opt/poetry" \
-    # make poetry create the virtual environment in the project's root
-    # it gets named `.venv`
-    POETRY_VIRTUALENVS_IN_PROJECT=true \
-    # do not ask any interactive question
-    POETRY_NO_INTERACTION=1 \
-    \
-    # paths
-    # this is where our requirements + virtual environment will live
-    PYSETUP_PATH="/application" \
     VENV_PATH="/application/.venv"
 
+# Pip cache dir off to save space, disable upgrade messages, 
+ENV PIP_NO_CACHE_DIR=off \
+    PIP_DISABLE_PIP_VERSION_CHECK=on
 
-# prepend poetry and venv to path
-ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
+# https://python-poetry.org/docs/configuration/#using-environment-variables
+ENV POETRY_VERSION=1.2.2 \
+    POETRY_HOME="/opt/poetry" \
+    POETRY_VIRTUALENVS_IN_PROJECT=true \
+    POETRY_NO_INTERACTION=1
 
-# Install external packages
-RUN apt update && curl -sSL https://install.python-poetry.org | python3 -
+# Path
+ENV PATH="${POETRY_HOME}/bin:${VENV_PATH}/bin:$PATH"
 
-# Install python dependencies
+# Packages
+RUN apt update && \
+    apt install -y --no-install-recommends curl build-essential libpq-dev python-dev && \
+    curl -sSL https://install.python-poetry.org | python3 -
+
+# Dependencies and app
 WORKDIR /application
-COPY poetry.lock pyproject.toml /application/
+COPY . .
 RUN poetry install --no-root -vvv --without dev --sync
 
-# Copy python code
-COPY . /application/app
-COPY start-openshift.sh /application
-RUN chmod +x start-openshift.sh
-# Port and health check
-EXPOSE 3000
-HEALTHCHECK --interval=300s --timeout=10s CMD curl -f http://localhost/:3000
+# Non-privileged user, port and health check
+USER 1001
+EXPOSE ${PORT}
+HEALTHCHECK --interval=300s --timeout=10s CMD curl -f http://localhost:${PORT}
 
-# Non-privileged user
-USER app
-CMD ["./start-openshift.sh"]
+# Start
+CMD uvicorn src.main:app --host 0.0.0.0 --port ${PORT} --workers 1 --server-header --date-header --limit-concurrency 1000 --log-config ./logger.conf
