@@ -1,12 +1,12 @@
 name: Tests
 
 on:
-  pull_request:
-    types: ["opened", "reopened", "synchronize", "ready_for_review"]
-  push:
-    branches: ["main"]
-  schedule:
-    - cron: "0 11 * * 0" # 3 AM PST = 11 PM UDT, runs sundays
+  # pull_request:
+  #   types: ["opened", "reopened", "synchronize", "ready_for_review"]
+  # push:
+  #   branches: ["main"]
+  # schedule:
+  #   - cron: "0 11 * * 0" # 3 AM PST = 11 PM UDT, runs sundays
   workflow_dispatch:
 
 concurrency:

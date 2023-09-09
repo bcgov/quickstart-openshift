@@ -11,31 +11,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pr-greeting:
-    if: "!github.event.pull_request.head.repo.fork"
-    name: PR Greeting
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
-    runs-on: ubuntu-22.04
-    permissions:
-      pull-requests: write
-    steps:
-      - name: PR Greeting
-        uses: bcgov-nr/action-pr-description-add@v1.0.1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          add_markdown: |
-            ---
+  # pr-greeting:
+  #   if: "!github.event.pull_request.head.repo.fork"
+  #   name: PR Greeting
+  #   env:
+  #     DOMAIN: apps.silver.devops.gov.bc.ca
+  #     PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     pull-requests: write
+  #   steps:
+  #     - name: PR Greeting
+  #       uses: bcgov-nr/action-pr-description-add@v1.0.1
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         add_markdown: |
+  #           ---
 
-            Thanks for the PR!
+  #           Thanks for the PR!
 
-            Any successful deployments (not always required) will be available below.
-            [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/) available
-            [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/) available
+  #           Any successful deployments (not always required) will be available below.
+  #           [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/) available
+  #           [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/) available
 
-            Once merged, code will be promoted and handed off to following workflow run.
-            [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+  #           Once merged, code will be promoted and handed off to following workflow run.
+  #           [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
   builds:
     name: Builds
@@ -106,73 +106,83 @@ jobs:
           build_file: ${{ matrix.build_file }}
           build_context: ${{ matrix.build_context }}
 
-  deploys:
-    name: Deploys
-    if: "!github.event.pull_request.head.repo.fork"
-    needs:
-      - builds
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        name:
-          [
-            backend,
-            database,
-            init,
-            frontend,
-            backend-py,
-            backend-java,
-            backend-go,
-          ]
-        include:
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
-            triggers: ('database/' 'backend/' 'frontend/')
-            verification_path: /api
-          - name: backend-py
-            file: backend-python/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:${{ github.event.number }}
-            triggers: ('backend-python/')
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-            triggers: ('database/' 'backend/' 'backend-go' 'backend-java' 'backend-python' 'frontend/')
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-            triggers: ('database/' 'backend/' 'frontend/')
-          - name: init
-            file: common/openshift.init.yml
-            overwrite: false
-          - name: backend-java
-            file: backend-java/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-            triggers: ('backend-java/')
-          - name: backend-go
-            file: backend-go/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:${{ github.event.number }}
-            triggers: ('backend-go/')
+  cleanup:
+    name: cleanup
+    runs-on: ubuntu-latest
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.3.0
+      - uses: actions/delete-package-versions@v4
         with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          penetration_test: false
-          parameters:
-            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
-            ${{ matrix.parameters }}
-          triggers: ${{ matrix.triggers }}
-          verification_path: ${{ matrix.verification_path }}
+          package-name: frontend
+          package-type: "container"
+          min-versions-to-keep: 3
+
+  # deploys:
+  #   name: Deploys
+  #   if: "!github.event.pull_request.head.repo.fork"
+  #   needs:
+  #     - builds
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       name:
+  #         [
+  #           backend,
+  #           database,
+  #           init,
+  #           frontend,
+  #           backend-py,
+  #           backend-java,
+  #           backend-go,
+  #         ]
+  #       include:
+  #         - name: backend
+  #           file: backend/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #             -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
+  #           triggers: ('database/' 'backend/' 'frontend/')
+  #           verification_path: /api
+  #         - name: backend-py
+  #           file: backend-python/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #             -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:${{ github.event.number }}
+  #           triggers: ('backend-python/')
+  #         - name: database
+  #           file: database/openshift.deploy.yml
+  #           overwrite: false
+  #           triggers: ('database/' 'backend/' 'backend-go' 'backend-java' 'backend-python' 'frontend/')
+  #         - name: frontend
+  #           file: frontend/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #           triggers: ('database/' 'backend/' 'frontend/')
+  #         - name: init
+  #           file: common/openshift.init.yml
+  #           overwrite: false
+  #         - name: backend-java
+  #           file: backend-java/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #           triggers: ('backend-java/')
+  #         - name: backend-go
+  #           file: backend-go/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
+  #             -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:${{ github.event.number }}
+  #           triggers: ('backend-go/')
+  #   steps:
+  #     - uses: bcgov-nr/action-deployer-openshift@v1.3.0
+  #       with:
+  #         file: ${{ matrix.file }}
+  #         oc_namespace: ${{ vars.OC_NAMESPACE }}
+  #         oc_server: ${{ vars.OC_SERVER }}
+  #         oc_token: ${{ secrets.OC_TOKEN }}
+  #         overwrite: ${{ matrix.overwrite }}
+  #         penetration_test: false
+  #         parameters:
+  #           -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+  #           -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
+  #           ${{ matrix.parameters }}
+  #         triggers: ${{ matrix.triggers }}
+  #         verification_path: ${{ matrix.verification_path }}
