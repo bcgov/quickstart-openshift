@@ -159,6 +159,40 @@ jobs:
           path: ./cypress/screenshots
           if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
 
+  ghcr-cleanup:
+    name: GHCR Cleanup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        name:
+          [
+            frontend,
+            backend,
+            backend-go,
+            backend-py,
+            backend-java,
+            database,
+            database-migrations,
+            database-migrations-go,
+            database-migrations-py,
+          ]
+    steps:
+      - name: Delete all untagged
+        uses: actions/delete-package-versions@v4
+        with:
+          package-name: "${{ github.event.repository.name }}/${{ matrix.name }}"
+          package-type: "container"
+          min-versions-to-keep: 0
+          delete-only-untagged-versions: "true"
+
+      - name: Keep last 10
+        uses: actions/delete-package-versions@v4
+        with:
+          package-name: "${{ github.event.repository.name }}/${{ matrix.name }}"
+          package-type: "container"
+          min-versions-to-keep: 10
+          ignore-verions: "^(prod|test)$"
+
   deploys-prod:
     name: PROD Deployments
     needs:
