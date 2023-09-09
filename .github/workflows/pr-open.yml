@@ -107,11 +107,21 @@ jobs:
   #         build_context: ${{ matrix.build_context }}
 
   ghcr-cleanup:
-    name: cleanup
+    name: GHCR Cleanup
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        name: [database, backend, frontend]
+        name: [
+            frontend,
+            backend,
+            backend-go,
+            backend-py,
+            backend-java
+            database,
+            database-migrations,
+            database-migrations-go,
+            database-migrations-py,
+          ]
     steps:
       - name: Delete all untagged
         uses: actions/delete-package-versions@v4
@@ -121,7 +131,8 @@ jobs:
           min-versions-to-keep: 0
           delete-only-untagged-versions: "true"
 
-      - uses: actions/delete-package-versions@v4
+      - name: Keep last 10
+        uses: actions/delete-package-versions@v4
         with:
           package-name: "${{ github.event.repository.name }}/${{ matrix.name }}"
           package-type: "container"
