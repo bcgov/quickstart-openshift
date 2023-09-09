@@ -1,12 +1,12 @@
 name: Analysis
 
 on:
-  #   push:
-  #     branches: ["main"]
-  #   pull_request:
-  #     types: ["opened", "reopened", "synchronize", "ready_for_review"]
-  #   schedule:
-  #     - cron: "0 12 * * 0" # 4 AM PST = 12 PM UDT, runs sundays
+  push:
+    branches: ["main"]
+  pull_request:
+    types: ["opened", "reopened", "synchronize", "ready_for_review"]
+  schedule:
+    - cron: "0 12 * * 0" # 4 AM PST = 12 PM UDT, runs sundays
   workflow_dispatch:
 
 jobs:
