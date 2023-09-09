@@ -111,19 +111,19 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        name: [frontend, backend]
+        name: [database, backend, frontend]
     steps:
       - name: Delete all untagged
         uses: actions/delete-package-versions@v4
         with:
-          package-name: "${{ github.event.repository.name }}/${{matrix.name }}"
+          package-name: "${{ github.event.repository.name }}/${{ matrix.name }}"
           package-type: "container"
           min-versions-to-keep: 0
           delete-only-untagged-versions: "true"
 
       - uses: actions/delete-package-versions@v4
         with:
-          package-name: "${{ github.event.repository.name }}/${{matrix.name }}"
+          package-name: "${{ github.event.repository.name }}/${{ matrix.name }}"
           package-type: "container"
           min-versions-to-keep: 10
           ignore-verions: "^(prod|test)$"
