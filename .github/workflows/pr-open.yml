@@ -111,12 +111,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        name: [
+        name:
+          [
             frontend,
             backend,
             backend-go,
             backend-py,
-            backend-java
+            backend-java,
             database,
             database-migrations,
             database-migrations-go,
