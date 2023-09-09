@@ -37,74 +37,74 @@ jobs:
   #           Once merged, code will be promoted and handed off to following workflow run.
   #           [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
-  builds:
-    name: Builds
-    if: "!github.event.pull_request.head.repo.fork"
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        package:
-          [
-            backend,
-            database,
-            database-migrations,
-            frontend,
-            backend-py,
-            database-migrations-py,
-            backend-java,
-            backend-go,
-            database-migrations-go,
-          ]
-        include:
-          - package: backend
-            triggers: ('backend/')
-            build_file: ./backend/Dockerfile
-            build_context: ./backend
-          - package: database
-            triggers: ('database/')
-            build_file: ./database/Dockerfile
-            build_context: ./database
-          - package: frontend
-            triggers: ('frontend/')
-            build_file: ./frontend/Dockerfile
-            build_context: ./frontend
-          - package: database-migrations
-            triggers: ('backend/db')
-            build_file: ./backend/db/Dockerfile
-            build_context: ./backend/db
-          - package: database-migrations-py
-            triggers: ('backend-python/db')
-            build_file: ./backend-python/db/Dockerfile
-            build_context: ./backend-python/db
-          - package: backend-py
-            triggers: ('backend-python/')
-            build_file: ./backend-python/Dockerfile
-            build_context: ./backend-python
-          - package: backend-java
-            triggers: ('backend-java/')
-            build_file: ./backend-java/Dockerfile
-            build_context: ./backend-java
-          - package: database-migrations-go
-            triggers: ('backend-go/db')
-            build_file: ./backend-go/db/Dockerfile
-            build_context: ./backend-go/db
-          - package: backend-go
-            triggers: ('backend-go/')
-            build_file: ./backend-go/Dockerfile
-            build_context: ./backend-go
-    steps:
-      - uses: actions/checkout@v4
-      - uses: bcgov-nr/action-builder-ghcr@v1.2.0
-        with:
-          package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
-          tag_fallback: test
-          token: ${{ secrets.GITHUB_TOKEN }}
-          triggers: ${{ matrix.triggers }}
-          build_file: ${{ matrix.build_file }}
-          build_context: ${{ matrix.build_context }}
+  # builds:
+  #   name: Builds
+  #   if: "!github.event.pull_request.head.repo.fork"
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     packages: write
+  #   strategy:
+  #     matrix:
+  #       package:
+  #         [
+  #           backend,
+  #           database,
+  #           database-migrations,
+  #           frontend,
+  #           backend-py,
+  #           database-migrations-py,
+  #           backend-java,
+  #           backend-go,
+  #           database-migrations-go,
+  #         ]
+  #       include:
+  #         - package: backend
+  #           triggers: ('backend/')
+  #           build_file: ./backend/Dockerfile
+  #           build_context: ./backend
+  #         - package: database
+  #           triggers: ('database/')
+  #           build_file: ./database/Dockerfile
+  #           build_context: ./database
+  #         - package: frontend
+  #           triggers: ('frontend/')
+  #           build_file: ./frontend/Dockerfile
+  #           build_context: ./frontend
+  #         - package: database-migrations
+  #           triggers: ('backend/db')
+  #           build_file: ./backend/db/Dockerfile
+  #           build_context: ./backend/db
+  #         - package: database-migrations-py
+  #           triggers: ('backend-python/db')
+  #           build_file: ./backend-python/db/Dockerfile
+  #           build_context: ./backend-python/db
+  #         - package: backend-py
+  #           triggers: ('backend-python/')
+  #           build_file: ./backend-python/Dockerfile
+  #           build_context: ./backend-python
+  #         - package: backend-java
+  #           triggers: ('backend-java/')
+  #           build_file: ./backend-java/Dockerfile
+  #           build_context: ./backend-java
+  #         - package: database-migrations-go
+  #           triggers: ('backend-go/db')
+  #           build_file: ./backend-go/db/Dockerfile
+  #           build_context: ./backend-go/db
+  #         - package: backend-go
+  #           triggers: ('backend-go/')
+  #           build_file: ./backend-go/Dockerfile
+  #           build_context: ./backend-go
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: bcgov-nr/action-builder-ghcr@v1.2.0
+  #       with:
+  #         package: ${{ matrix.package }}
+  #         tag: ${{ github.event.number }}
+  #         tag_fallback: test
+  #         token: ${{ secrets.GITHUB_TOKEN }}
+  #         triggers: ${{ matrix.triggers }}
+  #         build_file: ${{ matrix.build_file }}
+  #         build_context: ${{ matrix.build_context }}
 
   cleanup:
     name: cleanup
@@ -112,7 +112,7 @@ jobs:
     steps:
       - uses: actions/delete-package-versions@v4
         with:
-          package-name: frontend
+          package-name: "quickstart-openshift/frontend"
           package-type: "container"
           min-versions-to-keep: 3
 
