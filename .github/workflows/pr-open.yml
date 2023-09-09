@@ -114,7 +114,9 @@ jobs:
         with:
           package-name: "quickstart-openshift/frontend"
           package-type: "container"
-          min-versions-to-keep: 3
+          min-versions-to-keep: 0
+          delete-only-untagged-versions: "true"
+          # ignore-verions: "^(prod|test)$"
 
   # deploys:
   #   name: Deploys
