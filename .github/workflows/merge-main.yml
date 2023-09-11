@@ -2,8 +2,8 @@ name: Merge to Main
 
 on:
   workflow_run:
-    workflows: ["PR Closed"]
-    types: ["completed"]
+    workflows: [PR Closed]
+    types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -18,15 +18,13 @@ jobs:
     strategy:
       matrix:
         name:
-          [
-            backend,
-            database,
-            frontend,
-            init,
-            backend-java,
-            backend-py,
-            backend-go,
-          ]
+          - backend
+          - database
+          - frontend
+          - init
+          - backend-java
+          - backend-py
+          - backend-go
         include:
           - name: backend
             file: backend/openshift.deploy.yml
@@ -72,8 +70,7 @@ jobs:
           verification_path: ${{ matrix.verification_path }}
 
   integration-tests:
-    needs:
-      - deploys-test
+    needs: [deploys-test]
     name: Integration Tests for APIs
     defaults:
       run:
@@ -118,8 +115,7 @@ jobs:
 
   cypress-e2e:
     name: Cypress end to end test
-    needs:
-      - deploys-test
+    needs: [deploys-test]
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -165,17 +161,15 @@ jobs:
     strategy:
       matrix:
         name:
-          [
-            frontend,
-            backend,
-            backend-go,
-            backend-py,
-            backend-java,
-            database,
-            database-migrations,
-            database-migrations-go,
-            database-migrations-py,
-          ]
+          - frontend
+          - backend
+          - backend-go
+          - backend-py
+          - backend-java
+          - database
+          - database-migrations
+          - database-migrations-go
+          - database-migrations-py
     steps:
       - name: Delete all untagged
         uses: actions/delete-package-versions@v4
@@ -195,23 +189,19 @@ jobs:
 
   deploys-prod:
     name: PROD Deployments
-    needs:
-      - integration-tests
-      - cypress-e2e
+    needs: [integration-tests, cypress-e2e]
     environment: prod
     runs-on: ubuntu-22.04
     strategy:
       matrix:
         name:
-          [
-            backend,
-            database,
-            frontend,
-            init,
-            backend-py,
-            backend-java,
-            backend-go,
-          ]
+          - backend
+          - database
+          - frontend
+          - init
+          - backend-py
+          - backend-java
+          - backend-go
         include:
           - name: backend
             file: backend/openshift.deploy.yml
@@ -258,25 +248,20 @@ jobs:
 
   image-promotions:
     name: Promote images to PROD
-    needs:
-      - deploys-prod
+    needs: [deploys-prod]
     runs-on: ubuntu-22.04
     permissions:
       packages: write
     strategy:
       matrix:
         component:
-          [
-            backend,
-            database,
-            database-migrations,
-            frontend,
-            database-migrations-py,
-            backend-py,
-            backend-java,
-            backend-go,
-            database-migrations-go,
-          ]
+          - backend
+          - database
+          - frontend
+          - init
+          - backend-py
+          - backend-java
+          - backend-go
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
         with:
@@ -305,9 +290,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: joshuaavalon/flyway-action@v3.0.0
-        name: generate schemaspy documentation for node/nest js backend
+        name: Generate SchemaSpy docs for node backend
         with:
           url: jdbc:postgresql://postgres:5432/default
           user: default

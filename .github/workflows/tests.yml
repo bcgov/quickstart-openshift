@@ -2,9 +2,9 @@ name: Tests
 
 on:
   pull_request:
-    types: ["opened", "reopened", "synchronize", "ready_for_review"]
+    types: [opened, reopened, synchronize, ready_for_review]
   push:
-    branches: ["main"]
+    branches: [main]
   schedule:
     - cron: "0 11 * * 0" # 3 AM PST = 11 PM UDT, runs sundays
   workflow_dispatch:
@@ -75,8 +75,7 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
@@ -93,8 +92,7 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
 
-      - name: cache deps
-        id: cache-deps
+      - id: cache-deps
         uses: actions/cache@v3
         with:
           path: .venv
@@ -103,9 +101,7 @@ jobs:
       - run: poetry install --no-interaction --no-root
         if: steps.cache-deps.outputs.cache-hit != 'true'
 
-      - name: Test with pytest
-        run: |
-          poetry run pytest
+      - run: poetry run pytest
 
   javascript:
     name: JavaScript
