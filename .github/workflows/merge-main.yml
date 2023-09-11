@@ -43,7 +43,7 @@ jobs:
             file: common/openshift.init.yml
             overwrite: false
           - name: backend-py
-            file: backend-python/openshift.deploy.yml
+            file: backend-py/openshift.deploy.yml
             overwrite: true
             parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
@@ -228,7 +228,7 @@ jobs:
             file: common/openshift.init.yml
             overwrite: false
           - name: backend-py
-            file: backend-python/openshift.deploy.yml
+            file: backend-py/openshift.deploy.yml
             overwrite: true
             parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
