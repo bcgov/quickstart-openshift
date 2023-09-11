@@ -191,7 +191,7 @@ jobs:
           package-name: "${{ github.event.repository.name }}/${{ matrix.name }}"
           package-type: "container"
           min-versions-to-keep: 10
-          ignore-verions: "^(prod|test)$"
+          ignore-versions: "^(prod|test)$"
 
   deploys-prod:
     name: PROD Deployments
