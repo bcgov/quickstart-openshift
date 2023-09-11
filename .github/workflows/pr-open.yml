@@ -30,7 +30,7 @@ jobs:
 
             Thanks for the PR!
 
-            Any successful deployments (as required) will be available below:
+            Deployments, as required, will be available below:
             - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }})
             - [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }})
             - [Backend-java](https://${{ env.PREFIX }}-backend-java.${{ env.DOMAIN }})
@@ -41,7 +41,7 @@ jobs:
             - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
             - [Tests Workflow](https://github.com/${{ github.repository }}/actions/workflows/tests.yml)
 
-            After merge, new images will be promoted to:
+            After merge, new images are promoted to:
             - [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
   builds:
