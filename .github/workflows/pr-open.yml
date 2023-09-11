@@ -37,6 +37,8 @@ jobs:
             [Backend-py](https://${{ env.PREFIX }}-backend-py.${{ env.DOMAIN }}/) available
             [Backend-go](https://${{ env.PREFIX }}-backend-go.${{ env.DOMAIN }}/) available
 
+            Please mark PRs as draft initially.  Once marked ready additional workflows will run.
+
             Once merged, code will be promoted and handed off to following workflow run.
             [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
