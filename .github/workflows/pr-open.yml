@@ -31,11 +31,11 @@ jobs:
             Thanks for the PR!
 
             Any successful deployments (deployed as required) will be available below.
-            [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/)
-            [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/)
-            [Backend-java](https://${{ env.PREFIX }}-backend-java.${{ env.DOMAIN }}/)
-            [Backend-py](https://${{ env.PREFIX }}-backend-py.${{ env.DOMAIN }}/)
-            [Backend-go](https://${{ env.PREFIX }}-backend-go.${{ env.DOMAIN }}/)
+            - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/)
+            - [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/)
+            - [Backend-java](https://${{ env.PREFIX }}-backend-java.${{ env.DOMAIN }}/)
+            - [Backend-py](https://${{ env.PREFIX }}-backend-py.${{ env.DOMAIN }}/)
+            - [Backend-go](https://${{ env.PREFIX }}-backend-go.${{ env.DOMAIN }}/)
 
             Please mark PRs as draft initially.  Once marked ready additional workflows will run.
 
