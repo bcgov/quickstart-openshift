@@ -30,9 +30,12 @@ jobs:
 
             Thanks for the PR!
 
-            Any successful deployments (not always required) will be available below.
-            [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/) available
+            Any successful deployments (deployed as required) will be available below.
             [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/) available
+            [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/) available
+            [Backend-java](https://${{ env.PREFIX }}-backend-java.${{ env.DOMAIN }}/) available
+            [Backend-py](https://${{ env.PREFIX }}-backend-py.${{ env.DOMAIN }}/) available
+            [Backend-go](https://${{ env.PREFIX }}-backend-go.${{ env.DOMAIN }}/) available
 
             Once merged, code will be promoted and handed off to following workflow run.
             [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
