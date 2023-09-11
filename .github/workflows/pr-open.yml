@@ -30,17 +30,19 @@ jobs:
 
             Thanks for the PR!
 
-            Any successful deployments (deployed as required) will be available below.
-            - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/)
-            - [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/)
-            - [Backend-java](https://${{ env.PREFIX }}-backend-java.${{ env.DOMAIN }}/)
-            - [Backend-py](https://${{ env.PREFIX }}-backend-py.${{ env.DOMAIN }}/)
-            - [Backend-go](https://${{ env.PREFIX }}-backend-go.${{ env.DOMAIN }}/)
+            Any successful deployments (as required) will be available below:
+            - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }})
+            - [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }})
+            - [Backend-java](https://${{ env.PREFIX }}-backend-java.${{ env.DOMAIN }})
+            - [Backend-py](https://${{ env.PREFIX }}-backend-py.${{ env.DOMAIN }})
+            - [Backend-go](https://${{ env.PREFIX }}-backend-go.${{ env.DOMAIN }})
 
-            Please mark PRs as draft initially.  Once marked ready additional workflows will run.
+            Please mark PRs as draft initially.  Once changed to ready additional workflows will run:
+            - [Analysis](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
+            - [Tests](https://github.com/${{ github.repository }}/actions/workflows/tests.yml)
 
-            Once merged, code will be promoted and handed off to following workflow run.
-            [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+            Once merged, code will be promoted and handed off to following workflow:
+            - [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
   builds:
     name: Builds
