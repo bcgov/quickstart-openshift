@@ -71,21 +71,21 @@ jobs:
           - package: frontend
             triggers: ('frontend/')
           - package: database-migrations
-            build_file: ./backend/db/Dockerfile
             build_context: ./backend/db
+            build_file: ./backend/db/Dockerfile
             triggers: ('backend/db')
           - package: database-migrations-py
             triggers: ('backend-py/db')
-            build_file: ./backend-py/db/Dockerfile
             build_context: ./backend-py/db
+            build_file: ./backend-py/db/Dockerfile
           - package: backend-py
             triggers: ('backend-py/')
           - package: backend-java
             triggers: ('backend-java/')
           - package: database-migrations-go
             triggers: ('backend-go/db')
-            build_file: ./backend-go/db/Dockerfile
             build_context: ./backend-go/db
+            build_file: ./backend-go/db/Dockerfile
           - package: backend-go
             triggers: ('backend-go/')
     steps:
@@ -98,6 +98,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ${{ matrix.triggers }}
           build_context: ${{ matrix.build_context }}
+          build_file: ${{ matrix.build_file }}
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:

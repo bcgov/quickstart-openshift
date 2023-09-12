@@ -70,10 +70,10 @@ services:
       database:
         condition: service_healthy
 
-  migrations-python:
+  migrations-py:
     profiles: ["python", "all"]
     image: flyway/flyway:9-alpine
-    container_name: migrations-python
+    container_name: migrations-py
     command: info migrate info
     volumes: ["./backend-py/db/migrations:/flyway/sql:ro"]
     environment:
@@ -126,7 +126,7 @@ services:
       - "./backend-py/src/v1/models:/app/models"
       - "./backend-py/generate-models.sh:/app/generate-models.sh"
     depends_on:
-      migrations-python:
+      migrations-py:
         condition: service_completed_successfully
 
   backend-py:
