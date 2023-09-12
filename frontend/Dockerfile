@@ -3,7 +3,7 @@ FROM node:20.6.1-bullseye-slim AS build
 
 # Install packages, build and keep only prod packages
 WORKDIR /app
-COPY *.json ./
+COPY *.json *.ts index.html ./
 COPY ./src ./src
 RUN npm ci --omit=dev --ignore-scripts && \
     npm run build
