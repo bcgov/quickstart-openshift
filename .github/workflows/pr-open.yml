@@ -71,17 +71,21 @@ jobs:
           - package: frontend
             triggers: ('frontend/')
           - package: database-migrations
+            build_file: ./backend/db/Dockerfile
+            build_context: ./backend/db
             triggers: ('backend/db')
           - package: database-migrations-py
             triggers: ('backend-py/db')
-            build_context: backend-py/db
+            build_file: ./backend-py/db/Dockerfile
+            build_context: ./backend-py/db
           - package: backend-py
             triggers: ('backend-py/')
           - package: backend-java
             triggers: ('backend-java/')
           - package: database-migrations-go
             triggers: ('backend-go/db')
-            build_context: backend-go/db
+            build_file: ./backend-go/db/Dockerfile
+            build_context: ./backend-go/db
           - package: backend-go
             triggers: ('backend-go/')
     steps:
