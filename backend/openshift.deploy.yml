@@ -1,8 +1,5 @@
 apiVersion: template.openshift.io/v1
 kind: Template
-labels:
-  app: ${NAME}-${ZONE}
-  app.kubernetes.io/part-of: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Module name

@@ -43,17 +43,14 @@ jobs:
           - name: backend-py
             file: backend-py/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
+            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
           - name: backend-java
             file: backend-java/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
           - name: backend-go
             file: backend-go/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:test
+            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:test
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.3.0
         with:
@@ -220,17 +217,14 @@ jobs:
           - name: backend-py
             file: backend-py/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
+            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
           - name: backend-java
             file: backend-java/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
           - name: backend-go
             file: backend-go/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:test
+            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:test
 
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.3.0
