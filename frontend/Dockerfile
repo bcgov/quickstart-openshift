@@ -1,9 +1,11 @@
 # Build static files
-FROM node:alpine3.16 AS build
+FROM node:20.6.1-bullseye-slim AS build
 
+# Install packages, build and keep only prod packages
 WORKDIR /app
-COPY . .
-RUN npm ci --ignore-scripts && \
+COPY *.json *.ts index.html ./
+COPY ./src ./src
+RUN npm ci --omit=dev --ignore-scripts && \
     npm run build
 
 # Caddy

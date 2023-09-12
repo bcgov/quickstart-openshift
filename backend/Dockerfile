@@ -1,4 +1,5 @@
-FROM node:20-bullseye-slim AS build
+# Build static files
+FROM node:20.6.1-bullseye-slim AS build
 
 # Install packages, build and keep only prod packages
 WORKDIR /app
@@ -7,8 +8,7 @@ COPY ./src ./src
 RUN npm ci --omit=dev --ignore-scripts && \
     npm run build
 
-
-# Deployment container
+# Deploy container
 FROM gcr.io/distroless/nodejs20-debian11:nonroot
 ENV NODE_ENV production
 
