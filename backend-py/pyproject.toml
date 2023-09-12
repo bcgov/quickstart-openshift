@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "backend-python"
+name = "backend-py"
 version = "0.1.0"
 description = "Starter template for Python backend projects"
 authors = ["NRIDS"]

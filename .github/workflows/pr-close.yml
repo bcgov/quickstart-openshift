@@ -2,10 +2,8 @@ name: PR Closed
 
 on:
   pull_request:
-    branches:
-      - main
-    types:
-      - closed
+    branches: [main]
+    types: [closed]
 
 concurrency:
   # PR open and close use the same group, allowing only one at a time
@@ -37,17 +35,15 @@ jobs:
     strategy:
       matrix:
         package:
-          [
-            backend,
-            database,
-            database-migrations,
-            frontend,
-            database-migrations-py,
-            backend-py,
-            backend-java,
-            backend-go,
-            database-migrations-go,
-          ]
+          - backend
+          - database
+          - database-migrations
+          - frontend
+          - database-migrations-py
+          - backend-py
+          - backend-java
+          - backend-go
+          - database-migrations-go
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
         with:

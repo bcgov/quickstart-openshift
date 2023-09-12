@@ -2,8 +2,8 @@ name: Merge to Main
 
 on:
   workflow_run:
-    workflows: ["PR Closed"]
-    types: ["completed"]
+    workflows: [PR Closed]
+    types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -18,15 +18,13 @@ jobs:
     strategy:
       matrix:
         name:
-          [
-            backend,
-            database,
-            frontend,
-            init,
-            backend-java,
-            backend-py,
-            backend-go,
-          ]
+          - backend
+          - database
+          - frontend
+          - init
+          - backend-java
+          - backend-py
+          - backend-go
         include:
           - name: backend
             file: backend/openshift.deploy.yml
@@ -43,19 +41,16 @@ jobs:
             file: common/openshift.init.yml
             overwrite: false
           - name: backend-py
-            file: backend-python/openshift.deploy.yml
+            file: backend-py/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
+            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
           - name: backend-java
             file: backend-java/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
           - name: backend-go
             file: backend-go/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:test
+            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:test
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.3.0
         with:
@@ -72,8 +67,7 @@ jobs:
           verification_path: ${{ matrix.verification_path }}
 
   integration-tests:
-    needs:
-      - deploys-test
+    needs: [deploys-test]
     name: Integration Tests for APIs
     defaults:
       run:
@@ -118,8 +112,7 @@ jobs:
 
   cypress-e2e:
     name: Cypress end to end test
-    needs:
-      - deploys-test
+    needs: [deploys-test]
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -165,17 +158,15 @@ jobs:
     strategy:
       matrix:
         name:
-          [
-            frontend,
-            backend,
-            backend-go,
-            backend-py,
-            backend-java,
-            database,
-            database-migrations,
-            database-migrations-go,
-            database-migrations-py,
-          ]
+          - frontend
+          - backend
+          - backend-go
+          - backend-py
+          - backend-java
+          - database
+          - database-migrations
+          - database-migrations-go
+          - database-migrations-py
     steps:
       - name: Delete all untagged
         uses: actions/delete-package-versions@v4
@@ -191,27 +182,23 @@ jobs:
           package-name: "${{ github.event.repository.name }}/${{ matrix.name }}"
           package-type: "container"
           min-versions-to-keep: 10
-          ignore-verions: "^(prod|test)$"
+          ignore-versions: "^(prod|test)$"
 
   deploys-prod:
     name: PROD Deployments
-    needs:
-      - integration-tests
-      - cypress-e2e
+    needs: [integration-tests, cypress-e2e]
     environment: prod
     runs-on: ubuntu-22.04
     strategy:
       matrix:
         name:
-          [
-            backend,
-            database,
-            frontend,
-            init,
-            backend-py,
-            backend-java,
-            backend-go,
-          ]
+          - backend
+          - database
+          - frontend
+          - init
+          - backend-py
+          - backend-java
+          - backend-go
         include:
           - name: backend
             file: backend/openshift.deploy.yml
@@ -228,19 +215,16 @@ jobs:
             file: common/openshift.init.yml
             overwrite: false
           - name: backend-py
-            file: backend-python/openshift.deploy.yml
+            file: backend-py/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
+            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
           - name: backend-java
             file: backend-java/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
           - name: backend-go
             file: backend-go/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:test
+            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:test
 
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.3.0
@@ -258,25 +242,20 @@ jobs:
 
   image-promotions:
     name: Promote images to PROD
-    needs:
-      - deploys-prod
+    needs: [deploys-prod]
     runs-on: ubuntu-22.04
     permissions:
       packages: write
     strategy:
       matrix:
         component:
-          [
-            backend,
-            database,
-            database-migrations,
-            frontend,
-            database-migrations-py,
-            backend-py,
-            backend-java,
-            backend-go,
-            database-migrations-go,
-          ]
+          - backend
+          - database
+          - frontend
+          - init
+          - backend-py
+          - backend-java
+          - backend-go
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
         with:
@@ -305,9 +284,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: joshuaavalon/flyway-action@v3.0.0
-        name: generate schemaspy documentation for node/nest js backend
+        name: Generate SchemaSpy docs for node backend
         with:
           url: jdbc:postgresql://postgres:5432/default
           user: default

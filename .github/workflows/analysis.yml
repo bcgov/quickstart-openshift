@@ -2,12 +2,16 @@ name: Analysis
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
   pull_request:
-    types: ["opened", "reopened", "synchronize", "ready_for_review"]
+    types: [opened, reopened, synchronize, ready_for_review]
   schedule:
     - cron: "0 12 * * 0" # 4 AM PST = 12 PM UDT, runs sundays
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   CodeQL:
@@ -16,9 +20,9 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        language: ["go", "java", "javascript", "python"]
+        language: [go, java, javascript, python]
         include:
-          - language: "go"
+          - language: go
             working-directory: backend-go
             build: |
               sed -i '/^toolchain .*$/d' go.mod

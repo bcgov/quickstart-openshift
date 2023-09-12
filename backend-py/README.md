@@ -18,8 +18,8 @@
 ### Local Development
 - Run the `docker-compose -f .\docker-compose.py.yml up` command to start the entire stack.
 - The database changes are applied automatically by flyway
-- The models are generated into `backend-python/src/v1/models/model.py` .
-- Devs are encouraged to see the `backend-python/src/v1/models/model.py` file and update the models in entities.py. The reason of manual process behind is the sqlacodegen is still lacking support for  SQLAlchemy 2.x.
+- The models are generated into `backend-py/src/v1/models/model.py` .
+- Devs are encouraged to see the `backend-py/src/v1/models/model.py` file and update the models in entities.py. The reason of manual process behind is the sqlacodegen is still lacking support for  SQLAlchemy 2.x.
 - The API is Documentation available at http://localhost:3003/docs
 
 ### Unit Testing
