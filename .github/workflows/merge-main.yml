@@ -12,45 +12,45 @@ concurrency:
 
 jobs:
   deploys-test:
-    name: TEST Deployments
+    name: TEST Deploys
     environment: test
     runs-on: ubuntu-22.04
     strategy:
       matrix:
         name:
-          - backend
-          - database
-          - frontend
           - init
+          - database
+          - backend
+          - backend-go
           - backend-java
           - backend-py
-          - backend-go
+          - frontend
         include:
+          - name: init
+            file: common/openshift.init.yml
+            overwrite: false
+          - name: database
+            file: database/openshift.deploy.yml
+            overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
             parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:test
             overwrite: true
             verification_path: /api
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
-          - name: init
-            file: common/openshift.init.yml
-            overwrite: false
-          - name: backend-py
-            file: backend-py/openshift.deploy.yml
-            overwrite: true
-            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
-          - name: backend-java
-            file: backend-java/openshift.deploy.yml
-            overwrite: true
           - name: backend-go
             file: backend-go/openshift.deploy.yml
             overwrite: true
             parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:test
+          - name: backend-java
+            file: backend-java/openshift.deploy.yml
+            overwrite: true
+          - name: backend-py
+            file: backend-py/openshift.deploy.yml
+            overwrite: true
+            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:test
+          - name: frontend
+            file: frontend/openshift.deploy.yml
+            overwrite: true
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.3.0
         with:
@@ -177,7 +177,7 @@ jobs:
           ignore-versions: "^(prod|test)$"
 
   deploys-prod:
-    name: PROD Deployments
+    name: PROD Deploys
     needs: [integration-tests, cypress-e2e]
     environment: prod
     runs-on: ubuntu-22.04
