@@ -9,6 +9,10 @@ on:
     - cron: "0 12 * * 0" # 4 AM PST = 12 PM UDT, runs sundays
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   CodeQL:
     name: CodeQL
