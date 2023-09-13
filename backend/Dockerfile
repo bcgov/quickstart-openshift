@@ -10,7 +10,7 @@ RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
     npm run build
 
 # Deploy container
-# Distroless does not have npm
+# Distroless has node, but not npm
 FROM gcr.io/distroless/nodejs20-debian11:nonroot
 ENV NODE_ENV production
 
@@ -19,11 +19,9 @@ WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 
-# Port and health check
+# Ports, health check and non-root user
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost/:3000/api || exit 1
-
-# Non-privileged user
 USER app
 
 # Start up command with 50MB of heap size, each application needs to determine what is the best value. DONT use default as it is 4GB.
