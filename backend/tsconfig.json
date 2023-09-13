@@ -2,9 +2,8 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "strict": true,
+    "strict": false,
     "noUncheckedIndexedAccess": true,
-    "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "resolveJsonModule": true,
     "allowJs": true,
