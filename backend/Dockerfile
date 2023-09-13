@@ -1,14 +1,16 @@
 # Build static files
+# Node Bullseye has npm
 FROM node:20.6.1-bullseye-slim AS build
 
 # Install packages, build and keep only prod packages
 WORKDIR /app
 COPY *.json ./
 COPY ./src ./src
-RUN npm ci --omit=dev --ignore-scripts && \
+RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
     npm run build
 
 # Deploy container
+# Distroless does not have npm
 FROM gcr.io/distroless/nodejs20-debian11:nonroot
 ENV NODE_ENV production
 
