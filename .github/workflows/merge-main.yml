@@ -168,12 +168,12 @@ jobs:
           - database-migrations-go
           - database-migrations-py
     steps:
-      - name: Keep last 10
+      - name: Keep last 50
         uses: actions/delete-package-versions@v4
         with:
           package-name: "${{ github.event.repository.name }}/${{ matrix.name }}"
           package-type: "container"
-          min-versions-to-keep: 20
+          min-versions-to-keep: 50
           ignore-versions: "^(prod|test)$"
 
   deploys-prod:
