@@ -18,8 +18,6 @@ jobs:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
     runs-on: ubuntu-22.04
-    permissions:
-      pull-requests: write
     steps:
       - name: PR Greeting
         uses: bcgov-nr/action-pr-description-add@feat/pickUpToken
