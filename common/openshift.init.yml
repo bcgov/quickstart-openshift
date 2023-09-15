@@ -20,13 +20,13 @@ objects:
   - apiVersion: v1
     kind: Secret
     metadata:
-      name: ${NAME}-${ZONE}-${PG_DATABASE}
+      name: "${NAME}-${ZONE}-${PG_DATABASE}"
       labels:
-        app: ${NAME}-${ZONE}
+        app: "${NAME}-${ZONE}"
     stringData:
-      database-name: ${NAME}
-      database-password: ${DB_PASSWORD}
-      database-user: ${NAME}
+      database-name: "${NAME}"
+      database-password: "${DB_PASSWORD}"
+      database-user: "${NAME}"
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:

@@ -85,38 +85,38 @@ objects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
+      name: "${NAME}-${ZONE}-${COMPONENT}"
       labels:
-        app: ${NAME}-${ZONE}
+        app: "${NAME}-${ZONE}"
     spec:
       accessModes:
         - ReadWriteOnce
       resources:
         requests:
-          storage: ${DB_PVC_SIZE}
+          storage: "${DB_PVC_SIZE}"
       storageClassName: netapp-file-standard
   - kind: ImageStream
     apiVersion: v1
     metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
+      name: "${NAME}-${ZONE}-${COMPONENT}"
       labels:
-        app: ${NAME}-${ZONE}
+        app: "${NAME}-${ZONE}"
     spec:
       lookupPolicy:
         local: false
       tags:
-        - name: ${IMAGE_TAG}
+        - name: "${IMAGE_TAG}"
           from:
             kind: DockerImage
-            name: ${REGISTRY}/${PROMOTE}
+            name: "${REGISTRY}/${PROMOTE}"
           referencePolicy:
             type: Local
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
+      name: "${NAME}-${ZONE}-${COMPONENT}"
       labels:
-        app: ${NAME}-${ZONE}
+        app: "${NAME}-${ZONE}"
     spec:
       replicas: 1
       triggers:
@@ -125,12 +125,12 @@ objects:
           imageChangeParams:
             automatic: true
             containerNames:
-              - ${NAME}
+              - "${NAME}"
             from:
               kind: ImageStreamTag
-              name: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+              name: "${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}"
       selector:
-        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+        deploymentconfig: "${NAME}-${ZONE}-${COMPONENT}"
       strategy:
         type: Recreate
         recreateParams:
@@ -138,18 +138,18 @@ objects:
         activeDeadlineSeconds: 21600
       template:
         metadata:
-          name: ${NAME}-${ZONE}-${COMPONENT}
+          name: "${NAME}-${ZONE}-${COMPONENT}"
           labels:
-            app: ${NAME}-${ZONE}
-            deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+            app: "${NAME}-${ZONE}"
+            deploymentconfig: "${NAME}-${ZONE}-${COMPONENT}"
         spec:
           volumes:
-            - name: ${NAME}-${ZONE}-${COMPONENT}
+            - name: "${NAME}-${ZONE}-${COMPONENT}"
               persistentVolumeClaim:
-                claimName: ${NAME}-${ZONE}-${COMPONENT}
+                claimName: "${NAME}-${ZONE}-${COMPONENT}"
           containers:
-            - name: ${NAME}
-              image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+            - name: "${NAME}"
+              image: "${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}"
               ports:
                 - containerPort: 5432
                   protocol: TCP
@@ -179,21 +179,21 @@ objects:
                 - name: POSTGRES_DB
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      name: "${NAME}-${ZONE}-${COMPONENT}"
                       key: database-name
                 - name: POSTGRES_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      name: "${NAME}-${ZONE}-${COMPONENT}"
                       key: database-password
                 - name: POSTGRES_USER
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      name: "${NAME}-${ZONE}-${COMPONENT}"
                       key: database-user
               volumeMounts:
-                - name: ${NAME}-${ZONE}-${COMPONENT}
-                  mountPath: ${PVC_MOUNT_PATH}
+                - name: "${NAME}-${ZONE}-${COMPONENT}"
+                  mountPath: "${PVC_MOUNT_PATH}"
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
               imagePullPolicy: Always
@@ -205,8 +205,8 @@ objects:
     kind: Service
     metadata:
       labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}
+        app: "${NAME}-${ZONE}"
+      name: "${NAME}-${ZONE}-${COMPONENT}"
     spec:
       ports:
         - name: postgresql
@@ -215,16 +215,16 @@ objects:
           protocol: TCP
           targetPort: 5432
       selector:
-        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+        deploymentconfig: "${NAME}-${ZONE}-${COMPONENT}"
       sessionAffinity: None
       type: ClusterIP
   ### Backup-Container starts here ###
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
-      name: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
+      name: "${NAME}-${ZONE}-${BACKUP_COMPONENT}"
       labels:
-        app: ${NAME}-${ZONE}
+        app: "${NAME}-${ZONE}"
     spec:
       accessModes:
         - ReadWriteOnce
@@ -235,10 +235,10 @@ objects:
   - kind: CronJob
     apiVersion: "batch/v1"
     metadata:
-      name: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
+      name: "${NAME}-${ZONE}-${BACKUP_COMPONENT}"
       labels:
-        app: ${NAME}-${ZONE}
-        cronjob: ${NAME}-${ZONE}
+        app: "${NAME}-${ZONE}"
+        cronjob: "${NAME}-${ZONE}"
     spec:
       schedule: "${CRON_MINUTES} 8 * * *" # Run daily at 8:xx AM UTC
       concurrencyPolicy: "Replace"
@@ -247,18 +247,18 @@ objects:
       jobTemplate:
         metadata:
           labels:
-            app: ${NAME}-${ZONE}
-            cronjob: ${NAME}-${ZONE}
+            app: "${NAME}-${ZONE}"
+            cronjob: "${NAME}-${ZONE}"
         spec:
-          backoffLimit: ${{JOB_BACKOFF_LIMIT}}
+          backoffLimit: "${{JOB_BACKOFF_LIMIT}}"
           template:
             metadata:
               labels:
-                app: ${NAME}-${ZONE}
-                cronjob: ${NAME}-${ZONE}
+                app: "${NAME}-${ZONE}"
+                cronjob: "${NAME}-${ZONE}"
             spec:
               containers:
-                - name: ${NAME}-${ZONE}
+                - name: "${NAME}-${ZONE}"
                   image: "bcgovimages/backup-container:latest"
                   command:
                     - "/bin/bash"
@@ -288,7 +288,7 @@ objects:
                     - name: DATABASE_SERVICE_NAME
                       value: "${NAME}-${ZONE}-database"
                     - name: DEFAULT_PORT
-                      value: ${DATABASE_DEFAULT_PORT}
+                      value: "${DATABASE_DEFAULT_PORT}"
                     - name: POSTGRES_DATABASE
                       valueFrom:
                         secretKeyRef:
@@ -297,17 +297,17 @@ objects:
                     - name: DATABASE_USER
                       valueFrom:
                         secretKeyRef:
-                          name: ${NAME}-${ZONE}-database
+                          name: "${NAME}-${ZONE}-database"
                           key: "database-user"
                     - name: DATABASE_PASSWORD
                       valueFrom:
                         secretKeyRef:
-                          name: ${NAME}-${ZONE}-database
+                          name: "${NAME}-${ZONE}-database"
                           key: "database-password"
               volumes:
                 - name: backup
                   persistentVolumeClaim:
-                    claimName: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
+                    claimName: "${NAME}-${ZONE}-${BACKUP_COMPONENT}"
               restartPolicy: "Never"
               terminationGracePeriodSeconds: 30
               activeDeadlineSeconds: 1600
