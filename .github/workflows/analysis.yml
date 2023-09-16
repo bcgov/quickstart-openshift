@@ -49,6 +49,14 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
+      - uses: actions/cache@v3
+        if: ${{ matrix.build && matrix.language == 'java' }}
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       - name: Build
         if: ${{ matrix.build }}
         run: ${{ matrix.build }}
