@@ -30,7 +30,7 @@ jobs:
               CGO_ENABLED=0 GOOS=linux go build -v
           - language: "java"
             working-directory: backend-java
-            build: ./mvnw package -Pnative -DskipTests
+            build: ./mvnw package -DskipTests
           - language: "javascript"
           - language: "python"
     steps:
