@@ -12,7 +12,7 @@
 		level {$LOG_LEVEL}
 	}
 }
-root * /srv
+root * /app/dist
 encode zstd gzip
 file_server
 @spa_router {
