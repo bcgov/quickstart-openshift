@@ -15,7 +15,7 @@ FROM caddy:2.7.4-alpine
 RUN apk add --no-cache ca-certificates
 
 # Copy static files and run formatting
-COPY --from=build /srv
+COPY --from=build /app/dist /srv
 COPY Caddyfile /etc/caddy/Caddyfile
 RUN caddy fmt --overwrite /etc/caddy/Caddyfile
 
