@@ -33,16 +33,12 @@ jobs:
             Deployments, as required, will be available below:
             - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }})
             - [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }})
-            - [Backend-java](https://${{ env.PREFIX }}-backend-java.${{ env.DOMAIN }})
-            - [Backend-py](https://${{ env.PREFIX }}-backend-py.${{ env.DOMAIN }})
-            - [Backend-go](https://${{ env.PREFIX }}-backend-go.${{ env.DOMAIN }})
 
             Please create PRs in draft mode.  Mark as ready to enable:
             - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
-            - [Tests Workflow](https://github.com/${{ github.repository }}/actions/workflows/tests.yml)
 
             After merge, new images are promoted to:
-            - [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
   # https://github.com/bcgov-nr/action-builder-ghcr
   builds:
@@ -53,41 +49,18 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package:
-          - backend
-          - database
-          - database-migrations
-          - frontend
-          - backend-py
-          - database-migrations-py
-          - backend-java
-          - backend-go
-          - database-migrations-go
+        package: [database, migrations, backend, frontend]
         include:
-          - package: backend
-            triggers: ('backend/')
           - package: database
             triggers: ('database/')
-          - package: frontend
-            triggers: ('frontend/')
-          - package: database-migrations
+          - package: migrations
             build_context: ./backend/db
             build_file: ./backend/db/Dockerfile
             triggers: ('backend/db')
-          - package: database-migrations-py
-            triggers: ('backend-py/db')
-            build_context: ./backend-py/db
-            build_file: ./backend-py/db/Dockerfile
-          - package: backend-py
-            triggers: ('backend-py/')
-          - package: backend-java
-            triggers: ('backend-java/')
-          - package: database-migrations-go
-            triggers: ('backend-go/db')
-            build_context: ./backend-go/db
-            build_file: ./backend-go/db/Dockerfile
-          - package: backend-go
-            triggers: ('backend-go/')
+          - package: backend
+            triggers: ('backend/')
+          - package: frontend
+            triggers: ('frontend/')
     steps:
       - uses: actions/checkout@v4
       - uses: bcgov-nr/action-builder-ghcr@v1.2.1
@@ -108,51 +81,27 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name:
-          - backend
-          - database
-          - init
-          - frontend
-          - backend-py
-          - backend-java
-          - backend-go
+        name: [init, database, backend, frontend]
         include:
+          - name: init
+            file: common/openshift.init.yml
+            overwrite: false
+          - name: database
+            file: database/openshift.deploy.yml
+            overwrite: false
+            triggers: ('database/' 'backend/' 'frontend/')
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
             parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
+              -p PROMOTE_MIGRATION=${{ github.repository }}/migrations:${{ github.event.number }}
             triggers: ('database/' 'backend/' 'frontend/')
             verification_path: /api
-          - name: backend-py
-            file: backend-py/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-py:${{ github.event.number }}
-            triggers: ('backend-py/')
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-            triggers: ('database/' 'backend/' 'backend-go' 'backend-java' 'backend-py' 'frontend/')
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
             triggers: ('database/' 'backend/' 'frontend/')
-          - name: init
-            file: common/openshift.init.yml
-            overwrite: false
-          - name: backend-java
-            file: backend-java/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-            triggers: ('backend-java/')
-          - name: backend-go
-            file: backend-go/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:${{ github.event.number }}
-            triggers: ('backend-go/')
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.4.0
         with:

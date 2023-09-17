@@ -6,7 +6,7 @@ on:
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
   schedule:
-    - cron: "0 12 * * 0" # 4 AM PST = 12 PM UDT, runs sundays
+    - cron: "0 11 * * 0" # 3 AM PST = 12 PM UDT, runs sundays
   workflow_dispatch:
 
 concurrency:
@@ -14,53 +14,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  CodeQL:
+  codeql:
     name: CodeQL
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        language: [go, java, javascript, python]
-        include:
-          - language: go
-            working-directory: backend-go
-            build: |
-              sed -i '/^toolchain .*$/d' go.mod
-              go install github.com/swaggo/swag/cmd/swag@latest
-              CGO_ENABLED=0 GOOS=linux go build -v
-          - language: "java"
-            working-directory: backend-java
-            build: ./mvnw package -DskipTests
-          - language: "javascript"
-          - language: "python"
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v2
         with:
-          languages: ${{ matrix.language }}
-
-      - name: Autobuild
-        if: ${{ ! matrix.build }}
-        uses: github/codeql-action/autobuild@v2
-
-      - uses: actions/setup-java@v3
-        if: ${{ matrix.build && matrix.language == 'java' }}
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
-      - uses: actions/cache@v3
-        if: ${{ matrix.build && matrix.language == 'java' }}
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Build
-        if: ${{ matrix.build }}
-        run: ${{ matrix.build }}
-        working-directory: ${{ matrix.working-directory }}
+          languages: javascript
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
@@ -74,7 +36,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@0.12.0
         with:
@@ -89,3 +50,51 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: "trivy-results.sarif"
+
+  tests:
+    name: Tests
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    strategy:
+      matrix:
+        dir: [backend, frontend]
+        include:
+          - dir: backend
+            sonar_projectKey: quickstart-openshift_backend
+            token: SONAR_TOKEN_BACKEND
+            triggers: ('backend/')
+          - dir: frontend
+            sonar_projectKey: quickstart-openshift_frontend
+            token: SONAR_TOKEN_FRONTEND
+            triggers: ('frontend/')
+    steps:
+      - uses: bcgov-nr/action-test-and-analyse@v1.1.0
+        with:
+          commands: |
+            npm ci
+            npm run test:cov
+          dir: ${{ matrix.dir }}
+          node_version: "20"
+          sonar_args: >
+            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
+            -Dsonar.sources=src
+            -Dsonar.tests.inclusions=**/*spec.ts
+            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
+          sonar_token: ${{ secrets[matrix.token] }}
+          triggers: ${{ matrix.triggers }}
