@@ -9,31 +9,11 @@ x-var:
   - &POSTGRES_DATABASE
     postgres
 
-x-flyway-vars: &flyway-vars
-  FLYWAY_URL: jdbc:postgresql://database:5432/postgres
-  FLYWAY_USER: *POSTGRES_USER
-  FLYWAY_PASSWORD: *POSTGRES_PASSWORD
-  FLYWAY_BASELINE_ON_MIGRATE: true
-
 x-postgres-vars: &postgres-vars
   POSTGRES_HOST: database
   POSTGRES_USER: *POSTGRES_USER
   POSTGRES_PASSWORD: *POSTGRES_PASSWORD
   POSTGRES_DATABASE: *POSTGRES_DATABASE
-
-x-python-vars: &python-vars
-  PIP_NO_CACHE_DIR: off
-  PIP_DISABLE_PIP_VERSION_CHECK: on
-  PIP_DEFAULT_TIMEOUT: 100
-  POETRY_VERSION: 1.2.2
-  POETRY_HOME: /opt/poetry
-  POETRY_VIRTUALENVS_IN_PROJECT: true
-  POETRY_NO_INTERACTION: 1
-  PYSETUP_PATH: /application
-  VENV_PATH: /application/.venv
-  PYTHONDONTWRITEBYTECODE: 1
-  PYTHONUNBUFFERED: 1
-  PYTHONPATH: /application/app/src
 
 services:
   database:
@@ -51,7 +31,10 @@ services:
     command: info migrate info
     volumes: ["./backend/db/migrations:/flyway/sql:ro"]
     environment:
-      <<: *flyway-vars
+      FLYWAY_URL: jdbc:postgresql://database:5432/postgres
+      FLYWAY_USER: *POSTGRES_USER
+      FLYWAY_PASSWORD: *POSTGRES_PASSWORD
+      FLYWAY_BASELINE_ON_MIGRATE: true
       FLYWAY_DEFAULT_SCHEMA: USERS
     depends_on:
       database:
