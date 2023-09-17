@@ -49,11 +49,11 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [database, database-migrations, backend, frontend]
+        package: [database, migrations, backend, frontend]
         include:
           - package: database
             triggers: ('database/')
-          - package: database-migrations
+          - package: migrations
             build_context: ./backend/db
             build_file: ./backend/db/Dockerfile
             triggers: ('backend/db')
@@ -94,7 +94,7 @@ jobs:
             file: backend/openshift.deploy.yml
             overwrite: true
             parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations:${{ github.event.number }}
+              -p PROMOTE_MIGRATION=${{ github.repository }}/migrations:${{ github.event.number }}
             triggers: ('database/' 'backend/' 'frontend/')
             verification_path: /api
           - name: frontend

@@ -48,10 +48,10 @@ parameters:
     value: bcgov/quickstart-openshift/backend:test
   - name: PROMOTE_MIGRATION
     description: Image (namespace/name:tag) for migration to promote/import
-    value: bcgov/quickstart-openshift/database-migrations:test
+    value: bcgov/quickstart-openshift/migrations:test
   - name: COMPONENT_DB_MIGRATION
     description: Component name for database migrations
-    value: database-migrations
+    value: migrations
 objects:
   - apiVersion: v1
     kind: ImageStream
