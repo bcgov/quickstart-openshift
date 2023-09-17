@@ -36,10 +36,9 @@ jobs:
 
             Please create PRs in draft mode.  Mark as ready to enable:
             - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
-            - [Tests Workflow](https://github.com/${{ github.repository }}/actions/workflows/tests.yml)
 
             After merge, new images are promoted to:
-            - [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
   # https://github.com/bcgov-nr/action-builder-ghcr
   builds:
