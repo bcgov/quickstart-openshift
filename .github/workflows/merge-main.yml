@@ -52,7 +52,7 @@ jobs:
             file: frontend/openshift.deploy.yml
             overwrite: true
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.3.0
+      - uses: bcgov-nr/action-deployer-openshift@v1.4.0
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -63,6 +63,7 @@ jobs:
             -p ZONE=test -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
             -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
           penetration_test: true
+          penetration_test_artifact: ${{ matrix.name }}
           penetration_test_issue: ${{ matrix.name }}
           verification_path: ${{ matrix.verification_path }}
 
@@ -219,7 +220,7 @@ jobs:
             parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:test
 
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.3.0
+      - uses: bcgov-nr/action-deployer-openshift@v1.4.0
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
