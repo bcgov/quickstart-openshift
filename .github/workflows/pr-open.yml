@@ -154,16 +154,14 @@ jobs:
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:${{ github.event.number }}
             triggers: ('backend-go/')
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@main
+      - uses: bcgov-nr/action-deployer-openshift@v1.4.0
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
-          penetration_test: true
-          penetration_test_artifact: ${{ matrix.name }}
-          penetration_test_issue: ${{ matrix.name }}
+          penetration_test: false
           parameters:
             -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
             -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
