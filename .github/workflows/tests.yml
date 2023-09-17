@@ -46,6 +46,7 @@ jobs:
             triggers: ('frontend/')
     steps:
       - uses: bcgov-nr/action-test-and-analyse@v1.1.0
+        name: ${{ matrix.dir }}
         with:
           commands: |
             npm ci
