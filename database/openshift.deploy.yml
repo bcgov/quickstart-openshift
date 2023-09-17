@@ -24,6 +24,16 @@ parameters:
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
+  - name: PROMOTE
+    description: Image (namespace/name:tag) to promote/import
+    required: true
+  - name: PG_DATABASE
+    description: Postgres database name
+    value: database
+  - name: DB_PASSWORD
+    description: Password for the PostgreSQL connection user.
+    from: "[a-zA-Z0-9]{16}"
+    generate: expression
   ### Backup-Container starts here ###
   - name: BACKUP_COMPONENT
     description: BACKUP_COMPONENT name
@@ -78,10 +88,45 @@ parameters:
     description: Random number, 0-60, for scheduling cronjobs
     from: "[0-5]{1}[0-9]{1}"
     generate: expression
-  - name: PROMOTE
-    description: Image (namespace/name:tag) to promote/import
-    required: true
 objects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: "${NAME}-${ZONE}-${PG_DATABASE}"
+      labels:
+        app: "${NAME}-${ZONE}"
+    stringData:
+      database-name: "${NAME}"
+      database-password: "${DB_PASSWORD}"
+      database-user: "${NAME}"
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-from-openshift-ingress
+      labels:
+        template: openshift-test
+    spec:
+      podSelector: {}
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  network.openshift.io/policy-group: ingress
+      policyTypes:
+        - Ingress
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-same-namespace
+      labels:
+        template: quickstart-network-security-policy
+    spec:
+      podSelector: {}
+      ingress:
+        - from:
+            - podSelector: {}
+      policyTypes:
+        - Ingress
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:

@@ -70,7 +70,7 @@ Runs on pull request submission.
 - Deployment includes curl checks and optional penetration tests
 - Other checks and updates as required
 
-![](common/graphics/pr-open.png)
+![](.graphics/pr-open.png)
 
 ## Pull Request Closed
 
@@ -79,7 +79,7 @@ Runs on pull request close or merge.
 - Cleans up OpenShift objects/artifacts
 - Merge promotes successful build images to TEST
 
-![](common/graphics/pr-close.png)
+![](.graphics/pr-close.png)
 
 ## Merge to Main
 
@@ -93,7 +93,7 @@ Runs on merge to main branch.
 
 \* excludes database changes
 
-![](common/graphics/merge-main.png)
+![](.graphics/merge-main.png)
 
 ## Unit Tests
 
@@ -102,7 +102,7 @@ Runs on pull request submission or merge to main.
 - Unit tests (should include coverage)
 - Optionally, report results to Sonarcloud
 
-![](common/graphics/unit-tests.png)
+![](.graphics/unit-tests.png)
 
 
 # Starter Application
@@ -150,7 +150,7 @@ Create a new repository using this repository as a template.
 * Check Codecov | Code Coverage to grant access
 * Jira cannot be unchecked (I try every time!)
 
-![](./common/graphics/template.png)
+![](./.graphics/template.png)
 
 
 ## GitHub Secrets, Variables and Environments
@@ -293,7 +293,7 @@ This is required to prevent direct pushes and merges to the default branch.  The
     * `[check] Require conversation resolution before merging`
     * `[check] Include administrators` (optional)
 
-![](./common/graphics/branch-protection.png)
+![](./.graphics/branch-protection.png)
 
 ### Adding Team Members
 
