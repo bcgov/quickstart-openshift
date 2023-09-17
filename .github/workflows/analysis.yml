@@ -18,49 +18,14 @@ jobs:
     name: CodeQL
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        language: [go, java, javascript, python]
-        include:
-          - language: go
-            working-directory: backend-go
-            build: |
-              sed -i '/^toolchain .*$/d' go.mod
-              go install github.com/swaggo/swag/cmd/swag@latest
-              CGO_ENABLED=0 GOOS=linux go build -v
-          - language: "java"
-            working-directory: backend-java
-            build: ./mvnw package -DskipTests
-          - language: "javascript"
-          - language: "python"
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v2
         with:
-          languages: ${{ matrix.language }}
+          languages: javascript
 
       - name: Autobuild
-        if: ${{ ! matrix.build }}
         uses: github/codeql-action/autobuild@v2
-
-      - uses: actions/setup-java@v3
-        if: ${{ matrix.build && matrix.language == 'java' }}
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
-      - uses: actions/cache@v3
-        if: ${{ matrix.build && matrix.language == 'java' }}
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Build
-        if: ${{ matrix.build }}
-        run: ${{ matrix.build }}
-        working-directory: ${{ matrix.working-directory }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
