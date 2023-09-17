@@ -6,7 +6,7 @@ on:
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
   schedule:
-    - cron: "0 12 * * 0" # 4 AM PST = 12 PM UDT, runs sundays
+    - cron: "0 11 * * 0" # 3 AM PST = 12 PM UDT, runs sundays
   workflow_dispatch:
 
 concurrency:
@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  CodeQL:
+  codeql:
     name: CodeQL
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
@@ -50,3 +50,53 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: "trivy-results.sarif"
+
+  tests:
+    name: Tests
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    strategy:
+      matrix:
+        dir: [backend, frontend]
+        include:
+          - dir: backend
+            sonar_projectKey: quickstart-openshift_backend
+            token: SONAR_TOKEN_BACKEND
+            triggers: ('backend/')
+          - dir: frontend
+            sonar_projectKey: quickstart-openshift_frontend
+            token: SONAR_TOKEN_FRONTEND
+            triggers: ('frontend/')
+    steps:
+      - uses: bcgov-nr/action-test-and-analyse@v1.1.0
+        name: ${{ matrix.dir }}
+        with:
+          commands: |
+            npm ci
+            npm run test:cov
+          dir: ${{ matrix.dir }}
+          node_version: "20"
+          sonar_args: >
+            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.project.monorepo.enabled=true
+            -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
+            -Dsonar.sources=src
+            -Dsonar.tests.inclusions=**/*spec.ts
+            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
+          sonar_token: ${{ secrets[matrix.token] }}
+          triggers: ${{ matrix.triggers }}
