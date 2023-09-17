@@ -162,7 +162,7 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           penetration_test: true
-          penetration_test_artifact_name: ${{ matrix.name }}
+          penetration_test_artifact: ${{ matrix.name }}
           penetration_test_issue: ${{ matrix.name }}
           parameters:
             -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
