@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        package: [init, database, backend, frontend]
+        name: [init, database, backend, frontend]
         include:
           - name: init
             file: common/openshift.init.yml
