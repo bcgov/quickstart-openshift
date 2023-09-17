@@ -154,7 +154,7 @@ jobs:
               -p PROMOTE_MIGRATION=${{ github.repository }}/database-migrations-go:${{ github.event.number }}
             triggers: ('backend-go/')
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.3.0
+      - uses: bcgov-nr/action-deployer-openshift@v1.4.0
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
