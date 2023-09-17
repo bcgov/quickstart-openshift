@@ -83,7 +83,6 @@ jobs:
             triggers: ('frontend/')
     steps:
       - uses: bcgov-nr/action-test-and-analyse@v1.1.0
-        name: ${{ matrix.dir }}
         with:
           commands: |
             npm ci
@@ -93,7 +92,6 @@ jobs:
           sonar_args: >
             -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
             -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.project.monorepo.enabled=true
             -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
             -Dsonar.sources=src
             -Dsonar.tests.inclusions=**/*spec.ts
