@@ -1,5 +1,3 @@
-<!-* Project Shields  *->
-
 [![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 [![Merge](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml)
@@ -307,7 +305,12 @@ Postgres is default.  Switch to PostGIS by copying the appropriate Dockerfile to
 
 ## Pluggable Backends
 
-This quickstart works with more than just JavaScript.  Please check out [our pluggable backends repository](https://github.com/bcgov/quickstart-openshift-backends) for Go, Java and Python options!
+This quickstart works with more than just JavaScript.  Please check out our pluggable [backends repository](https://github.com/bcgov/quickstart-openshift-backends).  Flyway-based database migrations for each are included.
+
+Supported languages:
+* [Go with Fiber](https://github.com/bcgov/quickstart-openshift-backends/tree/main/backend-go)
+* [Java with Quarkus, Cloud Native](https://github.com/bcgov/quickstart-openshift-backends/tree/main/backend-go)
+* [Python with FastAPI](https://github.com/bcgov/quickstart-openshift-backends/tree/main/backend-py)
 
 ## SchemaSpy
 
