@@ -34,7 +34,7 @@
 ### Table of Contents
 
 - [Overview](#Overview)
-- [Setup/Installation](#Setup/Installation)
+- [Setup](#Setup)
 - [Workflows](#Workflows)
 - [Starter Application](#Starter-Application)
 - [Feedback](#Feedback)
@@ -58,7 +58,7 @@ Features:
     * Backend: TypeScript, Nest.js
     * Alternative backends for [Java/Quarkus, Go/Fiber and Python/FastAPI](https://github.com/bcgov/quickstart-openshift-backends)
 
-# Setup/Installation
+# Setup
 
 Initial setup is intended to take an hour or less.  This depends greatly on intended complexity, features selected/excluded and outside cooperation.
 
