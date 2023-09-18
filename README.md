@@ -1,28 +1,3 @@
-# Table of Contents
-
-- [Project Status](#####-Project)
-- [QuickStart: Pipeline and Sample Application Stack](#-QuickStart:-Pipeline-and-Sample-Application-Stack)
-   - [OpenShift, TypeScript, Go, Java, Python, Postges, PostGIS](##-OpenShift,-TypeScript,-Go,-Java,-Python,-Postges,-PostGIS)
-- [Workflows](#-Workflows)
-   - [Pull Request Opened](##-Pull-Request-Opened)
-   - [Pull Request Closed](##-Pull-Request-Closed)
-   - [Merge to Main](##-Merge-to-Main)
-   - [Unit Tests](##-Unit-Tests)
-- [Starter Application](#-Starter-Application)
-- [Getting Started](#-Getting-Started)
-   - [Pre-requisties](##-Prerequisites)
-   - [GitHub Repository from Template](##-GitHub-Repository-from-Template)
-   - [GitHub Secrets, Variables and Environments](##-GitHub-Secrets,-Variables-and-Environments)     
-   - [Secret and Variable Values](##-Secret-and-Variable-Values)
-   - [Repository Configuration](##-Repository-Configuration)        
-- [Natural Resources Kickstarter](#-Natural-Resources-Kickstarter)
-   - [Unit Testing / Integration Testing for Node/Nest Backend](##-Unit-Testing-/-Integration-Testing-for-Node/Nest-Backend)
-   - [Database Documentation using SchemaSpy](##-Database-Documentation-using-SchemaSpy)
-- [Feedback](#-Feedback)
-- [Acknowledgements](#-Acknowledgements)
-             
-        
-
 <!-- Project Shields -->
 
 [![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
