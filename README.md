@@ -307,13 +307,13 @@ After a full workflow run and merge can been run, please do the following:
 
 ![img.png](.graphics/schemaspy.png)
 
-# Contributing
-
-Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.
-
 # Resources
 
 This repository is provided by NRIDS Architecture and Forestry Digital Services, courtesy of the Government of British Columbia.
 
-* We recommend follwing NRID's [Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md).  Via Confluence, some links may be internal (sorry!).
+* NRID's [Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md) (via. Confluence, links may be internal)
 * [OpenShift Backends for Go, Java and Python](https://github.com/bcgov/quickstart-openshift-backends)
+
+# Contributing
+
+Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.
