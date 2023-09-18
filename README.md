@@ -49,90 +49,11 @@ Features:
 
 # Table of Contents
 
+- [Setup/Installation](#Setup/Installation)
 - [Workflows](#Workflows)
 - [Starter Application](#Starter-Application)
-- [Setup/Installation](#Setup/Installation)
 - [Feedback](#Feedback)
 - [Acknowledgements](#Acknowledgements)
-
-# Workflows
-
-## Pull Request Opened
-
-Runs on pull request submission.
-
-- Provides safe, sandboxed deployment environments
-- Build action pushes to GitHub Container Registry (ghcr.io)
-- Build triggers select new builds vs reusing builds
-- Deployment triggers to only deploy when changes are made
-- Deployment includes curl checks and optional penetration tests
-- Other checks and updates as required
-
-![](.graphics/pr-open.png)
-
-## Analysis
-
-Runs on pull request submission or merge to main.
-
-- Unit tests (should include coverage)
-- SonarCloud coverage and analysis
-- CodeQL/GitHub security reporting
-- Trivy password, vulnerability and security scanning
-
-![](.graphics/analysis.png)
-
-## Pull Request Closed
-
-Runs on pull request close or merge.
-
-- Cleans up OpenShift objects/artifacts
-- Merge promotes successful build images to TEST
-
-![](.graphics/pr-close.png)
-
-## Merge
-
-Runs on merge to main branch.
-
-- Code scanning and reporting to GitHub Security overview
-- Zero-downtime* TEST deployment
-- Penetration tests on TEST deployment
-- Zero-downtime* PROD deployment
-- Labels successful deployment images as PROD
-
-\* excludes database changes
-
-![](.graphics/merge.png)
-
-# Starter Application
-
-The starter stack includes a (React, MUI, Vite, Caddy) frontend, Pluggable backend(Nest/Node, Quarkus/Java On Native, FastAPI/Python, Fiber/Golang) and postgres database.  See subfolder for source, including Dockerfiles and OpenShift templates.
-
-Features:
-* [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
-* [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
-* [Flyway](https://flywaydb.org/) database migrations
-* [Postgres](https://www.postgresql.org/) or [PostGIS](https://postgis.net/) database
-* [backup-container](https://github.com/BCDevOps/backup-container) provided by BCDevOps
-
-Postgres is default.  Switch to PostGIS by copying the appropriate Dockerfile to `./database`:
-
-> cp ./database/postgis/Dockerfile ./database
-
-This quickstart works with more than just JavaScript.  Please check out [our pluggable backends repository](https://github.com/bcgov/quickstart-openshift-backends) for Go, Java and Python options!
-
-## SchemaSpy Database Documentation
-
-The database documentation is created and deployed to GitHub pages.  See [here](https://bcgov.github.io/quickstart-openshift/schemaspy/index.html).
-
-After a full workflow run and merge can been run, please do the following:
-
-1. Select Settings (gear, top right) -> Pages (under `Code and automation`)
-2. Click `Branch` or `Add teams`
-3. Select `gh-pages`
-4. Click `Save`
-
-![img.png](.graphics/schemaspy.png)
 
 # Setup/Installation
 
@@ -235,7 +156,7 @@ Locate an OpenShift pipeline token:
 5. Under Data, copy `token`
 6. Paste into the GitHub Secret `OC_TOKEN` (see above)
 
-**SONAR_TOKENs**
+**SONAR_TOKEN(s)**
 
 If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, but monoreposities will have multiple, like `${{ secrets.SONAR_TOKEN_BACKEND }}` and `${{ secrets.SONAR_TOKEN_FRONTEND }}`.
 
@@ -310,6 +231,85 @@ Don't forget to add your team members!
 3. Use the search box to find people or teams
 4. Choose a role (read, triage, write, maintain, admin)
 5. Click Add
+
+# Workflows
+
+## Pull Request Opened
+
+Runs on pull request submission.
+
+- Provides safe, sandboxed deployment environments
+- Build action pushes to GitHub Container Registry (ghcr.io)
+- Build triggers select new builds vs reusing builds
+- Deployment triggers to only deploy when changes are made
+- Deployment includes curl checks and optional penetration tests
+- Other checks and updates as required
+
+![](.graphics/pr-open.png)
+
+## Analysis
+
+Runs on pull request submission or merge to main.
+
+- Unit tests (should include coverage)
+- SonarCloud coverage and analysis
+- CodeQL/GitHub security reporting
+- Trivy password, vulnerability and security scanning
+
+![](.graphics/analysis.png)
+
+## Pull Request Closed
+
+Runs on pull request close or merge.
+
+- Cleans up OpenShift objects/artifacts
+- Merge promotes successful build images to TEST
+
+![](.graphics/pr-close.png)
+
+## Merge
+
+Runs on merge to main branch.
+
+- Code scanning and reporting to GitHub Security overview
+- Zero-downtime* TEST deployment
+- Penetration tests on TEST deployment
+- Zero-downtime* PROD deployment
+- Labels successful deployment images as PROD
+
+\* excludes database changes
+
+![](.graphics/merge.png)
+
+# Starter Application
+
+The starter stack includes a (React, MUI, Vite, Caddy) frontend, Pluggable backend(Nest/Node, Quarkus/Java On Native, FastAPI/Python, Fiber/Golang) and postgres database.  See subfolder for source, including Dockerfiles and OpenShift templates.
+
+Features:
+* [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
+* [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
+* [Flyway](https://flywaydb.org/) database migrations
+* [Postgres](https://www.postgresql.org/) or [PostGIS](https://postgis.net/) database
+* [backup-container](https://github.com/BCDevOps/backup-container) provided by BCDevOps
+
+Postgres is default.  Switch to PostGIS by copying the appropriate Dockerfile to `./database`:
+
+> cp ./database/postgis/Dockerfile ./database
+
+This quickstart works with more than just JavaScript.  Please check out [our pluggable backends repository](https://github.com/bcgov/quickstart-openshift-backends) for Go, Java and Python options!
+
+## SchemaSpy Database Documentation
+
+The database documentation is created and deployed to GitHub pages.  See [here](https://bcgov.github.io/quickstart-openshift/schemaspy/index.html).
+
+After a full workflow run and merge can been run, please do the following:
+
+1. Select Settings (gear, top right) -> Pages (under `Code and automation`)
+2. Click `Branch` or `Add teams`
+3. Select `gh-pages`
+4. Click `Save`
+
+![img.png](.graphics/schemaspy.png)
 
 # Natural Resources Kickstarter
 
