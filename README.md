@@ -321,4 +321,4 @@ Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../.
 
 ---
 
-This quickstart is provided courtesty of NRIDS Architecture and Forestry Digital Services, parts of the Government of British Columbia.
+This repository is maintained by NRIDS Architecture and Forestry Digital Services, courtesy of the Government of British Columbia.
