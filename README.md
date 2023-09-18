@@ -31,16 +31,6 @@
 
 ## Pull Request-Based Workflows with Sample Stack
 
-### Table of Contents
-
-- [Overview](#Overview)
-- [Setup](#Setup)
-- [Workflows](#Workflows)
-- [App Stack](#App-Stack)
-- [Contributing](#Contributing)
-
-# Overview
-
 The is a fully functional set of [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions) workflows and a starter application stack intended to help Agile teams hit the ground running.
 
 Features:
@@ -56,6 +46,14 @@ Features:
     * Frontend: TypeScript, Caddy Server
     * Backend: TypeScript, Nest.js
     * Alternative backends for [Java/Quarkus, Go/Fiber and Python/FastAPI](https://github.com/bcgov/quickstart-openshift-backends)
+
+### Table of Contents
+
+- [Setup](#Setup)
+- [Workflows](#Workflows)
+- [App Stack](#App-Stack)
+- [Contributing](#Contributing)
+- [Resources](#Resources)
 
 # Setup
 
@@ -309,16 +307,13 @@ After a full workflow run and merge can been run, please do the following:
 
 ![img.png](.graphics/schemaspy.png)
 
-# Natural Resources Kickstarter
-
-Members of the BC Government's Natural Resource minisistries are strongly recommended to follow the recommendations in their [Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md).  The linked document is generated from Confluence, so some links may be internal-only (sorry!).
-
-[Natural Resources Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md)
-
 # Contributing
 
 Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.
 
----
+# Resources
 
 This repository is provided by NRIDS Architecture and Forestry Digital Services, courtesy of the Government of British Columbia.
+
+* We recommend follwing NRID's [Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md).  Via Confluence, some links may be internal (sorry!).
+* [OpenShift Backends for Go, Java and Python](https://github.com/bcgov/quickstart-openshift-backends)
