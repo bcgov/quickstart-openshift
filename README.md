@@ -65,8 +65,8 @@ Features:
   * [Starter](#Starter)
   * [Pluggable Backends](#Pluggable-Backends)
   * [SchemaSpy](#SchemaSpy)
-* [Contributing](#Contributing)
 * [Resources](#Resources)
+* [Contributing](#Contributing)
 
 # Setup
 
