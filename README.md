@@ -93,7 +93,7 @@ Create a new repository using this repository as a template.
 
 ![](./.graphics/template.png)
 
-## Secrets, Variables and Environments
+## Secrets and Variables
 
 Variables and secrets are consumed by workflows.  Environments provide their own values, overriding default sets.
 
