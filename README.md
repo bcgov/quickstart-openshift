@@ -36,9 +36,8 @@
 - [Overview](#Overview)
 - [Setup](#Setup)
 - [Workflows](#Workflows)
-- [Starter Application](#Starter-Application)
-- [Feedback](#Feedback)
-- [Acknowledgements](#Acknowledgements)
+- [App Stack](#App-Stack)
+- [Contributing](#Contributing)
 
 # Overview
 
@@ -280,7 +279,7 @@ Runs on merge to main branch.
 
 ![](.graphics/merge.png)
 
-# Starter Application
+# App Stack
 
 The starter stack includes a (React, MUI, Vite, Caddy) frontend, Pluggable backend(Nest/Node, Quarkus/Java On Native, FastAPI/Python, Fiber/Golang) and postgres database.  See subfolder for source, including Dockerfiles and OpenShift templates.
 
@@ -316,11 +315,10 @@ Members of the BC Government's Natural Resource minisistries are strongly recomm
 
 [Natural Resources Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md)
 
-# Feedback
+# Contributing
 
 Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.
 
-
-# Acknowledgements
+---
 
 This quickstart is provided courtesty of NRIDS Architecture and Forestry Digital Services, parts of the Government of British Columbia.
