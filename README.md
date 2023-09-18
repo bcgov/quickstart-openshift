@@ -50,8 +50,21 @@ Features:
 # Table of Contents
 
 - [Setup](#Setup)
+ - [Prerequisites](#Prerequisites)
+ - [Using this Template](#Using-this-Template)
+ - [Secrets and Variables](#Secrets-and-Variables)
+ - [Environments](#environments)
+ - [Updating Dependencies](#Updating-Dependencies)
+ - [Repository Configuration](#Repository-Configuration)
 - [Workflows](#Workflows)
+ - [Pull Request](#Pull-Request)
+ - [Analysis](#Analysis)
+ - [Pull Request Closed](#Pull-Request-Closed)
+ - [Merge](#Merge)
 - [App Stack](#App-Stack)
+ - [Starter](#Starter)
+ - [Pluggable Backends](#Pluggable-Backends)
+ - [SchemaSpy](#SchemaSpy)
 - [Contributing](#Contributing)
 - [Resources](#Resources)
 
@@ -71,8 +84,7 @@ The following are required:
 * Project namespaces:
     * OpenShift - [Register a New Project](https://registry.developer.gov.bc.ca)
 
-
-## GitHub Repository from Template
+## Using this Template
 
 Create a new repository using this repository as a template.
 
@@ -81,8 +93,7 @@ Create a new repository using this repository as a template.
 
 ![](./.graphics/template.png)
 
-
-## GitHub Secrets, Variables and Environments
+## Secrets, Variables and Environments
 
 Variables and secrets are consumed by workflows.  Environments provide their own values, overriding default sets.
 
@@ -137,29 +148,7 @@ OpenShift project/namespace.  Provided by your OpenShift platform team.
 * Consume: `{{ vars.OC_NAMESPACE }}`
 * Value: format `abc123-dev | test | prod`
 
-### Dependency Pull Requests
-
-Dependabot and Mend Renovate can both provide dependency updates using pull requests.  Dependabot is simpler to configure, while Renovate is much more configurable and lighter on resources.
-
-#### Self-Hosted Renovate
-
-Renovate is provided by DevOps at the Natural Resources.  Support is best effort.  It is our recommended path, due to being highly configurable and light on resources.
-
-To opt-in:
- * Provide our bot, `bcgov-renovate`, write access to a repository
- * Sign up with us by [pick one]:
-    * Add your repository to our [list](https://github.com/bcgov/nr-renovate/blob/main/renovate.json#L21) using a pull request
-    * OR write us [an issue](https://github.com/bcgov/nr-renovate/issues/new/choose) providing your repository name
-
-#### Dependabot
-
-Dependabot is configurable from the following file.  More information is available [here](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot).
-
-Please be aware that Dependabot requires its own set of secrets to be configured.  Navigation:
-
-> Click Settings > Secrets and Variables > Actions > Variables > New repository variable
-
-### Environments
+## Environments
 
 Environments are groups of secrets and variables that can be gatekept.  This includes limting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values override any default values.
 
@@ -172,6 +161,28 @@ Environments provide a [number of features](https://docs.github.com/en/actions/d
 * Required reviewers
 * Wait timer
 * Deployment branches
+
+## Updating Dependencies
+
+Dependabot and Mend Renovate can both provide dependency updates using pull requests.  Dependabot is simpler to configure, while Renovate is much more configurable and lighter on resources.
+
+### Self-Hosted Renovate
+
+Renovate is provided by DevOps at the Natural Resources.  Support is best effort.  It is our recommended path, due to being highly configurable and light on resources.
+
+To opt-in:
+ * Provide our bot, `bcgov-renovate`, write access to a repository
+ * Sign up with us by [pick one]:
+    * Add your repository to our [list](https://github.com/bcgov/nr-renovate/blob/main/renovate.json#L21) using a pull request
+    * OR write us [an issue](https://github.com/bcgov/nr-renovate/issues/new/choose) providing your repository name
+
+### Dependabot
+
+Dependabot is configurable from the following file.  More information is available [here](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot).
+
+Please be aware that Dependabot requires its own set of secrets to be configured.  Navigation:
+
+> Click Settings > Secrets and Variables > Actions > Variables > New repository variable
 
 ## Repository Configuration
 
@@ -230,7 +241,7 @@ Don't forget to add your team members!
 
 # Workflows
 
-## Pull Request Opened
+## Pull Request
 
 Runs on pull request submission.
 
@@ -279,6 +290,8 @@ Runs on merge to main branch.
 
 # App Stack
 
+## Starter
+
 The starter stack includes a (React, MUI, Vite, Caddy) frontend, Pluggable backend(Nest/Node, Quarkus/Java On Native, FastAPI/Python, Fiber/Golang) and postgres database.  See subfolder for source, including Dockerfiles and OpenShift templates.
 
 Features:
@@ -292,9 +305,11 @@ Postgres is default.  Switch to PostGIS by copying the appropriate Dockerfile to
 
 > cp ./database/postgis/Dockerfile ./database
 
+## Pluggable Backends
+
 This quickstart works with more than just JavaScript.  Please check out [our pluggable backends repository](https://github.com/bcgov/quickstart-openshift-backends) for Go, Java and Python options!
 
-## SchemaSpy Database Documentation
+## SchemaSpy
 
 The database documentation is created and deployed to GitHub pages.  See [here](https://bcgov.github.io/quickstart-openshift/schemaspy/index.html).
 
