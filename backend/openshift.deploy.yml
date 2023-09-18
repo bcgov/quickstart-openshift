@@ -1,8 +1,5 @@
 apiVersion: template.openshift.io/v1
 kind: Template
-labels:
-  app: ${NAME}-${ZONE}
-  app.kubernetes.io/part-of: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Module name
@@ -51,49 +48,49 @@ parameters:
     value: bcgov/quickstart-openshift/backend:test
   - name: PROMOTE_MIGRATION
     description: Image (namespace/name:tag) for migration to promote/import
-    value: bcgov/quickstart-openshift/database-migrations:test
+    value: bcgov/quickstart-openshift/migrations:test
   - name: COMPONENT_DB_MIGRATION
     description: Component name for database migrations
-    value: database-migrations
+    value: migrations
 objects:
   - apiVersion: v1
     kind: ImageStream
     metadata:
       labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}
+        app: "${NAME}-${ZONE}"
+      name: "${NAME}-${ZONE}-${COMPONENT}"
     spec:
       lookupPolicy:
         local: false
       tags:
-        - name: ${IMAGE_TAG}
+        - name: "${IMAGE_TAG}"
           from:
             kind: DockerImage
-            name: ${REGISTRY}/${PROMOTE}
+            name: "${REGISTRY}/${PROMOTE}"
           referencePolicy:
             type: Local
   - apiVersion: v1
     kind: ImageStream
     metadata:
       labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}
+        app: "${NAME}-${ZONE}"
+      name: "${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}"
     spec:
       lookupPolicy:
         local: false
       tags:
-        - name: ${IMAGE_TAG}
+        - name: "${IMAGE_TAG}"
           from:
             kind: DockerImage
-            name: ${REGISTRY}/${PROMOTE_MIGRATION}
+            name: "${REGISTRY}/${PROMOTE_MIGRATION}"
           referencePolicy:
             type: Local
   - apiVersion: v1
     kind: DeploymentConfig
     metadata:
       labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}
+        app: "${NAME}-${ZONE}"
+      name: "${NAME}-${ZONE}-${COMPONENT}"
     spec:
       replicas: 1
       triggers:
@@ -102,60 +99,60 @@ objects:
           imageChangeParams:
             automatic: true
             containerNames:
-              - ${NAME}
+              - "${NAME}"
             from:
               kind: ImageStreamTag
-              name: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+              name: "${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}"
         - type: ImageChange
           imageChangeParams:
             automatic: true
             containerNames:
-              - ${NAME}-${COMPONENT_DB_MIGRATION}
+              - "${NAME}-${COMPONENT_DB_MIGRATION}"
             from:
               kind: ImageStreamTag
-              name: ${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}:${IMAGE_TAG}
+              name: "${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}:${IMAGE_TAG}"
       selector:
-        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+        deploymentconfig: "${NAME}-${ZONE}-${COMPONENT}"
       strategy:
         type: Rolling
       template:
         metadata:
           labels:
-            app: ${NAME}-${ZONE}
-            deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+            app: "${NAME}-${ZONE}"
+            deploymentconfig: "${NAME}-${ZONE}-${COMPONENT}"
         spec:
           containers:
-            - image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+            - image: "${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}"
               imagePullPolicy: Always
-              name: ${NAME}
+              name: "${NAME}"
               env:
                 - name: POSTGRES_HOST
-                  value: ${NAME}-${ZONE}-database
+                  value: "${NAME}-${ZONE}-database"
                 - name: POSTGRES_DATABASE
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-database
+                      name: "${NAME}-${ZONE}-database"
                       key: database-name
                 - name: POSTGRES_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-database
+                      name: "${NAME}-${ZONE}-database"
                       key: database-password
                 - name: POSTGRES_USER
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-database
+                      name: "${NAME}-${ZONE}-database"
                       key: database-user
               ports:
                 - containerPort: 3000
                   protocol: TCP
               resources:
                 requests:
-                  cpu: ${CPU_REQUEST}
-                  memory: ${MEMORY_REQUEST}
+                  cpu: "${CPU_REQUEST}"
+                  memory: "${MEMORY_REQUEST}"
                 limits:
-                  cpu: ${CPU_LIMIT}
-                  memory: ${MEMORY_LIMIT}
+                  cpu: "${CPU_LIMIT}"
+                  memory: "${MEMORY_LIMIT}"
               readinessProbe:
                 httpGet:
                   path: /api
@@ -177,20 +174,20 @@ objects:
                 periodSeconds: 30
                 timeoutSeconds: 5
           initContainers:
-            - name: ${NAME}-${COMPONENT_DB_MIGRATION}
-              image: ${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}:${IMAGE_TAG}
+            - name: "${NAME}-${COMPONENT_DB_MIGRATION}"
+              image: "${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}:${IMAGE_TAG}"
               env:
                 - name: FLYWAY_URL
                   value: "jdbc:postgresql://${NAME}-${ZONE}-database:5432/${NAME}"
                 - name: FLYWAY_USER
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-database
+                      name: "${NAME}-${ZONE}-database"
                       key: database-user
                 - name: FLYWAY_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-database
+                      name: "${NAME}-${ZONE}-database"
                       key: database-password
                 - name: FLYWAY_BASELINE_ON_MIGRATE
                   value: "true"
@@ -198,17 +195,17 @@ objects:
                   value: "USERS"
               resources:
                 requests:
-                  cpu: ${CPU_REQUEST_INIT}
-                  memory: ${MEMORY_REQUEST_INIT}
+                  cpu: "${CPU_REQUEST_INIT}"
+                  memory: "${MEMORY_REQUEST_INIT}"
                 limits:
-                  cpu: ${CPU_LIMIT_INIT}
-                  memory: ${MEMORY_LIMIT_INIT}
+                  cpu: "${CPU_LIMIT_INIT}"
+                  memory: "${MEMORY_LIMIT_INIT}"
   - apiVersion: v1
     kind: Service
     metadata:
       labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}
+        app: "${NAME}-${ZONE}"
+      name: "${NAME}-${ZONE}-${COMPONENT}"
     spec:
       ports:
         - name: 3000-tcp
@@ -216,20 +213,20 @@ objects:
           port: 80
           targetPort: 3000
       selector:
-        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+        deploymentconfig: "${NAME}-${ZONE}-${COMPONENT}"
   - apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
       labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}
+        app: "${NAME}-${ZONE}"
+      name: "${NAME}-${ZONE}-${COMPONENT}"
     spec:
-      host: ${NAME}-${ZONE}-${COMPONENT}.${DOMAIN}
+      host: "${NAME}-${ZONE}-${COMPONENT}.${DOMAIN}"
       port:
         targetPort: 3000-tcp
       to:
         kind: Service
-        name: ${NAME}-${ZONE}-${COMPONENT}
+        name: "${NAME}-${ZONE}-${COMPONENT}"
         weight: 100
       tls:
         termination: edge
@@ -237,14 +234,14 @@ objects:
   - apiVersion: autoscaling/v2
     kind: HorizontalPodAutoscaler
     metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
+      name: "${NAME}-${ZONE}-${COMPONENT}"
     spec:
       scaleTargetRef:
         apiVersion: apps.openshift.io/v1
         kind: DeploymentConfig
-        name: ${NAME}-${ZONE}-${COMPONENT}
-      minReplicas: ${{MIN_REPLICAS}}
-      maxReplicas: ${{MAX_REPLICAS}}
+        name: "${NAME}-${ZONE}-${COMPONENT}"
+      minReplicas: "${{MIN_REPLICAS}}"
+      maxReplicas: "${{MAX_REPLICAS}}"
       metrics:
         - type: Resource
           resource:

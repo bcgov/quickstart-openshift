@@ -1,11 +1,9 @@
-name: Pull Request Closed
+name: PR Closed
 
 on:
   pull_request:
-    branches:
-      - main
-    types:
-      - closed
+    branches: [main]
+    types: [closed]
 
 concurrency:
   # PR open and close use the same group, allowing only one at a time
@@ -16,7 +14,7 @@ jobs:
   # Clean up OpenShift when PR closed, no conditions
   cleanup-openshift:
     name: Cleanup OpenShift
-    if: '!github.event.pull_request.head.repo.fork'
+    if: "!github.event.pull_request.head.repo.fork"
     runs-on: ubuntu-22.04
     steps:
       - name: Remove OpenShift artifacts
@@ -36,7 +34,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [backend, database,database-migrations, frontend, database-migrations-py, backend-py, backend-java, backend-go, database-migrations-go]
+        package: [database, migrations, backend, frontend]
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
         with:
