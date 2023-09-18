@@ -1,4 +1,4 @@
-<!-- Project Shields -->
+<!-* Project Shields  *->
 
 [![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
@@ -49,24 +49,24 @@ Features:
 
 # Table of Contents
 
-- [Setup](#Setup)
- - [Prerequisites](#Prerequisites)
- - [Using this Template](#Using-this-Template)
- - [Secrets and Variables](#Secrets-and-Variables)
- - [Environments](#environments)
- - [Updating Dependencies](#Updating-Dependencies)
- - [Repository Configuration](#Repository-Configuration)
-- [Workflows](#Workflows)
- - [Pull Request](#Pull-Request)
- - [Analysis](#Analysis)
- - [Pull Request Closed](#Pull-Request-Closed)
- - [Merge](#Merge)
-- [App Stack](#App-Stack)
- - [Starter](#Starter)
- - [Pluggable Backends](#Pluggable-Backends)
- - [SchemaSpy](#SchemaSpy)
-- [Contributing](#Contributing)
-- [Resources](#Resources)
+* [Setup](#Setup)
+  * [Prerequisites](#Prerequisites)
+  * [Using this Template](#Using-this-Template)
+  * [Secrets and Variables](#Secrets-and-Variables)
+  * [Environments](#environments)
+  * [Updating Dependencies](#Updating-Dependencies)
+  * [Repository Configuration](#Repository-Configuration)
+* [Workflows](#Workflows)
+  * [Pull Request](#Pull-Request)
+  * [Analysis](#Analysis)
+  * [Pull Request Closed](#Pull-Request-Closed)
+  * [Merge](#Merge)
+* [App Stack](#App-Stack)
+  * [Starter](#Starter)
+  * [Pluggable Backends](#Pluggable-Backends)
+  * [SchemaSpy](#SchemaSpy)
+* [Contributing](#Contributing)
+* [Resources](#Resources)
 
 # Setup
 
@@ -82,7 +82,7 @@ The following are required:
 * Membership in the BCGov GitHub organization
     * Provide GitHub IDs to [BCGov's Just Ask](https://just-ask.developer.gov.bc.ca/)
 * Project namespaces:
-    * OpenShift - [Register a New Project](https://registry.developer.gov.bc.ca)
+    * OpenShift  * [Register a New Project](https://registry.developer.gov.bc.ca)
 
 ## Using this Template
 
@@ -194,13 +194,13 @@ Squash merging is recommended for simplified history and ease of rollback.  Clea
 
 Pull Requests:
 
-- `[uncheck] Allow merge commits`
-- `[check] Allow squash merging`
-  - `Default to pull request title`
-- `[uncheck] Allow rebase merging`
-- `[check] Always suggest updating pull request branches`
-- `[uncheck] Allow auto-merge`
-- `[check] Automatically delete head branches`
+* `[uncheck] Allow merge commits`
+* `[check] Allow squash merging`
+   * `Default to pull request title`
+* `[uncheck] Allow rebase merging`
+* `[check] Always suggest updating pull request branches`
+* `[uncheck] Allow auto-merge`
+* `[check] Automatically delete head branches`
 
 ### Packages
 
@@ -212,7 +212,7 @@ E.g. https://github.com/bcgov/quickstart-openshift/packages
 
 This is required to prevent direct pushes and merges to the default branch.  These steps must be run after one full pull request pipeline has been run.
 
-1. Select Settings (gear, top right) -> Branches (under Code and Automation)
+1. Select Settings (gear, top right)  *> Branches (under Code and Automation)
 2. Click `Add Rule` or edit an existing rule
 3. Under `Protect matching branches` specify the following:
     * Branch name pattern: `main`
@@ -233,7 +233,7 @@ This is required to prevent direct pushes and merges to the default branch.  The
 
 Don't forget to add your team members!  
 
-1. Select Settings (gear, top right) -> Collaborators and teams (under `Access`)
+1. Select Settings (gear, top right)  *> Collaborators and teams (under `Access`)
 2. Click `Add people` or `Add teams`
 3. Use the search box to find people or teams
 4. Choose a role (read, triage, write, maintain, admin)
@@ -245,12 +245,12 @@ Don't forget to add your team members!
 
 Runs on pull request submission.
 
-- Provides safe, sandboxed deployment environments
-- Build action pushes to GitHub Container Registry (ghcr.io)
-- Build triggers select new builds vs reusing builds
-- Deployment triggers to only deploy when changes are made
-- Deployment includes curl checks and optional penetration tests
-- Other checks and updates as required
+* Provides safe, sandboxed deployment environments
+* Build action pushes to GitHub Container Registry (ghcr.io)
+* Build triggers select new builds vs reusing builds
+* Deployment triggers to only deploy when changes are made
+* Deployment includes curl checks and optional penetration tests
+* Other checks and updates as required
 
 ![](.graphics/pr-open.png)
 
@@ -258,10 +258,10 @@ Runs on pull request submission.
 
 Runs on pull request submission or merge to the default branch.
 
-- Unit tests (should include coverage)
-- SonarCloud coverage and analysis
-- CodeQL/GitHub security reporting
-- Trivy password, vulnerability and security scanning
+* Unit tests (should include coverage)
+* SonarCloud coverage and analysis
+* CodeQL/GitHub security reporting
+* Trivy password, vulnerability and security scanning
 
 ![](.graphics/analysis.png)
 
@@ -269,8 +269,8 @@ Runs on pull request submission or merge to the default branch.
 
 Runs on pull request close or merge.
 
-- Cleans up OpenShift objects/artifacts
-- Merge promotes successful build images to TEST
+* Cleans up OpenShift objects/artifacts
+* Merge promotes successful build images to TEST
 
 ![](.graphics/pr-close.png)
 
@@ -278,11 +278,11 @@ Runs on pull request close or merge.
 
 Runs on merge to main branch.
 
-- Code scanning and reporting to GitHub Security overview
-- Zero-downtime* TEST deployment
-- Penetration tests on TEST deployment
-- Zero-downtime* PROD deployment
-- Labels successful deployment images as PROD
+* Code scanning and reporting to GitHub Security overview
+* Zero-downtime* TEST deployment
+* Penetration tests on TEST deployment
+* Zero-downtime* PROD deployment
+* Labels successful deployment images as PROD
 
 \* excludes database changes
 
@@ -315,7 +315,7 @@ The database documentation is created and deployed to GitHub pages.  See [here](
 
 After a full workflow run and merge can been run, please do the following:
 
-1. Select Settings (gear, top right) -> Pages (under `Code and automation`)
+1. Select Settings (gear, top right)  *> Pages (under `Code and automation`)
 2. Click `Branch` or `Add teams`
 3. Select `gh-pages`
 4. Click `Save`
