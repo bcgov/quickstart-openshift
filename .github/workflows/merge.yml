@@ -164,7 +164,7 @@ jobs:
           verification_path: ${{ matrix.verification_path }}
 
   image-promotions:
-    name: Promote images to PROD
+    name: Promote images
     needs: [deploys-prod]
     runs-on: ubuntu-22.04
     permissions:

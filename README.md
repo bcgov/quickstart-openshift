@@ -1,133 +1,63 @@
 <!-- Project Shields -->
 
-##### Project
-[![Issues](https://img.shields.io/github/issues/bcgov/quickstart-openshift)](/../../issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/bcgov/quickstart-openshift)](/../../pulls)
 [![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
-[![Merge to Main](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml)
-[![Tests](https://github.com/bcgov/quickstart-openshift/actions/workflows/tests.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/tests.yml)
+[![Merge](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml)
 [![Analysis](https://github.com/bcgov/quickstart-openshift/actions/workflows/analysis.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/analysis.yml)
 
 ##### Frontend (JavaScript/TypeScript)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Duplicated Lines](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
 
 ##### Backend (JavaScript/TypeScript)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Duplicated Lines](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
 
-# QuickStart: Pipeline and Sample Application Stack
+# QuickStart for OpenShift
 
-## OpenShift, TypeScript, Go, Java, Python, Postges, PostGIS
+## Pull Request-Based Workflows with Sample Stack
 
-The is a fully functional set of workflows and a starter application stack intended to help Agile DevOps teams hit the ground running on OpenShift.  Pipelines are run using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions).
+The is a fully functional set of [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions) workflows and a starter application stack intended to help Agile teams hit the ground running.
 
 Features:
 * Pull Request-based pipeline
-* Sandboxed development deployments
-* Gated production deployments
+* Sandboxed development environments
+* Gateable production deployments
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure and container scan tools
-* Automatic dependency patching provided from [bcgov/nr-renovate](https://github.com/bcgov/nr-renovate)
-* Enforced code reviews and pipeline checks
-* Templates and setup documentation
-* Full stack with pluggable backends:
+* Automatic dependency patching available from [bcgov/nr-renovate](https://github.com/bcgov/nr-renovate)
+* Enforced code reviews and workflow jobs (pass|fail)
+* Sample application stack:
     * Database: Postgres, PostGIS, backups
     * Frontend: TypeScript, Caddy Server
     * Backend: TypeScript, Nest.js
-    * Backend: Java, Quarkus, Cloud Native
-    * Backend: Go, Fiber
-    * Backend: Python, FastAPI
+    * Alternative backends for [Java/Quarkus, Go/Fiber and Python/FastAPI](https://github.com/bcgov/quickstart-openshift-backends)
 
-# Workflows
+# Table of Contents
 
-## Pull Request Opened
+- [Setup/Installation](#Setup/Installation)
+- [Workflows](#Workflows)
+- [Starter Application](#Starter-Application)
+- [Feedback](#Feedback)
+- [Acknowledgements](#Acknowledgements)
 
-Runs on pull request submission.
+# Setup/Installation
 
-- Provides safe, sandboxed deployment environments
-- Build action pushes to GitHub Container Registry (ghcr.io)
-- Build triggers select new builds vs reusing builds
-- Deployment includes curl checks and optional penetration tests
-- Other checks and updates as required
-
-![](.graphics/pr-open.png)
-
-## Pull Request Closed
-
-Runs on pull request close or merge.
-
-- Cleans up OpenShift objects/artifacts
-- Merge promotes successful build images to TEST
-
-![](.graphics/pr-close.png)
-
-## Merge to Main
-
-Runs on merge to main branch.
-
-- Code scanning and reporting to GitHub Security overview
-- Zero-downtime* TEST deployment
-- Penetration tests on TEST deployment
-- Zero-downtime* PROD deployment
-- Labels successful deployment images as PROD
-
-\* excludes database changes
-
-![](.graphics/merge-main.png)
-
-## Unit Tests
-
-Runs on pull request submission or merge to main.
-
-- Unit tests (should include coverage)
-- Optionally, report results to Sonarcloud
-
-![](.graphics/unit-tests.png)
-
-
-# Starter Application
-
-The starter stack includes a (React, MUI, Vite, Caddy) frontend, Pluggable backend(Nest/Node, Quarkus/Java On Native, FastAPI/Python, Fiber/Golang) and postgres database.  See subfolder for source, including Dockerfiles and OpenShift templates.
-
-Features:
-* [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
-* [NestJS](https://docs.nestjs.com) Nest/Node backend
-* [Quarkus](https://quarkus.io/) Quarkus/Java On Native backend
-* [FastAPI](https://fastapi.tiangolo.com/) FastAPI/Python backend
-* [Fiber](https://gofiber.io/) Fiber/Golang backend
-* [Postgres](https://www.postgresql.org/) or [PostGIS](https://postgis.net/) database
-* [backup-container](https://github.com/BCDevOps/backup-container) provided by BCDevOps
-
-Postgres is default.  Switch to PostGIS by copying the appropriate Dockerfile to `./database`:
-
-> cp ./database/postgis/Dockerfile ./database
-
-The quickstart comes with several pluggable backend components. Please delete the extra backends and remove them from any related workflows.
-
-
-# Getting Started
-
-Initial setup is intended to take four hours or less.  This depends greatly on intended complexity, features selected/excluded and outside cooperation.
+Initial setup is intended to take an hour or less.  This depends greatly on intended complexity, features selected/excluded and outside cooperation.
 
 ## Prerequisites
 
@@ -148,7 +78,6 @@ Create a new repository using this repository as a template.
 
 * Select bcgov/quickstart-openshift under Repository template
 * Check Codecov | Code Coverage to grant access
-* Jira cannot be unchecked (I try every time!)
 
 ![](./.graphics/template.png)
 
@@ -169,11 +98,11 @@ Secrets are hidden from logs and outputs, while variables are visible.  Using se
 
 ### Dependency Pull Requests
 
-Dependabot and Mend Renovate can both provide dependency updates using pull requests.  Dependabot is simpler to configure, while Renovate is much more configurable.
+Dependabot and Mend Renovate can both provide dependency updates using pull requests.  Dependabot is simpler to configure, while Renovate is much more configurable and lighter on resources.
 
 #### Self-Hosted Renovate
 
-Renovate is provided by DevOps at the Natural Resources.  Support is best effort.
+Renovate is provided by DevOps at the Natural Resources.  Support is best effort.  It is our recommended path, due to being highly configurable and light on resources.
 
 To opt-in:
  * Provide our bot, `bcgov-renovate`, write access to a repository
@@ -185,13 +114,11 @@ To opt-in:
 
 Dependabot is configurable from the following file.  More information is available [here](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot).
 
-[./workflows/dependabot.yml](./workflows/dependabot.yml)
-
 Please be aware that Dependabot requires its own set of secrets to be configured.  Navigation:
 
 > Click Settings > Secrets and Variables > Actions > Variables > New repository variable
 
-### Environment
+### Environments
 
 Environments are groups of secrets and variables that can be gatekept.  This includes limting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values override any default values.
 
@@ -229,7 +156,7 @@ Locate an OpenShift pipeline token:
 5. Under Data, copy `token`
 6. Paste into the GitHub Secret `OC_TOKEN` (see above)
 
-**SONAR_TOKENs**
+**SONAR_TOKEN(s)**
 
 If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, but monoreposities will have multiple, like `${{ secrets.SONAR_TOKEN_BACKEND }}` and `${{ secrets.SONAR_TOKEN_FRONTEND }}`.
 
@@ -299,12 +226,90 @@ This is required to prevent direct pushes and merges to the default branch.  The
 
 Don't forget to add your team members!  
 
-1. Select Settings (gear, top right) -> Collaborators and teams (under Access)
+1. Select Settings (gear, top right) -> Collaborators and teams (under `Access`)
 2. Click `Add people` or `Add teams`
 3. Use the search box to find people or teams
 4. Choose a role (read, triage, write, maintain, admin)
 5. Click Add
 
+# Workflows
+
+## Pull Request Opened
+
+Runs on pull request submission.
+
+- Provides safe, sandboxed deployment environments
+- Build action pushes to GitHub Container Registry (ghcr.io)
+- Build triggers select new builds vs reusing builds
+- Deployment triggers to only deploy when changes are made
+- Deployment includes curl checks and optional penetration tests
+- Other checks and updates as required
+
+![](.graphics/pr-open.png)
+
+## Analysis
+
+Runs on pull request submission or merge to main.
+
+- Unit tests (should include coverage)
+- SonarCloud coverage and analysis
+- CodeQL/GitHub security reporting
+- Trivy password, vulnerability and security scanning
+
+![](.graphics/analysis.png)
+
+## Pull Request Closed
+
+Runs on pull request close or merge.
+
+- Cleans up OpenShift objects/artifacts
+- Merge promotes successful build images to TEST
+
+![](.graphics/pr-close.png)
+
+## Merge
+
+Runs on merge to main branch.
+
+- Code scanning and reporting to GitHub Security overview
+- Zero-downtime* TEST deployment
+- Penetration tests on TEST deployment
+- Zero-downtime* PROD deployment
+- Labels successful deployment images as PROD
+
+\* excludes database changes
+
+![](.graphics/merge.png)
+
+# Starter Application
+
+The starter stack includes a (React, MUI, Vite, Caddy) frontend, Pluggable backend(Nest/Node, Quarkus/Java On Native, FastAPI/Python, Fiber/Golang) and postgres database.  See subfolder for source, including Dockerfiles and OpenShift templates.
+
+Features:
+* [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
+* [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
+* [Flyway](https://flywaydb.org/) database migrations
+* [Postgres](https://www.postgresql.org/) or [PostGIS](https://postgis.net/) database
+* [backup-container](https://github.com/BCDevOps/backup-container) provided by BCDevOps
+
+Postgres is default.  Switch to PostGIS by copying the appropriate Dockerfile to `./database`:
+
+> cp ./database/postgis/Dockerfile ./database
+
+This quickstart works with more than just JavaScript.  Please check out [our pluggable backends repository](https://github.com/bcgov/quickstart-openshift-backends) for Go, Java and Python options!
+
+## SchemaSpy Database Documentation
+
+The database documentation is created and deployed to GitHub pages.  See [here](https://bcgov.github.io/quickstart-openshift/schemaspy/index.html).
+
+After a full workflow run and merge can been run, please do the following:
+
+1. Select Settings (gear, top right) -> Pages (under `Code and automation`)
+2. Click `Branch` or `Add teams`
+3. Select `gh-pages`
+4. Click `Save`
+
+![img.png](.graphics/schemaspy.png)
 
 # Natural Resources Kickstarter
 
@@ -312,26 +317,6 @@ Members of the BC Government's Natural Resource minisistries are strongly recomm
 
 [Natural Resources Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md)
 
-
-## Unit Testing / Integration Testing for Node/Nest Backend
-
-Currently, the unit testing and integration testing is done in the same stage. Please make sure the database container
-is up and running. please run this command from the root of the repository if the DB container is not running.
-
-```
- docker compose up -d database
- # or
- podman compose up -d database
-```
-
-## Database Documentation using SchemaSpy
-
-The database documentation are auto generated by SchemaSpy and deployed to GitHub pages, 
-it is available  [here](https://bcgov.github.io/quickstart-openshift/schemaspy/index.html).
-
-Please update the pages in the repo settings as per the screenshot.
-
-![img.png](.github/SchemaSpy_GH.png)
 # Feedback
 
 Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.
@@ -339,4 +324,4 @@ Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../.
 
 # Acknowledgements
 
-This Action is provided courtesy of the Forestry Suite of Applications, part of the Government of British Columbia.
+This quickstart is provided courtesty of NRIDS Architecture and Forestry Digital Services, parts of the Government of British Columbia.
