@@ -1,12 +1,8 @@
 <!-- Project Shields -->
 
-##### Project
-[![Issues](https://img.shields.io/github/issues/bcgov/quickstart-openshift)](/../../issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/bcgov/quickstart-openshift)](/../../pulls)
 [![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
-[![Merge to Main](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml)
-[![Tests](https://github.com/bcgov/quickstart-openshift/actions/workflows/tests.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/tests.yml)
+[![Merge](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge-main.yml)
 [![Analysis](https://github.com/bcgov/quickstart-openshift/actions/workflows/analysis.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/analysis.yml)
 
 ##### Frontend (JavaScript/TypeScript)
@@ -35,28 +31,48 @@
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
 
-# QuickStart: Pipeline and Sample Application Stack
+# QuickStart for OpenShift
 
-## OpenShift, TypeScript, Go, Java, Python, Postges, PostGIS
+## Pull Request-Based Workflows with Sample Stack
 
-The is a fully functional set of workflows and a starter application stack intended to help Agile DevOps teams hit the ground running on OpenShift.  Pipelines are run using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions).
+The is a fully functional set of [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions) workflows and a starter application stack intended to help Agile teams hit the ground running.
 
 Features:
 * Pull Request-based pipeline
-* Sandboxed development deployments
-* Gated production deployments
+* Sandboxed development environments
+* Gateable production deployments
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure and container scan tools
-* Automatic dependency patching provided from [bcgov/nr-renovate](https://github.com/bcgov/nr-renovate)
-* Enforced code reviews and pipeline checks
-* Templates and setup documentation
-* Full stack with pluggable backends:
+* Automatic dependency patching available from [bcgov/nr-renovate](https://github.com/bcgov/nr-renovate)
+* Enforced code reviews and workflow jobs (pass|fail)
+* Sample application stack:
     * Database: Postgres, PostGIS, backups
     * Frontend: TypeScript, Caddy Server
     * Backend: TypeScript, Nest.js
-    * Backend: Java, Quarkus, Cloud Native
-    * Backend: Go, Fiber
-    * Backend: Python, FastAPI
+* [Alternative, pluggable backends](https://github.com/bcgov/quickstart-openshift-backends):
+    * Java with Quarkus, Cloud Native
+    * Go with Fiber
+    * Python with FastAPI
+
+# Table of Contents
+
+- [Workflows](#Workflows)
+   - [Pull Request Opened](#Pull-Request-Opened)
+   - [Analysis (PR Ready)](##Analysis)
+   - [Pull Request Closed](#Pull-Request-Closed)
+   - [Merge](##-Merge-to-Main)
+- [Starter Application](#-Starter-Application)
+- [Getting Started](#-Getting-Started)
+   - [Pre-requisties](##-Prerequisites)
+   - [GitHub Repository from Template](##-GitHub-Repository-from-Template)
+   - [GitHub Secrets, Variables and Environments](##-GitHub-Secrets,-Variables-and-Environments)     
+   - [Secret and Variable Values](##-Secret-and-Variable-Values)
+   - [Repository Configuration](##-Repository-Configuration)        
+- [Natural Resources Kickstarter](#-Natural-Resources-Kickstarter)
+   - [Unit Testing / Integration Testing for Node/Nest Backend](##-Unit-Testing-/-Integration-Testing-for-Node/Nest-Backend)
+   - [Database Documentation using SchemaSpy](##-Database-Documentation-using-SchemaSpy)
+- [Feedback](#-Feedback)
+- [Acknowledgements](#-Acknowledgements)
 
 # Workflows
 
@@ -72,6 +88,15 @@ Runs on pull request submission.
 
 ![](.graphics/pr-open.png)
 
+## Analysis
+
+Runs on pull request submission or merge to main.
+
+- Unit tests (should include coverage)
+- Optionally, report results to Sonarcloud
+
+![](.graphics/unit-tests.png)
+
 ## Pull Request Closed
 
 Runs on pull request close or merge.
@@ -81,7 +106,7 @@ Runs on pull request close or merge.
 
 ![](.graphics/pr-close.png)
 
-## Merge to Main
+## Merge
 
 Runs on merge to main branch.
 
@@ -95,16 +120,6 @@ Runs on merge to main branch.
 
 ![](.graphics/merge-main.png)
 
-## Unit Tests
-
-Runs on pull request submission or merge to main.
-
-- Unit tests (should include coverage)
-- Optionally, report results to Sonarcloud
-
-![](.graphics/unit-tests.png)
-
-
 # Starter Application
 
 The starter stack includes a (React, MUI, Vite, Caddy) frontend, Pluggable backend(Nest/Node, Quarkus/Java On Native, FastAPI/Python, Fiber/Golang) and postgres database.  See subfolder for source, including Dockerfiles and OpenShift templates.
@@ -112,9 +127,6 @@ The starter stack includes a (React, MUI, Vite, Caddy) frontend, Pluggable backe
 Features:
 * [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
 * [NestJS](https://docs.nestjs.com) Nest/Node backend
-* [Quarkus](https://quarkus.io/) Quarkus/Java On Native backend
-* [FastAPI](https://fastapi.tiangolo.com/) FastAPI/Python backend
-* [Fiber](https://gofiber.io/) Fiber/Golang backend
 * [Postgres](https://www.postgresql.org/) or [PostGIS](https://postgis.net/) database
 * [backup-container](https://github.com/BCDevOps/backup-container) provided by BCDevOps
 
@@ -122,12 +134,11 @@ Postgres is default.  Switch to PostGIS by copying the appropriate Dockerfile to
 
 > cp ./database/postgis/Dockerfile ./database
 
-The quickstart comes with several pluggable backend components. Please delete the extra backends and remove them from any related workflows.
-
+This quickstart works with more than just JavaScript.  Please check out [our pluggable backends repository(https://github.com/bcgov/quickstart-openshift-backends)] for Go, Java and Python options!
 
 # Getting Started
 
-Initial setup is intended to take four hours or less.  This depends greatly on intended complexity, features selected/excluded and outside cooperation.
+Initial setup is intended to take an hour or less.  This depends greatly on intended complexity, features selected/excluded and outside cooperation.
 
 ## Prerequisites
 
@@ -169,11 +180,11 @@ Secrets are hidden from logs and outputs, while variables are visible.  Using se
 
 ### Dependency Pull Requests
 
-Dependabot and Mend Renovate can both provide dependency updates using pull requests.  Dependabot is simpler to configure, while Renovate is much more configurable.
+Dependabot and Mend Renovate can both provide dependency updates using pull requests.  Dependabot is simpler to configure, while Renovate is much more configurable and lighter on resources.
 
 #### Self-Hosted Renovate
 
-Renovate is provided by DevOps at the Natural Resources.  Support is best effort.
+Renovate is provided by DevOps at the Natural Resources.  Support is best effort.  It is our recommended path, due to being highly configurable and light on resources.
 
 To opt-in:
  * Provide our bot, `bcgov-renovate`, write access to a repository
@@ -191,7 +202,7 @@ Please be aware that Dependabot requires its own set of secrets to be configured
 
 > Click Settings > Secrets and Variables > Actions > Variables > New repository variable
 
-### Environment
+### Environments
 
 Environments are groups of secrets and variables that can be gatekept.  This includes limting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values override any default values.
 
@@ -305,7 +316,6 @@ Don't forget to add your team members!
 4. Choose a role (read, triage, write, maintain, admin)
 5. Click Add
 
-
 # Natural Resources Kickstarter
 
 Members of the BC Government's Natural Resource minisistries are strongly recommended to follow the recommendations in their [Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md).  The linked document is generated from Confluence, so some links may be internal-only (sorry!).
@@ -320,8 +330,6 @@ is up and running. please run this command from the root of the repository if th
 
 ```
  docker compose up -d database
- # or
- podman compose up -d database
 ```
 
 ## Database Documentation using SchemaSpy
@@ -332,6 +340,7 @@ it is available  [here](https://bcgov.github.io/quickstart-openshift/schemaspy/i
 Please update the pages in the repo settings as per the screenshot.
 
 ![img.png](.github/SchemaSpy_GH.png)
+
 # Feedback
 
 Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.
@@ -339,4 +348,4 @@ Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../.
 
 # Acknowledgements
 
-This Action is provided courtesy of the Forestry Suite of Applications, part of the Government of British Columbia.
+This quickstart is provided courtesty of NRIDS Architecture and Forestry Digital Services, parts of the Government of British Columbia.

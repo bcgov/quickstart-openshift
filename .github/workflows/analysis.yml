@@ -27,7 +27,7 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
         with:
-          category: "/language:${{matrix.language}}"
+          category: "/language:javascript"
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
