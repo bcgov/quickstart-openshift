@@ -31,6 +31,17 @@
 
 ## Pull Request-Based Workflows with Sample Stack
 
+### Table of Contents
+
+- [Overview](#Overview)
+- [Setup/Installation](#Setup/Installation)
+- [Workflows](#Workflows)
+- [Starter Application](#Starter-Application)
+- [Feedback](#Feedback)
+- [Acknowledgements](#Acknowledgements)
+
+# Overview
+
 The is a fully functional set of [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions) workflows and a starter application stack intended to help Agile teams hit the ground running.
 
 Features:
@@ -46,14 +57,6 @@ Features:
     * Frontend: TypeScript, Caddy Server
     * Backend: TypeScript, Nest.js
     * Alternative backends for [Java/Quarkus, Go/Fiber and Python/FastAPI](https://github.com/bcgov/quickstart-openshift-backends)
-
-# Table of Contents
-
-- [Setup/Installation](#Setup/Installation)
-- [Workflows](#Workflows)
-- [Starter Application](#Starter-Application)
-- [Feedback](#Feedback)
-- [Acknowledgements](#Acknowledgements)
 
 # Setup/Installation
 
@@ -84,17 +87,58 @@ Create a new repository using this repository as a template.
 
 ## GitHub Secrets, Variables and Environments
 
-Variables and secrets are consumed by workflows.  Environments provide their own sets of secrets and variables, overriding default sets.
-
-### Repository Secrets and Variables
-
-Repository secrets and variables are available to all workflows, except pull requests triggered by Dependabot.
+Variables and secrets are consumed by workflows.  Environments provide their own values, overriding default sets.
 
 Secrets are hidden from logs and outputs, while variables are visible.  Using secrets exclusively can make troubeshooting more difficult.
 
+Note: Dependabot, which we don't recommend as highly as Renovate, requires its own set of variables.
+
+### Secrets Values
+
 > Click Settings > Secrets and Variables > Actions > Secrets > New repository secret
 
+**GITHUB_TOKEN**
+
+Default token.  Replaced every workflow run, available to all workflows.
+* Consume: `{{ secrets.GITHUB_TOKEN }}`
+
+**OC_TOKEN**
+
+OpenShift token, different for every project/namespace.  This guide assumes your OpenShift platform team has provisioned a pipeline account.
+
+* Consume: `{{ secrets.OC_TOKEN }}`
+
+Locate an OpenShift pipeline token:
+
+1. Login to your OpenShift cluster, e.g.: [Gold](https://console.apps.silver.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/)
+2. Select your DEV namespace
+3. Click Workloads > Secrets (under Workloads for Administrator view)
+4. Select `pipeline-token-...` or a similarly privileged token
+5. Under Data, copy `token`
+6. Paste into the GitHub Secret `OC_TOKEN` (see above)
+
+**SONAR_TOKEN(s)**
+
+If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, but monoreposities will have multiple, like `${{ secrets.SONAR_TOKEN_BACKEND }}` and `${{ secrets.SONAR_TOKEN_FRONTEND }}`.
+
+BC Government employees can request SonarCloud projects from [bcdevops/devops-requests](https://github.com/BCDevOps/devops-requests) by creating a SonarCloud request/[issue](https://github.com/BCDevOps/devops-requests/issues/new/choose).  This template expects a monorepo, so please ask for that and provide component names (e.g. backend, frontend).
+
+### Variable Values
+
 > Click Settings > Secrets and Variables > Actions > Variables > New repository variable
+
+**OC_SERVER**
+
+OpenShift server address.
+* Consume: `{{ vars.OC_SERVER }}`
+* Value: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
+
+**OC_NAMESPACE**
+
+OpenShift project/namespace.  Provided by your OpenShift platform team.
+
+* Consume: `{{ vars.OC_NAMESPACE }}`
+* Value: format `abc123-dev | test | prod`
 
 ### Dependency Pull Requests
 
@@ -131,51 +175,6 @@ Environments provide a [number of features](https://docs.github.com/en/actions/d
 * Required reviewers
 * Wait timer
 * Deployment branches
-
-## Secret and Variable Values
-
-### Secrets
-
-**GITHUB_TOKEN**
-
-Default token.  Replaced every workflow run, available to all workflows.
-* Consume: `{{ secrets.GITHUB_TOKEN }}`
-
-**OC_TOKEN**
-
-OpenShift token, different for every project/namespace.  This guide assumes your OpenShift platform team has provisioned a pipeline account.
-
-* Consume: `{{ secrets.OC_TOKEN }}`
-
-Locate an OpenShift pipeline token:
-
-1. Login to your OpenShift cluster, e.g.: [Gold](https://console.apps.silver.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/)
-2. Select your DEV namespace
-3. Click Workloads > Secrets (under Workloads for Administrator view)
-4. Select `pipeline-token-...` or a similarly privileged token
-5. Under Data, copy `token`
-6. Paste into the GitHub Secret `OC_TOKEN` (see above)
-
-**SONAR_TOKEN(s)**
-
-If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, but monoreposities will have multiple, like `${{ secrets.SONAR_TOKEN_BACKEND }}` and `${{ secrets.SONAR_TOKEN_FRONTEND }}`.
-
-BC Government employees can request SonarCloud projects from [bcdevops/devops-requests](https://github.com/BCDevOps/devops-requests) by creating a SonarCloud request/[issue](https://github.com/BCDevOps/devops-requests/issues/new/choose).  This template expects a monorepo, so please ask for that and provide component names (e.g. backend, frontend).
-
-### Variables
-
-**OC_SERVER**
-
-OpenShift server address.
-* Consume: `{{ vars.OC_SERVER }}`
-* Value: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
-
-**OC_NAMESPACE**
-
-OpenShift project/namespace.  Provided by your OpenShift platform team.
-
-* Consume: `{{ vars.OC_NAMESPACE }}`
-* Value: format `abc123-dev | test | prod`
 
 ## Repository Configuration
 
@@ -249,7 +248,7 @@ Runs on pull request submission.
 
 ## Analysis
 
-Runs on pull request submission or merge to main.
+Runs on pull request submission or merge to the default branch.
 
 - Unit tests (should include coverage)
 - SonarCloud coverage and analysis
