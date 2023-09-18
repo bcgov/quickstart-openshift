@@ -1,4 +1,4 @@
-<!-- Project Shields -->
+<!-* Project Shields  *->
 
 [![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
@@ -49,13 +49,26 @@ Features:
 
 # Table of Contents
 
-- [Setup/Installation](#Setup/Installation)
-- [Workflows](#Workflows)
-- [Starter Application](#Starter-Application)
-- [Feedback](#Feedback)
-- [Acknowledgements](#Acknowledgements)
+* [Setup](#Setup)
+  * [Prerequisites](#Prerequisites)
+  * [Using this Template](#Using-this-Template)
+  * [Secrets and Variables](#Secrets-and-Variables)
+  * [Environments](#environments)
+  * [Updating Dependencies](#Updating-Dependencies)
+  * [Repository Configuration](#Repository-Configuration)
+* [Workflows](#Workflows)
+  * [Pull Request](#Pull-Request)
+  * [Analysis](#Analysis)
+  * [Pull Request Closed](#Pull-Request-Closed)
+  * [Merge](#Merge)
+* [App Stack](#App-Stack)
+  * [Starter](#Starter)
+  * [Pluggable Backends](#Pluggable-Backends)
+  * [SchemaSpy](#SchemaSpy)
+* [Resources](#Resources)
+* [Contributing](#Contributing)
 
-# Setup/Installation
+# Setup
 
 Initial setup is intended to take an hour or less.  This depends greatly on intended complexity, features selected/excluded and outside cooperation.
 
@@ -69,10 +82,9 @@ The following are required:
 * Membership in the BCGov GitHub organization
     * Provide GitHub IDs to [BCGov's Just Ask](https://just-ask.developer.gov.bc.ca/)
 * Project namespaces:
-    * OpenShift - [Register a New Project](https://registry.developer.gov.bc.ca)
+    * OpenShift  * [Register a New Project](https://registry.developer.gov.bc.ca)
 
-
-## GitHub Repository from Template
+## Using this Template
 
 Create a new repository using this repository as a template.
 
@@ -81,60 +93,17 @@ Create a new repository using this repository as a template.
 
 ![](./.graphics/template.png)
 
+## Secrets and Variables
 
-## GitHub Secrets, Variables and Environments
-
-Variables and secrets are consumed by workflows.  Environments provide their own sets of secrets and variables, overriding default sets.
-
-### Repository Secrets and Variables
-
-Repository secrets and variables are available to all workflows, except pull requests triggered by Dependabot.
+Variables and secrets are consumed by workflows.  Environments provide their own values, overriding default sets.
 
 Secrets are hidden from logs and outputs, while variables are visible.  Using secrets exclusively can make troubeshooting more difficult.
 
+Note: Dependabot, which we don't recommend as highly as Renovate, requires its own set of variables.
+
+### Secrets Values
+
 > Click Settings > Secrets and Variables > Actions > Secrets > New repository secret
-
-> Click Settings > Secrets and Variables > Actions > Variables > New repository variable
-
-### Dependency Pull Requests
-
-Dependabot and Mend Renovate can both provide dependency updates using pull requests.  Dependabot is simpler to configure, while Renovate is much more configurable and lighter on resources.
-
-#### Self-Hosted Renovate
-
-Renovate is provided by DevOps at the Natural Resources.  Support is best effort.  It is our recommended path, due to being highly configurable and light on resources.
-
-To opt-in:
- * Provide our bot, `bcgov-renovate`, write access to a repository
- * Sign up with us by [pick one]:
-    * Add your repository to our [list](https://github.com/bcgov/nr-renovate/blob/main/renovate.json#L21) using a pull request
-    * OR write us [an issue](https://github.com/bcgov/nr-renovate/issues/new/choose) providing your repository name
-
-#### Dependabot
-
-Dependabot is configurable from the following file.  More information is available [here](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot).
-
-Please be aware that Dependabot requires its own set of secrets to be configured.  Navigation:
-
-> Click Settings > Secrets and Variables > Actions > Variables > New repository variable
-
-### Environments
-
-Environments are groups of secrets and variables that can be gatekept.  This includes limting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values override any default values.
-
-For pull requests and development surrounding lower-level, sandboxed environments it is best not to use an environment at all.  Higher level environments, like TEST and PROD, will override those values as necessary.
-
-> Click Settings > Environments > New environment
-
-Environments provide a [number of features](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment), including:
-
-* Required reviewers
-* Wait timer
-* Deployment branches
-
-## Secret and Variable Values
-
-### Secrets
 
 **GITHUB_TOKEN**
 
@@ -154,15 +123,17 @@ Locate an OpenShift pipeline token:
 3. Click Workloads > Secrets (under Workloads for Administrator view)
 4. Select `pipeline-token-...` or a similarly privileged token
 5. Under Data, copy `token`
-6. Paste into the GitHub Secret `OC_TOKEN` (see above)
+6. Paste into the GitHub Secret `OC_TOKEN`
 
 **SONAR_TOKEN(s)**
 
-If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, but monoreposities will have multiple, like `${{ secrets.SONAR_TOKEN_BACKEND }}` and `${{ secrets.SONAR_TOKEN_FRONTEND }}`.
+If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, while monorepos use multiple, e.g. `${{ secrets.SONAR_TOKEN_BACKEND }}`, `${{ secrets.SONAR_TOKEN_FRONTEND }}`.
 
-BC Government employees can request SonarCloud projects from [bcdevops/devops-requests](https://github.com/BCDevOps/devops-requests) by creating a SonarCloud request/[issue](https://github.com/BCDevOps/devops-requests/issues/new/choose).  This template expects a monorepo, so please ask for that and provide component names (e.g. backend, frontend).
+BC Government employees can request SonarCloud projects by creating an [issue](https://github.com/BCDevOps/devops-requests/issues/new/choose) with BCDevOps.  Please make sure to request a monorepo with component names (e.g. backend, frontend), which may not be explained in their directions.
 
-### Variables
+### Variable Values
+
+> Click Settings > Secrets and Variables > Actions > Variables > New repository variable
 
 **OC_SERVER**
 
@@ -177,6 +148,42 @@ OpenShift project/namespace.  Provided by your OpenShift platform team.
 * Consume: `{{ vars.OC_NAMESPACE }}`
 * Value: format `abc123-dev | test | prod`
 
+## Environments
+
+Environments are groups of secrets and variables that can be gatekept.  This includes limting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values override any default values.
+
+For pull requests and development surrounding lower-level, sandboxed environments it is best not to use an environment at all.  Higher level environments, like TEST and PROD, will override those values as necessary.
+
+> Click Settings > Environments > New environment
+
+Environments provide a [number of features](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment), including:
+
+* Required reviewers
+* Wait timer
+* Deployment branches
+
+## Updating Dependencies
+
+Dependabot and Mend Renovate can both provide dependency updates using pull requests.  Dependabot is simpler to configure, while Renovate is much more configurable and lighter on resources.
+
+### Self-Hosted Renovate
+
+Renovate is provided by DevOps at the Natural Resources.  Support is best effort.  It is our recommended path, due to being highly configurable and light on resources.
+
+To opt-in:
+ * Provide our bot, `bcgov-renovate`, write access to a repository
+ * Sign up with us by [pick one]:
+    * Add your repository to our [list](https://github.com/bcgov/nr-renovate/blob/main/renovate.json#L21) using a pull request
+    * OR write us [an issue](https://github.com/bcgov/nr-renovate/issues/new/choose) providing your repository name
+
+### Dependabot
+
+Dependabot is configurable from the following file.  More information is available [here](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot).
+
+Please be aware that Dependabot requires its own set of secrets to be configured.  Navigation:
+
+> Click Settings > Secrets and Variables > Actions > Variables > New repository variable
+
 ## Repository Configuration
 
 ### Pull Request Handling
@@ -187,13 +194,13 @@ Squash merging is recommended for simplified history and ease of rollback.  Clea
 
 Pull Requests:
 
-- `[uncheck] Allow merge commits`
-- `[check] Allow squash merging`
-  - `Default to pull request title`
-- `[uncheck] Allow rebase merging`
-- `[check] Always suggest updating pull request branches`
-- `[uncheck] Allow auto-merge`
-- `[check] Automatically delete head branches`
+* `[uncheck] Allow merge commits`
+* `[check] Allow squash merging`
+   * `Default to pull request title`
+* `[uncheck] Allow rebase merging`
+* `[check] Always suggest updating pull request branches`
+* `[uncheck] Allow auto-merge`
+* `[check] Automatically delete head branches`
 
 ### Packages
 
@@ -205,7 +212,7 @@ E.g. https://github.com/bcgov/quickstart-openshift/packages
 
 This is required to prevent direct pushes and merges to the default branch.  These steps must be run after one full pull request pipeline has been run.
 
-1. Select Settings (gear, top right) -> Branches (under Code and Automation)
+1. Select Settings (gear, top right)  *> Branches (under Code and Automation)
 2. Click `Add Rule` or edit an existing rule
 3. Under `Protect matching branches` specify the following:
     * Branch name pattern: `main`
@@ -226,7 +233,7 @@ This is required to prevent direct pushes and merges to the default branch.  The
 
 Don't forget to add your team members!  
 
-1. Select Settings (gear, top right) -> Collaborators and teams (under `Access`)
+1. Select Settings (gear, top right)  *> Collaborators and teams (under `Access`)
 2. Click `Add people` or `Add teams`
 3. Use the search box to find people or teams
 4. Choose a role (read, triage, write, maintain, admin)
@@ -234,27 +241,27 @@ Don't forget to add your team members!
 
 # Workflows
 
-## Pull Request Opened
+## Pull Request
 
 Runs on pull request submission.
 
-- Provides safe, sandboxed deployment environments
-- Build action pushes to GitHub Container Registry (ghcr.io)
-- Build triggers select new builds vs reusing builds
-- Deployment triggers to only deploy when changes are made
-- Deployment includes curl checks and optional penetration tests
-- Other checks and updates as required
+* Provides safe, sandboxed deployment environments
+* Build action pushes to GitHub Container Registry (ghcr.io)
+* Build triggers select new builds vs reusing builds
+* Deployment triggers to only deploy when changes are made
+* Deployment includes curl checks and optional penetration tests
+* Other checks and updates as required
 
 ![](.graphics/pr-open.png)
 
 ## Analysis
 
-Runs on pull request submission or merge to main.
+Runs on pull request submission or merge to the default branch.
 
-- Unit tests (should include coverage)
-- SonarCloud coverage and analysis
-- CodeQL/GitHub security reporting
-- Trivy password, vulnerability and security scanning
+* Unit tests (should include coverage)
+* SonarCloud coverage and analysis
+* CodeQL/GitHub security reporting
+* Trivy password, vulnerability and security scanning
 
 ![](.graphics/analysis.png)
 
@@ -262,8 +269,8 @@ Runs on pull request submission or merge to main.
 
 Runs on pull request close or merge.
 
-- Cleans up OpenShift objects/artifacts
-- Merge promotes successful build images to TEST
+* Cleans up OpenShift objects/artifacts
+* Merge promotes successful build images to TEST
 
 ![](.graphics/pr-close.png)
 
@@ -271,17 +278,19 @@ Runs on pull request close or merge.
 
 Runs on merge to main branch.
 
-- Code scanning and reporting to GitHub Security overview
-- Zero-downtime* TEST deployment
-- Penetration tests on TEST deployment
-- Zero-downtime* PROD deployment
-- Labels successful deployment images as PROD
+* Code scanning and reporting to GitHub Security overview
+* Zero-downtime* TEST deployment
+* Penetration tests on TEST deployment
+* Zero-downtime* PROD deployment
+* Labels successful deployment images as PROD
 
 \* excludes database changes
 
 ![](.graphics/merge.png)
 
-# Starter Application
+# App Stack
+
+## Starter
 
 The starter stack includes a (React, MUI, Vite, Caddy) frontend, Pluggable backend(Nest/Node, Quarkus/Java On Native, FastAPI/Python, Fiber/Golang) and postgres database.  See subfolder for source, including Dockerfiles and OpenShift templates.
 
@@ -296,32 +305,30 @@ Postgres is default.  Switch to PostGIS by copying the appropriate Dockerfile to
 
 > cp ./database/postgis/Dockerfile ./database
 
+## Pluggable Backends
+
 This quickstart works with more than just JavaScript.  Please check out [our pluggable backends repository](https://github.com/bcgov/quickstart-openshift-backends) for Go, Java and Python options!
 
-## SchemaSpy Database Documentation
+## SchemaSpy
 
 The database documentation is created and deployed to GitHub pages.  See [here](https://bcgov.github.io/quickstart-openshift/schemaspy/index.html).
 
 After a full workflow run and merge can been run, please do the following:
 
-1. Select Settings (gear, top right) -> Pages (under `Code and automation`)
+1. Select Settings (gear, top right)  *> Pages (under `Code and automation`)
 2. Click `Branch` or `Add teams`
 3. Select `gh-pages`
 4. Click `Save`
 
 ![img.png](.graphics/schemaspy.png)
 
-# Natural Resources Kickstarter
+# Resources
 
-Members of the BC Government's Natural Resource minisistries are strongly recommended to follow the recommendations in their [Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md).  The linked document is generated from Confluence, so some links may be internal-only (sorry!).
+This repository is provided by NRIDS Architecture and Forestry Digital Services, courtesy of the Government of British Columbia.
 
-[Natural Resources Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md)
+* NRID's [Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md) (via. Confluence, links may be internal)
+* [OpenShift Backends for Go, Java and Python](https://github.com/bcgov/quickstart-openshift-backends)
 
-# Feedback
+# Contributing
 
 Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.
-
-
-# Acknowledgements
-
-This quickstart is provided courtesty of NRIDS Architecture and Forestry Digital Services, parts of the Government of British Columbia.
