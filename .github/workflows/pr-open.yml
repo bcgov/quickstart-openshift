@@ -62,7 +62,6 @@ jobs:
           - package: frontend
             triggers: ('frontend/')
     steps:
-      - uses: actions/checkout@v4
       - uses: bcgov-nr/action-builder-ghcr@v1.2.1
         with:
           package: ${{ matrix.package }}
