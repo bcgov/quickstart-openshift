@@ -44,8 +44,7 @@ jobs:
             -p ZONE=test -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
             -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
           penetration_test: true
-          penetration_test_artifact: ${{ matrix.name }}
-          penetration_test_issue: ${{ matrix.name }}
+          name: ${{ matrix.name }}
           penetration_test_token: ${{ secrets.GITHUB_TOKEN }}
           verification_path: ${{ matrix.verification_path }}
 
