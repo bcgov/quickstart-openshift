@@ -2,8 +2,8 @@ apiVersion: template.openshift.io/v1
 kind: Template
 parameters:
   - name: NAME
-    description: Product name
-    value: quickstart-openshift
+    description: Module name
+    required: true
   - name: COMPONENT
     description: Component name
     value: database

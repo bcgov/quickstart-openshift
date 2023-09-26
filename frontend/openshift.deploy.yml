@@ -3,7 +3,7 @@ kind: Template
 parameters:
   - name: NAME
     description: Module name
-    value: quickstart-openshift
+    required: true
   - name: COMPONENT
     description: Component name
     value: frontend
