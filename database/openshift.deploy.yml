@@ -10,6 +10,12 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: REGISTRY
+    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
+    value: ghcr.io
+  - name: ORG_NAME
+    description: Organization name, e.g. bcgov
+    value: bcgov
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
@@ -24,9 +30,6 @@ parameters:
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
-  - name: PROMOTE
-    description: Image (namespace/name:tag) to promote/import
-    required: true
   - name: PG_DATABASE
     description: Postgres database name
     value: database
@@ -153,7 +156,7 @@ objects:
         - name: "${IMAGE_TAG}"
           from:
             kind: DockerImage
-            name: "${REGISTRY}/${PROMOTE}"
+            name: "${REGISTRY}/${ORG_NAME}Z/${NAME}/${COMPONENT}:${ZONE}"
           referencePolicy:
             type: Local
   - kind: DeploymentConfig

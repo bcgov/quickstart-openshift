@@ -26,7 +26,6 @@ jobs:
             overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
-            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/migrations:test
             overwrite: true
             verification_path: /api
           - name: frontend
@@ -42,8 +41,8 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           parameters:
-            -p ZONE=test -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
-            -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
+            -p ZONE=test -p NAME=${{ github.event.repository.name }}
+            ${{ matrix.parameters }}
           penetration_test: true
           name: ${{ matrix.name }}
           penetration_test_token: ${{ secrets.GITHUB_TOKEN }}
@@ -147,7 +146,6 @@ jobs:
             overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
-            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/migrations:test
             overwrite: true
             verification_path: /api
           - name: frontend
@@ -162,8 +160,8 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           parameters:
-            -p ZONE=prod -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
-            -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
+            -p ZONE=prod -p NAME=${{ github.event.repository.name }}
+            ${{ matrix.parameters }}
           penetration_test: false
           verification_path: ${{ matrix.verification_path }}
 

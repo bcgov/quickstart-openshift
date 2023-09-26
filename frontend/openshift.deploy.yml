@@ -10,6 +10,12 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: REGISTRY
+    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
+    value: ghcr.io
+  - name: ORG_NAME
+    description: Organization name, e.g. bcgov
+    value: bcgov
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
@@ -29,12 +35,6 @@ parameters:
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "5"
-  - name: REGISTRY
-    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
-    value: ghcr.io
-  - name: PROMOTE
-    description: Image (namespace/name:tag) to promote/import
-    value: bcgov/quickstart-openshift/frontend:prod
   - name: LOG_LEVEL
     description: Caddy logging level DEBUG, INFO, WARN, ERROR, PANIC, and FATAL (https://github.com/caddyserver/caddy/blob/master/logging.go)
     value: "info"
@@ -52,7 +52,7 @@ objects:
         - name: "${IMAGE_TAG}"
           from:
             kind: DockerImage
-            name: "${REGISTRY}/${PROMOTE}"
+            name: "${REGISTRY}/${ORG_NAME}Z/${NAME}/${COMPONENT}:${ZONE}"
           referencePolicy:
             type: Local
   - apiVersion: v1
