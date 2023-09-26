@@ -43,12 +43,6 @@ parameters:
   - name: ORG_NAME
     description: Organization name, e.g. bcgov
     value: bcgov
-  - name: PROMOTE
-    description: Image (namespace/name:tag) to promote/import
-    value: bcgov/quickstart-openshift/backend:test
-  - name: PROMOTE_MIGRATION
-    description: Image (namespace/name:tag) for migration to promote/import
-    value: bcgov/quickstart-openshift/migrations:test
   - name: COMPONENT_DB_MIGRATION
     description: Component name for database migrations
     value: migrations
@@ -66,7 +60,7 @@ objects:
         - name: "${IMAGE_TAG}"
           from:
             kind: DockerImage
-            name: "${REGISTRY}/${PROMOTE}"
+            name: "${REGISTRY}/${ORG_NAME}Z/${NAME}/${COMPONENT}:${ZONE}"
           referencePolicy:
             type: Local
   - apiVersion: v1
@@ -82,7 +76,7 @@ objects:
         - name: "${IMAGE_TAG}"
           from:
             kind: DockerImage
-            name: "${REGISTRY}/${PROMOTE_MIGRATION}"
+            name: "${REGISTRY}/${ORG_NAME}Z/${NAME}/${COMPONENT_DB_MIGRATION}:${ZONE}"
           referencePolicy:
             type: Local
   - apiVersion: v1

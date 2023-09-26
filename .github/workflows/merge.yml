@@ -185,6 +185,23 @@ jobs:
           target: test
           tags: prod
 
+  cleanup:
+    name: Pod cleanup
+    needs: [deploys-prod]
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        environment: [test, prod]
+    steps:
+      - name: Remove OpenShift artifacts
+        environment: ${{ matrix.environment }}
+        run: |
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          oc project ${{ vars.OC_NAMESPACE }}
+
+          # Remove old build runs, build pods and deployment pods
+          oc delete po --field-selector=status.phase==Succeeded
+
   generate-schema-spy:
     name: Generate SchemaSpy Documentation
     runs-on: ubuntu-22.04
