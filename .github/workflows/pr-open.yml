@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
+    timeout-minutes: 1
     steps:
       - name: PR Greeting
         uses: bcgov-nr/action-pr-description-add@v1.1.0
@@ -61,6 +62,7 @@ jobs:
             triggers: ('backend/')
           - package: frontend
             triggers: ('frontend/')
+    timeout-minutes: 10
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v1.2.1
         with:
@@ -78,6 +80,7 @@ jobs:
     if: "!github.event.pull_request.head.repo.fork"
     needs: [builds]
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     strategy:
       matrix:
         name: [database, backend, frontend]
