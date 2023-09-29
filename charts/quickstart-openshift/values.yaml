@@ -1,0 +1,259 @@
+# Default values for fin-pay-transparency.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+nameOverride: ""
+fullnameOverride: ""
+global:
+  secrets:
+    databasePassword: ~ # needed
+    annotation:
+      helm.sh/policy: "keep"
+  zone: ~ # it is required, could be pr-123, dev, test, prod
+  domain: "apps.silver.devops.gov.bc.ca" # it is required, apps.silver.devops.gov.bc.ca for silver cluster
+
+
+backend:
+  enabled: true
+  deployment: # can be either a statefulSet or a deployment not both
+    enabled: true
+  containers:
+    - name: backend
+      repository: ghcr.io/bcgov/quickstart-openshift # example, it includes registry and repository
+      image: backend # the exact component name, be it backend, api-1 etc...
+      tag: test # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      env:
+        fromGlobalSecret:
+          - name: POSTGRES_PASSWORD
+            key: databasePassword
+          - name: POSTGRES_USER
+            key: databaseUser
+          - name: POSTGRES_DATABASE
+            key: databaseName
+        fromValues:
+          - name: POSTGRES_HOST
+            value: '{{ .Release.Name }}-{{ .Values.global.zone }}-database' # this is interpolated, it will be replaced with the actual value
+      ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+      resources: # this is optional
+        limits:
+          cpu: 150m
+          memory: 250Mi
+        requests:
+          cpu: 100m
+          memory: 150Mi
+
+  initContainers:
+    - name: database-migrations
+      repository: ghcr.io/bcgov/quickstart-openshift # example
+      image: database-migrations
+      tag: test
+      env:
+        fromGlobalSecret:
+          - name: FLYWAY_PASSWORD
+            key: databasePassword
+          - name: FLYWAY_USER
+            key: databaseUser
+        fromValues:
+          - name: FLYWAY_URL
+            value: 'jdbc:postgresql://{{ .Release.Name }}-{{ .Values.global.zone }}-database:5432/{{ .Values.global.secrets.databaseName }}'
+          - name: FLYWAY_BASELINE_ON_MIGRATE
+            value: "true"
+          - name: FLYWAY_DEFAULT_SCHEMA
+            value: "USERS"
+      resources:
+        limits:
+          cpu: 250m
+          memory: 250Mi
+        requests:
+          cpu: 200m
+          memory: 150Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 1
+    targetCPUUtilizationPercentage: 80 # this percentage from request cpu
+  vault:
+    enabled: false
+    entrypoint: ~ # the entrypoint for vault, this is the override of container command.
+    role: ~ #licenseplate-prod or licenseplate-nonprod
+    secretPaths: # the paths where secrets live. dev/api-1, dev/api-2, test/api-1 etc...
+      - dev/api-1
+      - dev/api-2
+      - test/api-1
+      - test/api-2
+      - prod/api-1
+      - prod/api-2
+    resources:
+      limits:
+        cpu: 50m
+        memory: 50Mi
+      requests:
+        cpu: 20m
+        memory: 25Mi
+  service:
+    enabled: true
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 80
+        targetPort: 3000 # the container port where the application is listening on
+        protocol: TCP
+  nodeSelector: { }
+  tolerations: [ ]
+  affinity: { }
+
+frontend:
+  enabled: true
+  deployment: # can be either a statefulSet or a deployment not both
+    enabled: true
+  containers:
+    - name: frontend
+      repository: ghcr.io/bcgov/quickstart-openshift # example, it includes registry and repository
+      image: frontend # the exact component name, be it backend, api-1 etc...
+      tag: test # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      env:
+        fromValues:
+          - name: BACKEND_URL
+            value: "https://{{ .Release.Name }}-{{ .Values.global.zone }}-backend.{{ .Values.global.domain }}"
+          - name: LOG_LEVEL
+            value: "info"
+      ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        - name: http2
+          containerPort: 3001
+          protocol: TCP
+      resources: # this is optional
+        limits:
+          cpu: 100m
+          memory: 150Mi
+        requests:
+          cpu: 20m
+          memory: 50Mi
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: 3001
+          scheme: HTTP
+        initialDelaySeconds: 5
+        periodSeconds: 2
+        timeoutSeconds: 2
+        successThreshold: 1
+        failureThreshold: 30
+      livenessProbe:
+        successThreshold: 1
+        failureThreshold: 3
+        httpGet:
+          path: /health
+          port: 3001
+          scheme: HTTP
+        initialDelaySeconds: 15
+        periodSeconds: 30
+        timeoutSeconds: 5
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 1
+    targetCPUUtilizationPercentage: 80 # this percentage from request cpu
+  service:
+    enabled: true
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 80
+        targetPort: 3000 # the container port where the application is listening on
+        protocol: TCP
+
+crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
+  enabled: true
+
+  crunchyImage: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
+
+  postgresVersion: 14
+
+  instances:
+    name: ha # high availability
+    replicas: 2
+    dataVolumeClaimSpec:
+      storage: 480Mi
+      storageClassName: netapp-block-standard
+    requests:
+      cpu: 25m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 512Mi
+    replicaCertCopy:
+      requests:
+        cpu: 1m
+        memory: 32Mi
+      limits:
+        cpu: 50m
+        memory: 64Mi
+
+  pgBackRest:
+    image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
+    retention: "2" # Ideally a larger number such as 30 backups/days
+    # If retention-full-type set to 'count' then the oldest backups will expire when the number of backups reach the number defined in retention
+    # If retention-full-type set to 'time' then the number defined in retention will take that many days worth of full backups before expiration
+    retentionFullType: count
+    repos:
+      schedules:
+        full: 0 8 * * *
+        incremental: 0 0,4,12,16,20 * * *
+      volume:
+        accessModes: "ReadWriteOnce"
+        storage: 64Mi
+        storageClassName: netapp-file-backup
+    repoHost:
+      requests:
+        cpu: 1m
+        memory: 64Mi
+      limits:
+        cpu: 50m
+        memory: 128Mi
+    sidecars:
+      requests:
+        cpu: 1m
+        memory: 64Mi
+      limits:
+        cpu: 50m
+        memory: 128Mi
+
+  patroni:
+    postgresql:
+      pg_hba: "host all all 0.0.0.0/0 md5"
+      parameters:
+        shared_buffers: 16MB # default is 128MB; a good tuned default for shared_buffers is 25% of the memory allocated to the pod
+        wal_buffers: "64kB" # this can be set to -1 to automatically set as 1/32 of shared_buffers or 64kB, whichever is larger
+        min_wal_size: 32MB
+        max_wal_size: 64MB # default is 1GB
+        max_slot_wal_keep_size: 128MB # default is -1, allowing unlimited wal growth when replicas fall behind
+
+  proxy:
+    pgBouncer:
+      image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
+      replicas: 2
+      requests:
+        cpu: 1m
+        memory: 64Mi
+      limits:
+        cpu: 50m
+        memory: 128Mi
+
+  # Postgres Cluster resource values:
+  pgmonitor:
+    enabled: false
+    exporter:
+      image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
+      requests:
+        cpu: 1m
+        memory: 64Mi
+      limits:
+        cpu: 50m
+        memory: 128Mi
+database:
+  enabled: false

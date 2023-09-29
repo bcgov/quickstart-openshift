@@ -1,0 +1,33 @@
+{{- if or .Values.containers .Values.initContainers -}}
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: {{ include "component.fullname" . }}
+  labels:
+    {{- include "component.labels" . | nindent 4 }}
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+{{- if .Values.containers }}
+    {{- range .Values.containers }}
+    - name: {{ .name }}:{{ .tag }}
+      from:
+        kind: DockerImage
+        name: {{ .repository }}/{{ .image }}:{{ .tag }}
+      referencePolicy:
+        type: Local
+   {{- end }}
+{{- if .Values.initContainers }}
+  {{- range .Values.initContainers }}
+    - name: {{ .name }}:{{ .tag }}
+      from:
+        kind: DockerImage
+        name: {{ .repository }}/{{ .image }}:{{ .tag }}
+      referencePolicy:
+        type: Local
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

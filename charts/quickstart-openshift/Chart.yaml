@@ -1,6 +1,6 @@
 apiVersion: v2
-name: database
-description: Postgres
+name: quickstart-openshift
+description: A Helm chart for Kubernetes deployment.
 icon: https://www.nicepng.com/png/detail/521-5211827_bc-icon-british-columbia-government-logo.png
 
 # A chart can be either an 'application' or a 'library' chart.
@@ -23,3 +23,26 @@ version: 0.1.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "1.16.0"
+
+dependencies:
+  - name: component
+    condition: backend.enabled
+    version: 1.0.0
+    alias: backend
+
+  - name: component
+    condition: database.enabled
+    version: 1.0.0
+    alias: database
+
+  - name: component
+    condition: frontend.enabled
+    version: 1.0.0
+    alias: frontend
+
+  - name: crunchy-postgres
+    condition: crunchy.enabled
+    version: 0.5.0
+    repository: https://bcgov.github.io/crunchy-postgres/
+    alias: crunchy
+
