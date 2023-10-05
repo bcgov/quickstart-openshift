@@ -3,13 +3,22 @@ kind: Template
 parameters:
   - name: NAME
     description: Module name
-    value: quickstart-openshift
+    required: true
   - name: COMPONENT
     description: Component name
     value: backend
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: REGISTRY
+    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
+    value: ghcr.io
+  - name: ORG_NAME
+    description: Organization name, e.g. bcgov
+    value: bcgov
+  - name: COMPONENT_DB_MIGRATION
+    description: Component name for database migrations
+    value: migrations
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
@@ -37,21 +46,6 @@ parameters:
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "5"
-  - name: REGISTRY
-    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
-    value: ghcr.io
-  - name: ORG_NAME
-    description: Organization name, e.g. bcgov
-    value: bcgov
-  - name: PROMOTE
-    description: Image (namespace/name:tag) to promote/import
-    value: bcgov/quickstart-openshift/backend:test
-  - name: PROMOTE_MIGRATION
-    description: Image (namespace/name:tag) for migration to promote/import
-    value: bcgov/quickstart-openshift/migrations:test
-  - name: COMPONENT_DB_MIGRATION
-    description: Component name for database migrations
-    value: migrations
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -66,7 +60,7 @@ objects:
         - name: "${IMAGE_TAG}"
           from:
             kind: DockerImage
-            name: "${REGISTRY}/${PROMOTE}"
+            name: "${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${ZONE}"
           referencePolicy:
             type: Local
   - apiVersion: v1
@@ -82,7 +76,7 @@ objects:
         - name: "${IMAGE_TAG}"
           from:
             kind: DockerImage
-            name: "${REGISTRY}/${PROMOTE_MIGRATION}"
+            name: "${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT_DB_MIGRATION}:${ZONE}"
           referencePolicy:
             type: Local
   - apiVersion: v1

@@ -26,7 +26,6 @@ jobs:
             overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
-            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/migrations:test
             overwrite: true
             verification_path: /api
           - name: frontend
@@ -42,8 +41,8 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           parameters:
-            -p ZONE=test -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
-            -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
+            -p ZONE=test -p NAME=${{ github.event.repository.name }}
+            ${{ matrix.parameters }}
           penetration_test: true
           name: ${{ matrix.name }}
           penetration_test_token: ${{ secrets.GITHUB_TOKEN }}
@@ -147,7 +146,6 @@ jobs:
             overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
-            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/migrations:test
             overwrite: true
             verification_path: /api
           - name: frontend
@@ -162,8 +160,8 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           parameters:
-            -p ZONE=prod -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
-            -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
+            -p ZONE=prod -p NAME=${{ github.event.repository.name }}
+            ${{ matrix.parameters }}
           penetration_test: false
           verification_path: ${{ matrix.verification_path }}
 
@@ -184,6 +182,23 @@ jobs:
           repository: ${{ github.repository }}/${{ matrix.component }}
           target: test
           tags: prod
+
+  cleanup:
+    name: Pod cleanup
+    needs: [deploys-prod]
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        environment: [test, prod]
+    steps:
+      - name: Remove OpenShift artifacts
+        environment: ${{ matrix.environment }}
+        run: |
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          oc project ${{ vars.OC_NAMESPACE }}
+
+          # Remove old build runs, build pods and deployment pods
+          oc delete po --field-selector=status.phase==Succeeded
 
   generate-schema-spy:
     name: Generate SchemaSpy Documentation

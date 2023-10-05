@@ -33,7 +33,7 @@ jobs:
 
             Deployments, as required, will be available below:
             - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }})
-            - [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }})
+            - [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/api)
 
             Please create PRs in draft mode.  Mark as ready to enable:
             - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
@@ -93,7 +93,6 @@ jobs:
             file: backend/openshift.deploy.yml
             overwrite: true
             parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-              -p PROMOTE_MIGRATION=${{ github.repository }}/migrations:${{ github.event.number }}
             triggers: ('database/' 'backend/' 'frontend/')
             verification_path: /api
           - name: frontend
@@ -112,7 +111,6 @@ jobs:
           penetration_test: false
           parameters:
             -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path }}
