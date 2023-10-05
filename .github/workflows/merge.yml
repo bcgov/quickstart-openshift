@@ -48,6 +48,20 @@ jobs:
           penetration_test_token: ${{ secrets.GITHUB_TOKEN }}
           verification_path: ${{ matrix.verification_path }}
 
+  cleanup-test:
+    name: PROD Pod cleanup
+    needs: [deploys-test]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Remove OpenShift artifacts
+        environment: test
+        run: |
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          oc project ${{ vars.OC_NAMESPACE }}
+
+          # Remove old build runs, build pods and deployment pods
+          oc delete po --field-selector=status.phase==Succeeded
+
   integration-tests:
     needs: [deploys-test]
     name: Integration Tests for APIs
@@ -165,6 +179,20 @@ jobs:
           penetration_test: false
           verification_path: ${{ matrix.verification_path }}
 
+  cleanup-prod:
+    name: PROD Pod cleanup
+    needs: [deploys-prod]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Remove OpenShift artifacts
+        environment: prod
+        run: |
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          oc project ${{ vars.OC_NAMESPACE }}
+
+          # Remove old build runs, build pods and deployment pods
+          oc delete po --field-selector=status.phase==Succeeded
+
   image-promotions:
     name: Promote images
     needs: [deploys-prod]
@@ -182,23 +210,6 @@ jobs:
           repository: ${{ github.repository }}/${{ matrix.component }}
           target: test
           tags: prod
-
-  cleanup:
-    name: Pod cleanup
-    needs: [deploys-prod]
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        environment: [test, prod]
-    steps:
-      - name: Remove OpenShift artifacts
-        environment: ${{ matrix.environment }}
-        run: |
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
-          oc project ${{ vars.OC_NAMESPACE }}
-
-          # Remove old build runs, build pods and deployment pods
-          oc delete po --field-selector=status.phase==Succeeded
 
   generate-schema-spy:
     name: Generate SchemaSpy Documentation
