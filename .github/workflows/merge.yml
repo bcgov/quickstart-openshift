@@ -48,6 +48,20 @@ jobs:
           penetration_test_token: ${{ secrets.GITHUB_TOKEN }}
           verification_path: ${{ matrix.verification_path }}
 
+  cleanup-test:
+    name: PROD Pod cleanup
+    needs: [deploys-test]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Remove OpenShift artifacts
+        environment: test
+        run: |
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          oc project ${{ vars.OC_NAMESPACE }}
+
+          # Remove old build runs, build pods and deployment pods
+          oc delete po --field-selector=status.phase==Succeeded
+
   integration-tests:
     needs: [deploys-test]
     name: Integration Tests for APIs
@@ -74,7 +88,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run integration tests
-        run: BASE_URL=https://quickstart-openshift-test-backend.apps.silver.devops.gov.bc.ca API_NAME=nest  node src/main.js
+        run: BASE_URL=https://${{ github.event.repository.name }}-test-backend.apps.silver.devops.gov.bc.ca API_NAME=nest  node src/main.js
 
   cypress-e2e:
     name: Cypress end to end test
@@ -102,10 +116,13 @@ jobs:
         name: List the state of node modules
         continue-on-error: true
         run: npm list
+
       - uses: cypress-io/github-action@v6
         name: Cypress run
+        env:
+          CYPRESS_baseUrl: https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca/
         with:
-          config: pageLoadTimeout=10000,baseUrl=https://quickstart-openshift-test-frontend.apps.silver.devops.gov.bc.ca/
+          config: pageLoadTimeout=10000
           working-directory: ./frontend
           browser: ${{ matrix.browser }}
       - uses: actions/upload-artifact@v3
@@ -165,6 +182,20 @@ jobs:
           penetration_test: false
           verification_path: ${{ matrix.verification_path }}
 
+  cleanup-prod:
+    name: PROD Pod cleanup
+    needs: [deploys-prod]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Remove OpenShift artifacts
+        environment: prod
+        run: |
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          oc project ${{ vars.OC_NAMESPACE }}
+
+          # Remove old build runs, build pods and deployment pods
+          oc delete po --field-selector=status.phase==Succeeded
+
   image-promotions:
     name: Promote images
     needs: [deploys-prod]
@@ -182,23 +213,6 @@ jobs:
           repository: ${{ github.repository }}/${{ matrix.component }}
           target: test
           tags: prod
-
-  cleanup:
-    name: Pod cleanup
-    needs: [deploys-prod]
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        environment: [test, prod]
-    steps:
-      - name: Remove OpenShift artifacts
-        environment: ${{ matrix.environment }}
-        run: |
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
-          oc project ${{ vars.OC_NAMESPACE }}
-
-          # Remove old build runs, build pods and deployment pods
-          oc delete po --field-selector=status.phase==Succeeded
 
   generate-schema-spy:
     name: Generate SchemaSpy Documentation
