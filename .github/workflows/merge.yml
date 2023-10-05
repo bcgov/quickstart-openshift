@@ -50,11 +50,11 @@ jobs:
 
   cleanup-test:
     name: PROD Pod cleanup
+    environment: test
     needs: [deploys-test]
     runs-on: ubuntu-22.04
     steps:
       - name: Remove OpenShift artifacts
-        environment: test
         run: |
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
@@ -184,11 +184,11 @@ jobs:
 
   cleanup-prod:
     name: PROD Pod cleanup
+    environment: prod
     needs: [deploys-prod]
     runs-on: ubuntu-22.04
     steps:
       - name: Remove OpenShift artifacts
-        environment: prod
         run: |
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
