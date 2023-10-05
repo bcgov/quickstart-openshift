@@ -171,10 +171,10 @@ frontend:
 crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
   enabled: true
 
-  #crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres-gis:ubi8-15.2-3.3-0
+  crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres-gis:ubi8-15.2-3.3-0
 
   postgresVersion: 15
-  #postGISVersion: '3.3'
+  postGISVersion: '3.3'
   instances:
     name: ha # high availability
     replicas: 1
