@@ -132,7 +132,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        component: [database, backend, frontend]
+        component: [database, backend, migrations, frontend]
     timeout-minutes: 1
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
