@@ -43,7 +43,6 @@ jobs:
           parameters:
             -p ZONE=test -p NAME=${{ github.event.repository.name }}
             ${{ matrix.parameters }}
-          penetration_test: true
           name: ${{ matrix.name }}
           penetration_test_token: ${{ secrets.GITHUB_TOKEN }}
           verification_path: ${{ matrix.verification_path }}
@@ -179,7 +178,6 @@ jobs:
           parameters:
             -p ZONE=prod -p NAME=${{ github.event.repository.name }}
             ${{ matrix.parameters }}
-          penetration_test: false
           verification_path: ${{ matrix.verification_path }}
 
   cleanup-prod:
