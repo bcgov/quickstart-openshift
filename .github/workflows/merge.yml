@@ -48,7 +48,7 @@ jobs:
           verification_path: ${{ matrix.verification_path }}
 
   cleanup-test:
-    name: PROD Pod cleanup
+    name: TEST Pod cleanup
     environment: test
     needs: [deploys-test]
     runs-on: ubuntu-22.04
@@ -80,10 +80,7 @@ jobs:
             ${{ runner.os }}-build-cache-node-modules-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
-      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-        name: List the state of node modules
-        continue-on-error: true
-        run: npm list
+
       - name: Install dependencies
         run: npm ci
       - name: Run integration tests
@@ -111,10 +108,6 @@ jobs:
             ${{ runner.os }}-build-cache-node-modules-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
-      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-        name: List the state of node modules
-        continue-on-error: true
-        run: npm list
 
       - uses: cypress-io/github-action@v6
         name: Cypress run
@@ -131,25 +124,27 @@ jobs:
           path: ./cypress/screenshots
           if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
 
-  ghcr-cleanup:
-    name: GHCR Cleanup
-    runs-on: ubuntu-latest
+  image-promotions:
+    name: Promote images
+    needs: [integration-tests, cypress-e2e, cleanup-test]
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
     strategy:
       matrix:
-        name: [database, migrations, backend, frontend]
+        component: [database, backend, frontend]
     timeout-minutes: 1
     steps:
-      - name: Keep last 50
-        uses: actions/delete-package-versions@v4
+      - uses: shrink/actions-docker-registry-tag@v3
         with:
-          package-name: "${{ github.event.repository.name }}/${{ matrix.name }}"
-          package-type: "container"
-          min-versions-to-keep: 50
-          ignore-versions: "^(prod|test)$"
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.component }}
+          target: test
+          tags: prod
 
   deploys-prod:
     name: PROD Deploys
-    needs: [integration-tests, cypress-e2e]
+    needs: [image-promotions]
     environment: prod
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -194,24 +189,6 @@ jobs:
           # Remove old build runs, build pods and deployment pods
           oc delete po --field-selector=status.phase==Succeeded
 
-  image-promotions:
-    name: Promote images
-    needs: [deploys-prod]
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        component: [database, backend, frontend]
-    timeout-minutes: 1
-    steps:
-      - uses: shrink/actions-docker-registry-tag@v3
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.component }}
-          target: test
-          tags: prod
-
   generate-schema-spy:
     name: Generate SchemaSpy Documentation
     runs-on: ubuntu-22.04
@@ -253,3 +230,19 @@ jobs:
         with:
           folder: output
           target-folder: schemaspy
+
+  ghcr-cleanup:
+    name: GHCR Cleanup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        name: [database, migrations, backend, frontend]
+    timeout-minutes: 1
+    steps:
+      - name: Keep last 50
+        uses: actions/delete-package-versions@v4
+        with:
+          package-name: "${{ github.event.repository.name }}/${{ matrix.name }}"
+          package-type: "container"
+          min-versions-to-keep: 50
+          ignore-versions: "^(prod|test)$"
