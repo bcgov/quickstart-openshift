@@ -33,7 +33,7 @@ jobs:
 
             Deployments, as required, will be available below:
             - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }})
-            - [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }})
+            - [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/api)
 
             Please create PRs in draft mode.  Mark as ready to enable:
             - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
