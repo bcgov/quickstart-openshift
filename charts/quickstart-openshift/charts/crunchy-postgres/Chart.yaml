@@ -1,7 +1,6 @@
 apiVersion: v2
-name: quickstart-openshift
-description: A Helm chart for Kubernetes deployment.
-icon: https://www.nicepng.com/png/detail/521-5211827_bc-icon-british-columbia-government-logo.png
+name: crunchy-postgres
+description: A Helm chart for Kubernetes
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -16,27 +15,12 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.1.0
+version: 0.5.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "1.16.0"
 
-dependencies:
-  - name: component
-    condition: backend.enabled
-    version: 1.0.0
-    alias: backend
-
-  - name: component
-    condition: frontend.enabled
-    version: 1.0.0
-    alias: frontend
-
-  - name: crunchy-postgres
-    condition: crunchy.enabled
-    version: 0.5.0
-    alias: crunchy
-
+# Crunchy Postgres Operator version
+appVersion: "5.0.4"

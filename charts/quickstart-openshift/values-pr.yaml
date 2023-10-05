@@ -2,15 +2,15 @@
 # Declare variables to be passed into your templates.
 global:
   secrets:
-    databasePassword: ~ # needed
+    databasePassword: 'abc123#' # needed
     annotation:
       helm.sh/policy: "keep"
-  zone: test # it is required, could be pr-123, dev, test, prod
+  zone: 'test' # it is required, could be pr-123, dev, test, prod
   domain: "apps.silver.devops.gov.bc.ca" # it is required, apps.silver.devops.gov.bc.ca for silver cluster
 
 
 backend:
-  enabled: true
+  enabled: false
   deployment: # can be either a statefulSet or a deployment not both
     enabled: true
   containers:
@@ -102,7 +102,7 @@ backend:
   affinity: { }
 
 frontend:
-  enabled: true
+  enabled: false
   deployment: # can be either a statefulSet or a deployment not both
     enabled: true
   containers:
@@ -128,7 +128,7 @@ frontend:
           cpu: 100m
           memory: 150Mi
         requests:
-          cpu: 20m
+          cpu: 50m
           memory: 50Mi
       readinessProbe:
         httpGet:
@@ -152,8 +152,8 @@ frontend:
         timeoutSeconds: 5
   autoscaling:
     enabled: true
-    minReplicas: 3
-    maxReplicas: 5
+    minReplicas: 1
+    maxReplicas: 1
     targetCPUUtilizationPercentage: 80 # this percentage from request cpu
   service:
     enabled: true
@@ -171,13 +171,13 @@ frontend:
 crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
   enabled: true
 
-  crunchyImage: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
+  #crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres-gis:ubi8-15.2-3.3-0
 
-  postgresVersion: 14
-
+  postgresVersion: 15
+  #postGISVersion: '3.3'
   instances:
     name: ha # high availability
-    replicas: 2
+    replicas: 1
     dataVolumeClaimSpec:
       storage: 480Mi
       storageClassName: netapp-block-standard
@@ -196,8 +196,9 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
         memory: 64Mi
 
   pgBackRest:
+    enabled: false
     image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
-    retention: "2" # Ideally a larger number such as 30 backups/days
+    retention: "1" # Ideally a larger number such as 30 backups/days
     # If retention-full-type set to 'count' then the oldest backups will expire when the number of backups reach the number defined in retention
     # If retention-full-type set to 'time' then the number defined in retention will take that many days worth of full backups before expiration
     retentionFullType: count
@@ -237,7 +238,7 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
   proxy:
     pgBouncer:
       image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
-      replicas: 2
+      replicas: 1
       requests:
         cpu: 1m
         memory: 64Mi
@@ -256,5 +257,3 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
       limits:
         cpu: 50m
         memory: 128Mi
-database:
-  enabled: false
