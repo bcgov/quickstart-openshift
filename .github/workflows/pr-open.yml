@@ -56,7 +56,6 @@ jobs:
             triggers: ('database/')
           - package: migrations
             build_context: ./backend/db
-            build_file: ./backend/db/Dockerfile
             triggers: ('backend/db')
           - package: backend
             triggers: ('backend/')
@@ -73,7 +72,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ${{ matrix.triggers }}
           build_context: ${{ matrix.build_context }}
-          build_file: ${{ matrix.build_file }}
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
