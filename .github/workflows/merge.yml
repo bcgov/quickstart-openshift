@@ -188,19 +188,3 @@ jobs:
 
           # Remove old build runs, build pods and deployment pods
           oc delete po --field-selector=status.phase==Succeeded
-
-  ghcr-cleanup:
-    name: GHCR Cleanup
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        name: [database, migrations, backend, frontend]
-    timeout-minutes: 1
-    steps:
-      - name: Keep last 50
-        uses: actions/delete-package-versions@v4
-        with:
-          package-name: "${{ github.event.repository.name }}/${{ matrix.name }}"
-          package-type: "container"
-          min-versions-to-keep: 50
-          ignore-versions: "^(prod|test)$"
