@@ -64,7 +64,7 @@ jobs:
             triggers: ('frontend/')
     timeout-minutes: 10
     steps:
-      - uses: bcgov-nr/action-builder-ghcr@v1.2.1
+      - uses: bcgov-nr/action-builder-ghcr@v1.3.0
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
