@@ -9,7 +9,7 @@ spec:
   {{ if .Values.crunchyImage }}
   image: {{ .Values.crunchyImage }}
   {{ end }}
-  imagePullPolicy: 'Always'
+  imagePullPolicy: {{.Values.imagePullPolicy}}
   postgresVersion: {{ .Values.postgresVersion }}
   {{ if .Values.postGISVersion }}
   postGISVersion: {{ .Values.postGISVersion | quote }}
@@ -35,6 +35,10 @@ spec:
 
   instances:
     - name: {{ .Values.instances.name }}
+      {{- if .Values.instances.metadata }}
+      metadata:
+        {{- toYaml .Values.instances.metadata | nindent 8 }}
+      {{- end }}
       replicas: {{ .Values.instances.replicas }}
       resources:
         requests:
@@ -136,7 +140,19 @@ spec:
           min_wal_size: {{ .Values.patroni.postgresql.parameters.min_wal_size }}
           max_wal_size: {{ .Values.patroni.postgresql.parameters.max_wal_size }}
           max_slot_wal_keep_size:  {{ .Values.patroni.postgresql.parameters.max_slot_wal_keep_size }}
-
+    credentials:
+      superuser:
+        username: postgres
+        password: tea
+      admin:
+        username: admin
+        password: cola
+      standby:
+        username: standby
+        password: pinacolada
+      appuser:
+        username: appuser
+        password: pop
 
   proxy:
     pgBouncer:

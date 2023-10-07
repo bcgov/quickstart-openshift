@@ -142,7 +142,11 @@ spec:
             - name: {{$item.name}} # the env variable name
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "component.fullname" $ }}
+                  {{- if $item.secretName }}
+                  name: {{tpl $item.secretName $}}
+                  {{- else }}
+                   name: {{ include "component.fullname" $ }}
+                  {{- end }}
                   key: {{$item.key}} # the key of secret
           {{- end }}
           {{- end }}
@@ -151,7 +155,11 @@ spec:
             - name: {{$item.name}} # the env variable name
               valueFrom:
                 secretKeyRef:
+                  {{- if $item.secretName }}
+                  name: {{tpl $item.secretName $}}
+                  {{- else }}
                   name: {{ $releaseFullName }}
+                  {{- end }}
                   key: {{$item.key}} # the key of secret
           {{- end }}
           {{- end }}

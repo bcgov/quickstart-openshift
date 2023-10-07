@@ -2,10 +2,8 @@
 # Declare variables to be passed into your templates.
 global:
   secrets:
-    databasePassword: 'abc123#' # needed
     annotation:
       helm.sh/policy: "keep"
-  zone: 'test' # it is required, could be pr-123, dev, test, prod
   domain: "apps.silver.devops.gov.bc.ca" # it is required, apps.silver.devops.gov.bc.ca for silver cluster
 
 
@@ -19,16 +17,19 @@ backend:
       image: backend # the exact component name, be it backend, api-1 etc...
       tag: test # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
       env:
-        fromGlobalSecret:
+        fromLocalSecret:
           - name: POSTGRES_PASSWORD
-            key: databasePassword
+            key: password
+            secretName: '{{ .Release.Name }}-pg-pguser-{{ .Release.Name }}-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
           - name: POSTGRES_USER
-            key: databaseUser
+            key: user
+            secretName: '{{ .Release.Name }}-pg-pguser-{{ .Release.Name }}-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for
           - name: POSTGRES_DATABASE
-            key: databaseName
+            key: dbname
+            secretName: '{{ .Release.Name }}-pg-pguser-{{ .Release.Name }}-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for
         fromValues:
           - name: POSTGRES_HOST
-            value: '{{ .Release.Name }}-{{ .Values.global.zone }}-database' # this is interpolated, it will be replaced with the actual value
+            value: '{{ .Release.Name }}-pg-pgbouncer' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
       ports:
         - name: http
           containerPort: 3000
@@ -44,17 +45,19 @@ backend:
   initContainers:
     - name: database-migrations
       repository: ghcr.io/bcgov/quickstart-openshift # example
-      image: database-migrations
+      image: migrations
       tag: test
       env:
         fromGlobalSecret:
           - name: FLYWAY_PASSWORD
-            key: databasePassword
+            key: password
+            secretName: '{{ .Release.Name }}-pg-pguser-{{ .Release.Name }}-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
           - name: FLYWAY_USER
-            key: databaseUser
+            key: user
+            secretName: '{{ .Release.Name }}-pg-pguser-{{ .Release.Name }}-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for
         fromValues:
           - name: FLYWAY_URL
-            value: 'jdbc:postgresql://{{ .Release.Name }}-{{ .Values.global.zone }}-database:5432/{{ .Values.global.secrets.databaseName }}'
+            value: 'jdbc:postgresql://{{ .Release.Name }}-pg-pgbouncer:5432/{{ .Release.Name }}-pg'
           - name: FLYWAY_BASELINE_ON_MIGRATE
             value: "true"
           - name: FLYWAY_DEFAULT_SCHEMA
@@ -168,18 +171,23 @@ frontend:
     host: "{{ .Release.Name }}-{{ .Values.global.zone }}-frontend-{{ .Release.Namespace }}.{{ .Values.global.domain }}"
     targetPort: http # look at line#164 refer to the name.
 
-crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
+pg: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
   enabled: true
 
   crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres-gis:ubi8-15.2-3.3-0
 
   postgresVersion: 15
   postGISVersion: '3.3'
+  imagePullPolicy: Always
   instances:
     name: ha # high availability
-    replicas: 1
+    replicas: 1 # 2 or 3 for high availability in TEST and PROD.
+    metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9187'
     dataVolumeClaimSpec:
-      storage: 480Mi
+      storage: 120Mi
       storageClassName: netapp-block-standard
     requests:
       cpu: 25m
