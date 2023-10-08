@@ -5,31 +5,30 @@ global:
     annotation:
       helm.sh/policy: "keep"
   domain: "apps.silver.devops.gov.bc.ca" # it is required, apps.silver.devops.gov.bc.ca for silver cluster
-
+  openshiftImageRegistry: "image-registry.openshift-image-registry.svc:5000"
 
 backend:
-  enabled: false
+  enabled: true
   deployment: # can be either a statefulSet or a deployment not both
     enabled: true
   containers:
     - name: backend
       repository: ghcr.io/bcgov/quickstart-openshift # example, it includes registry and repository
       image: backend # the exact component name, be it backend, api-1 etc...
-      tag: test # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      tag: prod # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
       env:
         fromLocalSecret:
           - name: POSTGRES_PASSWORD
             key: password
-            secretName: '{{ .Release.Name }}-pg-pguser-{{ .Release.Name }}-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
-          - name: POSTGRES_USER
-            key: user
-            secretName: '{{ .Release.Name }}-pg-pguser-{{ .Release.Name }}-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for
-          - name: POSTGRES_DATABASE
-            key: dbname
-            secretName: '{{ .Release.Name }}-pg-pguser-{{ .Release.Name }}-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for
+            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+
         fromValues:
           - name: POSTGRES_HOST
-            value: '{{ .Release.Name }}-pg-pgbouncer' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+            value: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+          - name: POSTGRES_USER
+            value: quickstart
+          - name: POSTGRES_DATABASE
+            value: quickstart
       ports:
         - name: http
           containerPort: 3000
@@ -41,27 +40,45 @@ backend:
         requests:
           cpu: 100m
           memory: 150Mi
-
+      readinessProbe:
+        httpGet:
+          path: /api
+          port: 3000
+          scheme: HTTP
+        initialDelaySeconds: 5
+        periodSeconds: 2
+        timeoutSeconds: 2
+        successThreshold: 1
+        failureThreshold: 30
+      livenessProbe:
+        successThreshold: 1
+        failureThreshold: 3
+        httpGet:
+          path: /api
+          port: 3000
+          scheme: HTTP
+        initialDelaySeconds: 15
+        periodSeconds: 30
+        timeoutSeconds: 5
   initContainers:
     - name: database-migrations
       repository: ghcr.io/bcgov/quickstart-openshift # example
       image: migrations
-      tag: test
+      tag: prod
       env:
-        fromGlobalSecret:
+        fromLocalSecret:
           - name: FLYWAY_PASSWORD
             key: password
-            secretName: '{{ .Release.Name }}-pg-pguser-{{ .Release.Name }}-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
-          - name: FLYWAY_USER
-            key: user
-            secretName: '{{ .Release.Name }}-pg-pguser-{{ .Release.Name }}-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for
+            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
         fromValues:
           - name: FLYWAY_URL
-            value: 'jdbc:postgresql://{{ .Release.Name }}-pg-pgbouncer:5432/{{ .Release.Name }}-pg'
+            value: 'jdbc:postgresql://{{ .Release.Name }}-bitnami-pg:5432/quickstart'
           - name: FLYWAY_BASELINE_ON_MIGRATE
             value: "true"
           - name: FLYWAY_DEFAULT_SCHEMA
             value: "USERS"
+          - name: FLYWAY_USER
+            value: "quickstart"
       resources:
         limits:
           cpu: 250m
@@ -105,18 +122,21 @@ backend:
   affinity: { }
 
 frontend:
-  enabled: false
+  enabled: true
   deployment: # can be either a statefulSet or a deployment not both
     enabled: true
   containers:
     - name: frontend
       repository: ghcr.io/bcgov/quickstart-openshift # example, it includes registry and repository
       image: frontend # the exact component name, be it backend, api-1 etc...
-      tag: test # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      tag: prod # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      securityContext:
+        capabilities:
+          add: [ "NET_BIND_SERVICE" ]
       env:
         fromValues:
           - name: BACKEND_URL
-            value: "https://{{ .Release.Name }}-{{ .Values.global.zone }}-backend.{{ .Values.global.domain }}"
+            value: "http://{{ .Release.Name }}-backend"
           - name: LOG_LEVEL
             value: "info"
       ports:
@@ -168,11 +188,11 @@ frontend:
         protocol: TCP
   route:
     enabled: true
-    host: "{{ .Release.Name }}-{{ .Values.global.zone }}-frontend-{{ .Release.Namespace }}.{{ .Values.global.domain }}"
+    host: "{{ .Release.Name }}-frontend.{{ .Values.global.domain }}"
     targetPort: http # look at line#164 refer to the name.
 
 pg: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
-  enabled: true
+  enabled: false
 
   crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres-gis:ubi8-15.2-3.3-0
 
@@ -265,3 +285,39 @@ pg: # enable it for TEST and PROD, for PR based pipelines simply use single post
       limits:
         cpu: 50m
         memory: 128Mi
+
+bitnami-pg:
+  enabled: true
+  auth:
+    username: quickstart
+    password: default
+    database: quickstart
+  shmVolume:
+    enabled: false
+  backup:
+    enabled: true
+    cronjob:
+      containerSecurityContext: {}
+      podSecurityContext:
+        enabled: false
+      storage:
+        size: 200Mi
+  primary:
+    persistence:
+        enabled: true
+        storageClass: netapp-file-standard
+        accessModes:
+        - ReadWriteOnce
+        size: 100Mi
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false
+
+    resources:
+        requests:
+          cpu: 50m
+          memory: 150Mi
+        limits:
+          cpu: 150m
+          memory: 250Mi

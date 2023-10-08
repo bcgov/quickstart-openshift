@@ -1,33 +1,45 @@
 {{- if or .Values.containers .Values.initContainers -}}
+
+{{- if .Values.containers }}
+{{- range .Values.containers }}
 ---
 apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
-  name: {{ include "component.fullname" . }}
+  name: {{ $.Release.Name }}-{{ .name }}
   labels:
-    {{- include "component.labels" . | nindent 4 }}
+    {{- include "component.labels" $ | nindent 4 }}
 spec:
   lookupPolicy:
     local: false
   tags:
-{{- if .Values.containers }}
-    {{- range .Values.containers }}
-    - name: {{ .name }}:{{ .tag }}
+    - name: {{ .tag }}
       from:
         kind: DockerImage
-        name: {{ .repository }}/{{ .image }}:{{ .tag }}
+        name: '{{ .repository }}/{{ .image }}:{{ .tag }}'
       referencePolicy:
         type: Local
-   {{- end }}
+{{- end }}
+{{- end }}
 {{- if .Values.initContainers }}
-  {{- range .Values.initContainers }}
-    - name: {{ .name }}:{{ .tag }}
+{{- range .Values.initContainers }}
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: {{ $.Release.Name }}-{{ .name }}
+  labels:
+    {{- include "component.labels" $ | nindent 4 }}
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - name: {{ .tag }}
       from:
         kind: DockerImage
-        name: {{ .repository }}/{{ .image }}:{{ .tag }}
+        name: '{{ .repository }}/{{ .image }}:{{ .tag }}'
       referencePolicy:
         type: Local
-  {{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

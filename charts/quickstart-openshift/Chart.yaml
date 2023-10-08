@@ -40,3 +40,7 @@ dependencies:
     version: 0.5.0
     alias: pg
 
+  - name: postgresql
+    version: 13.0.0
+    repository: https://charts.bitnami.com/bitnami
+    alias: bitnami-pg

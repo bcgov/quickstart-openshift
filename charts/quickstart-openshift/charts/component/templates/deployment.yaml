@@ -1,6 +1,6 @@
 {{- if .Values.deployment }}
 {{- $releaseName := .Release.Name }}
-{{- $releaseFullName := printf "%s-%s" .Release.Name .Values.global.zone }}
+{{- $componentFullName := include "component.fullname" . }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -45,7 +45,7 @@ spec:
       initContainers:
       {{- range .Values.initContainers }}
         - name: {{ .name }}
-          image: {{ .name }}:{{ .tag }}
+          image: '{{$.Values.global.openshiftImageRegistry}}/{{$.Release.Namespace}}/{{$releaseName}}-{{ .name }}:{{ .tag }}'
           imagePullPolicy: Always
           {{- if .env }}
           env:
@@ -63,7 +63,7 @@ spec:
             - name: {{$item.name}} # the env variable name
               valueFrom:
                 configMapKeyRef:
-                  name: {{ $releaseFullName }}
+                  name: {{ $releaseName }}
                   key: {{$item.key}} # the key of configmap
           {{- end }}
           {{- end }}
@@ -72,7 +72,12 @@ spec:
             - name: {{$item.name}} # the env variable name
               valueFrom:
                 secretKeyRef:
+                  {{- if $item.secretName }}
+                  name: {{tpl $item.secretName $}}
+                  {{- else }}
                   name: {{ include "component.fullname" $ }}
+                  {{- end }}
+
                   key: {{$item.key}} # the key of secret
           {{- end }}
           {{- end }}
@@ -81,7 +86,11 @@ spec:
             - name: {{$item.name}} # the env variable name
               valueFrom:
                 secretKeyRef:
-                  name: {{ $releaseFullName  }}
+                  {{- if $item.secretName }}
+                  name: {{tpl $item.secretName $}}
+                  {{- else }}
+                  name: {{ $releaseName }}
+                  {{- end }}
                   key: {{$item.key}} # the key of secret
           {{- end }}
           {{- end }}
@@ -93,18 +102,36 @@ spec:
           {{- end }}
           {{- end }}
           {{- end }}
+          {{- if .resources}}
+          {{- with .resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- else }}
+          resources:
+            limits:
+              cpu: 100m
+              memory: 250Mi
+            requests:
+              cpu: 20m
+              memory: 50Mi
+          {{- end }}
       {{- end }}
       {{- end }}
       containers:
       {{- range .Values.containers }}
         - name: {{ .name }}
+          {{- if .securityContext }}
+          securityContext:
+          {{- toYaml .securityContext | nindent 12 }}
+          {{- end}}
           {{- if and .vault .vault.enabled }}
           args:
             - 'sh'
             - '-c'
             - '{{- range $k := .vault.secretPaths }}source /vault/secrets/{{$k}} && {{- end}}{{ .vault.entrypoint }}'
           {{- end}}
-          image: '{{ .name }}:{{ .tag }}'
+          image: '{{$.Values.global.openshiftImageRegistry}}/{{$.Release.Namespace}}/{{$releaseName}}-{{ .name }}:{{ .tag }}'
           imagePullPolicy: Always
           {{- if .envFrom }}
           envFrom:
@@ -133,7 +160,7 @@ spec:
             - name: {{$item.name}} # the env variable name
               valueFrom:
                 configMapKeyRef:
-                  name: {{ $releaseFullName }}
+                  name: {{ $releaseName }}
                   key: {{$item.key}} # the key of configmap
           {{- end }}
           {{- end }}
@@ -145,7 +172,7 @@ spec:
                   {{- if $item.secretName }}
                   name: {{tpl $item.secretName $}}
                   {{- else }}
-                   name: {{ include "component.fullname" $ }}
+                  name: {{ include "component.fullname" $ }}
                   {{- end }}
                   key: {{$item.key}} # the key of secret
           {{- end }}
@@ -158,7 +185,7 @@ spec:
                   {{- if $item.secretName }}
                   name: {{tpl $item.secretName $}}
                   {{- else }}
-                  name: {{ $releaseFullName }}
+                  name: {{ $releaseName }}
                   {{- end }}
                   key: {{$item.key}} # the key of secret
           {{- end }}
