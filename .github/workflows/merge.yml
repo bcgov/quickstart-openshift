@@ -26,7 +26,6 @@ jobs:
             overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
-            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/migrations:test
             overwrite: true
             verification_path: /api
           - name: frontend
@@ -42,12 +41,25 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           parameters:
-            -p ZONE=test -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
-            -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
-          penetration_test: true
+            -p ZONE=test -p NAME=${{ github.event.repository.name }}
+            ${{ matrix.parameters }}
           name: ${{ matrix.name }}
           penetration_test_token: ${{ secrets.GITHUB_TOKEN }}
           verification_path: ${{ matrix.verification_path }}
+
+  cleanup-test:
+    name: TEST Pod cleanup
+    environment: test
+    needs: [deploys-test]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Remove OpenShift artifacts
+        run: |
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          oc project ${{ vars.OC_NAMESPACE }}
+
+          # Remove old build runs, build pods and deployment pods
+          oc delete po --field-selector=status.phase==Succeeded
 
   integration-tests:
     needs: [deploys-test]
@@ -68,14 +80,11 @@ jobs:
             ${{ runner.os }}-build-cache-node-modules-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
-      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-        name: List the state of node modules
-        continue-on-error: true
-        run: npm list
+
       - name: Install dependencies
         run: npm ci
       - name: Run integration tests
-        run: BASE_URL=https://quickstart-openshift-test-backend.apps.silver.devops.gov.bc.ca API_NAME=nest  node src/main.js
+        run: BASE_URL=https://${{ github.event.repository.name }}-test-backend.apps.silver.devops.gov.bc.ca API_NAME=nest  node src/main.js
 
   cypress-e2e:
     name: Cypress end to end test
@@ -99,14 +108,13 @@ jobs:
             ${{ runner.os }}-build-cache-node-modules-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
-      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-        name: List the state of node modules
-        continue-on-error: true
-        run: npm list
+
       - uses: cypress-io/github-action@v6
         name: Cypress run
+        env:
+          CYPRESS_baseUrl: https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca/
         with:
-          config: pageLoadTimeout=10000,baseUrl=https://quickstart-openshift-test-frontend.apps.silver.devops.gov.bc.ca/
+          config: pageLoadTimeout=10000
           working-directory: ./frontend
           browser: ${{ matrix.browser }}
       - uses: actions/upload-artifact@v3
@@ -116,25 +124,27 @@ jobs:
           path: ./cypress/screenshots
           if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
 
-  ghcr-cleanup:
-    name: GHCR Cleanup
-    runs-on: ubuntu-latest
+  image-promotions:
+    name: Promote images
+    needs: [integration-tests, cypress-e2e, cleanup-test]
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
     strategy:
       matrix:
-        name: [database, migrations, backend, frontend]
+        component: [database, backend, migrations, frontend]
     timeout-minutes: 1
     steps:
-      - name: Keep last 50
-        uses: actions/delete-package-versions@v4
+      - uses: shrink/actions-docker-registry-tag@v3
         with:
-          package-name: "${{ github.event.repository.name }}/${{ matrix.name }}"
-          package-type: "container"
-          min-versions-to-keep: 50
-          ignore-versions: "^(prod|test)$"
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.component }}
+          target: test
+          tags: prod
 
   deploys-prod:
     name: PROD Deploys
-    needs: [integration-tests, cypress-e2e]
+    needs: [image-promotions]
     environment: prod
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -147,7 +157,6 @@ jobs:
             overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
-            parameters: -p PROMOTE_MIGRATION=${{ github.repository }}/migrations:test
             overwrite: true
             verification_path: /api
           - name: frontend
@@ -162,67 +171,20 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           parameters:
-            -p ZONE=prod -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
-            -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
-          penetration_test: false
+            -p ZONE=prod -p NAME=${{ github.event.repository.name }}
+            ${{ matrix.parameters }}
           verification_path: ${{ matrix.verification_path }}
 
-  image-promotions:
-    name: Promote images
+  cleanup-prod:
+    name: PROD Pod cleanup
+    environment: prod
     needs: [deploys-prod]
     runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        component: [database, backend, frontend]
-    timeout-minutes: 1
     steps:
-      - uses: shrink/actions-docker-registry-tag@v3
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.component }}
-          target: test
-          tags: prod
-
-  generate-schema-spy:
-    name: Generate SchemaSpy Documentation
-    runs-on: ubuntu-22.04
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_DB: default
-          POSTGRES_USER: default
-          POSTGRES_PASSWORD: default
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: joshuaavalon/flyway-action@v3.0.0
-        name: Generate SchemaSpy docs for node backend
-        with:
-          url: jdbc:postgresql://postgres:5432/default
-          user: default
-          password: default
-        env:
-          FLYWAY_VALIDATE_MIGRATION_NAMING: true
-          FLYWAY_LOCATIONS: filesystem:./backend/db/migrations
-          FLYWAY_DEFAULT_SCHEMA: "users"
-      - name: Create Output Folder
+      - name: Remove OpenShift artifacts
         run: |
-          mkdir output
-          chmod a+rwx -R output
-      - name: Run Schemaspy
-        run: docker run --network host -v "$PWD/output:/output" schemaspy/schemaspy:6.2.4 -t pgsql -db default -host 127.0.0.1 -port 5432 -u default -p default -schemas users
-      - name: Deploy to Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: output
-          target-folder: schemaspy
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          oc project ${{ vars.OC_NAMESPACE }}
+
+          # Remove old build runs, build pods and deployment pods
+          oc delete po --field-selector=status.phase==Succeeded

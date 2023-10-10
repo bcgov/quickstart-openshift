@@ -1,0 +1,71 @@
+name: Scheduled
+
+on:
+  schedule: [cron: "0 11 * * 6"] # 3 AM PST = 12 PM UDT, Saturdays
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+    name: Penetration Tests
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: ${{ github.event.repository.name }}-test
+    strategy:
+      matrix:
+        name: [backend, frontend]
+    steps:
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.7.0
+        with:
+          allow_issue_writing: true
+          artifact_name: "zap_${{ matrix.name }}"
+          cmd_options: "-a"
+          issue_title: "ZAP: ${{ matrix.name }}"
+          target: https://${{ env.PREFIX }}-${{ matrix.name }}.${{ env.DOMAIN }}s
+
+  generate-schema-spy:
+    name: Generate SchemaSpy Documentation
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: default
+          POSTGRES_USER: default
+          POSTGRES_PASSWORD: default
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: joshuaavalon/flyway-action@v3.0.0
+        name: Generate SchemaSpy docs for node backend
+        with:
+          url: jdbc:postgresql://postgres:5432/default
+          user: default
+          password: default
+        env:
+          FLYWAY_VALIDATE_MIGRATION_NAMING: true
+          FLYWAY_LOCATIONS: filesystem:./backend/db/migrations
+          FLYWAY_DEFAULT_SCHEMA: "users"
+      - name: Create Output Folder
+        run: |
+          mkdir output
+          chmod a+rwx -R output
+      - name: Run Schemaspy
+        run: docker run --network host -v "$PWD/output:/output" schemaspy/schemaspy:6.2.4 -t pgsql -db default -host 127.0.0.1 -port 5432 -u default -p default -schemas users
+      - name: Deploy to Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: output
+          target-folder: schemaspy
