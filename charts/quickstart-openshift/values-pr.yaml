@@ -11,6 +11,7 @@ backend:
   enabled: true
   deployment: # can be either a statefulSet or a deployment not both
     enabled: true
+
   containers:
     - name: backend
       repository: ghcr.io/bcgov/quickstart-openshift # example, it includes registry and repository
@@ -29,6 +30,11 @@ backend:
             value: quickstart
           - name: POSTGRES_DATABASE
             value: quickstart
+        fromLocalConfigmap: # just for example purpose.
+          - name: backend-configmap
+            key: config.js
+          - name: backend-prod-configmap
+            key: config.prod.js
       ports:
         - name: http
           containerPort: 3000
@@ -125,6 +131,21 @@ frontend:
   enabled: true
   deployment: # can be either a statefulSet or a deployment not both
     enabled: true
+  configmap:
+    enabled: true
+    data: # below is just for example.
+      config.js: |-
+        const envConfig = (() => {
+          return {
+            "VITE_DEPLOY_ENVIRONMENT":"{{ .Release.Name }}-{{ .Release.Namespace }}"
+          };
+        })();
+      config.prod.js: |-
+        const envConfig = (() => {
+          return {
+            "VITE_DEPLOY_ENVIRONMENT":"static"
+          };
+        })();
   containers:
     - name: frontend
       repository: ghcr.io/bcgov/quickstart-openshift # example, it includes registry and repository
@@ -288,10 +309,15 @@ pg: # enable it for TEST and PROD, for PR based pipelines simply use single post
 
 bitnami-pg:
   enabled: true
+  image:
+    registry: ghcr.io
+    repository: bcgov/nr-containers/bitnami/postgres
+    tag: 16
   auth:
     username: quickstart
-    password: default
+    password: default # overridden at deployment
     database: quickstart
+    postgresPassword: default # overridden at deployment
   shmVolume:
     enabled: false
   backup:
