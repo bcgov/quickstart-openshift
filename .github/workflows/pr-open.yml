@@ -96,4 +96,4 @@ jobs:
           # Deploy Helm Chart
           cd charts/${{ github.event.repository.name }}
           helm dependency update
-          helm upgrade --install --wait --atomic ${{ github.repository }}-${{ github.event.number }} --values values-pr.yaml  --set-string backend.image.tag=${{ github.event.number }} --set-string frontend.image.tag=${{ github.event.number }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
+          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-${{ github.event.number }} --values values-pr.yaml  --set-string backend.image.tag=${{ github.event.number }} --set-string frontend.image.tag=${{ github.event.number }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
