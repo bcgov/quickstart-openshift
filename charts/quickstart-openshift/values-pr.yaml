@@ -30,11 +30,7 @@ backend:
             value: quickstart
           - name: POSTGRES_DATABASE
             value: quickstart
-        fromLocalConfigmap: # just for example purpose.
-          - name: backend-configmap
-            key: config.js
-          - name: backend-prod-configmap
-            key: config.prod.js
+
       ports:
         - name: http
           containerPort: 3000
@@ -160,6 +156,11 @@ frontend:
             value: "http://{{ .Release.Name }}-backend"
           - name: LOG_LEVEL
             value: "info"
+        fromLocalConfigmap: # just for example purpose.
+          - name: frontend-configmap
+            key: config.js
+          - name: frontend-prod-configmap
+            key: config.prod.js
       ports:
         - name: http
           containerPort: 3000
