@@ -2,6 +2,7 @@
 # Declare variables to be passed into your templates.
 global:
   repository: ~ # the repository where the images are stored.
+  registry: ghcr.io # the registry where the images are stored. override during runtime for other registry at global level or individual level.
   secrets:
     annotation:
       helm.sh/policy: "keep"
@@ -15,6 +16,7 @@ backend:
 
   containers:
     - name: backend
+      registry: '{{ .Values.global.registry }}'
       repository: '{{ .Values.global.repository }}' # example, it includes registry and repository
       image: backend # the exact component name, be it backend, api-1 etc...
       tag: prod # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
@@ -65,6 +67,7 @@ backend:
         timeoutSeconds: 5
   initContainers:
     - name: database-migrations
+      registry: '{{ .Values.global.registry }}' # example, it includes registry
       repository: '{{ .Values.global.repository }}' # example, it includes registry and repository
       image: migrations
       tag: prod
@@ -145,7 +148,8 @@ frontend:
         })();
   containers:
     - name: frontend
-      repository: '{{ .Values.global.repository }}' # example, it includes registry and repository
+      registry: '{{ .Values.global.registry }}' # example, it includes registry
+      repository: '{{ .Values.global.repository }}' # example, it includes repository
       image: frontend # the exact component name, be it backend, api-1 etc...
       tag: prod # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
       securityContext:
