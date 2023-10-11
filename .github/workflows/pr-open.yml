@@ -50,10 +50,8 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [database, migrations, backend, frontend]
+        package: [ migrations, backend, frontend]
         include:
-          - package: database
-            triggers: ('database/')
           - package: migrations
             build_context: ./backend/db
             triggers: ('backend/db')

@@ -70,7 +70,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run integration tests
-        run: BASE_URL=https://${{ github.event.repository.name }}-test-backend.apps.silver.devops.gov.bc.ca API_NAME=nest  node src/main.js
+        run: BASE_URL=https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca/api/ API_NAME=nest  node src/main.js
 
   cypress-e2e:
     name: Cypress end to end test
@@ -118,7 +118,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        component: [database, backend, migrations, frontend]
+        component: [backend, migrations, frontend]
     timeout-minutes: 1
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
