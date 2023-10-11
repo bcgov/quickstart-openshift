@@ -18,6 +18,11 @@ jobs:
     strategy:
       matrix:
         name: [backend, frontend]
+        include:
+          - name: backend
+            target: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api/
+          - name: frontend
+            target: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
     steps:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.7.0
@@ -26,7 +31,7 @@ jobs:
           artifact_name: "zap_${{ matrix.name }}"
           cmd_options: "-a"
           issue_title: "ZAP: ${{ matrix.name }}"
-          target: https://${{ env.PREFIX }}-${{ matrix.name }}.${{ env.DOMAIN }}s
+          target: ${{ matrix.target }}
 
   generate-schema-spy:
     name: Generate SchemaSpy Documentation
