@@ -31,7 +31,7 @@ jobs:
           # Deploy Helm Chart
           cd charts/${{ github.event.repository.name }}
           helm dependency update
-          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-test --values values.yaml  --set-string backend.containers[0].image.tag=test --set-string backend.initContainers[0].image.tag=test --set-string frontend.containers[0].image.tag=test --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
+          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-test --values values.yaml  --set-string backend.containers[0].tag=test --set-string backend.initContainers[0].tag=test --set-string frontend.containers[0].tag=test --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
 
   cleanup-test:
     name: TEST Pod cleanup
