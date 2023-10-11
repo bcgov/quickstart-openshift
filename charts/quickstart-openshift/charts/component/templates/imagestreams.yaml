@@ -13,7 +13,7 @@ spec:
   lookupPolicy:
     local: false
   tags:
-    - name: {{ .tag }}
+    - name: {{ .tag | quote }}
       from:
         kind: DockerImage
         name: '{{ .repository }}/{{ .image }}:{{ .tag }}'
@@ -34,7 +34,7 @@ spec:
   lookupPolicy:
     local: false
   tags:
-    - name: {{ .tag }}
+    - name: {{ .tag | quote }}
       from:
         kind: DockerImage
         name: '{{ .repository }}/{{ .image }}:{{ .tag }}'
