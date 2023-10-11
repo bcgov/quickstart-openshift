@@ -12,7 +12,6 @@ concurrency:
 
 jobs:
   pr-greeting:
-    if: "!github.event.pull_request.head.repo.fork"
     name: PR Greeting
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
@@ -44,7 +43,6 @@ jobs:
   # https://github.com/bcgov-nr/action-builder-ghcr
   builds:
     name: Builds
-    if: "!github.event.pull_request.head.repo.fork"
     runs-on: ubuntu-22.04
     permissions:
       packages: write
@@ -74,7 +72,6 @@ jobs:
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
     name: Deploys
-    if: "!github.event.pull_request.head.repo.fork"
     needs: [builds]
     runs-on: ubuntu-22.04
     timeout-minutes: 10
