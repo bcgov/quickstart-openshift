@@ -27,17 +27,20 @@ appVersion: "1.16.0"
 dependencies:
   - name: component
     condition: backend.enabled
-    version: 1.0.0
+    version: 0.0.1
+    repository: https://bcgov.github.io/helm-service
     alias: backend
 
   - name: component
     condition: frontend.enabled
-    version: 1.0.0
+    version: 0.0.1
+    repository: https://bcgov.github.io/helm-service
     alias: frontend
 
   - name: crunchy-postgres
     condition: pg.enabled
     version: 0.5.0
+    repository: https://bcgov.github.io/crunchy-postgres
     alias: pg
 
   - name: postgresql
