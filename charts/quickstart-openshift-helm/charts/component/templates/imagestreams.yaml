@@ -16,7 +16,7 @@ spec:
     - name: {{ .tag | quote }}
       from:
         kind: DockerImage
-        name: '{{ .repository }}/{{ .image }}:{{ .tag }}'
+        name: '{{ tpl .repository $ }}/{{ .image }}:{{ .tag }}'
       referencePolicy:
         type: Local
 {{- end }}
@@ -37,7 +37,7 @@ spec:
     - name: {{ .tag | quote }}
       from:
         kind: DockerImage
-        name: '{{ .repository }}/{{ .image }}:{{ .tag }}'
+        name: '{{ tpl .repository $ }}/{{ .image }}:{{ .tag }}'
       referencePolicy:
         type: Local
 {{- end }}

@@ -1,6 +1,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 global:
+  repository: ~ # the repository where the images are stored.
   secrets:
     annotation:
       helm.sh/policy: "keep"
@@ -14,7 +15,7 @@ backend:
 
   containers:
     - name: backend
-      repository: ghcr.io/bcgov/quickstart-openshift # example, it includes registry and repository
+      repository: '{{ .Values.global.repository }}' # example, it includes registry and repository
       image: backend # the exact component name, be it backend, api-1 etc...
       tag: prod # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
       env:
@@ -64,7 +65,7 @@ backend:
         timeoutSeconds: 5
   initContainers:
     - name: database-migrations
-      repository: ghcr.io/bcgov/quickstart-openshift # example
+      repository: '{{ .Values.global.repository }}' # example, it includes registry and repository
       image: migrations
       tag: prod
       env:
@@ -144,7 +145,7 @@ frontend:
         })();
   containers:
     - name: frontend
-      repository: ghcr.io/bcgov/quickstart-openshift # example, it includes registry and repository
+      repository: '{{ .Values.global.repository }}' # example, it includes registry and repository
       image: frontend # the exact component name, be it backend, api-1 etc...
       tag: prod # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
       securityContext:
