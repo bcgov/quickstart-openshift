@@ -15,37 +15,23 @@ jobs:
     name: TEST Deploys
     environment: test
     runs-on: ubuntu-22.04
-    permissions:
-      issues: write
-    strategy:
-      matrix:
-        name: [database, backend, frontend]
-        include:
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-            verification_path: /api
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
     timeout-minutes: 10
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.0.0
-        with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          parameters:
-            -p ZONE=test -p NAME=${{ github.event.repository.name }}
-            ${{ matrix.parameters }}
-          name: ${{ matrix.name }}
-          penetration_test_token: ${{ secrets.GITHUB_TOKEN }}
-          verification_path: ${{ matrix.verification_path }}
+      - uses: actions/checkout@v3
+      - name: Deploy
+        shell: bash
+        run: |
+          # Allow pipefail, since we could be catching oc create errors
+          set +o pipefail
+          
+          # Login to OpenShift (NOTE: project command is a safeguard)
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ vars.oc_namespace }}
+          
+          # Deploy Helm Chart
+          cd charts/${{ github.event.repository.name }}
+          helm dependency update
+          helm upgrade --install --wait --atomic ${{ github.event.repository.name }} --values values.yaml  --set-string backend.containers[0].image.tag=test --set-string backend.initContainers[0].image.tag=test --set-string frontend.containers[0].image.tag=test --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
 
   cleanup-test:
     name: TEST Pod cleanup
@@ -148,32 +134,22 @@ jobs:
     environment: prod
     runs-on: ubuntu-22.04
     timeout-minutes: 10
-    strategy:
-      matrix:
-        name: [database, backend, frontend]
-        include:
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-            verification_path: /api
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.0.0
-        with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          parameters:
-            -p ZONE=prod -p NAME=${{ github.event.repository.name }}
-            ${{ matrix.parameters }}
-          verification_path: ${{ matrix.verification_path }}
+      - uses: actions/checkout@v3
+      - name: Deploy
+        shell: bash
+        run: |
+          # Allow pipefail, since we could be catching oc create errors
+          set +o pipefail
+          
+          # Login to OpenShift (NOTE: project command is a safeguard)
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ vars.oc_namespace }}
+          
+          # Deploy Helm Chart
+          cd charts/${{ github.event.repository.name }}
+          helm dependency update
+          helm upgrade --install --wait --atomic ${{ github.event.repository.name }} --values values.yaml  --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
 
   cleanup-prod:
     name: PROD Pod cleanup

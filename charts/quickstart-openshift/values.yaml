@@ -2,33 +2,35 @@
 # Declare variables to be passed into your templates.
 global:
   secrets:
-    databasePassword: ~ # needed
     annotation:
       helm.sh/policy: "keep"
-  zone: test # it is required, could be pr-123, dev, test, prod
   domain: "apps.silver.devops.gov.bc.ca" # it is required, apps.silver.devops.gov.bc.ca for silver cluster
-
+  openshiftImageRegistry: "image-registry.openshift-image-registry.svc:5000"
 
 backend:
   enabled: true
   deployment: # can be either a statefulSet or a deployment not both
     enabled: true
+
   containers:
     - name: backend
       repository: ghcr.io/bcgov/quickstart-openshift # example, it includes registry and repository
       image: backend # the exact component name, be it backend, api-1 etc...
-      tag: test # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      tag: prod # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
       env:
-        fromGlobalSecret:
+        fromLocalSecret:
           - name: POSTGRES_PASSWORD
-            key: databasePassword
-          - name: POSTGRES_USER
-            key: databaseUser
-          - name: POSTGRES_DATABASE
-            key: databaseName
+            key: password
+            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+
         fromValues:
           - name: POSTGRES_HOST
-            value: '{{ .Release.Name }}-{{ .Values.global.zone }}-database' # this is interpolated, it will be replaced with the actual value
+            value: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+          - name: POSTGRES_USER
+            value: quickstart
+          - name: POSTGRES_DATABASE
+            value: quickstart
+
       ports:
         - name: http
           containerPort: 3000
@@ -38,27 +40,47 @@ backend:
           cpu: 150m
           memory: 250Mi
         requests:
-          cpu: 100m
+          cpu: 75m
           memory: 150Mi
-
+      readinessProbe:
+        httpGet:
+          path: /api
+          port: 3000
+          scheme: HTTP
+        initialDelaySeconds: 5
+        periodSeconds: 2
+        timeoutSeconds: 2
+        successThreshold: 1
+        failureThreshold: 30
+      livenessProbe:
+        successThreshold: 1
+        failureThreshold: 3
+        httpGet:
+          path: /api
+          port: 3000
+          scheme: HTTP
+        initialDelaySeconds: 15
+        periodSeconds: 30
+        timeoutSeconds: 5
   initContainers:
     - name: database-migrations
       repository: ghcr.io/bcgov/quickstart-openshift # example
-      image: database-migrations
-      tag: test
+      image: migrations
+      tag: prod
       env:
-        fromGlobalSecret:
+        fromLocalSecret:
           - name: FLYWAY_PASSWORD
-            key: databasePassword
-          - name: FLYWAY_USER
-            key: databaseUser
+            key: password
+            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
         fromValues:
           - name: FLYWAY_URL
-            value: 'jdbc:postgresql://{{ .Release.Name }}-{{ .Values.global.zone }}-database:5432/{{ .Values.global.secrets.databaseName }}'
+            value: 'jdbc:postgresql://{{ .Release.Name }}-bitnami-pg:5432/quickstart'
           - name: FLYWAY_BASELINE_ON_MIGRATE
             value: "true"
           - name: FLYWAY_DEFAULT_SCHEMA
             value: "USERS"
+          - name: FLYWAY_USER
+            value: "quickstart"
       resources:
         limits:
           cpu: 250m
@@ -68,8 +90,8 @@ backend:
           memory: 150Mi
   autoscaling:
     enabled: true
-    minReplicas: 1
-    maxReplicas: 1
+    minReplicas: 3
+    maxReplicas: 5
     targetCPUUtilizationPercentage: 80 # this percentage from request cpu
   vault:
     enabled: false
@@ -87,7 +109,7 @@ backend:
         cpu: 50m
         memory: 50Mi
       requests:
-        cpu: 20m
+        cpu: 50m
         memory: 25Mi
   service:
     enabled: true
@@ -105,17 +127,40 @@ frontend:
   enabled: true
   deployment: # can be either a statefulSet or a deployment not both
     enabled: true
+  configmap:
+    enabled: true
+    data: # below is just for example.
+      config.js: |-
+        const envConfig = (() => {
+          return {
+            "VITE_DEPLOY_ENVIRONMENT":"{{ .Release.Name }}-{{ .Release.Namespace }}"
+          };
+        })();
+      config.prod.js: |-
+        const envConfig = (() => {
+          return {
+            "VITE_DEPLOY_ENVIRONMENT":"static"
+          };
+        })();
   containers:
     - name: frontend
       repository: ghcr.io/bcgov/quickstart-openshift # example, it includes registry and repository
       image: frontend # the exact component name, be it backend, api-1 etc...
-      tag: test # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      tag: prod # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      securityContext:
+        capabilities:
+          add: [ "NET_BIND_SERVICE" ]
       env:
         fromValues:
           - name: BACKEND_URL
-            value: "https://{{ .Release.Name }}-{{ .Values.global.zone }}-backend.{{ .Values.global.domain }}"
+            value: "http://{{ .Release.Name }}-backend"
           - name: LOG_LEVEL
             value: "info"
+        fromLocalConfigmap: # just for example purpose.
+          - name: frontend-configmap
+            key: config.js
+          - name: frontend-prod-configmap
+            key: config.prod.js
       ports:
         - name: http
           containerPort: 3000
@@ -128,7 +173,7 @@ frontend:
           cpu: 100m
           memory: 150Mi
         requests:
-          cpu: 20m
+          cpu: 30m
           memory: 50Mi
       readinessProbe:
         httpGet:
@@ -165,21 +210,26 @@ frontend:
         protocol: TCP
   route:
     enabled: true
-    host: "{{ .Release.Name }}-{{ .Values.global.zone }}-frontend-{{ .Release.Namespace }}.{{ .Values.global.domain }}"
+    host: "{{ .Release.Name }}-frontend.{{ .Values.global.domain }}"
     targetPort: http # look at line#164 refer to the name.
 
-crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
-  enabled: true
+pg: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
+  enabled: false
 
-  crunchyImage: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
+  crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres-gis:ubi8-15.2-3.3-0
 
-  postgresVersion: 14
-
+  postgresVersion: 15
+  postGISVersion: '3.3'
+  imagePullPolicy: Always
   instances:
     name: ha # high availability
-    replicas: 2
+    replicas: 1 # 2 or 3 for high availability in TEST and PROD.
+    metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9187'
     dataVolumeClaimSpec:
-      storage: 480Mi
+      storage: 120Mi
       storageClassName: netapp-block-standard
     requests:
       cpu: 25m
@@ -196,8 +246,9 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
         memory: 64Mi
 
   pgBackRest:
+    enabled: false
     image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
-    retention: "2" # Ideally a larger number such as 30 backups/days
+    retention: "1" # Ideally a larger number such as 30 backups/days
     # If retention-full-type set to 'count' then the oldest backups will expire when the number of backups reach the number defined in retention
     # If retention-full-type set to 'time' then the number defined in retention will take that many days worth of full backups before expiration
     retentionFullType: count
@@ -237,7 +288,7 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
   proxy:
     pgBouncer:
       image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
-      replicas: 2
+      replicas: 1
       requests:
         cpu: 1m
         memory: 64Mi
@@ -256,5 +307,44 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
       limits:
         cpu: 50m
         memory: 128Mi
-database:
-  enabled: false
+
+bitnami-pg:
+  enabled: true
+  image:
+    registry: ghcr.io
+    repository: bcgov/nr-containers/bitnami/postgres
+    tag: 16
+  auth:
+    username: quickstart
+    password: default # overridden at deployment
+    database: quickstart
+    postgresPassword: default # overridden at deployment
+  shmVolume:
+    enabled: false
+  backup:
+    enabled: true
+    cronjob:
+      containerSecurityContext: {}
+      podSecurityContext:
+        enabled: false
+      storage:
+        size: 200Mi
+  primary:
+    persistence:
+      enabled: true
+      storageClass: netapp-file-standard
+      accessModes:
+        - ReadWriteOnce
+      size: 100Mi
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 150Mi
+      limits:
+        cpu: 150m
+        memory: 250Mi
