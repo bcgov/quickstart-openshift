@@ -1,0 +1,275 @@
+{{- if .Values.deployment }}
+{{- $releaseName := .Release.Name }}
+{{- $componentFullName := include "component.fullname" . }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "component.fullname" . }}
+  labels:
+    {{- include "component.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "component.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- if and .Values.vault .Values.vault.enabled }}
+      annotations:
+        {{- include "component.podAnnotations" . | nindent 8 }}
+        {{- include "component.vaultAnnotations" . | nindent 8 }}
+      {{- else }}
+      annotations:
+        {{- include "component.podAnnotations" . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "component.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.serviceAccount }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- end }}
+      {{- if .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- end }}
+      {{- $configmap := .Values.configmap -}}
+      {{- $secrets := .Values.secret -}}
+      {{- if .Values.initContainers }}
+      initContainers:
+      {{- range .Values.initContainers }}
+        - name: {{ .name }}
+          image: '{{$.Values.global.openshiftImageRegistry}}/{{$.Release.Namespace}}/{{$releaseName}}-{{ .name }}:{{ .tag }}'
+          imagePullPolicy: Always
+          {{- if .env }}
+          env:
+          {{- if .env.fromLocalConfigmap }}
+          {{- range $item := .env.fromLocalConfigmap }} # picking individual elements from configmap of individual component (backend, frontend, etc)
+            - name: {{$item.name}} # the env variable name
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "component.fullname" $ }}
+                  key: {{$item.key}} # the key of configmap
+          {{- end }}
+          {{- end }}
+          {{- if .env.fromGlobalConfigmap }}
+          {{- range $item := .env.fromGlobalConfigmap }} # picking individual elements from global configmap of entire deployment set
+            - name: {{$item.name}} # the env variable name
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $releaseName }}
+                  key: {{$item.key}} # the key of configmap
+          {{- end }}
+          {{- end }}
+          {{- if .env.fromLocalSecret }}
+          {{- range $item := .env.fromLocalSecret }} # picking individual elements from secret of individual component (backend, frontend, etc)
+            - name: {{$item.name}} # the env variable name
+              valueFrom:
+                secretKeyRef:
+                  {{- if $item.secretName }}
+                  name: {{tpl $item.secretName $}}
+                  {{- else }}
+                  name: {{ include "component.fullname" $ }}
+                  {{- end }}
+
+                  key: {{$item.key}} # the key of secret
+          {{- end }}
+          {{- end }}
+          {{- if .env.fromGlobalSecret }}
+          {{- range $item := .env.fromGlobalSecret }} # picking individual elements from global secret of entire deployment set
+            - name: {{$item.name}} # the env variable name
+              valueFrom:
+                secretKeyRef:
+                  {{- if $item.secretName }}
+                  name: {{tpl $item.secretName $}}
+                  {{- else }}
+                  name: {{ $releaseName }}
+                  {{- end }}
+                  key: {{$item.key}} # the key of secret
+          {{- end }}
+          {{- end }}
+
+          {{- if .env.fromValues }} #this could be pure values based env like DB URLS or DB Host et
+          {{- range $item := .env.fromValues }} # picking individual elements from global secret of entire deployment set
+            - name: {{$item.name}} # the env variable name
+              value: {{tpl  $item.value $ | quote}} # the value of env variable
+          {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- if .resources}}
+          {{- with .resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- else }}
+          resources:
+            limits:
+              cpu: 100m
+              memory: 250Mi
+            requests:
+              cpu: 20m
+              memory: 50Mi
+          {{- end }}
+      {{- end }}
+      {{- end }}
+      containers:
+      {{- range .Values.containers }}
+        - name: {{ .name }}
+          {{- if .securityContext }}
+          securityContext:
+          {{- toYaml .securityContext | nindent 12 }}
+          {{- end}}
+          {{- if and .vault .vault.enabled }}
+          args:
+            - 'sh'
+            - '-c'
+            - '{{- range $k := .vault.secretPaths }}source /vault/secrets/{{$k}} && {{- end}}{{ .vault.entrypoint }}'
+          {{- end}}
+          image: '{{$.Values.global.openshiftImageRegistry}}/{{$.Release.Namespace}}/{{$releaseName}}-{{ .name }}:{{ .tag }}'
+          imagePullPolicy: Always
+          {{- if .envFrom }}
+          envFrom:
+          {{- if .envFrom.secretRef }}
+            - secretRef:
+                name: {{ include "component.fullname" $ }}
+          {{- end }}
+          {{- if .envFrom.configMapRef }}
+            - configMapRef:
+                name: {{ include "component.fullname" $ }}
+          {{- end }}
+          {{- end }}
+          {{- if .env }}
+          env:
+          {{- if .env.fromLocalConfigmap }}
+          {{- range $item := .env.fromLocalConfigmap }} # picking individual elements from configmap of individual component (backend, frontend, etc)
+            - name: {{$item.name}} # the env variable name
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "component.fullname" $ }}
+                  key: {{$item.key}} # the key of configmap
+          {{- end }}
+          {{- end }}
+          {{- if .env.fromGlobalConfigmap }}
+          {{- range $item := .env.fromGlobalConfigmap }} # picking individual elements from global configmap of entire deployment set
+            - name: {{$item.name}} # the env variable name
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $releaseName }}
+                  key: {{$item.key}} # the key of configmap
+          {{- end }}
+          {{- end }}
+          {{- if .env.fromLocalSecret }}
+          {{- range $item := .env.fromLocalSecret }} # picking individual elements from secret of individual component (backend, frontend, etc)
+            - name: {{$item.name}} # the env variable name
+              valueFrom:
+                secretKeyRef:
+                  {{- if $item.secretName }}
+                  name: {{tpl $item.secretName $}}
+                  {{- else }}
+                  name: {{ include "component.fullname" $ }}
+                  {{- end }}
+                  key: {{$item.key}} # the key of secret
+          {{- end }}
+          {{- end }}
+          {{- if .env.fromGlobalSecret }}
+          {{- range $item := .env.fromGlobalSecret }} # picking individual elements from global secret of entire deployment set
+            - name: {{$item.name}} # the env variable name
+              valueFrom:
+                secretKeyRef:
+                  {{- if $item.secretName }}
+                  name: {{tpl $item.secretName $}}
+                  {{- else }}
+                  name: {{ $releaseName }}
+                  {{- end }}
+                  key: {{$item.key}} # the key of secret
+          {{- end }}
+          {{- end }}
+          {{- if .env.fromValues }} #this could be pure values based env like DB URLS or DB Host et
+          {{- range $item := .env.fromValues }} # picking individual elements from global secret of entire deployment set
+            - name: {{$item.name}} # the env variable name
+              value: {{tpl  $item.value $ | quote}} # the value of env variable
+          {{- end }}
+          {{- end }}
+          {{- end }}
+
+          {{- if .ports}}
+          {{- with .ports }}
+          ports:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- else }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          {{- end }}
+          {{- if .resources}}
+          {{- with .resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- else }}
+          resources:
+            limits:
+              cpu: 100m
+              memory: 250Mi
+            requests:
+              cpu: 20m
+              memory: 50Mi
+          {{- end }}
+          {{- if .readinessProbe}}
+          {{- with .readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- else }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+              scheme: HTTP
+          {{- end }}
+          {{- if .livenessProbe}}
+          {{- with .livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- else }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+              scheme: HTTP
+          {{- end }}
+          {{- if .volumeMounts }}
+          {{- with .volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- end }}
+      {{- end }}
+      {{- if .Values.volumes }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
