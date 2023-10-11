@@ -1,0 +1,127 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+{{- include "metadata" . }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.resources.pvc.size }}
+  storageClassName: netapp-file-standard
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+{{- include "metadata" . }}
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - name: {{ tpl .Values.id.database . }}
+      from:
+        kind: DockerImage
+        name: "{{ .Values.image.registry }}/{{ .Values.org }}/{{ .Values.repo }}/{{ .Values.component }}:{{ .Values.image.tag }}"
+      referencePolicy:
+        type: Local
+---
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+{{- include "metadata" . }}
+spec:
+  replicas: 1
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - {{ tpl .Values.id.database . }}
+        from:
+          kind: ImageStreamTag
+          name: "{{ tpl .Values.id.database . }}:{{ .Values.image.tag }}"
+  selector:
+    deploymentconfig: {{ tpl .Values.id.database . }}
+  strategy:
+    type: Recreate
+    recreateParams:
+      timeoutSeconds: 600
+    activeDeadlineSeconds: 21600
+  template:
+    {{- include "metadata" . | indent 4 }}
+        deploymentconfig: {{ tpl .Values.id.database . }}
+    spec:
+      volumes:
+        - name: {{ tpl .Values.id.database . }}
+          persistentVolumeClaim:
+            claimName: {{ tpl .Values.id.database . }}
+      containers:
+        - name: {{ tpl .Values.id.database . }}
+          image: "{{ tpl .Values.id.database . }}:{{ .Values.image.tag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - /usr/bin/env
+                - bash
+                - -c
+                - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+            failureThreshold: 5
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 1
+          livenessProbe:
+            exec:
+              command:
+                - /usr/bin/env
+                - bash
+                - -c
+                - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+            failureThreshold: 5
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 1
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.id.database . }}
+                  key: database-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.id.database . }}
+                  key: database-password
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.id.database . }}
+                  key: database-user
+          volumeMounts:
+            - name: {{ tpl .Values.id.database . }}
+              mountPath: {{ .Values.resources.pvc.mount }}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      schedulerName: default-scheduler
+---
+apiVersion: v1
+kind: Service
+{{- include "metadata" . }}
+spec:
+  ports:
+    - name: postgresql
+      nodePort: 0
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+  selector:
+    deploymentconfig: {{ tpl .Values.id.database . }}
+  sessionAffinity: None
+  type: ClusterIP
