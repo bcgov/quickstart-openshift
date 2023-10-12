@@ -105,7 +105,7 @@ jobs:
         run: |
           # Allow pipefail, since we could be catching oc create errors
           set +o pipefail
-          IncrementalTag=${{ github.event.number }}.${{ needs.builds.steps.outputs.NewTag }}
+          IncrementalTag=${{ needs.builds.outputs.NewTag }}
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
