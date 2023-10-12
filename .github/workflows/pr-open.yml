@@ -46,6 +46,8 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       packages: write
+    outputs:
+      NewTag: ${{ steps.get-tags.outputs.NewTag }}
     strategy:
       matrix:
         package: [ migrations, backend, frontend]
@@ -68,6 +70,27 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ${{ matrix.triggers }}
           build_context: ${{ matrix.build_context }}
+      - name: Get existing image tags
+        id: get-tags
+        run: |
+          TAGS=$(docker pull -q ghcr.io/${{ github.repository }}/${{ matrix.package }}:${{ github.event.number }}.* 2>/dev/null | awk -F':' '{print $2}' | sort -nr)
+          if [ -z "$TAGS" ]; then
+            # Set a default initial tag number if no images are found
+            NEW_TAG=0
+          else
+            TAGS=( $TAGS )
+            NEW_TAG=$((TAGS[0] + 1))
+          fi
+          echo "NewTag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+      - uses: shrink/actions-docker-registry-tag@v3
+        name: Tag images
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.package }}
+          target: ${{ github.event.number }}
+          tags: |
+            ${{ github.event.number }}.${{ steps.get-tags.outputs.NewTag }}
+
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
@@ -82,7 +105,7 @@ jobs:
         run: |
           # Allow pipefail, since we could be catching oc create errors
           set +o pipefail
-          
+          IncrementalTag=${{ github.event.number }}.${{ needs.builds.steps.outputs.NewTag }}
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
@@ -90,4 +113,4 @@ jobs:
           # Deploy Helm Chart
           cd charts/${{ github.event.repository.name }}
           helm dependency update
-          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-${{ github.event.number }} --values values-pr.yaml --set-string global.repository=${{ github.repository }}  --set-string backend.containers[0].tag="${{ github.event.number }}" --set-string backend.initContainers[0].tag="${{ github.event.number }}" --set-string frontend.containers[0].tag="${{ github.event.number }}" --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
+          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-${{ github.event.number }} --values values-pr.yaml --set-string global.repository=${{ github.repository }}  --set-string backend.containers[0].tag="${{ github.event.number }}.$IncrementalTag" --set-string backend.initContainers[0].tag="${{ github.event.number }}.$IncrementalTag" --set-string frontend.containers[0].tag="${{ github.event.number }}.$IncrementalTag" --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
