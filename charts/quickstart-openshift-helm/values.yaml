@@ -329,7 +329,7 @@ bitnami-pg:
   backup:
     enabled: true
     cronjob:
-      containerSecurityContext: {}
+      containerSecurityContext: { }
       podSecurityContext:
         enabled: false
       storage:
