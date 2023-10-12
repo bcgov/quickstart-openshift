@@ -329,7 +329,7 @@ bitnami-pg:
   backup:
     enabled: true
     cronjob:
-      containerSecurityContext: {}
+      containerSecurityContext: { }
       podSecurityContext:
         enabled: false
       storage:
@@ -345,7 +345,10 @@ bitnami-pg:
       enabled: false
     podSecurityContext:
       enabled: false
-
+    initdb:
+      scripts:
+        postgis.sql: |
+          CREATE EXTENSION postgis;
     resources:
       requests:
         cpu: 50m
