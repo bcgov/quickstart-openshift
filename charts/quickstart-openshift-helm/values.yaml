@@ -347,10 +347,7 @@ bitnami-pg:
       enabled: false
     initdb:
       scripts:
-        postgis: |
-          #!/bin/sh
-          echo adding postgis extension.
-          psql -U postgres;
+        postgis.sql: |
           CREATE EXTENSION postgis;
     resources:
       requests:
