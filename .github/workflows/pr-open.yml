@@ -106,6 +106,7 @@ jobs:
           # Allow pipefail, since we could be catching oc create errors
           set +o pipefail
           IncrementalTag=${{ needs.builds.outputs.NewTag }}
+          echo "IncrementalTag is $IncrementalTag"
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
