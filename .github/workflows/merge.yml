@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
+      - uses: actions/checkout@v4
       - name: Conventional Changelog Update
         uses: TriPSs/conventional-changelog-action@v3
         id: changelog
@@ -52,7 +53,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Deploy
         shell: bash
         run: |
@@ -153,7 +154,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Deploy
         shell: bash
         run: |
