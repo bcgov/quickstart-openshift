@@ -345,6 +345,13 @@ bitnami-pg:
       enabled: false
     podSecurityContext:
       enabled: false
+    initdb:
+      scripts:
+        postgis: |
+          #!/bin/sh
+          echo adding postgis extension.
+          psql -U postgres;
+          CREATE EXTENSION postgis;
 
     resources:
         requests:
