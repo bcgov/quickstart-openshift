@@ -218,7 +218,7 @@ frontend:
     host: "{{ .Release.Name }}-frontend.{{ .Values.global.domain }}"
     targetPort: http # look at line#164 refer to the name.
 
-pg: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
+crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
   enabled: false
 
   crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres-gis:ubi8-15.2-3.3-0
@@ -314,10 +314,10 @@ pg: # enable it for TEST and PROD, for PR based pipelines simply use single post
         memory: 128Mi
 
 bitnami-pg:
-  enabled: true
+  enabled: false
   image:
     registry: ghcr.io
-    repository: bcgov/nr-containers/bitnami/postgres
+    repository: bcgov/nr-containers/bitnami/postgresql
     tag: 16
   auth:
     username: quickstart
@@ -339,7 +339,7 @@ bitnami-pg:
         enabled: true
         storageClass: netapp-file-standard
         accessModes:
-        - ReadWriteOnce
+          - ReadWriteOnce
         size: 100Mi
     containerSecurityContext:
       enabled: false
@@ -357,3 +357,42 @@ bitnami-pg:
         limits:
           cpu: 150m
           memory: 250Mi
+
+bitnami-pg-ha:
+  enabled: true
+  postgresql:
+    image:
+      registry: ghcr.io
+      repository: bcgov/nr-containers/bitnami/postgresql-ha
+      tag: 16
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false
+    resources: ## Example:
+      limits:
+        cpu: 250m
+        memory: 356Mi
+      ## Examples:
+      requests:
+        cpu: 100m
+        memory: 125Mi
+    username: quickstart
+    password: default # overridden at deployment
+    database: quickstart
+    postgresPassword: default # overridden at deployment
+    initdbScripts:
+        postgis.sql: | # enable  POSTGIS extension
+          CREATE EXTENSION postgis;
+  persistence: ## Example:
+    enabled: true
+    storageClass: netapp-file-standard
+    accessModes:
+      - ReadWriteOnce
+    size: 200Mi
+  pgpool:
+    image:
+      registry: ghcr.io
+      repository: bcgov/nr-containers/bitnami/pgpool
+      tag: 4
+      debug: true

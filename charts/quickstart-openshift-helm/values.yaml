@@ -218,7 +218,7 @@ frontend:
     host: "{{ .Release.Name }}-frontend.{{ .Values.global.domain }}"
     targetPort: http # look at line#164 refer to the name.
 
-pg: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
+crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
   enabled: false
 
   crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres-gis:ubi8-15.2-3.3-0
