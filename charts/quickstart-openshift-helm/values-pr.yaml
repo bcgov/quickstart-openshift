@@ -22,13 +22,18 @@ backend:
       tag: prod # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
       env:
         fromLocalSecret:
+          #- name: POSTGRES_PASSWORD
+          #  key: password
+          #  secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
           - name: POSTGRES_PASSWORD
             key: password
-            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+            secretName: '{{ .Release.Name }}-bitnami-pg-ha' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
 
         fromValues:
+          #- name: POSTGRES_HOST
+          #  value: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
           - name: POSTGRES_HOST
-            value: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+            value: '{{ .Release.Name }}-bitnami-pg-pool' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
           - name: POSTGRES_USER
             value: quickstart
           - name: POSTGRES_DATABASE
@@ -73,12 +78,15 @@ backend:
       tag: prod
       env:
         fromLocalSecret:
+          #- name: FLYWAY_PASSWORD
+          #  key: password
+          #  secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
           - name: FLYWAY_PASSWORD
             key: password
-            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+            secretName: '{{ .Release.Name }}-bitnami-pg-ha' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
         fromValues:
           - name: FLYWAY_URL
-            value: 'jdbc:postgresql://{{ .Release.Name }}-bitnami-pg:5432/quickstart'
+            value: 'jdbc:postgresql://{{ .Release.Name }}-bitnami-pg-pool:5432/quickstart'
           - name: FLYWAY_BASELINE_ON_MIGRATE
             value: "true"
           - name: FLYWAY_DEFAULT_SCHEMA
@@ -396,3 +404,7 @@ bitnami-pg-ha:
       repository: bcgov/nr-containers/bitnami/pgpool
       tag: 4
       debug: true
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false
