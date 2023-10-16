@@ -322,7 +322,7 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
         memory: 128Mi
 
 bitnami-pg:
-  enabled: false
+  enabled: true
   image:
     registry: ghcr.io
     repository: bcgov/nr-containers/bitnami/postgresql
@@ -335,7 +335,7 @@ bitnami-pg:
   shmVolume:
     enabled: false
   backup:
-    enabled: true
+    enabled: false
     cronjob:
       containerSecurityContext: { }
       podSecurityContext:
@@ -367,7 +367,7 @@ bitnami-pg:
           memory: 250Mi
 
 bitnami-pg-ha:
-  enabled: true
+  enabled: false
   postgresql:
     image:
       registry: ghcr.io
@@ -408,3 +408,59 @@ bitnami-pg-ha:
       enabled: false
     podSecurityContext:
       enabled: false
+
+backup:
+  enabled: true
+  pvc:
+    enabled: true
+    size: 256Mi
+    storageClassName: netapp-file-standard
+    accessModes: ReadWriteOnce
+  cronjob:
+    enabled: true
+    containers:
+      - name: backup
+        image: bcgovimages/backup-container:latest
+        command:
+          - "/bin/bash"
+          - "-c"
+          - "/backup.sh -1"
+        volumeMounts:
+          - mountPath: "/backups/"
+            name: "{{.Release.Name}}-backup"
+        env:
+          fromValues:
+            - name: BACKUP_DIR
+              value: "/backups/"
+            - name: BACKUP_STRATEGY
+              value: "rolling"
+            - name: NUM_BACKUPS
+              value: '5'
+            - name: DAILY_BACKUPS
+              value: '7'
+            - name: WEEKLY_BACKUPS
+              value: '4'
+            - name: MONTHLY_BACKUPS
+              value: '1'
+            - name: DATABASE_SERVICE_NAME # depends on which chart being used, adjust accordingly.
+              value: '{{.Release.Name}}-bitnami-pg'
+            - name: DEFAULT_PORT
+              value: "5432"
+            - name: POSTGRESQL_DATABASE
+              value: "quickstart"
+            - name: DATABASE_USER
+              value: "quickstart"
+            - name: DATABASE_PASSWORD
+              password: '{{.Values.password}}' # overridden at deployment
+        resources:
+          limits:
+            cpu: 50m
+            memory: 256Mi
+          requests:
+            cpu: 20m
+            memory: 128Mi
+    volumes:
+      - name: "{{.Release.Name}}-backup"
+        persistentVolumeClaim:
+          claimName: "{{.Release.Name}}-backup"
+    restartPolicy: "Never"
