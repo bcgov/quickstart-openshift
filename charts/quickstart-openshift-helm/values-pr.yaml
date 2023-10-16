@@ -459,7 +459,7 @@ backup:
           - name: DATABASE_USER
             value: "quickstart"
           - name: DATABASE_PASSWORD
-            password: '{{.Values.password}}' # overridden at deployment
+            value: '{{.Values.password}}' # overridden at deployment
       resources:
         limits:
           cpu: 50m
