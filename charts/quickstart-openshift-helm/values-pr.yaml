@@ -463,8 +463,10 @@ backup:
             value: "quickstart"
           - name: DATABASE_USER
             value: "quickstart"
+        fromLocalSecret:
           - name: DATABASE_PASSWORD
-            value: '{{.Values.password}}' # overridden at deployment
+            key: password
+            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
       resources:
         limits:
           cpu: 50m
