@@ -14,7 +14,6 @@ jobs:
   # Clean up OpenShift when PR closed, no conditions
   cleanup-openshift:
     name: Cleanup OpenShift
-    if: "!github.event.pull_request.head.repo.fork"
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
@@ -24,7 +23,7 @@ jobs:
           oc project ${{ vars.OC_NAMESPACE }}
 
           # Remove old build runs, build pods and deployment pods
-          oc delete all,pvc,secret -l app=${{ github.event.repository.name }}-${{ github.event.number }}
+          helm uninstall ${{ github.event.repository.name }}-${{ github.event.number }}
 
   # If merged into main, then handle any image promotions
   image-promotions:
@@ -35,7 +34,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [database, migrations, backend, frontend]
+        package: [migrations, backend, frontend]
     timeout-minutes: 1
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
