@@ -366,49 +366,6 @@ bitnami-pg:
           cpu: 150m
           memory: 250Mi
 
-bitnami-pg-ha:
-  enabled: false
-  postgresql:
-    image:
-      registry: ghcr.io
-      repository: bcgov/nr-containers/bitnami/postgresql-ha
-      tag: 16
-    containerSecurityContext:
-      enabled: false
-    podSecurityContext:
-      enabled: false
-    resources: ## Example:
-      limits:
-        cpu: 250m
-        memory: 356Mi
-      ## Examples:
-      requests:
-        cpu: 100m
-        memory: 125Mi
-    username: quickstart
-    password: default # overridden at deployment
-    database: quickstart
-    postgresPassword: default # overridden at deployment
-    initdbScripts:
-        postgis.sql: | # enable  POSTGIS extension
-          CREATE EXTENSION postgis;
-  persistence: ## Example:
-    enabled: true
-    storageClass: netapp-file-standard
-    accessModes:
-      - ReadWriteOnce
-    size: 200Mi
-  pgpool:
-    image:
-      registry: ghcr.io
-      repository: bcgov/nr-containers/bitnami/pgpool
-      tag: 4
-      debug: true
-    containerSecurityContext:
-      enabled: false
-    podSecurityContext:
-      enabled: false
-
 backup:
   enabled: true
   pvc:
