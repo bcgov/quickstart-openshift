@@ -1,6 +1,6 @@
 # Build static files
 # Node Bullseye has npm
-FROM node:20.8.0-bullseye-slim AS build
+FROM node:20.8.1-bullseye-slim AS build
 
 # Install packages, build and keep only prod packages
 WORKDIR /app
@@ -11,7 +11,7 @@ RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
 
 # Deploy container
 # Caddy serves static files
-FROM caddy:2.7.4-alpine
+FROM caddy:2.7.5-alpine
 RUN apk add --no-cache ca-certificates
 
 # Copy static files and run formatting
