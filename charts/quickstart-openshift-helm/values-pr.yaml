@@ -424,7 +424,7 @@ backup:
           claimName: "{{.Release.Name}}-backup"
     restartPolicy: "Never"
     schedule: "0 0 * * *"
-    concurrencyPolicy: "replace"
+    concurrencyPolicy: "Replace"
     failedJobsHistoryLimit: 7
     successfulJobsHistoryLimit: 30
     startingDeadlineSeconds: 3600
