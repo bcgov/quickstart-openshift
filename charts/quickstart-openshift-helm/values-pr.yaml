@@ -423,6 +423,11 @@ backup:
         persistentVolumeClaim:
           claimName: "{{.Release.Name}}-backup"
     restartPolicy: "Never"
+    schedule: "0 0 * * *"
+    concurrencyPolicy: "replace"
+    failedJobsHistoryLimit: 7
+    successfulJobsHistoryLimit: 30
+    startingDeadlineSeconds: 3600
   containers:
     - name: backup
       registry: 'docker.io'
