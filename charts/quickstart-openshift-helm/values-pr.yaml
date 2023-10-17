@@ -25,10 +25,15 @@ backend:
           - name: POSTGRES_PASSWORD
             key: password
             secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+          #- name: POSTGRES_PASSWORD
+          #  key: password
+          #  secretName: '{{ .Release.Name }}-bitnami-pg-ha' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
 
         fromValues:
           - name: POSTGRES_HOST
             value: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+          #- name: POSTGRES_HOST
+          #  value: '{{ .Release.Name }}-bitnami-pg-pool' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
           - name: POSTGRES_USER
             value: quickstart
           - name: POSTGRES_DATABASE
@@ -76,6 +81,9 @@ backend:
           - name: FLYWAY_PASSWORD
             key: password
             secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+          #- name: FLYWAY_PASSWORD
+          #  key: password
+          #  secretName: '{{ .Release.Name }}-bitnami-pg-ha' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
         fromValues:
           - name: FLYWAY_URL
             value: 'jdbc:postgresql://{{ .Release.Name }}-bitnami-pg:5432/quickstart'
@@ -218,7 +226,7 @@ frontend:
     host: "{{ .Release.Name }}-frontend.{{ .Values.global.domain }}"
     targetPort: http # look at line#164 refer to the name.
 
-pg: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
+crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
   enabled: false
 
   crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres-gis:ubi8-15.2-3.3-0
@@ -317,8 +325,8 @@ bitnami-pg:
   enabled: true
   image:
     registry: ghcr.io
-    repository: bcgov/nr-containers/bitnami/postgres
-    tag: 16
+    repository: bcgov/nr-containers/bitnami/postgresql
+    tag: 16.0.0
   auth:
     username: quickstart
     password: default # overridden at deployment
@@ -327,7 +335,7 @@ bitnami-pg:
   shmVolume:
     enabled: false
   backup:
-    enabled: true
+    enabled: false
     cronjob:
       containerSecurityContext: { }
       podSecurityContext:
@@ -339,7 +347,7 @@ bitnami-pg:
         enabled: true
         storageClass: netapp-file-standard
         accessModes:
-        - ReadWriteOnce
+          - ReadWriteOnce
         size: 100Mi
     containerSecurityContext:
       enabled: false
@@ -357,3 +365,70 @@ bitnami-pg:
         limits:
           cpu: 150m
           memory: 250Mi
+
+backup:
+  enabled: true
+  pvc:
+    enabled: true
+    size: 256Mi
+    storageClassName: netapp-file-standard
+    accessModes: ReadWriteOnce
+  cronjob:
+    enabled: true
+    volumes:
+      - name: "{{.Release.Name}}-backup"
+        persistentVolumeClaim:
+          claimName: "{{.Release.Name}}-backup"
+    restartPolicy: "Never"
+    schedule: "0 0 * * *"
+    concurrencyPolicy: "Replace"
+    failedJobsHistoryLimit: 7
+    successfulJobsHistoryLimit: 30
+    startingDeadlineSeconds: 3600
+  containers:
+    - name: backup
+      registry: 'docker.io'
+      repository: 'bcgovimages' # example, it includes registry and repository
+      image: backup-container # the exact component name, be it backend, api-1 etc...
+      tag: latest # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      command:
+        - "/bin/bash"
+        - "-c"
+        - "/backup.sh -1"
+      volumeMounts:
+        - mountPath: "/backups/"
+          name: "{{.Release.Name}}-backup"
+      env:
+        fromValues:
+          - name: BACKUP_DIR
+            value: "/backups/"
+          - name: BACKUP_STRATEGY
+            value: "rolling"
+          - name: NUM_BACKUPS
+            value: '5'
+          - name: DAILY_BACKUPS
+            value: '7'
+          - name: WEEKLY_BACKUPS
+            value: '4'
+          - name: MONTHLY_BACKUPS
+            value: '1'
+          - name: DATABASE_SERVICE_NAME # depends on which chart being used, adjust accordingly.
+            value: '{{.Release.Name}}-bitnami-pg'
+          - name: DEFAULT_PORT
+            value: "5432"
+          - name: POSTGRESQL_DATABASE
+            value: "quickstart"
+          - name: DATABASE_USER
+            value: "quickstart"
+        fromLocalSecret:
+          - name: DATABASE_PASSWORD
+            key: password
+            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+      resources:
+        limits:
+          cpu: 50m
+          memory: 256Mi
+        requests:
+          cpu: 20m
+          memory: 128Mi
+
