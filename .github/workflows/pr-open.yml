@@ -12,7 +12,6 @@ concurrency:
 
 jobs:
   pr-greeting:
-    if: "!github.event.pull_request.head.repo.fork"
     name: PR Greeting
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
@@ -33,7 +32,7 @@ jobs:
 
             Deployments, as required, will be available below:
             - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }})
-            - [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/api)
+            - [Backend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api)
 
             Please create PRs in draft mode.  Mark as ready to enable:
             - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
@@ -44,16 +43,13 @@ jobs:
   # https://github.com/bcgov-nr/action-builder-ghcr
   builds:
     name: Builds
-    if: "!github.event.pull_request.head.repo.fork"
     runs-on: ubuntu-22.04
     permissions:
       packages: write
     strategy:
       matrix:
-        package: [database, migrations, backend, frontend]
+        package: [ migrations, backend, frontend]
         include:
-          - package: database
-            triggers: ('database/')
           - package: migrations
             build_context: ./backend/db
             triggers: ('backend/db')
@@ -67,48 +63,38 @@ jobs:
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
+          tag: ${{ github.sha }}
           tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ${{ matrix.triggers }}
           build_context: ${{ matrix.build_context }}
+      - name: Tag Docker Images
+        uses: shrink/actions-docker-registry-tag@v3
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.package }}
+          target: ${{ github.sha }}
+          tags: ${{ github.event.number }}
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
     name: Deploys
-    if: "!github.event.pull_request.head.repo.fork"
     needs: [builds]
     runs-on: ubuntu-22.04
     timeout-minutes: 10
-    strategy:
-      matrix:
-        name: [database, backend, frontend]
-        include:
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-            triggers: ('database/' 'backend/' 'frontend/')
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-            triggers: ('database/' 'backend/' 'frontend/')
-            verification_path: /api
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
-            triggers: ('database/' 'backend/' 'frontend/')
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.0.0
-        with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          parameters:
-            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
-            ${{ matrix.parameters }}
-          triggers: ${{ matrix.triggers }}
-          verification_path: ${{ matrix.verification_path }}
+      - uses: actions/checkout@v3
+      - name: Deploy
+        shell: bash
+        run: |
+          # Allow pipefail, since we could be catching oc create errors
+          set +o pipefail
+          echo "IncrementalTag is $IncrementalTag"
+          # Login to OpenShift (NOTE: project command is a safeguard)
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ vars.oc_namespace }}
+          
+          # Deploy Helm Chart
+          cd charts/${{ github.event.repository.name }}
+          helm dependency update
+          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-${{ github.event.number }} --values values-pr.yaml --set-string global.repository=${{ github.repository }}  --set-string backend.containers[0].tag="${{ github.sha }}" --set-string backend.initContainers[0].tag="${{ github.sha }}" --set-string frontend.containers[0].tag="${{ github.sha }}" --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .

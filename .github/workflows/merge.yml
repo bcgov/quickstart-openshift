@@ -11,41 +11,63 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  semantic-version:
+    outputs:
+      semanticVersion: ${{ steps.changelog.outputs.version }}
+      tag: ${{ steps.changelog.outputs.tag }}
+      clean_changelog: ${{ steps.changelog.outputs.clean_changelog }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Conventional Changelog Update
+        uses: TriPSs/conventional-changelog-action@v3
+        id: changelog
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          output-file: 'CHANGELOG.md'
+          skip-version-file: 'true'
+          skip-commit: 'true'
+          skip-on-empty: 'false'
+          git-push: 'true'
+  retag-images:
+    needs: [semantic-version]
+    runs-on: ubuntu-22.04
+    strategy:
+        matrix:
+            package: [backend, migrations, frontend]
+    steps:
+      - name: Tag Docker Images
+        uses: shrink/actions-docker-registry-tag@v3
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.package }}
+          target: test
+          tags: ${{ needs.semantic-version.outputs.semanticVersion }}
+
   deploys-test:
+    needs: [retag-images, semantic-version]
     name: TEST Deploys
     environment: test
     runs-on: ubuntu-22.04
-    permissions:
-      issues: write
-    strategy:
-      matrix:
-        name: [database, backend, frontend]
-        include:
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-            verification_path: /api
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
     timeout-minutes: 10
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.0.0
-        with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          parameters:
-            -p ZONE=test -p NAME=${{ github.event.repository.name }}
-            ${{ matrix.parameters }}
-          name: ${{ matrix.name }}
-          penetration_test_token: ${{ secrets.GITHUB_TOKEN }}
-          verification_path: ${{ matrix.verification_path }}
+      - uses: actions/checkout@v4
+      - name: Deploy
+        shell: bash
+        run: |
+          # Allow pipefail, since we could be catching oc create errors
+          set +o pipefail
+          
+          # Login to OpenShift (NOTE: project command is a safeguard)
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ vars.oc_namespace }}
+          
+          # Deploy Helm Chart
+          cd charts/${{ github.event.repository.name }}
+          helm dependency update
+          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-test --values values.yaml --set-string global.repository=${{ github.repository }}  --set-string backend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string backend.initContainers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string frontend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
 
   cleanup-test:
     name: TEST Pod cleanup
@@ -84,7 +106,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run integration tests
-        run: BASE_URL=https://${{ github.event.repository.name }}-test-backend.apps.silver.devops.gov.bc.ca API_NAME=nest  node src/main.js
+        run: BASE_URL=https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca API_NAME=nest  node src/main.js
 
   cypress-e2e:
     name: Cypress end to end test
@@ -124,56 +146,40 @@ jobs:
           path: ./cypress/screenshots
           if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
 
-  image-promotions:
-    name: Promote images
-    needs: [integration-tests, cypress-e2e, cleanup-test]
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        component: [database, backend, migrations, frontend]
-    timeout-minutes: 1
-    steps:
-      - uses: shrink/actions-docker-registry-tag@v3
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.component }}
-          target: test
-          tags: prod
 
   deploys-prod:
     name: PROD Deploys
-    needs: [image-promotions]
+    needs: [cypress-e2e, integration-tests,deploys-test, semantic-version] # all of this needed to Go To PROD.
     environment: prod
     runs-on: ubuntu-22.04
     timeout-minutes: 10
-    strategy:
-      matrix:
-        name: [database, backend, frontend]
-        include:
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-            verification_path: /api
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.0.0
+      - uses: actions/checkout@v4
+      - name: Deploy
+        shell: bash
+        run: |
+          # Allow pipefail, since we could be catching oc create errors
+          set +o pipefail
+          
+          # Login to OpenShift (NOTE: project command is a safeguard)
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ vars.oc_namespace }}
+          
+          # Deploy Helm Chart
+          cd charts/${{ github.event.repository.name }}
+          helm dependency update
+          helm upgrade --install --wait --atomic ${{ github.event.repository.name }} --values values.yaml --set-string global.repository=${{ github.repository }} --set-string backend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string backend.initContainers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string frontend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: ${{ needs.semantic-version.outputs.semanticVersion != '' }}
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          parameters:
-            -p ZONE=prod -p NAME=${{ github.event.repository.name }}
-            ${{ matrix.parameters }}
-          verification_path: ${{ matrix.verification_path }}
+          token: ${{ github.token }}
+          tag_name: ${{ needs.semantic-version.outputs.tag }}
+          name: ${{ needs.semantic-version.outputs.tag }}
+          body: ${{ needs.semantic-version.outputs.clean_changelog }}
 
   cleanup-prod:
     name: PROD Pod cleanup
