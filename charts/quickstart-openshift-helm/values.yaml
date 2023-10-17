@@ -317,8 +317,8 @@ bitnami-pg:
   enabled: true
   image:
     registry: ghcr.io
-    repository: bcgov/nr-containers/bitnami/postgres
-    tag: 16
+    repository: bcgov/nr-containers/bitnami/postgresql
+    tag: 16.0.0
   auth:
     username: quickstart
     password: default # overridden at deployment
