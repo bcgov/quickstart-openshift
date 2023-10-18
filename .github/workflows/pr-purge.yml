@@ -1,8 +1,7 @@
 name: PR Env Purge
 
 on:
-  pull_request:
-  schedule: [cron: "0 13 * * *"] # 4 AM PST = 1 PM UDT, Saturdays
+  # schedule: [cron: "0 13 * * *"] # 4 AM PST = 1 PM UDT, Saturdays
   workflow_dispatch:
 
 concurrency:
@@ -11,7 +10,7 @@ concurrency:
 
 jobs:
   ageOutPRs:
-    name: Age out Pull Request Environments
+    name: PR Env Purge
     env:
       AGE: "2 days ago"
     runs-on: ubuntu-latest
@@ -24,4 +23,4 @@ jobs:
 
           oc get pods -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
             awk '$2 <= "'$(date -d '${{ env.AGE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
-            xargs --no-run-if-empty echo oc delete pod
+            xargs --no-run-if-empty oc delete pod
