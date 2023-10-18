@@ -12,7 +12,9 @@ jobs:
   ageOutPRs:
     name: PR Env Purge
     env:
-      AGE: "2 days ago"
+      # https://tecadmin.net/getting-yesterdays-date-in-bash/
+      DATE: "2 days ago"
+      TYPE: "po,image,pvc"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -21,6 +23,6 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
 
-          oc get pods -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
-            awk '$2 <= "'$(date -d '${{ env.AGE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
-            xargs --no-run-if-empty oc delete pod
+          oc get ${{ env.TYPE }} -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
+            awk '$2 <= "'$(date -d '${{ env.DATE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
+            xargs --no-run-if-empty oc delete ${{ env.TYPE }}
