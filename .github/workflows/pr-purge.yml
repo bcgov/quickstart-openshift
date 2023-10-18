@@ -1,4 +1,4 @@
-name: Scheduled
+name: PR Env Purge
 
 on:
   pull_request:
