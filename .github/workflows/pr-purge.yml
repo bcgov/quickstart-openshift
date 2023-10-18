@@ -12,13 +12,13 @@ concurrency:
 jobs:
   ageOutPRs:
     name: Age out Pull Request Environments
-    runs-on: ubuntu-latest
     env:
       AGE: "2 days ago"
-      PREFIX: ${{ github.event.repository.name }}-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - run: |
-            # Login to OpenShift (NOTE: project command is a safeguard)
+          # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
 
