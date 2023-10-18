@@ -13,7 +13,7 @@ jobs:
     name: PR Env Purge
     env:
       # https://tecadmin.net/getting-yesterdays-date-in-bash/
-      DATE: "2 days ago"
+      DATE: "1 week ago"
       TYPE: "po,image,pvc"
     runs-on: ubuntu-latest
     timeout-minutes: 10
