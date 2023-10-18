@@ -1,7 +1,7 @@
 name: PR Env Purge
 
 on:
-  # schedule: [cron: "0 13 * * *"] # 4 AM PST = 1 PM UDT, Saturdays
+  schedule: [cron: "0 13 * * *"] # 4 AM PST = 1 PM UDT
   workflow_dispatch:
 
 concurrency:
