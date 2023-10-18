@@ -1,0 +1,28 @@
+name: PR Env Purge
+
+on:
+  schedule: [cron: "0 13 * * *"] # 4 AM PST = 1 PM UDT
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ageOutPRs:
+    name: PR Env Purge
+    env:
+      # https://tecadmin.net/getting-yesterdays-date-in-bash/
+      DATE: "1 week ago"
+      TYPE: "po,image,pvc"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: |
+          # Login to OpenShift (NOTE: project command is a safeguard)
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          oc project ${{ vars.OC_NAMESPACE }}
+
+          oc get ${{ env.TYPE }} -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
+            awk '$2 <= "'$(date -d '${{ env.DATE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
+            xargs --no-run-if-empty oc delete ${{ env.TYPE }}
