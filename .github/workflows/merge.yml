@@ -16,7 +16,6 @@ jobs:
       semanticVersion: ${{ steps.changelog.outputs.version }}
       tag: ${{ steps.changelog.outputs.tag }}
       clean_changelog: ${{ steps.changelog.outputs.clean_changelog }}
-      skipped: ${{ steps.changelog.outputs.skipped }}      
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -30,10 +29,10 @@ jobs:
           output-file: 'CHANGELOG.md'
           skip-version-file: 'true'
           skip-commit: 'true'
+          skip-on-empty: 'false'
           git-push: 'true'
   retag-images:
     needs: [semantic-version]
-    if: ${{ needs.semantic-version.outputs.skipped == 'false' }}
     runs-on: ubuntu-22.04
     strategy:
         matrix:
@@ -50,7 +49,6 @@ jobs:
   deploys-test:
     needs: [retag-images, semantic-version]
     name: TEST Deploys
-    if: ${{ needs.semantic-version.outputs.skipped == 'false' }}
     environment: test
     runs-on: ubuntu-22.04
     timeout-minutes: 10
