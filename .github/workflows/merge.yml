@@ -168,18 +168,21 @@ jobs:
           # Deploy Helm Chart
           cd charts/${{ github.event.repository.name }}
           helm dependency update
-          helm upgrade --install --wait --atomic ${{ github.event.repository.name }} --values values.yaml --set-string global.repository=${{ github.repository }} --set-string backend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string backend.initContainers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string frontend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
+          helm upgrade --install --wait --atomic ${{ github.event.repository.name }} \
+            --values values.yaml --set-string global.repository=${{ github.repository }} \
+            --set-string backend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} \
+            --set-string backend.initContainers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} \
+            --set-string frontend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} \
+            --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} \
+            --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}
+            --timeout 10m .
+
+      - name: Create Tags
+        uses: jaywcjlove/create-tag-action@v1.3.19
         if: ${{ needs.semantic-version.outputs.semanticVersion != '' }}
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          token: ${{ github.token }}
-          tag_name: ${{ needs.semantic-version.outputs.tag }}
-          name: ${{ needs.semantic-version.outputs.tag }}
-          body: ${{ needs.semantic-version.outputs.clean_changelog }}
+        run: |
+          git tag ${{ needs.semantic-version.outputs.semanticVersion }}
+          git push origin --tag
 
   cleanup-prod:
     name: PROD Pod cleanup
