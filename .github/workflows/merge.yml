@@ -65,20 +65,6 @@ jobs:
           helm dependency update
           helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-test --values values.yaml --set-string global.repository=${{ github.repository }} --set-string backend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string backend.initContainers[0].tag=${{ needs.semver.outputs.semver }} --set-string frontend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}} --timeout 10m .
 
-  cleanup-test:
-    name: TEST Pod cleanup
-    environment: test
-    needs: [deploys-test]
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Remove OpenShift artifacts
-        run: |
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
-          oc project ${{ vars.OC_NAMESPACE }}
-
-          # Remove old build runs, build pods and deployment pods
-          oc delete po --field-selector=status.phase==Succeeded
-
   integration-tests:
     needs: [deploys-test]
     name: Integration Tests
@@ -155,9 +141,6 @@ jobs:
       - name: Deploy
         shell: bash
         run: |
-          # Allow pipefail, since we could be catching oc create errors
-          set +o pipefail
-          
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
@@ -173,11 +156,14 @@ jobs:
           git tag ${{ needs.semver.outputs.semver }}
           git push origin --tag
 
-  cleanup-prod:
-    name: PROD Pod cleanup
-    environment: prod
-    needs: [deploys-prod]
+  cleanup:
+    name: Pod cleanup
+    environment: ${{ matrix.environment }}
+    needs: [deploys-test]
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        environment: [test, prod]
     steps:
       - name: Remove OpenShift artifacts
         run: |
