@@ -20,11 +20,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
-      - name: Checkout branch
-        uses: actions/checkout@v3
-        with:
-          ref: refs/heads/${{ github.head_ref }}
-
+      - uses: actions/checkout@v4
       - name: Conventional Changelog Update
         uses: TriPSs/conventional-changelog-action@v3
         id: changelog
@@ -36,7 +32,6 @@ jobs:
           skip-commit: 'true'
           skip-on-empty: 'false'
           git-push: 'true'
-          git-branch: refs/heads/${{ github.head_ref }}
 
   retag-images:
     needs: [semantic-version]
