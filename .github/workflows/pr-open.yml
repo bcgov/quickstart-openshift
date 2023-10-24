@@ -96,9 +96,6 @@ jobs:
       - name: Deploy
         shell: bash
         run: |
-          # Allow pipefail, since we could be catching oc create errors
-          set +o pipefail
-          echo "IncrementalTag is $IncrementalTag"
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
@@ -106,4 +103,4 @@ jobs:
           # Deploy Helm Chart
           cd charts/${{ github.event.repository.name }}
           helm dependency update
-          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-${{ github.event.number }} --values values-pr.yaml --set-string global.repository=${{ github.repository }}  --set-string backend.containers[0].tag="${{ github.sha }}" --set-string backend.initContainers[0].tag="${{ github.sha }}" --set-string frontend.containers[0].tag="${{ github.sha }}" --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
+          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-${{ github.event.number }} --values values-pr.yaml --set-string global.repository=${{ github.repository }} --set-string backend.containers[0].tag="${{ github.sha }}" --set-string backend.initContainers[0].tag="${{ github.sha }}" --set-string frontend.containers[0].tag="${{ github.sha }}" --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}} --timeout 10m .
