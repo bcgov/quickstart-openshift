@@ -63,7 +63,7 @@ jobs:
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
+          tag: ${{ github.sha }}
           tag_fallback: test
           triggers: ('${{ matrix.triggers }}/')
           build_context: ${{ matrix.build_context }}
@@ -73,8 +73,8 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ github.event.number }}
-          tags: ${{ github.sha }}
+          target: ${{ github.sha }}
+          tags: ${{ github.event.number }}
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
