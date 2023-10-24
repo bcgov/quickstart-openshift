@@ -57,14 +57,6 @@ jobs:
     strategy:
       matrix:
         package: [migrations, backend, frontend]
-        include:
-          - package: migrations
-            build_context: ./backend/db
-            triggers: ('backend/db')
-          - package: backend
-            triggers: ('backend/')
-          - package: frontend
-            triggers: ('frontend/')
     timeout-minutes: 10
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v1.3.0
@@ -74,7 +66,6 @@ jobs:
           tag: ${{ github.sha }}
           tag_fallback: test
           triggers: ${{ matrix.triggers }}
-          build_context: ${{ matrix.build_context }}
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
