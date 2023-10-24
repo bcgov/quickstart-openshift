@@ -159,7 +159,7 @@ jobs:
   cleanup:
     name: Pod cleanup
     environment: ${{ matrix.environment }}
-    needs: [deploys-test]
+    needs: [deploys-prod]
     runs-on: ubuntu-22.04
     strategy:
       matrix:
