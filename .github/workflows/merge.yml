@@ -21,18 +21,22 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout branch
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/${{ github.head_ref }}
+
       - name: Conventional Changelog Update
         uses: TriPSs/conventional-changelog-action@v3
         id: changelog
         continue-on-error: true
         with:
           github-token: ${{ github.token }}
-          # output-file: 'CHANGELOG.md'
+          output-file: 'CHANGELOG.md'
           skip-version-file: 'true'
           skip-commit: 'true'
           skip-on-empty: 'false'
-          # git-push: 'true'
+          git-push: 'true'
           git-branch: refs/heads/${{ github.head_ref }}
 
   # retag-images:
