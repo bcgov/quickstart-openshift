@@ -133,7 +133,7 @@ jobs:
 
   deploys-prod:
     name: Deploys (prod)
-    needs: [cypress-e2e, integration-tests,deploys-test, semver] # all of this needed to Go To PROD.
+    needs: [cypress-e2e, integration-tests]
     environment: prod
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -145,7 +145,7 @@ jobs:
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
-          
+
           # Deploy Helm Chart
           cd charts/${{ github.event.repository.name }}
           helm dependency update
@@ -158,7 +158,7 @@ jobs:
           git push origin --tag
 
   cleanup:
-    name: leanup
+    name: Cleanup
     environment: ${{ matrix.environment }}
     needs: [deploys-prod]
     runs-on: ubuntu-22.04
