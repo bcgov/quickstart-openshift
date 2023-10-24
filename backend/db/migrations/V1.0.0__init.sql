@@ -16,9 +16,9 @@ CREATE TABLE IF NOT EXISTS USERS.USERS
     EMAIL varchar(200) not null
 );
 INSERT INTO USERS.USERS (NAME, EMAIL)
-VALUES ('John', 'John.ipsum@test.com'),
-       ('Jane', 'Jane.ipsum@test.com'),
-       ('Jack', 'Jack.ipsum@test.com'),
-       ('Jill', 'Jill.ipsum@test.com'),
-       ('Joe', 'Joe.ipsum@test.com');
+VALUES ('John', 'John@test.com'),
+       ('Jane', 'Jane@test.com'),
+       ('Jack', 'Jack@test.com'),
+       ('Jill', 'Jill@test.com'),
+       ('Joe', 'Joe@test.com');
 
