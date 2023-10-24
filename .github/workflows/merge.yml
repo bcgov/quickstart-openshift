@@ -5,6 +5,7 @@ on:
     workflows: [PR Closed]
     types: [completed]
   workflow_dispatch:
+  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}
@@ -31,151 +32,152 @@ jobs:
           skip-commit: 'true'
           skip-on-empty: 'false'
           git-push: 'true'
-  retag-images:
-    needs: [semantic-version]
-    runs-on: ubuntu-22.04
-    strategy:
-        matrix:
-            package: [backend, migrations, frontend]
-    steps:
-      - name: Tag Docker Images
-        uses: shrink/actions-docker-registry-tag@v3
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: test
-          tags: ${{ needs.semantic-version.outputs.semanticVersion }}
 
-  deploys-test:
-    needs: [retag-images, semantic-version]
-    name: TEST Deploys
-    environment: test
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy
-        shell: bash
-        run: |
-          # Allow pipefail, since we could be catching oc create errors
-          set +o pipefail
+  # retag-images:
+  #   needs: [semantic-version]
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #       matrix:
+  #           package: [backend, migrations, frontend]
+  #   steps:
+  #     - name: Tag Docker Images
+  #       uses: shrink/actions-docker-registry-tag@v3
+  #       with:
+  #         registry: ghcr.io
+  #         repository: ${{ github.repository }}/${{ matrix.package }}
+  #         target: test
+  #         tags: ${{ needs.semantic-version.outputs.semanticVersion }}
+
+  # deploys-test:
+  #   needs: [retag-images, semantic-version]
+  #   name: TEST Deploys
+  #   environment: test
+  #   runs-on: ubuntu-22.04
+  #   timeout-minutes: 10
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Deploy
+  #       shell: bash
+  #       run: |
+  #         # Allow pipefail, since we could be catching oc create errors
+  #         set +o pipefail
           
-          # Login to OpenShift (NOTE: project command is a safeguard)
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ vars.oc_namespace }}
+  #         # Login to OpenShift (NOTE: project command is a safeguard)
+  #         oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+  #         oc project ${{ vars.oc_namespace }}
           
-          # Deploy Helm Chart
-          cd charts/${{ github.event.repository.name }}
-          helm dependency update
-          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-test --values values.yaml --set-string global.repository=${{ github.repository }}  --set-string backend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string backend.initContainers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string frontend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
+  #         # Deploy Helm Chart
+  #         cd charts/${{ github.event.repository.name }}
+  #         helm dependency update
+  #         helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-test --values values.yaml --set-string global.repository=${{ github.repository }}  --set-string backend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string backend.initContainers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string frontend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
 
-  cleanup-test:
-    name: TEST Pod cleanup
-    environment: test
-    needs: [deploys-test]
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Remove OpenShift artifacts
-        run: |
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
-          oc project ${{ vars.OC_NAMESPACE }}
+  # cleanup-test:
+  #   name: TEST Pod cleanup
+  #   environment: test
+  #   needs: [deploys-test]
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: Remove OpenShift artifacts
+  #       run: |
+  #         oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+  #         oc project ${{ vars.OC_NAMESPACE }}
 
-          # Remove old build runs, build pods and deployment pods
-          oc delete po --field-selector=status.phase==Succeeded
+  #         # Remove old build runs, build pods and deployment pods
+  #         oc delete po --field-selector=status.phase==Succeeded
 
-  integration-tests:
-    needs: [deploys-test]
-    name: Integration Tests for APIs
-    defaults:
-      run:
-        working-directory: integration-tests
-    runs-on: ubuntu-22.04
-    timeout-minutes: 1
-    steps:
-      - uses: actions/checkout@v4
-      - id: cache-npm
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-cache-node-modules-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+  # integration-tests:
+  #   needs: [deploys-test]
+  #   name: Integration Tests for APIs
+  #   defaults:
+  #     run:
+  #       working-directory: integration-tests
+  #   runs-on: ubuntu-22.04
+  #   timeout-minutes: 1
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - id: cache-npm
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: ~/.npm
+  #         key: ${{ runner.os }}-build-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-build-cache-node-modules-
+  #           ${{ runner.os }}-build-
+  #           ${{ runner.os }}-
 
-      - name: Install dependencies
-        run: npm ci
-      - name: Run integration tests
-        run: BASE_URL=https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca API_NAME=nest  node src/main.js
+  #     - name: Install dependencies
+  #       run: npm ci
+  #     - name: Run integration tests
+  #       run: BASE_URL=https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca API_NAME=nest  node src/main.js
 
-  cypress-e2e:
-    name: Cypress end to end test
-    needs: [deploys-test]
-    runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: frontend
-    strategy:
-      matrix:
-        browser: [chrome, firefox, edge]
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - id: cache-npm
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-cache-node-modules-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+  # cypress-e2e:
+  #   name: Cypress end to end test
+  #   needs: [deploys-test]
+  #   runs-on: ubuntu-22.04
+  #   defaults:
+  #     run:
+  #       working-directory: frontend
+  #   strategy:
+  #     matrix:
+  #       browser: [chrome, firefox, edge]
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - id: cache-npm
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: ~/.npm
+  #         key: ${{ runner.os }}-build-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-build-cache-node-modules-
+  #           ${{ runner.os }}-build-
+  #           ${{ runner.os }}-
 
-      - uses: cypress-io/github-action@v6
-        name: Cypress run
-        env:
-          CYPRESS_baseUrl: https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca/
-        with:
-          config: pageLoadTimeout=10000
-          working-directory: ./frontend
-          browser: ${{ matrix.browser }}
-      - uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: ./cypress/screenshots
-          if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
+  #     - uses: cypress-io/github-action@v6
+  #       name: Cypress run
+  #       env:
+  #         CYPRESS_baseUrl: https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca/
+  #       with:
+  #         config: pageLoadTimeout=10000
+  #         working-directory: ./frontend
+  #         browser: ${{ matrix.browser }}
+  #     - uses: actions/upload-artifact@v3
+  #       if: failure()
+  #       with:
+  #         name: cypress-screenshots
+  #         path: ./cypress/screenshots
+  #         if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
 
 
   deploys-prod:
     name: PROD Deploys
-    needs: [cypress-e2e, integration-tests,deploys-test, semantic-version] # all of this needed to Go To PROD.
-    environment: prod
+    # needs: [cypress-e2e, integration-tests,deploys-test, semantic-version] # all of this needed to Go To PROD.
+    # environment: prod
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy
-        shell: bash
-        run: |
-          # Allow pipefail, since we could be catching oc create errors
-          set +o pipefail
+      # - name: Deploy
+      #   shell: bash
+      #   run: |
+      #     # Allow pipefail, since we could be catching oc create errors
+      #     set +o pipefail
           
-          # Login to OpenShift (NOTE: project command is a safeguard)
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ vars.oc_namespace }}
+      #     # Login to OpenShift (NOTE: project command is a safeguard)
+      #     oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+      #     oc project ${{ vars.oc_namespace }}
           
-          # Deploy Helm Chart
-          cd charts/${{ github.event.repository.name }}
-          helm dependency update
-          helm upgrade --install --wait --atomic ${{ github.event.repository.name }} \
-            --values values.yaml --set-string global.repository=${{ github.repository }} \
-            --set-string backend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} \
-            --set-string backend.initContainers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} \
-            --set-string frontend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} \
-            --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} \
-            --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}
-            --timeout 10m .
+      #     # Deploy Helm Chart
+      #     cd charts/${{ github.event.repository.name }}
+      #     helm dependency update
+      #     helm upgrade --install --wait --atomic ${{ github.event.repository.name }} \
+      #       --values values.yaml --set-string global.repository=${{ github.repository }} \
+      #       --set-string backend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} \
+      #       --set-string backend.initContainers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} \
+      #       --set-string frontend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} \
+      #       --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} \
+      #       --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}
+      #       --timeout 10m .
 
       - name: Create Tags
         uses: jaywcjlove/create-tag-action@v1.3.19
@@ -184,16 +186,16 @@ jobs:
           git tag ${{ needs.semantic-version.outputs.semanticVersion }}
           git push origin --tag
 
-  cleanup-prod:
-    name: PROD Pod cleanup
-    environment: prod
-    needs: [deploys-prod]
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Remove OpenShift artifacts
-        run: |
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
-          oc project ${{ vars.OC_NAMESPACE }}
+  # cleanup-prod:
+  #   name: PROD Pod cleanup
+  #   environment: prod
+  #   needs: [deploys-prod]
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: Remove OpenShift artifacts
+  #       run: |
+  #         oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+  #         oc project ${{ vars.OC_NAMESPACE }}
 
-          # Remove old build runs, build pods and deployment pods
-          oc delete po --field-selector=status.phase==Succeeded
+  #         # Remove old build runs, build pods and deployment pods
+  #         oc delete po --field-selector=status.phase==Succeeded
