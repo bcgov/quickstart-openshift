@@ -13,6 +13,7 @@ concurrency:
 
 jobs:
   semantic-version:
+    name: Semantic Version
     outputs:
       semanticVersion: ${{ steps.changelog.outputs.version }}
       tag: ${{ steps.changelog.outputs.tag }}
@@ -27,11 +28,12 @@ jobs:
         continue-on-error: true
         with:
           github-token: ${{ github.token }}
-          output-file: 'CHANGELOG.md'
+          # output-file: 'CHANGELOG.md'
           skip-version-file: 'true'
           skip-commit: 'true'
           skip-on-empty: 'false'
-          git-push: 'true'
+          # git-push: 'true'
+          git-branch: refs/heads/${{ github.head_ref }}
 
   # retag-images:
   #   needs: [semantic-version]
@@ -183,7 +185,7 @@ jobs:
         # uses: jaywcjlove/create-tag-action@v1.3.19
         # if: ${{ needs.semantic-version.outputs.semanticVersion != '' }}
         run: |
-          git tag ${{ jobs.semantic-version.outputs.semanticVersion }}
+          git tag ${{ needs.semantic-version.outputs.semanticVersion }}
           git push origin --tag
 
   # cleanup-prod:
