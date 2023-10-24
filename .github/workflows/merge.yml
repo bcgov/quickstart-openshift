@@ -11,12 +11,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  semantic-version:
+  semver:
     name: Semantic Version
     outputs:
-      semanticVersion: ${{ steps.changelog.outputs.version }}
-      tag: ${{ steps.changelog.outputs.tag }}
-      clean_changelog: ${{ steps.changelog.outputs.clean_changelog }}
+      semver: ${{ steps.changelog.outputs.version }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -27,14 +25,13 @@ jobs:
         continue-on-error: true
         with:
           github-token: ${{ github.token }}
-          output-file: 'CHANGELOG.md'
           skip-version-file: 'true'
           skip-commit: 'true'
           skip-on-empty: 'false'
-          git-push: 'true'
+          git-push: 'false'
 
   retag-images:
-    needs: [semantic-version]
+    needs: [semver]
     runs-on: ubuntu-22.04
     strategy:
         matrix:
@@ -46,10 +43,10 @@ jobs:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
           target: test
-          tags: ${{ needs.semantic-version.outputs.semanticVersion }}
+          tags: ${{ needs.semver.outputs.semver }}
 
   deploys-test:
-    needs: [retag-images, semantic-version]
+    needs: [retag-images, semver]
     name: TEST Deploys
     environment: test
     runs-on: ubuntu-22.04
@@ -59,9 +56,6 @@ jobs:
       - name: Deploy
         shell: bash
         run: |
-          # Allow pipefail, since we could be catching oc create errors
-          set +o pipefail
-          
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
@@ -69,7 +63,7 @@ jobs:
           # Deploy Helm Chart
           cd charts/${{ github.event.repository.name }}
           helm dependency update
-          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-test --values values.yaml --set-string global.repository=${{ github.repository }}  --set-string backend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string backend.initContainers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string frontend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
+          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-test --values values.yaml --set-string global.repository=${{ github.repository }} --set-string backend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string backend.initContainers[0].tag=${{ needs.semver.outputs.semver }} --set-string frontend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}} --timeout 10m .
 
   cleanup-test:
     name: TEST Pod cleanup
@@ -87,10 +81,7 @@ jobs:
 
   integration-tests:
     needs: [deploys-test]
-    name: Integration Tests for APIs
-    defaults:
-      run:
-        working-directory: integration-tests
+    name: Integration Tests
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -105,13 +96,17 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: Install dependencies
-        run: npm ci
-      - name: Run integration tests
-        run: BASE_URL=https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca API_NAME=nest  node src/main.js
+      - name: Integration tests
+        env:
+          API_NAME: nest
+          BASE_URL: https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca
+        run: |
+          cd integration-tests
+          npm ci
+          node src/main.js
 
   cypress-e2e:
-    name: Cypress end to end test
+    name: Cypress E2E
     needs: [deploys-test]
     runs-on: ubuntu-22.04
     defaults:
@@ -151,7 +146,7 @@ jobs:
 
   deploys-prod:
     name: PROD Deploys
-    needs: [cypress-e2e, integration-tests,deploys-test, semantic-version] # all of this needed to Go To PROD.
+    needs: [cypress-e2e, integration-tests,deploys-test, semver] # all of this needed to Go To PROD.
     environment: prod
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -170,12 +165,12 @@ jobs:
           # Deploy Helm Chart
           cd charts/${{ github.event.repository.name }}
           helm dependency update
-          helm upgrade --install --wait --atomic ${{ github.event.repository.name }} --values values.yaml --set-string global.repository=${{ github.repository }} --set-string backend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string backend.initContainers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string frontend.containers[0].tag=${{ needs.semantic-version.outputs.semanticVersion }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}}   --timeout 10m .
+          helm upgrade --install --wait --atomic ${{ github.event.repository.name }} --values values.yaml --set-string global.repository=${{ github.repository }} --set-string backend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string backend.initContainers[0].tag=${{ needs.semver.outputs.semver }} --set-string frontend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}} --timeout 10m .
 
       - name: Create Tags
-        if: ${{ needs.semantic-version.outputs.semanticVersion != '' }}
+        if: ${{ needs.semver.outputs.semver != '' }}
         run: |
-          git tag ${{ needs.semantic-version.outputs.semanticVersion }}
+          git tag ${{ needs.semver.outputs.semver }}
           git push origin --tag
 
   cleanup-prod:
