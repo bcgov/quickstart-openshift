@@ -1,7 +1,7 @@
 FROM flyway/flyway:9.22-alpine
 
 # Copy migrations
-COPY ./migrations /flyway/sql
+COPY ./sql /flyway/sql
 
 # Non-root user
 RUN adduser -D app
