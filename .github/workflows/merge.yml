@@ -48,7 +48,7 @@ jobs:
 
   deploys-test:
     needs: [retag-images, semver]
-    name: TEST Deploys
+    name: Deploys (test)
     environment: test
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -93,7 +93,7 @@ jobs:
           node src/main.js
 
   cypress-e2e:
-    name: Cypress E2E
+    name: E2E Tests
     needs: [deploys-test]
     runs-on: ubuntu-22.04
     defaults:
@@ -132,7 +132,7 @@ jobs:
           if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
 
   deploys-prod:
-    name: PROD Deploys
+    name: Deploys (prod)
     needs: [cypress-e2e, integration-tests,deploys-test, semver] # all of this needed to Go To PROD.
     environment: prod
     runs-on: ubuntu-22.04
@@ -158,7 +158,7 @@ jobs:
           git push origin --tag
 
   cleanup:
-    name: Pod cleanup
+    name: leanup
     environment: ${{ matrix.environment }}
     needs: [deploys-prod]
     runs-on: ubuntu-22.04
