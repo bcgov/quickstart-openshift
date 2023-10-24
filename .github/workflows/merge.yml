@@ -183,7 +183,7 @@ jobs:
         # uses: jaywcjlove/create-tag-action@v1.3.19
         # if: ${{ needs.semantic-version.outputs.semanticVersion != '' }}
         run: |
-          git tag ${{ needs.semantic-version.outputs.semanticVersion }}
+          git tag ${{ jobs.semantic-version.outputs.semanticVersion }}
           git push origin --tag
 
   # cleanup-prod:
