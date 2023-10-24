@@ -56,7 +56,7 @@ jobs:
           password: default
         env:
           FLYWAY_VALIDATE_MIGRATION_NAMING: true
-          FLYWAY_LOCATIONS: filesystem:./backend/db/migrations
+          FLYWAY_LOCATIONS: filesystem:./migrations
           FLYWAY_DEFAULT_SCHEMA: "users"
 
       - name: Create Output Folder

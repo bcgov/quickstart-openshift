@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   conventional-commits:
-    name: Conventional commits
+    name: Conventional Commits
     runs-on: ubuntu-22.04
     steps:
       - uses: amannn/action-semantic-pull-request@v5.3.0
@@ -57,14 +57,6 @@ jobs:
     strategy:
       matrix:
         package: [migrations, backend, frontend]
-        include:
-          - package: migrations
-            build_context: ./backend/db
-            triggers: ('backend/db')
-          - package: backend
-            triggers: ('backend/')
-          - package: frontend
-            triggers: ('frontend/')
     timeout-minutes: 10
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v1.3.0
@@ -73,9 +65,16 @@ jobs:
           package: ${{ matrix.package }}
           tag: ${{ github.sha }}
           tag_fallback: test
-          token: ${{ secrets.GITHUB_TOKEN }}
-          triggers: ${{ matrix.triggers }}
+          triggers: ('${{ matrix.triggers }}/')
           build_context: ${{ matrix.build_context }}
+
+      - name: Tag Docker Images
+        uses: shrink/actions-docker-registry-tag@v3
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.package }}
+          target: ${{ github.sha }}
+          tags: ${{ github.event.number }}
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:

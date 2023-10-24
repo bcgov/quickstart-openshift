@@ -29,7 +29,7 @@ services:
     image: flyway/flyway:9-alpine
     container_name: migrations
     command: info migrate info
-    volumes: ["./backend/db/migrations:/flyway/sql:ro"]
+    volumes: ["./migrations:/flyway/sql:ro"]
     environment:
       FLYWAY_URL: jdbc:postgresql://database:5432/postgres
       FLYWAY_USER: *POSTGRES_USER
