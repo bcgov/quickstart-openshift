@@ -31,6 +31,7 @@ jobs:
           git-push: 'false'
 
   retag-images:
+    name: Tag Images
     needs: [semver]
     runs-on: ubuntu-22.04
     strategy:
