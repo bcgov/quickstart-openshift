@@ -56,7 +56,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [ migrations, backend, frontend]
+        package: [migrations, backend, frontend]
         include:
           - package: migrations
             build_context: ./backend/db
@@ -76,6 +76,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ${{ matrix.triggers }}
           build_context: ${{ matrix.build_context }}
+
       - name: Tag Docker Images
         uses: shrink/actions-docker-registry-tag@v3
         with:
