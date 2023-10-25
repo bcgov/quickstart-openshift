@@ -50,8 +50,7 @@ jobs:
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
     name: Deploys
-    needs: [vars]
-    environment: ${{ needs.vars.outputs.environment }}
+    environment: ${{ jobs.vars.outputs.environment }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
