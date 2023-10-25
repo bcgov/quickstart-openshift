@@ -11,74 +11,74 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  conventional-commits:
-    name: Conventional Commits
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: amannn/action-semantic-pull-request@v5.3.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # conventional-commits:
+  #   name: Conventional Commits
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: amannn/action-semantic-pull-request@v5.3.0
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  pr-description-add:
-    name: PR Description Add
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
-    runs-on: ubuntu-22.04
-    permissions:
-      pull-requests: write
-    timeout-minutes: 1
-    steps:
-      - uses: bcgov-nr/action-pr-description-add@v1.1.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          add_markdown: |
-            ---
+  # pr-description-add:
+  #   name: PR Description Add
+  #   env:
+  #     DOMAIN: apps.silver.devops.gov.bc.ca
+  #     PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     pull-requests: write
+  #   timeout-minutes: 1
+  #   steps:
+  #     - uses: bcgov-nr/action-pr-description-add@v1.1.0
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         add_markdown: |
+  #           ---
 
-            Thanks for the PR!
+  #           Thanks for the PR!
 
-            Deployments, as required, will be available below:
-            - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }})
-            - [Backend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api)
+  #           Deployments, as required, will be available below:
+  #           - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }})
+  #           - [Backend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api)
 
-            Please create PRs in draft mode.  Mark as ready to enable:
-            - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
+  #           Please create PRs in draft mode.  Mark as ready to enable:
+  #           - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
 
-            After merge, new images are promoted to:
-            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+  #           After merge, new images are promoted to:
+  #           - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
-  # https://github.com/bcgov-nr/action-builder-ghcr
-  builds:
-    name: Builds
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        package: [migrations, backend, frontend]
-    timeout-minutes: 10
-    steps:
-      - uses: bcgov-nr/action-builder-ghcr@v1.3.0
-        with:
-          keep_versions: 50
-          package: ${{ matrix.package }}
-          tag: ${{ github.sha }}
-          tag_fallback: test
-          triggers: ('${{ matrix.triggers }}/')
-          build_context: ${{ matrix.build_context }}
+  # # https://github.com/bcgov-nr/action-builder-ghcr
+  # builds:
+  #   name: Builds
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     packages: write
+  #   strategy:
+  #     matrix:
+  #       package: [migrations, backend, frontend]
+  #   timeout-minutes: 10
+  #   steps:
+  #     - uses: bcgov-nr/action-builder-ghcr@v1.3.0
+  #       with:
+  #         keep_versions: 50
+  #         package: ${{ matrix.package }}
+  #         tag: ${{ github.sha }}
+  #         tag_fallback: test
+  #         triggers: ('${{ matrix.triggers }}/')
+  #         build_context: ${{ matrix.build_context }}
 
-      - name: Tag Docker Images
-        uses: shrink/actions-docker-registry-tag@v3
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ github.sha }}
-          tags: ${{ github.event.number }}
+  #     - name: Tag Docker Images
+  #       uses: shrink/actions-docker-registry-tag@v3
+  #       with:
+  #         registry: ghcr.io
+  #         repository: ${{ github.repository }}/${{ matrix.package }}
+  #         target: ${{ github.sha }}
+  #         tags: ${{ github.event.number }}
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
     name: Deploys
-    needs: [builds]
+    # needs: [builds]
     uses: ./.github/workflows/common-deploy.yml
     secrets: inherit
     with:
