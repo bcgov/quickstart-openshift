@@ -52,6 +52,7 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
+      environment: test
       tag: ${{ needs.semver.outputs.semver }}
       target: test
 
@@ -126,6 +127,7 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
+      environment:
       tag: ${{ needs.semver.outputs.semver }}
       target: prod
 
