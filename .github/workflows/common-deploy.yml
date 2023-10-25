@@ -36,7 +36,7 @@ on:
 jobs:
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
-    name: Deploys
+    name: ${{ inputs.target }}
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
@@ -62,4 +62,3 @@ jobs:
             --install --wait --atomic ${{ github.event.repository.name }}-${{ inputs.target }} \
             --timeout ${{ inputs.timeout-minutes }}m \
             --values ${{ inputs.values }} .
-
