@@ -59,6 +59,7 @@ jobs:
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
+          echo tags are ${{ inputs.backend_tag }} ${{ inputs.migrations_tag }} ${{ inputs.frontend_tag }}
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
