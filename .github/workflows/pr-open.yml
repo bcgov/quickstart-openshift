@@ -92,8 +92,8 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      backend_tag: ${{ needs.build.outputs.backend_tag }}
-      migrations_tag: ${{ needs.build.outputs.migrations_tag }}
-      frontend_tag: ${{ needs.build.outputs.frontend_tag }}
+      backend_tag: ${{ needs.builds.outputs.backend_tag }}
+      migrations_tag: ${{ needs.builds.outputs.migrations_tag }}
+      frontend_tag: ${{ needs.builds.outputs.frontend_tag }}
       target: ${{ github.event.number }}
       values: values-pr.yaml
