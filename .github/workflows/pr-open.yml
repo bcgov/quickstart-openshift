@@ -77,7 +77,7 @@ jobs:
           tags: ${{ github.event.number }}
       - name: return build output
         run: |
-          echo "${{ matrix.package }}.digest=${steps.build.digest}" >> $GITHUB_OUTPUT
+          echo "${{ matrix.package }}.digest=${{steps.build.outputs.digest}}" >> $GITHUB_OUTPUT
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
