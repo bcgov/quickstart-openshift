@@ -96,9 +96,11 @@ jobs:
             LAST_DEPLOYED_SECONDS=`helm status $RELEASE --output=json | jq -r '.info.last_deployed.seconds'`
             SEC_DIFF=`expr $CURRENT_TIME_SECONDS - $LAST_DEPLOYED_SECONDS`
             DAY_DIFF=`expr $SEC_DIFF / 86400`
-            if [ "$DAY_DIFF" -gt 30 ]; then
-              echo "$RELEASE is older than a month. Proceeding to delete it."
+            if [ "$DAY_DIFF" -gt 7 ]; then
+              echo "$RELEASE is older than a week. Proceeding to delete it."
               echo helm delete --purge --no-hooks $RELEASE
+            else
+              echo "$RELEASE is under a week old.  No deletion required."
             fi
           done
 
