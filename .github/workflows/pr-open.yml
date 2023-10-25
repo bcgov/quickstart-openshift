@@ -51,6 +51,11 @@ jobs:
   builds:
     name: Builds
     runs-on: ubuntu-22.04
+    outputs:
+      backend_tag: ${{ steps.get_digest.outputs.backend_tag }}
+      migrations_tag: ${{ steps.get_digest.outputs.migrations_tag }}
+      frontend_tag: ${{ steps.get_digest.outputs.frontend_tag }}
+
     permissions:
       packages: write
     strategy:
@@ -76,8 +81,9 @@ jobs:
           target: ${{ github.sha }}
           tags: ${{ github.event.number }}
       - name: return build output
+        id: get_digest
         run: |
-          echo "${{ matrix.package }}.digest=${{steps.build.outputs.digest}}" >> $GITHUB_OUTPUT
+          echo "${{ matrix.package }}_tag=${{steps.build.outputs.digest}}" >> $GITHUB_OUTPUT
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
@@ -86,8 +92,8 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      backend_tag: ${{ needs.build.outputs.backend.digest }}
-      migrations_tag: ${{ needs.build.outputs.migrations.digest }}
-      frontend_tag: ${{ needs.build.outputs.frontend.digest }}
+      backend_tag: ${{ needs.build.outputs.backend_tag }}
+      migrations_tag: ${{ needs.build.outputs.migrations_tag }}
+      frontend_tag: ${{ needs.build.outputs.frontend_tag }}
       target: ${{ github.event.number }}
       values: values-pr.yaml
