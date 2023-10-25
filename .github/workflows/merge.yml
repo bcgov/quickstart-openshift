@@ -123,7 +123,7 @@ jobs:
 
   deploys-prod:
     name: Deploys (prod)
-    needs: [cypress-e2e, integration-tests]
+    needs: [cypress-e2e, integration-tests, semver]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
