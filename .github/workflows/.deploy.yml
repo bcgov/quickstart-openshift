@@ -56,7 +56,8 @@ jobs:
           PREVIOUS=$(helm status ${{ github.event.repository.name }}-${{ inputs.target }} -o json | jq .info.status || true)
           if [[ ${PREVIOUS} =~ pending ]]; then
             echo "Rollback triggered"
-            helm rollback ${{ github.event.repository.name }}-${{ inputs.target }}
+            helm rollback ${{ github.event.repository.name }}-${{ inputs.target }} || \
+              helm uninstall ${{ github.event.repository.name }}-${{ inputs.target }}
           fi
 
           # Deploy Helm Chart
