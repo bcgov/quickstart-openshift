@@ -4,6 +4,10 @@ on:
   workflow_call:
     inputs:
       ### Required
+      environment:
+        description: 'GitHub Actions environment for variables and secrets.'
+        required: false
+        type: string
       tag:
         description: 'Docker semver tag or SHA.  E.g.: needs.semver.outputs.semver or github.sha.'
         required: true
@@ -19,11 +23,6 @@ on:
         default: 'charts/${{ github.event.repository.name }}'
         required: false
         type: string
-      regex_environment:
-        description: 'Regex for higher level environments.  Default is test or prod.'
-        default: '^(test|prod)$'
-        required: false
-        type: string
       timeout-minutes:
         description: 'Timeout minutes'
         default: "10"
@@ -35,22 +34,10 @@ on:
         required: false
         type: string
 jobs:
-  vars:
-    name: Variables
-    runs-on: ubuntu-22.04
-    timeout-minutes: 1
-    steps:
-      - id: vars
-        run: |
-          # Environment
-          if [ ${{ inputs.target }} =~ ${{ inputs.regex }} ]; then
-            echo "environment=${{ inputs.target }}" >> $GITHUB_OUTPUT
-          fi
-
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
     name: Deploys
-    environment: ${{ job.vars.outputs.environment }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
