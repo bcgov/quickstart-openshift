@@ -53,7 +53,7 @@ jobs:
           set -euxo nounset
 
           # Interrupt any previous jobs (status = pending-upgrade)
-          PREVIOUS=$(helm status ${{ github.event.repository.name }}-${{ inputs.target }} -o json | jq .info.status &>/dev/null || true)
+          PREVIOUS=$(helm status ${{ github.event.repository.name }}-${{ inputs.target }} -o json | jq .info.status 2>/dev/null || true)
           if [ "${PREVIOUS}" = "pending-upgrade" ]; then
             echo "Rollback triggered"
             helm rollback ${{ github.event.repository.name }}-${{ inputs.target }}
