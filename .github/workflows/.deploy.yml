@@ -54,7 +54,7 @@ jobs:
 
           # Interrupt any previous jobs (status = pending-upgrade)
           PREVIOUS=$(helm status ${{ github.event.repository.name }}-${{ inputs.target }} -o json | jq .info.status || true)
-          if [ ${PREVIOUS} = pending ]; then
+          if [ ${PREVIOUS} =~ pending ]; then
             echo "Rollback triggered"
             helm rollback ${{ github.event.repository.name }}-${{ inputs.target }}
           fi
