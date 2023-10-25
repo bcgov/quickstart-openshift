@@ -30,30 +30,33 @@ jobs:
           skip-on-empty: 'false'
           git-push: 'false'
 
-  retag-images:
-    name: Tag Images
-    needs: [semver]
+  get-digest:
+    name: Get Digests
+    outputs:
+      backend_tag: ${{ steps.get_digest.outputs.backend_tag }}
+      migrations_tag: ${{ steps.get_digest.outputs.migrations_tag }}
+      frontend_tag: ${{ steps.get_digest.outputs.frontend_tag }}
     runs-on: ubuntu-22.04
     strategy:
         matrix:
             package: [backend, migrations, frontend]
     steps:
-      - name: Tag Docker Images
-        uses: shrink/actions-docker-registry-tag@v3
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: test
-          tags: ${{ needs.semver.outputs.semver }}
+      - name: return digest
+        id: get_digest
+        run: |
+          DIGEST=$(docker manifest inspect ghcr.io/${{ github.repository }}/${{ matrix.package }}:test | jq '.manifests[0].digest')
+          echo "${{ matrix.package }}_tag=${DIGEST}" >> $GITHUB_OUTPUT
 
   deploys-test:
     name: Deploys (test)
-    needs: [retag-images, semver]
+    needs: [retag-images, get-digest]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
       environment: test
-      tag: ${{ needs.semver.outputs.semver }}
+      backend_tag: ${{ needs.get-digest.outputs.backend_tag }}
+      migrations_tag: ${{ needs.get-digest.outputs.migrations_tag }}
+      frontend_tag: ${{ needs.get-digest.outputs.frontend_tag }}
       target: test
 
   integration-tests:
@@ -123,12 +126,14 @@ jobs:
 
   deploys-prod:
     name: Deploys (prod)
-    needs: [cypress-e2e, integration-tests, semver]
+    needs: [cypress-e2e, integration-tests, get-digest]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
       environment: prod
-      tag: ${{ needs.semver.outputs.semver }}
+      backend_tag: ${{ needs.get-digest.outputs.backend_tag }}
+      migrations_tag: ${{ needs.get-digest.outputs.migrations_tag }}
+      frontend_tag: ${{ needs.get-digest.outputs.frontend_tag }}
       target: prod
 
   tags:
