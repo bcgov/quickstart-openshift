@@ -49,7 +49,15 @@ jobs:
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
-          
+
+          # Interrupt any previous jobs (status = pending-upgrade)
+          PREVIOUS=$(helm status ${{ github.event.repository.name }}-${{ inputs.target }} -o json | jq .info.status || true)
+          if [[ ${PREVIOUS} =~ pending ]]; then
+            echo "Rollback triggered"
+            helm rollback ${{ github.event.repository.name }}-${{ inputs.target }} || \
+              helm uninstall ${{ github.event.repository.name }}-${{ inputs.target }}
+          fi
+
           # Deploy Helm Chart
           helm dependency update
           helm upgrade \
