@@ -10,7 +10,7 @@ on:
         type: string
       tag:
         description: 'Docker semver tag or SHA.  E.g.: needs.semver.outputs.semver or github.sha.'
-        required: true
+        required: false
         type: string
       backend_tag:
         description: 'backend Tag, could be tag or sha'
