@@ -39,7 +39,7 @@ jobs:
     name: Deploys
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
-    timeout-minutes: ${{ inputs.timeout-minutes }}
+    timeout-minutes: "10"
     steps:
       - uses: actions/checkout@v4
       - name: Deploy
