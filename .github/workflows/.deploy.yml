@@ -30,7 +30,7 @@ on:
         type: number
       values:
         description: 'Values file.'
-        default: 'values.yml'
+        default: 'values.yaml'
         required: false
         type: string
 jobs:
