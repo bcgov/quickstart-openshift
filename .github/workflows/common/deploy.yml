@@ -1,0 +1,77 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      ### Required
+      tag:
+        description: 'Docker semver tag or SHA.  E.g.: ${{ needs.semver.outputs.semver }} or ${{ github.sha }}.'
+        required: true
+        type: string
+      target:
+        description: 'PR number, test or prod.'
+        required: true
+        type: string
+      
+      ### Usually a bad idea / not recommended
+      directory:
+        description: 'Chart directory.'
+        default: 'charts/${{ github.event.repository.name }}'
+        required: false
+        type: string
+      regex_environment:
+        description: 'Regex for higher level environments.  Default is test or prod.'
+        default: '^(test|prod)$'
+        required: false
+        type: string
+      timeout-minutes:
+        description: 'Timeout minutes'
+        default: "10"
+        required: false
+        type: string
+      values:
+        description: 'Values file.'
+        default: 'values.yml'
+        required: false
+        type: string
+jobs:
+  vars:
+    name: Variables
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
+      - id: vars
+        run: |
+          # Environment
+          if [ ${{ inputs.target }} =~ ${{ inputs.regex }} ]; then
+            echo "environment=${{ inputs.target }}" >> $GITHUB_OUTPUT
+          fi
+
+  # https://github.com/bcgov-nr/action-deployer-openshift
+  deploys:
+    name: Deploys
+    needs: [vars]
+    environment: ${{ needs.vars.outputs.environment }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy
+        working-directory: ${{ inputs.directory }}
+        shell: bash
+        run: |
+          # Login to OpenShift (NOTE: project command is a safeguard)
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ vars.oc_namespace }}
+          
+          # Deploy Helm Chart
+          helm dependency update
+          helm upgrade --install --wait --atomic --timeout ${{ inputs.timeout-minutes }}m . \
+            ${{ github.event.repository.name }}-${{ inputs.target }} \
+            --values ${{ inputs.values }} \
+            --set-string global.repository=${{ github.repository }} \
+            --set-string backend.containers[0].tag="${{ inputs.tag }}" \
+            --set-string backend.initContainers[0].tag="${{ inputs.tag }}" \
+            --set-string frontend.containers[0].tag="${{ inputs.tag }}" \
+            --set-string bitnami-pg.auth.password=${{ secrets.DB_PASSWORD }} \
+            --set-string bitnami-pg.auth.postgresPassword=${{ secrets.DB_PASSWORD }}
