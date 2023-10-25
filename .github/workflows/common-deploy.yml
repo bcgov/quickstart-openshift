@@ -27,7 +27,7 @@ on:
         description: 'Timeout minutes'
         default: "10"
         required: false
-        type: string
+        type: number
       values:
         description: 'Values file.'
         default: 'values.yml'
@@ -39,7 +39,7 @@ jobs:
     name: Deploys
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
-    timeout-minutes: "10"
+    timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - uses: actions/checkout@v4
       - name: Deploy
