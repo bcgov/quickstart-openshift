@@ -127,7 +127,7 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      environment:
+      environment: prod
       tag: ${{ needs.semver.outputs.semver }}
       target: prod
 
