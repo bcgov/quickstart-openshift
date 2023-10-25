@@ -5,7 +5,7 @@ on:
     inputs:
       ### Required
       tag:
-        description: 'Docker semver tag or SHA.  E.g.: ${{ needs.semver.outputs.semver }} or ${{ github.sha }}.'
+        description: 'Docker semver tag or SHA.  E.g.: needs.semver.outputs.semver or github.sha.'
         required: true
         type: string
       target:
