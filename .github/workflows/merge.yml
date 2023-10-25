@@ -50,6 +50,7 @@ jobs:
     name: Deploys (test)
     needs: [retag-images, semver]
     uses: ./.github/workflows/.deploy.yml
+    secrets: inherit
     with:
       tag: ${{ needs.semver.outputs.semver }}
       target: test
@@ -123,6 +124,7 @@ jobs:
     name: Deploys (prod)
     needs: [cypress-e2e, integration-tests]
     uses: ./.github/workflows/.deploy.yml
+    secrets: inherit
     with:
       tag: ${{ needs.semver.outputs.semver }}
       target: prod
