@@ -36,7 +36,7 @@ on:
 jobs:
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
-    name: ${{ inputs.target }}
+    name: Helm
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
