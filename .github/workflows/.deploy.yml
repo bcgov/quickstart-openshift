@@ -1,0 +1,64 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      ### Required
+      environment:
+        description: 'GitHub Actions environment for variables and secrets.'
+        required: false
+        type: string
+      tag:
+        description: 'Docker semver tag or SHA.  E.g.: needs.semver.outputs.semver or github.sha.'
+        required: true
+        type: string
+      target:
+        description: 'PR number, test or prod.'
+        required: true
+        type: string
+      
+      ### Usually a bad idea / not recommended
+      directory:
+        description: 'Chart directory.'
+        default: 'charts/${{ github.event.repository.name }}'
+        required: false
+        type: string
+      timeout-minutes:
+        description: 'Timeout minutes'
+        default: 10
+        required: false
+        type: number
+      values:
+        description: 'Values file.'
+        default: 'values.yml'
+        required: false
+        type: string
+jobs:
+  # https://github.com/bcgov-nr/action-deployer-openshift
+  deploys:
+    name: Helm
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy
+        working-directory: ${{ inputs.directory }}
+        shell: bash
+        run: |
+          # Login to OpenShift (NOTE: project command is a safeguard)
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ vars.oc_namespace }}
+          
+          # Deploy Helm Chart
+          helm dependency update
+          helm upgrade \
+            --set-string global.repository=${{ github.repository }} \
+            --set-string backend.containers[0].tag="${{ inputs.tag }}" \
+            --set-string backend.initContainers[0].tag="${{ inputs.tag }}" \
+            --set-string frontend.containers[0].tag="${{ inputs.tag }}" \
+            --set-string bitnami-pg.auth.password=${{ secrets.DB_PASSWORD }} \
+            --set-string bitnami-pg.auth.postgresPassword=${{ secrets.DB_PASSWORD }} \
+            --install --wait --atomic ${{ github.event.repository.name }}-${{ inputs.target }} \
+            --timeout ${{ inputs.timeout-minutes }}m \
+            --values ${{ inputs.values }} .

@@ -27,7 +27,7 @@ jobs:
 
   # If merged into main, then handle any image promotions
   image-promotions:
-    name: Image Promotions
+    name: Tag Images
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-22.04
     permissions:

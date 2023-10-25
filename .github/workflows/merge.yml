@@ -31,6 +31,7 @@ jobs:
           git-push: 'false'
 
   retag-images:
+    name: Tag Images
     needs: [semver]
     runs-on: ubuntu-22.04
     strategy:
@@ -46,24 +47,13 @@ jobs:
           tags: ${{ needs.semver.outputs.semver }}
 
   deploys-test:
+    name: Deploys (test)
     needs: [retag-images, semver]
-    name: TEST Deploys
-    environment: test
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy
-        shell: bash
-        run: |
-          # Login to OpenShift (NOTE: project command is a safeguard)
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ vars.oc_namespace }}
-          
-          # Deploy Helm Chart
-          cd charts/${{ github.event.repository.name }}
-          helm dependency update
-          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-test --values values.yaml --set-string global.repository=${{ github.repository }} --set-string backend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string backend.initContainers[0].tag=${{ needs.semver.outputs.semver }} --set-string frontend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}} --timeout 10m .
+    uses: ./.github/workflows/.deploy.yml
+    secrets: inherit
+    with:
+      tag: ${{ needs.semver.outputs.semver }}
+      target: test
 
   integration-tests:
     needs: [deploys-test]
@@ -92,7 +82,7 @@ jobs:
           node src/main.js
 
   cypress-e2e:
-    name: Cypress E2E
+    name: E2E Tests
     needs: [deploys-test]
     runs-on: ubuntu-22.04
     defaults:
@@ -131,25 +121,20 @@ jobs:
           if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
 
   deploys-prod:
-    name: PROD Deploys
-    needs: [cypress-e2e, integration-tests,deploys-test, semver] # all of this needed to Go To PROD.
-    environment: prod
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy
-        shell: bash
-        run: |
-          # Login to OpenShift (NOTE: project command is a safeguard)
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ vars.oc_namespace }}
-          
-          # Deploy Helm Chart
-          cd charts/${{ github.event.repository.name }}
-          helm dependency update
-          helm upgrade --install --wait --atomic ${{ github.event.repository.name }} --values values.yaml --set-string global.repository=${{ github.repository }} --set-string backend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string backend.initContainers[0].tag=${{ needs.semver.outputs.semver }} --set-string frontend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}} --timeout 10m .
+    name: Deploys (prod)
+    needs: [cypress-e2e, integration-tests]
+    uses: ./.github/workflows/.deploy.yml
+    secrets: inherit
+    with:
+      tag: ${{ needs.semver.outputs.semver }}
+      target: prod
 
+  tags:
+    name: Create Tags
+    needs: [deploys-prod]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
       - name: Create Tags
         if: ${{ needs.semver.outputs.semver != '' }}
         run: |
@@ -157,7 +142,7 @@ jobs:
           git push origin --tag
 
   cleanup:
-    name: Pod cleanup
+    name: Cleanup
     environment: ${{ matrix.environment }}
     needs: [deploys-prod]
     runs-on: ubuntu-22.04
