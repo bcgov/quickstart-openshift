@@ -47,24 +47,12 @@ jobs:
           tags: ${{ needs.semver.outputs.semver }}
 
   deploys-test:
-    needs: [retag-images, semver]
     name: Deploys (test)
-    environment: test
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy
-        shell: bash
-        run: |
-          # Login to OpenShift (NOTE: project command is a safeguard)
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ vars.oc_namespace }}
-          
-          # Deploy Helm Chart
-          cd charts/${{ github.event.repository.name }}
-          helm dependency update
-          helm upgrade --install --wait --atomic ${{ github.event.repository.name }}-test --values values.yaml --set-string global.repository=${{ github.repository }} --set-string backend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string backend.initContainers[0].tag=${{ needs.semver.outputs.semver }} --set-string frontend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}} --timeout 10m .
+    needs: [retag-images, semver]
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      tag: ${{ needs.semver.outputs.semver }}
+      target: test
 
   integration-tests:
     needs: [deploys-test]
@@ -134,23 +122,17 @@ jobs:
   deploys-prod:
     name: Deploys (prod)
     needs: [cypress-e2e, integration-tests]
-    environment: prod
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      tag: ${{ needs.semver.outputs.semver }}
+      target: prod
+
+  tags:
+    name: Create Tags
+    needs: [deploys-prod]
     runs-on: ubuntu-22.04
-    timeout-minutes: 10
+    timeout-minutes: 1
     steps:
-      - uses: actions/checkout@v4
-      - name: Deploy
-        shell: bash
-        run: |
-          # Login to OpenShift (NOTE: project command is a safeguard)
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ vars.oc_namespace }}
-
-          # Deploy Helm Chart
-          cd charts/${{ github.event.repository.name }}
-          helm dependency update
-          helm upgrade --install --wait --atomic ${{ github.event.repository.name }} --values values.yaml --set-string global.repository=${{ github.repository }} --set-string backend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string backend.initContainers[0].tag=${{ needs.semver.outputs.semver }} --set-string frontend.containers[0].tag=${{ needs.semver.outputs.semver }} --set-string bitnami-pg.auth.password=${{secrets.DB_PASSWORD}} --set-string bitnami-pg.auth.postgresPassword=${{secrets.DB_PASSWORD}} --timeout 10m .
-
       - name: Create Tags
         if: ${{ needs.semver.outputs.semver != '' }}
         run: |

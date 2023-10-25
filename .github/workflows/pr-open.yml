@@ -79,8 +79,7 @@ jobs:
   deploys:
     name: Deploys
     needs: [builds]
-    uses: ./.github/workflows/common-deploy.yml
-    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
     with:
       tag: ${{ github.sha }}
       target: ${{ github.event.number }}
