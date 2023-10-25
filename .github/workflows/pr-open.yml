@@ -58,7 +58,8 @@ jobs:
         package: [migrations, backend, frontend]
     timeout-minutes: 10
     steps:
-      - uses: bcgov-nr/action-builder-ghcr@v1.3.0
+      - uses: bcgov-nr/action-builder-ghcr@feat/digest-output
+        id: build
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
@@ -74,6 +75,9 @@ jobs:
           repository: ${{ github.repository }}/${{ matrix.package }}
           target: ${{ github.sha }}
           tags: ${{ github.event.number }}
+      - name: return build output
+        run: |
+          echo "${{ matrix.package }}.digest=${steps.build.digest}" >> $GITHUB_OUTPUT
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
@@ -82,6 +86,8 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      tag: ${{ github.sha }}
+      backend_tag: ${{ needs.build.outputs.backend.digest }}
+      migrations_tag: ${{ needs.build.outputs.migrations.digest }}
+      frontend_tag: ${{ needs.build.outputs.frontend.digest }}
       target: ${{ github.event.number }}
       values: values-pr.yaml
