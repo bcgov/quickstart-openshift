@@ -50,9 +50,12 @@ jobs:
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
 
+          set -euxo nounset
+
           # Interrupt any previous jobs (status = pending-upgrade)
           PREVIOUS=$(helm status ${{ github.event.repository.name }}-${{ inputs.target }} | jq .info.status)
           if [ "PREVIOUS" = "pending-upgrade" ]; then
+            echo "Rollback triggered"
             helm rollback ${{ github.event.repository.name }}-${{ inputs.target }}
           fi
 
