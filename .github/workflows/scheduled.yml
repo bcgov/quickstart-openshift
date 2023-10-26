@@ -77,26 +77,38 @@ jobs:
     name: PR Env Purge
     env:
       # https://tecadmin.net/getting-yesterdays-date-in-bash/
-      CUTOFF: "1 hour ago"
-      TYPE: "po,image,pvc"
+      CUTOFF: "1 week ago"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - run: |
+      - name: Clean up Helm Releases
+        run: |
+          # Clean up Helm Releases
+
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
 
-          # Clean up Helm releases
+          # Echos
+          echo "Delete stale Helm releases"
+          echo "Cutoff: ${{ env.CUTOFF }}"
+
+          # Before date, list of releases
           BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
           RELEASES=$(helm ls -aq)
+
+          # If releases, then iterate
           [ -z "${RELEASES}" ]|| for r in ${RELEASES[@]}; do
+
+            # Get last update and convert the date
             UPDATED=$(date "+%s" -d <<< echo $(helm status $r -o json | jq -r .info.last_deployed))
+
+            # Compare to cutoff and delete as necessary
             if [[ ${UPDATED} < ${BEFORE} ]]; then
-              echo "older: ${r}"
-              echo helm delete --purge --no-hooks ${r}
+              echo -e "\nOlder than cutoff: ${r}"
+              helm delete --purge --no-hooks ${r}
             else
-              echo "newer: ${r}"
+              echo -e "\nNewer than cutoff: ${r}"
               echo "No need to delete"
             fi
           done
