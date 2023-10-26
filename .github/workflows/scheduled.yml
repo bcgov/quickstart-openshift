@@ -87,22 +87,11 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
 
-          # Store release names and current date
-          helm_releases=$(helm ls --short)
-
-          # Purge!
-          for RELEASE in ${helm_releases[@]};
-          do
-            LAST_DEPLOYED_SECONDS=`helm status $RELEASE --output=json | jq -r '.info.last_deployed.seconds'`
-            SEC_DIFF=`expr $CURRENT_TIME_SECONDS - $LAST_DEPLOYED_SECONDS`
-            DAY_DIFF=`expr $SEC_DIFF / 86400`
-            if [ "$DAY_DIFF" -gt 7 ]; then
-              echo "$RELEASE is older than a week. Proceeding to delete it."
-              echo helm delete --purge --no-hooks $RELEASE
-            else
-              echo "$RELEASE is under a week old.  No deletion required."
-            fi
-          done
+          RELEASES=$(helm ls -aq | head -n1)
+          [ -z ${RELEASES} ]|| \
+            for r in "${RELEASES[@]}"; do
+              helm status $r -o json | jq .info.last_deployed
+            done
 
           # oc get ${{ env.TYPE }} -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
           #   awk '$2 <= "'$(date -d '${{ env.DATE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
