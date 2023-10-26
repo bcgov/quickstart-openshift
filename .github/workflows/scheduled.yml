@@ -87,7 +87,6 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
 
-          set -x
           # Clean up Helm releases
           BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
           RELEASES=$(helm ls -aq)
@@ -101,8 +100,3 @@ jobs:
               echo "No need to delete"
             fi
           done
-
-          # # Let OpenShift clean up anything that was missed
-          # oc get ${{ env.TYPE }} -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
-          #   awk '$2 <= "'$(date -d '${{ env.CUTOFF }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
-          #   xargs --no-run-if-empty oc delete ${{ env.TYPE }}
