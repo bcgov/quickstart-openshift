@@ -87,11 +87,22 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
 
-          RELEASES=$(helm ls -aq | head -n1)
-          [ -z ${RELEASES} ]|| \
-            for r in "${RELEASES[@]}"; do
-              helm status $r -o json | jq .info.last_deployed
-            done
+          # Cutoff and releases
+          INPUT="1 hour ago"
+          CUTOFF=$(date +%s -d "${INPUT}")
+          RELEASES=$(helm ls -aq)
+
+          # If any releases, compare to cutoff and delete accordingly
+          [ -z ${RELEASES} ]|| for r in ${RELEASES[@]}; do
+            UPDATED=$(helm status $r -o json | jq .info.last_deployed | date +%s)
+            if [[ ${UPDATED} < ${CUTOFF} ]]; then
+              echo "older"
+              echo helm delete --purge --no-hooks ${r}
+            else
+              echo "newer"
+              echo "No need to delete"
+            fi
+          done
 
           # oc get ${{ env.TYPE }} -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
           #   awk '$2 <= "'$(date -d '${{ env.DATE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \

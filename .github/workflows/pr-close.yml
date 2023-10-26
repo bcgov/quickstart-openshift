@@ -23,7 +23,7 @@ jobs:
           oc project ${{ vars.OC_NAMESPACE }}
 
           # Remove old build runs, build pods and deployment pods
-          helm uninstall ${{ github.event.repository.name }}-${{ github.event.number }}
+          helm delete --purge --no-hooks ${{ github.event.repository.name }}-${{ github.event.number }}
 
   # If merged into main, then handle any image promotions
   image-promotions:
