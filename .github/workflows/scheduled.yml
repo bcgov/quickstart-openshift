@@ -105,7 +105,7 @@ jobs:
             # Compare to cutoff and delete as necessary
             if [[ ${UPDATED} < ${BEFORE} ]]; then
               echo -e "\nOlder than cutoff: ${r}"
-              helm delete --purge --no-hooks ${r}
+              helm uninstall --no-hooks ${r}
             else
               echo -e "\nNewer than cutoff: ${r}"
               echo "No need to delete"
