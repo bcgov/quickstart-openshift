@@ -76,16 +76,38 @@ jobs:
     name: PR Env Purge
     env:
       # https://tecadmin.net/getting-yesterdays-date-in-bash/
-      DATE: "1 week ago"
-      TYPE: "po,image,pvc"
+      CUTOFF: "1 week ago"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - run: |
+      - name: Clean up Helm Releases
+        run: |
+          # Clean up Helm Releases
+
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
 
-          oc get ${{ env.TYPE }} -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
-            awk '$2 <= "'$(date -d '${{ env.DATE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
-            xargs --no-run-if-empty oc delete ${{ env.TYPE }}
+          # Echos
+          echo "Delete stale Helm releases"
+          echo "Cutoff: ${{ env.CUTOFF }}"
+
+          # Before date, list of releases
+          BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
+          RELEASES=$(helm ls -aq)
+
+          # If releases, then iterate
+          [ -z "${RELEASES}" ]|| for r in ${RELEASES[@]}; do
+
+            # Get last update and convert the date
+            UPDATED=$(date "+%s" -d <<< echo $(helm status $r -o json | jq -r .info.last_deployed))
+
+            # Compare to cutoff and delete as necessary
+            if [[ ${UPDATED} < ${BEFORE} ]]; then
+              echo -e "\nOlder than cutoff: ${r}"
+              helm uninstall --no-hooks ${r}
+            else
+              echo -e "\nNewer than cutoff: ${r}"
+              echo "No need to delete"
+            fi
+          done
