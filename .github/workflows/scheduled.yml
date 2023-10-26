@@ -91,7 +91,7 @@ jobs:
           # Clean up Helm releases
           BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
           RELEASES=$(helm ls -aq)
-          [ -z ${RELEASES} ]|| for r in ${RELEASES[@]}; do
+          [ -z "${RELEASES}" ]|| for r in ${RELEASES[@]}; do
             UPDATED=$(helm status $r -o json | jq .info.last_deployed | date +%s)
             if [[ ${UPDATED} < ${BEFORE} ]]; then
               echo "older: ${r}"
