@@ -49,7 +49,7 @@ jobs:
 
   deploys-test:
     name: Deploys (test)
-    needs: [retag-images, get-digest]
+    needs: [get-digest]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
