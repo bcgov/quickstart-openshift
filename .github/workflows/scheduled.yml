@@ -77,7 +77,7 @@ jobs:
     name: PR Env Purge
     env:
       # https://tecadmin.net/getting-yesterdays-date-in-bash/
-      DATE: "1 week ago"
+      CUTOFF: "1 hour ago"
       TYPE: "po,image,pvc"
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -87,23 +87,21 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
 
-          # Cutoff and releases
-          INPUT="1 hour ago"
-          CUTOFF=$(date +%s -d "${INPUT}")
+          # Clean up Helm releases
+          BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
           RELEASES=$(helm ls -aq)
-
-          # If any releases, compare to cutoff and delete accordingly
           [ -z ${RELEASES} ]|| for r in ${RELEASES[@]}; do
             UPDATED=$(helm status $r -o json | jq .info.last_deployed | date +%s)
-            if [[ ${UPDATED} < ${CUTOFF} ]]; then
-              echo "older"
+            if [[ ${UPDATED} < ${BEFORE} ]]; then
+              echo "older: ${r}"
               echo helm delete --purge --no-hooks ${r}
             else
-              echo "newer"
+              echo "newer: ${r}"
               echo "No need to delete"
             fi
           done
 
-          # oc get ${{ env.TYPE }} -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
-          #   awk '$2 <= "'$(date -d '${{ env.DATE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
-          #   xargs --no-run-if-empty oc delete ${{ env.TYPE }}
+          # Let OpenShift clean up anything that was missed
+          oc get ${{ env.TYPE }} -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
+            awk '$2 <= "'$(date -d '${{ env.CUTOFF }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
+            xargs --no-run-if-empty oc delete ${{ env.TYPE }}
