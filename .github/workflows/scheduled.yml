@@ -92,7 +92,7 @@ jobs:
           BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
           RELEASES=$(helm ls -aq)
           [ -z "${RELEASES}" ]|| for r in ${RELEASES[@]}; do
-            UPDATED=$(helm status $r -o json | jq .info.last_deployed | date +%s)
+            UPDATED=$(date "+%s" -d <<< echo $(helm status $r -o json | jq -r .info.last_deployed))
             if [[ ${UPDATED} < ${BEFORE} ]]; then
               echo "older: ${r}"
               echo helm delete --purge --no-hooks ${r}
