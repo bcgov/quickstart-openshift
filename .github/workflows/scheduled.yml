@@ -101,7 +101,7 @@ jobs:
             fi
           done
 
-          # Let OpenShift clean up anything that was missed
-          oc get ${{ env.TYPE }} -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
-            awk '$2 <= "'$(date -d '${{ env.CUTOFF }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
-            xargs --no-run-if-empty oc delete ${{ env.TYPE }}
+          # # Let OpenShift clean up anything that was missed
+          # oc get ${{ env.TYPE }} -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
+          #   awk '$2 <= "'$(date -d '${{ env.CUTOFF }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
+          #   xargs --no-run-if-empty oc delete ${{ env.TYPE }}
