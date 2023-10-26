@@ -45,7 +45,7 @@ backend:
           protocol: TCP
       resources: # this is optional
         limits:
-          cpu: 150m
+          cpu: 250m
           memory: 250Mi
         requests:
           cpu: 100m
@@ -95,7 +95,7 @@ backend:
             value: "quickstart"
       resources:
         limits:
-          cpu: 250m
+          cpu: 500m
           memory: 250Mi
         requests:
           cpu: 200m
