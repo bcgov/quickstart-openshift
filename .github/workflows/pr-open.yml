@@ -80,7 +80,7 @@ jobs:
           repository: ${{ github.repository }}/${{ matrix.package }}
           target: ${{ github.sha }}
           tags: ${{ github.event.number }}
-      - name: return build output
+      - name: return image digest
         id: get_digest
         run: |
           echo "${{ matrix.package }}_tag=${{steps.build.outputs.digest}}" >> $GITHUB_OUTPUT
