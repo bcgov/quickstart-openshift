@@ -51,6 +51,11 @@ jobs:
   builds:
     name: Builds
     runs-on: ubuntu-22.04
+    outputs:
+      backend_tag: ${{ steps.get_digest.outputs.backend_tag }}
+      migrations_tag: ${{ steps.get_digest.outputs.migrations_tag }}
+      frontend_tag: ${{ steps.get_digest.outputs.frontend_tag }}
+
     permissions:
       packages: write
     strategy:
@@ -58,7 +63,8 @@ jobs:
         package: [migrations, backend, frontend]
     timeout-minutes: 10
     steps:
-      - uses: bcgov-nr/action-builder-ghcr@v1.3.0
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.0
+        id: build
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
@@ -74,6 +80,10 @@ jobs:
           repository: ${{ github.repository }}/${{ matrix.package }}
           target: ${{ github.sha }}
           tags: ${{ github.event.number }}
+      - name: return build output
+        id: get_digest
+        run: |
+          echo "${{ matrix.package }}_tag=${{steps.build.outputs.digest}}" >> $GITHUB_OUTPUT
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
@@ -82,6 +92,8 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      tag: ${{ github.sha }}
+      backend_tag: ${{ needs.builds.outputs.backend_tag }}
+      migrations_tag: ${{ needs.builds.outputs.migrations_tag }}
+      frontend_tag: ${{ needs.builds.outputs.frontend_tag }}
       target: ${{ github.event.number }}
       values: values-pr.yaml

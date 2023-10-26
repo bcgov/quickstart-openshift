@@ -10,13 +10,26 @@ on:
         type: string
       tag:
         description: 'Docker semver tag or SHA.  E.g.: needs.semver.outputs.semver or github.sha.'
+        required: false
+        type: string
+      backend_tag:
+        description: 'backend Tag, could be tag or sha'
         required: true
         type: string
+      migrations_tag:
+        description: 'migrations Tag, could be tag or sha'
+        required: true
+        type: string
+      frontend_tag:
+        description: 'frontend Tag, could be tag or sha'
+        required: true
+        type: string
+
       target:
         description: 'PR number, test or prod.'
         required: true
         type: string
-      
+
       ### Usually a bad idea / not recommended
       directory:
         description: 'Chart directory.'
@@ -46,6 +59,7 @@ jobs:
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
+          echo tags are ${{ inputs.backend_tag }} ${{ inputs.migrations_tag }} ${{ inputs.frontend_tag }}
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
@@ -57,14 +71,13 @@ jobs:
             helm rollback ${{ github.event.repository.name }}-${{ inputs.target }} || \
               helm uninstall ${{ github.event.repository.name }}-${{ inputs.target }}
           fi
-
           # Deploy Helm Chart
           helm dependency update
           helm upgrade \
             --set-string global.repository=${{ github.repository }} \
-            --set-string backend.containers[0].tag="${{ inputs.tag }}" \
-            --set-string backend.initContainers[0].tag="${{ inputs.tag }}" \
-            --set-string frontend.containers[0].tag="${{ inputs.tag }}" \
+            --set-string backend.containers[0].tag="${{ inputs.backend_tag }}" \
+            --set-string backend.initContainers[0].tag="${{ inputs.migrations_tag }}" \
+            --set-string frontend.containers[0].tag="${{ inputs.frontend_tag }}" \
             --set-string bitnami-pg.auth.password=${{ secrets.DB_PASSWORD }} \
             --set-string bitnami-pg.auth.postgresPassword=${{ secrets.DB_PASSWORD }} \
             --install --wait --atomic ${{ github.event.repository.name }}-${{ inputs.target }} \
