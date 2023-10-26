@@ -63,7 +63,7 @@ jobs:
         package: [migrations, backend, frontend]
     timeout-minutes: 10
     steps:
-      - uses: bcgov-nr/action-builder-ghcr@feat/digest-output
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.0
         id: build
         with:
           keep_versions: 50
