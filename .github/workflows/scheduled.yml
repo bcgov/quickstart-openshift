@@ -87,6 +87,7 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
 
+          set -x
           # Clean up Helm releases
           BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
           RELEASES=$(helm ls -aq)
