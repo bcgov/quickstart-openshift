@@ -36,9 +36,10 @@ Features:
 * Sandboxed development environments
 * Gateable production deployments
 * Container publishing (ghcr.io) and importing (OpenShift)
-* Security, vulnerability, infrastructure and container scan tools
+* Security, vulnerability, infrastructure, and container scan tools
 * Automatic dependency patching available from [bcgov/nr-renovate](https://github.com/bcgov/nr-renovate)
 * Enforced code reviews and workflow jobs (pass|fail)
+* Helm Package Manager for atomic deployments
 * Sample application stack:
     * Database: Postgres, PostGIS, backups
     * Frontend: TypeScript, Caddy Server
