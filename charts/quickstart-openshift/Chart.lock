@@ -11,5 +11,8 @@ dependencies:
 - name: component
   repository: https://bcgov.github.io/helm-service
   version: 0.0.13
-digest: sha256:8e1d9672f32629d18ec3a17bcc447c8ee9531d9ae9147db8dfd86f3f876af563
-generated: "2023-10-26T02:03:54.085557072Z"
+- name: component
+  repository: https://bcgov.github.io/helm-service
+  version: 0.0.13
+digest: sha256:f4c1099c85eb0e03685b066834e54089a1ba127d2083c25cbb9a7670612389a8
+generated: "2023-10-26T22:01:49.4841001-07:00"

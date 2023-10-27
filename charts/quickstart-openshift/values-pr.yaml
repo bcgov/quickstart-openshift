@@ -362,6 +362,7 @@ bitnami-pg:
       scripts:
         postgis.sh: |
           #!/bin/sh
+          PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -d postgres
           CREATE EXTENSION postgis;
 
     resources:
