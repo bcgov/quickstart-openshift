@@ -25,6 +25,9 @@ jobs:
           # Remove old build runs, build pods and deployment pods
           helm uninstall --no-hooks ${{ github.event.repository.name }}-${{ github.event.number }}
 
+          # Remove Bitnami Crunchy PVCs
+          oc delete pvc data-${{ github.event.repository.name }}-${{ github.event.number }}-bitnami-pg-0
+
   # If merged into main, then handle any image promotions
   image-promotions:
     name: Tag Images

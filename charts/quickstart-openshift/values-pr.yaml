@@ -5,10 +5,12 @@ global:
   registry: ghcr.io # the registry where the images are stored. override during runtime for other registry at global level or individual level.
   secrets:
     enabled: true
-    annotation:
-      helm.sh/policy: "keep"
+    databasePassword: ~
+    databaseUser: ~
+    databaseName: ~
   domain: "apps.silver.devops.gov.bc.ca" # it is required, apps.silver.devops.gov.bc.ca for silver cluster
   openshiftImageRegistry: "image-registry.openshift-image-registry.svc:5000"
+  databaseAlias: bitnami-pg # this is the alias for bitnami postgres, change it based on db type(crunchy,patroni...) and alias used in the chart.
 
 backend:
   enabled: true
@@ -22,23 +24,19 @@ backend:
       image: backend # the exact component name, be it backend, api-1 etc...
       tag: prod # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
       env:
-        fromLocalSecret:
+        fromGlobalSecret:
           - name: POSTGRES_PASSWORD
             key: password
-            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
-          #- name: POSTGRES_PASSWORD
-          #  key: password
-          #  secretName: '{{ .Release.Name }}-bitnami-pg-ha' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+          - name: POSTGRES_USER
+            key: databaseUser
+          - name: POSTGRES_DATABASE
+            key: databaseName
 
         fromValues:
           - name: POSTGRES_HOST
-            value: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+            value: '{{ .Release.Name }}-{{.Values.global.databaseAlias}}' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
           #- name: POSTGRES_HOST
           #  value: '{{ .Release.Name }}-bitnami-pg-pool' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
-          - name: POSTGRES_USER
-            value: quickstart
-          - name: POSTGRES_DATABASE
-            value: quickstart
 
       ports:
         - name: http
@@ -78,22 +76,19 @@ backend:
       image: migrations
       tag: prod
       env:
-        fromLocalSecret:
+        fromGlobalSecret:
           - name: FLYWAY_PASSWORD
-            key: password
-            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
-          #- name: FLYWAY_PASSWORD
-          #  key: password
-          #  secretName: '{{ .Release.Name }}-bitnami-pg-ha' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
-        fromValues:
+            key: databasePassword
           - name: FLYWAY_URL
-            value: 'jdbc:postgresql://{{ .Release.Name }}-bitnami-pg:5432/quickstart'
+            key: databaseJDBCURLNoCreds
+          - name: FLYWAY_USER
+            key: databaseUser
+        fromValues:
           - name: FLYWAY_BASELINE_ON_MIGRATE
             value: "true"
           - name: FLYWAY_DEFAULT_SCHEMA
             value: "USERS"
-          - name: FLYWAY_USER
-            value: "quickstart"
+
       resources:
         limits:
           cpu: 500m
@@ -329,10 +324,9 @@ bitnami-pg:
     repository: bcgov/nr-containers/bitnami/postgresql
     tag: 15.4.0
   auth:
-    username: quickstart
-    password: default # overridden at deployment
-    database: quickstart
-    postgresPassword: default # overridden at deployment
+   existingSecret: '{{ .Release.Name }}'
+   username: 'quickstart'
+   database: quickstart
   shmVolume:
     enabled: false
   backup:
@@ -344,10 +338,6 @@ bitnami-pg:
       storage:
         size: 200Mi
   primary:
-    persistentVolumeClaimRetentionPolicy:
-      enabled: true
-      whenScaled: Retain
-      whenDeleted: Delete
     persistence:
         enabled: true
         storageClass: netapp-file-standard
@@ -359,7 +349,7 @@ bitnami-pg:
     podSecurityContext:
       enabled: false
     initdb:
-      scripts:
+      scripts: # remove the below script, if POSTGIS is not required.
         postgis.sh: |
           #!/bin/sh
           PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -d postgres -c "CREATE EXTENSION postgis;"
@@ -419,17 +409,16 @@ backup:
           - name: MONTHLY_BACKUPS
             value: '1'
           - name: DATABASE_SERVICE_NAME # depends on which chart being used, adjust accordingly.
-            value: '{{.Release.Name}}-bitnami-pg'
+            value: '{{.Release.Name}}-{{.Values.global.databaseAlias}}'
           - name: DEFAULT_PORT
             value: "5432"
-          - name: POSTGRESQL_DATABASE
-            value: "quickstart"
-          - name: DATABASE_USER
-            value: "quickstart"
-        fromLocalSecret:
+        fromGlobalSecret:
           - name: DATABASE_PASSWORD
             key: password
-            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+          - name: POSTGRESQL_DATABASE
+            key: databaseName
+          - name: DATABASE_USER
+            key: databaseUser
       resources:
         limits:
           cpu: 50m
@@ -438,71 +427,3 @@ backup:
           cpu: 20m
           memory: 128Mi
 
-pgfeatureserv:
-  enabled: true
-  deployment: # can be either a statefulSet or a deployment not both
-    enabled: true
-  containers:
-    - name: pg-feature-service
-      registry: 'ghcr.io' # example, it includes registry
-      repository: 'bcgov/nr-containers/crunchy' # example, it includes repository
-      image: pgfeatureserv # the exact component name, be it backend, api-1 etc...
-      tag: '20231005' # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
-      env:
-        fromGlobalSecret:
-          - name: DATABASE_URL
-            key: databaseURL
-        fromValues:
-          - name: PGFS_SERVER_HTTPPORT
-            value: "7800"
-          - name: PGFS_METADATA_TITLE
-            value: "Om;s TEST"
-
-      ports:
-        - name: http
-          containerPort: 7800
-          protocol: TCP
-      resources: # this is optional
-        limits:
-          cpu: 100m
-          memory: 150Mi
-        requests:
-          cpu: 50m
-          memory: 50Mi
-      readinessProbe:
-        httpGet:
-          path: /
-          port: 7800
-          scheme: HTTP
-        initialDelaySeconds: 5
-        periodSeconds: 2
-        timeoutSeconds: 2
-        successThreshold: 1
-        failureThreshold: 30
-      livenessProbe:
-        successThreshold: 1
-        failureThreshold: 3
-        httpGet:
-          path: /
-          port: 7800
-          scheme: HTTP
-        initialDelaySeconds: 15
-        periodSeconds: 30
-        timeoutSeconds: 5
-  autoscaling:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 1
-    targetCPUUtilizationPercentage: 80 # this percentage from request cpu
-  service:
-    enabled: true
-    type: ClusterIP
-    ports:
-      - name: http
-        port: 80
-        targetPort: 7800 # the container port where the application is listening on
-        protocol: TCP
-  route:
-    enabled: true
-    host: "{{ .Release.Name }}-pg-feature-service.{{ .Values.global.domain }}"
-    targetPort: http # look at line#164 refer to the name.
