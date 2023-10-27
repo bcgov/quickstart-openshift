@@ -80,7 +80,7 @@ backend:
           - name: FLYWAY_PASSWORD
             key: databasePassword
           - name: FLYWAY_URL
-            key: databaseJDBCURL
+            key: databaseJDBCURLNoCreds
           - name: FLYWAY_USER
             key: databaseUser
         fromValues:
