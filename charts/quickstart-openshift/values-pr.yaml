@@ -349,9 +349,10 @@ bitnami-pg:
     podSecurityContext:
       enabled: false
     initdb:
-      scripts:
-        postgis.sql: |
-          CREATE EXTENSION postgis;
+      scripts: # remove the below script, if POSTGIS is not required.
+        postgis.sh: |
+          #!/bin/sh
+          PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -d postgres -c "CREATE EXTENSION postgis;"
 
     resources:
         requests:
