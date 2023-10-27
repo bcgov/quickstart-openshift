@@ -4,11 +4,15 @@ global:
   repository: ~ # the repository where the images are stored.
   registry: ghcr.io # the registry where the images are stored. override during runtime for other registry at global level or individual level.
   secrets:
+    enabled: true
+    databasePassword: ~
+    databaseUser: ~
+    databaseName: ~
     annotation:
       helm.sh/policy: "keep"
   domain: "apps.silver.devops.gov.bc.ca" # it is required, apps.silver.devops.gov.bc.ca for silver cluster
   openshiftImageRegistry: "image-registry.openshift-image-registry.svc:5000"
-
+  databaseAlias: bitnami-pg # this is the alias for bitnami postgres, change it based on db type(crunchy,patroni...) and alias used in the chart.
 backend:
   enabled: true
   deployment: # can be either a statefulSet or a deployment not both
@@ -21,18 +25,17 @@ backend:
       image: backend # the exact component name, be it backend, api-1 etc...
       tag: prod # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
       env:
-        fromLocalSecret:
+        fromGlobalSecret:
           - name: POSTGRES_PASSWORD
             key: password
-            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+          - name: POSTGRES_USER
+            key: databaseUser
+          - name: POSTGRES_DATABASE
+            key: databaseName
 
         fromValues:
           - name: POSTGRES_HOST
-            value: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
-          - name: POSTGRES_USER
-            value: quickstart
-          - name: POSTGRES_DATABASE
-            value: quickstart
+            value: '{{ .Release.Name }}-{{.Values.global.databaseAlias}}'
 
       ports:
         - name: http
@@ -72,19 +75,18 @@ backend:
       image: migrations
       tag: prod
       env:
-        fromLocalSecret:
+        fromGlobalSecret:
           - name: FLYWAY_PASSWORD
-            key: password
-            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
-        fromValues:
+            key: databasePassword
           - name: FLYWAY_URL
-            value: 'jdbc:postgresql://{{ .Release.Name }}-bitnami-pg:5432/quickstart'
+            key: databaseJDBCURLNoCreds
+          - name: FLYWAY_USER
+            key: databaseUser
+        fromValues:
           - name: FLYWAY_BASELINE_ON_MIGRATE
             value: "true"
           - name: FLYWAY_DEFAULT_SCHEMA
             value: "USERS"
-          - name: FLYWAY_USER
-            value: "quickstart"
       resources:
         limits:
           cpu: 500m
@@ -320,10 +322,8 @@ bitnami-pg:
     repository: bcgov/nr-containers/bitnami/postgresql
     tag: 15.4.0
   auth:
-    username: quickstart
-    password: default # overridden at deployment
+    existingSecret: '{{ .Release.Name }}'
     database: quickstart
-    postgresPassword: default # overridden at deployment
   shmVolume:
     enabled: false
   backup:
@@ -404,17 +404,21 @@ backup:
           - name: MONTHLY_BACKUPS
             value: '1'
           - name: DATABASE_SERVICE_NAME # depends on which chart being used, adjust accordingly.
-            value: '{{.Release.Name}}-bitnami-pg'
+            value: '{{.Release.Name}}-{{.Values.global.databaseAlias}}'
           - name: DEFAULT_PORT
             value: "5432"
           - name: POSTGRESQL_DATABASE
             value: "quickstart"
           - name: DATABASE_USER
             value: "quickstart"
-        fromLocalSecret:
+        fromGlobalSecret:
           - name: DATABASE_PASSWORD
             key: password
             secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
+          - name: POSTGRESQL_DATABASE
+            key: databaseName
+          - name: DATABASE_USER
+            key: databaseUser
       resources:
         limits:
           cpu: 50m
