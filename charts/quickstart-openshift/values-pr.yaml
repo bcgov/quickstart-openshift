@@ -356,7 +356,8 @@ bitnami-pg:
       enabled: false
     initdb:
       scripts:
-        postgis.sql: |
+        postgis.sh: |
+          #!/bin/sh
           CREATE EXTENSION postgis;
 
     resources:
@@ -449,13 +450,13 @@ pgfeatureserv:
             key: databaseURL
         fromValues:
           - name: PGFS_SERVER_HTTPPORT
-            value: "8080"
+            value: "7800"
           - name: PGFS_METADATA_TITLE
             value: "Om;s TEST"
 
       ports:
         - name: http
-          containerPort: 8080
+          containerPort: 7800
           protocol: TCP
       resources: # this is optional
         limits:
@@ -467,7 +468,7 @@ pgfeatureserv:
       readinessProbe:
         httpGet:
           path: /
-          port: 8080
+          port: 7800
           scheme: HTTP
         initialDelaySeconds: 5
         periodSeconds: 2
@@ -479,7 +480,7 @@ pgfeatureserv:
         failureThreshold: 3
         httpGet:
           path: /
-          port: 8080
+          port: 7800
           scheme: HTTP
         initialDelaySeconds: 15
         periodSeconds: 30
@@ -495,7 +496,7 @@ pgfeatureserv:
     ports:
       - name: http
         port: 80
-        targetPort: 8080 # the container port where the application is listening on
+        targetPort: 7800 # the container port where the application is listening on
         protocol: TCP
   route:
     enabled: true
