@@ -77,8 +77,7 @@ jobs:
             --set-string backend.containers[0].tag="${{ inputs.backend_tag }}" \
             --set-string backend.initContainers[0].tag="${{ inputs.migrations_tag }}" \
             --set-string frontend.containers[0].tag="${{ inputs.frontend_tag }}" \
-            --set-string bitnami-pg.auth.password=${{ secrets.DB_PASSWORD }} \
-            --set-string bitnami-pg.auth.postgresPassword=${{ secrets.DB_PASSWORD }} \
+            --set-string global.secrets.password=${{ secrets.DB_PASSWORD }} \
             --install --wait --atomic ${{ github.event.repository.name }}-${{ inputs.target }} \
             --timeout ${{ inputs.timeout-minutes }}m \
             --values ${{ inputs.values }} .
