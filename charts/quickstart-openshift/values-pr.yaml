@@ -344,6 +344,10 @@ bitnami-pg:
       storage:
         size: 200Mi
   primary:
+    persistentVolumeClaimRetentionPolicy:
+      enabled: true
+      whenScaled: Retain
+      whenDeleted: Delete
     persistence:
         enabled: true
         storageClass: netapp-file-standard
