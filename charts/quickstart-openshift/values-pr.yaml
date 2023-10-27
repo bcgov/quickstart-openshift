@@ -432,3 +432,71 @@ backup:
           cpu: 20m
           memory: 128Mi
 
+pgfeatureserv:
+  enabled: true
+  deployment: # can be either a statefulSet or a deployment not both
+    enabled: true
+  containers:
+    - name: pg-feature-service
+      registry: 'ghcr.io' # example, it includes registry
+      repository: 'bcgov/nr-containers/crunchy' # example, it includes repository
+      image: pgfeatureserv # the exact component name, be it backend, api-1 etc...
+      tag: '20231005' # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      env:
+        fromGlobalSecret:
+          - name: DATABASE_URL
+            key: databaseURL
+        fromValues:
+          - name: PGFS_SERVER_HTTPPORT
+            value: "8080"
+          - name: PGFS_METADATA_TITLE
+            value: "Om;s TEST"
+
+      ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+      resources: # this is optional
+        limits:
+          cpu: 100m
+          memory: 150Mi
+        requests:
+          cpu: 50m
+          memory: 50Mi
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 8080
+          scheme: HTTP
+        initialDelaySeconds: 5
+        periodSeconds: 2
+        timeoutSeconds: 2
+        successThreshold: 1
+        failureThreshold: 30
+      livenessProbe:
+        successThreshold: 1
+        failureThreshold: 3
+        httpGet:
+          path: /
+          port: 8080
+          scheme: HTTP
+        initialDelaySeconds: 15
+        periodSeconds: 30
+        timeoutSeconds: 5
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 1
+    targetCPUUtilizationPercentage: 80 # this percentage from request cpu
+  service:
+    enabled: true
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 80
+        targetPort: 8080 # the container port where the application is listening on
+        protocol: TCP
+  route:
+    enabled: true
+    host: "{{ .Release.Name }}-pg-feature-service.{{ .Values.global.domain }}"
+    targetPort: http # look at line#164 refer to the name.
