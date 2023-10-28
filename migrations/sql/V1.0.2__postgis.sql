@@ -63,8 +63,6 @@ LANGUAGE 'plpgsql'
 STABLE
 STRICT;
 
-============================================================================
-
 CREATE OR REPLACE FUNCTION postgisftw.geo_grid(
   num_x integer DEFAULT 10,
   num_y integer DEFAULT 10,
@@ -97,8 +95,6 @@ COMMENT ON FUNCTION postgisftw.geo_grid IS 'Generates a grid of rectangles over 
 
 SELECT * FROM postgisftw.geo_grid(5,5,-128,24,-64,49);
 
-============================================================================
-
 
 
 CREATE OR REPLACE FUNCTION postgisftw.buffer(
@@ -114,7 +110,6 @@ END;
 $$
 LANGUAGE 'plpgsql' STABLE STRICT;
 
-============================================================================
 
 CREATE OR REPLACE FUNCTION postgisftw.country_by_name(
 	name_prefix text DEFAULT 'A')
@@ -132,7 +127,6 @@ LANGUAGE 'plpgsql' STABLE STRICT;
 COMMENT ON FUNCTION postgisftw.country_by_name
 IS 'Filters the countries table by the initial letters of the name using the "name_prefix" parameter.';
 
-============================================================================
 
 CREATE OR REPLACE FUNCTION postgisftw.country_by_loc(
   lon numeric DEFAULT 0.0,
@@ -156,7 +150,6 @@ IS 'Finds the country at a geographic location';
 SELECT * FROM postgisftw.country_by_loc(8, 47);
 
 
-============================================================================
 
 CREATE OR REPLACE FUNCTION postgisftw.country_neighbors(
   lon numeric DEFAULT 0.0,
@@ -179,7 +172,6 @@ LANGUAGE 'plpgsql' STABLE STRICT;
 SELECT * FROM postgisftw.country_neighbors(8, 47);
 
 
-============================================================================
 
 CREATE OR REPLACE FUNCTION postgisftw.geonames_nn(
   pt_lon numeric DEFAULT 0.0,
