@@ -81,13 +81,13 @@ backend:
             key: databasePassword
           - name: FLYWAY_URL
             key: databaseJDBCURLNoCreds
-          - name: FLYWAY_USER
-            key: databaseUser
         fromValues:
           - name: FLYWAY_BASELINE_ON_MIGRATE
             value: "true"
           - name: FLYWAY_DEFAULT_SCHEMA
             value: "USERS"
+          - name: FLYWAY_USER
+            value: postgres
 
       resources:
         limits:
