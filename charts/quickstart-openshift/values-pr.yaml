@@ -503,7 +503,7 @@ pgtileserv:
       env:
         fromGlobalSecret:
           - name: DATABASE_URL
-            key: databaseURL
+            key: databaseURLPostgres
         fromValues:
           - name: PGFS_SERVER_HTTPPORT
             value: "7800"
