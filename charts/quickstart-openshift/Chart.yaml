@@ -54,4 +54,9 @@ dependencies:
     condition: pgfeatureserv.enabled
     version: 0.0.13
     repository: https://bcgov.github.io/helm-service
-    alias: pgfeatureserv
+    alias: pgtileserv
+  - name: component
+    condition: pgtileserv.enabled
+    version: 0.0.13
+    repository: https://bcgov.github.io/helm-service
+    alias: pgtileserv
