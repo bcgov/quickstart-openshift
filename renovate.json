@@ -2,6 +2,6 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": "Presets from https://github.com/bcgov/nr-renovate",
   "extends": [
-    "github>bcgov/nr-renovate"
+    "github>bcgov/renovate-config"
   ]
 }
