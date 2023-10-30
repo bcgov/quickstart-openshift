@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom'
 import { afterAll, afterEach, beforeAll } from 'vitest'
 import { setupServer } from 'msw/node'
-import { rest } from 'msw'
+import { http, HttpResponse } from 'msw'
 
 const users = [
   {
@@ -13,9 +13,11 @@ const users = [
 ]
 
 export const restHandlers = [
-  rest.get('http://localhost:3000/api/v1/users', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(users))
-  }),
+  http.get('http://localhost:3000/api/v1/users', () => {
+    return new HttpResponse(JSON.stringify(users), {
+      status: 200,
+    })
+  })
 ]
 
 const server = setupServer(...restHandlers)
