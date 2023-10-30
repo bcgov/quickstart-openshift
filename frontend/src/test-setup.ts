@@ -17,7 +17,7 @@ export const restHandlers = [
     return new HttpResponse(JSON.stringify(users), {
       status: 200,
     })
-  })
+  }),
 ]
 
 const server = setupServer(...restHandlers)

@@ -17,7 +17,7 @@ parserOptions:
     jsx: true
   ecmaVersion: 12
   sourceType: module
-  project: './tsconfig.json'
+  project: './frontend/tsconfig.json'
 
 plugins:
   - 'react'
