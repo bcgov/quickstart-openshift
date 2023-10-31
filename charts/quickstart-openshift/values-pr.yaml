@@ -557,5 +557,5 @@ pgtileserv:
         protocol: TCP
   route:
     enabled: true
-    host: "{{ .Release.Name }}-pg-feature-service.{{ .Values.global.domain }}"
+    host: "{{ .Release.Name }}-pg-tile-service.{{ .Values.global.domain }}"
     targetPort: http # look at line#164 refer to the name.
