@@ -96,4 +96,5 @@ jobs:
       migrations_tag: ${{ needs.builds.outputs.migrations_tag }}
       frontend_tag: ${{ needs.builds.outputs.frontend_tag }}
       target: ${{ github.event.number }}
-      values: values-pr.yaml
+      values: values.yaml
+      autoscaling: false
