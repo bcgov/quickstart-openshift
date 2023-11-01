@@ -409,10 +409,6 @@ backup:
             value: '{{.Release.Name}}-{{.Values.global.databaseAlias}}'
           - name: DEFAULT_PORT
             value: "5432"
-          - name: POSTGRESQL_DATABASE
-            value: "quickstart"
-          - name: DATABASE_USER
-            value: "quickstart"
         fromGlobalSecret:
           - name: DATABASE_PASSWORD
             key: password
