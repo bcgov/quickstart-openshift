@@ -454,7 +454,6 @@ backup:
         fromGlobalSecret:
           - name: DATABASE_PASSWORD
             key: password
-            secretName: '{{ .Release.Name }}-bitnami-pg' # this is interpolated, it will be replaced with the actual value, pg is the alias for crunchy.
           - name: POSTGRESQL_DATABASE
             key: databaseName
           - name: DATABASE_USER
