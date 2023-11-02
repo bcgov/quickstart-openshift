@@ -97,8 +97,29 @@ backend:
   autoscaling:
     enabled: true
     minReplicas: 3
-    maxReplicas: 5
+    maxReplicas: 7
     targetCPUUtilizationPercentage: 80 # this percentage from request cpu
+    behavior:
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        policies:
+          - type: Percent
+            value: 10
+            periodSeconds: 60
+          - type: Pods
+            value: 2
+            periodSeconds: 60
+        selectPolicy: Min
+      scaleUp:
+        stabilizationWindowSeconds: 0
+        policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 30
+          - type: Pods
+            value: 2
+            periodSeconds: 30
+        selectPolicy: Max
   vault:
     enabled: false
     entrypoint: ~ # the entrypoint for vault, this is the override of container command.
@@ -205,8 +226,29 @@ frontend:
   autoscaling:
     enabled: true
     minReplicas: 3
-    maxReplicas: 5
+    maxReplicas: 7
     targetCPUUtilizationPercentage: 80 # this percentage from request cpu
+    behavior:
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        policies:
+          - type: Percent
+            value: 10
+            periodSeconds: 60
+          - type: Pods
+            value: 2
+            periodSeconds: 60
+        selectPolicy: Min
+      scaleUp:
+        stabilizationWindowSeconds: 0
+        policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 30
+          - type: Pods
+            value: 2
+            periodSeconds: 30
+        selectPolicy: Max
   service:
     enabled: true
     type: ClusterIP
