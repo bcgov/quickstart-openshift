@@ -34,7 +34,11 @@ jobs:
           skip-commit: "true"
           skip-version-file: "true"
       - run: |
-          echo "semver: ${{ steps.changelog.outputs.version }}"
+          echo "changelog: ${{ steps.changelog.outputs.changelog }}"
+          echo "clean_changelog: ${{ steps.changelog.outputs.clean_changelog }}"
+          echo "version: ${{ steps.changelog.outputs.version }}"
+          echo "tag: ${{ steps.changelog.outputs.tag }}"
+          echo "skipped: ${{ steps.changelog.outputs.skipped }}"
 
   # conventional-commits:
   #   name: Conventional Commits
