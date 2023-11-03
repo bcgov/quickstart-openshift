@@ -25,7 +25,7 @@ jobs:
           oc project ${{ vars.OC_NAMESPACE }}
 
           # If found, then remove
-          if helm status ${{ env.name }} && helm uninstall --no-hooks ${{ env.name }} || \
+          helm status ${{ env.name }} && helm uninstall --no-hooks ${{ env.name }} || \
             echo "Not found: ${{ env.name }}"
 
           # Remove Bitnami Crunchy PVCs
