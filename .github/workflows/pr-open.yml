@@ -18,18 +18,23 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
-      - uses: actions/checkout@v4
+
+      - name: Checkout branch
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/${{ github.head_ref }}
+
       - name: Conventional Changelog Update
         uses: TriPSs/conventional-changelog-action@v4
         id: changelog
         continue-on-error: true
         with:
-          github-token: ${{ github.token }}
-          skip-version-file: 'true'
-          skip-commit: 'true'
-          skip-on-empty: 'false'
-          git-push: 'false'
           git-branch: refs/heads/${{ github.head_ref }}
+          git-push: "false"
+          github-token: ${{ github.token }}
+          output-file: "CHANGELOG.md"
+          skip-commit: "true"
+          skip-version-file: "true"
 
   vars:
     runs-on: ubuntu-22.04
@@ -38,6 +43,7 @@ jobs:
       - name: echos
         run: |
           echo "semver: ${{ needs.semver.outputs.semver }}"
+          echo "github.head_ref: ${{ github.head_ref }}"
 
 
   # conventional-commits:
