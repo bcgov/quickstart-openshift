@@ -11,119 +11,92 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  semver:
-    name: Semantic Version
-    # outputs:
-    #   semver: ${{ steps.changelog.outputs.version }}
+  conventional-commits:
+    name: Conventional Commits
     runs-on: ubuntu-22.04
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  pr-description-add:
+    name: PR Description Add
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+    runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: write
     timeout-minutes: 1
     steps:
-      - name: Checkout branch
-        uses: actions/checkout@v3
+      - uses: bcgov-nr/action-pr-description-add@v1.1.0
         with:
-          ref: refs/heads/${{ github.head_ref }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          add_markdown: |
+            ---
 
-      - name: Conventional Changelog Update
-        uses: TriPSs/conventional-changelog-action@v4
-        id: changelog
+            Thanks for the PR!
+
+            Deployments, as required, will be available below:
+            - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }})
+            - [Backend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api)
+
+            Please create PRs in draft mode.  Mark as ready to enable:
+            - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
+
+            After merge, new images are promoted to:
+            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+
+  # https://github.com/bcgov-nr/action-builder-ghcr
+  builds:
+    name: Builds
+    runs-on: ubuntu-22.04
+    outputs:
+      backend_tag: ${{ steps.get_digest.outputs.backend_tag }}
+      migrations_tag: ${{ steps.get_digest.outputs.migrations_tag }}
+      frontend_tag: ${{ steps.get_digest.outputs.frontend_tag }}
+
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [migrations, backend, frontend]
+    timeout-minutes: 10
+    steps:
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.0
+        id: build
         with:
-          git-branch: refs/heads/${{ github.head_ref }}
-          git-push: "false"
-          github-token: ${{ github.token }}
-          output-file: "CHANGELOG.md"
-          skip-commit: "true"
-          skip-version-file: "true"
-      - run: |
-          echo "changelog: ${{ steps.changelog.outputs.changelog }}"
-          echo "clean_changelog: ${{ steps.changelog.outputs.clean_changelog }}"
-          echo "version: ${{ steps.changelog.outputs.version }}"
-          echo "tag: ${{ steps.changelog.outputs.tag }}"
-          echo "skipped: ${{ steps.changelog.outputs.skipped }}"
+          keep_versions: 50
+          package: ${{ matrix.package }}
+          tag: |
+            ${{ github.sha }}
+            ${{ github.event.number }}
+          tag_fallback: test
+          triggers: ('${{ matrix.triggers }}/')
+          build_context: ${{ matrix.build_context }}
 
-  # conventional-commits:
-  #   name: Conventional Commits
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - uses: amannn/action-semantic-pull-request@v5.3.0
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Tag Docker Images
+        uses: shrink/actions-docker-registry-tag@v3
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.package }}
+          target: ${{ github.sha }}
+          tags: ${{ github.event.number }}
+      - name: return image digest
+        id: get_digest
+        run: |
+          echo "${{ matrix.package }}_tag=${{steps.build.outputs.digest}}" >> $GITHUB_OUTPUT
 
-  # pr-description-add:
-  #   name: PR Description Add
-  #   env:
-  #     DOMAIN: apps.silver.devops.gov.bc.ca
-  #     PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
-  #   runs-on: ubuntu-22.04
-  #   permissions:
-  #     pull-requests: write
-  #   timeout-minutes: 1
-  #   steps:
-  #     - uses: bcgov-nr/action-pr-description-add@v1.1.0
-  #       with:
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
-  #         add_markdown: |
-  #           ---
-
-  #           Thanks for the PR!
-
-  #           Deployments, as required, will be available below:
-  #           - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }})
-  #           - [Backend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api)
-
-  #           Please create PRs in draft mode.  Mark as ready to enable:
-  #           - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
-
-  #           After merge, new images are promoted to:
-  #           - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
-
-  # # https://github.com/bcgov-nr/action-builder-ghcr
-  # builds:
-  #   name: Builds
-  #   runs-on: ubuntu-22.04
-  #   outputs:
-  #     backend_tag: ${{ steps.get_digest.outputs.backend_tag }}
-  #     migrations_tag: ${{ steps.get_digest.outputs.migrations_tag }}
-  #     frontend_tag: ${{ steps.get_digest.outputs.frontend_tag }}
-
-  #   permissions:
-  #     packages: write
-  #   strategy:
-  #     matrix:
-  #       package: [migrations, backend, frontend]
-  #   timeout-minutes: 10
-  #   steps:
-  #     - uses: bcgov-nr/action-builder-ghcr@v2.0.0
-  #       id: build
-  #       with:
-  #         keep_versions: 50
-  #         package: ${{ matrix.package }}
-  #         tag: ${{ github.sha }}
-  #         tag_fallback: test
-  #         triggers: ('${{ matrix.triggers }}/')
-  #         build_context: ${{ matrix.build_context }}
-
-  #     - name: Tag Docker Images
-  #       uses: shrink/actions-docker-registry-tag@v3
-  #       with:
-  #         registry: ghcr.io
-  #         repository: ${{ github.repository }}/${{ matrix.package }}
-  #         target: ${{ github.sha }}
-  #         tags: ${{ github.event.number }}
-  #     - name: return image digest
-  #       id: get_digest
-  #       run: |
-  #         echo "${{ matrix.package }}_tag=${{steps.build.outputs.digest}}" >> $GITHUB_OUTPUT
-
-  # # https://github.com/bcgov-nr/action-deployer-openshift
-  # deploys:
-  #   name: Deploys
-  #   needs: [builds]
-  #   uses: ./.github/workflows/.deploy.yml
-  #   secrets: inherit
-  #   with:
-  #     backend_tag: ${{ needs.builds.outputs.backend_tag }}
-  #     migrations_tag: ${{ needs.builds.outputs.migrations_tag }}
-  #     frontend_tag: ${{ needs.builds.outputs.frontend_tag }}
-  #     target: ${{ github.event.number }}
-  #     values: values.yaml
-  #     autoscaling: false
+  # https://github.com/bcgov-nr/action-deployer-openshift
+  deploys:
+    name: Deploys
+    needs: [builds]
+    uses: ./.github/workflows/.deploy.yml
+    secrets: inherit
+    with:
+      backend_tag: ${{ needs.builds.outputs.backend_tag }}
+      migrations_tag: ${{ needs.builds.outputs.migrations_tag }}
+      frontend_tag: ${{ needs.builds.outputs.frontend_tag }}
+      target: ${{ github.event.number }}
+      values: values.yaml
+      autoscaling: false
