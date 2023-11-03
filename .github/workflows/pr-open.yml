@@ -29,9 +29,7 @@ jobs:
           output-file: "CHANGELOG.md"
           skip-commit: "true"
           skip-version-file: "true"
-
-      - name: echos
-        run: |
+      - run: |
           echo "semver: ${{ steps.changelog.outputs.semver }}"
 
   # conventional-commits:
