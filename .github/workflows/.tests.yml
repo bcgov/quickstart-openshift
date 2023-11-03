@@ -1,0 +1,74 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      ### Required
+      target:
+        description: 'PR number, test or prod.'
+        required: true
+        type: string
+
+jobs:
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
+      - uses: actions/checkout@v4
+      - id: cache-npm
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-cache-node-modules-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Integration tests
+        env:
+          API_NAME: nest
+          BASE_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-frontend.apps.silver.devops.gov.bc.ca
+        run: |
+          cd integration-tests
+          npm ci
+          node src/main.js
+
+  cypress-e2e:
+    name: E2E Tests
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: frontend
+    strategy:
+      matrix:
+        browser: [chrome, firefox, edge]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - id: cache-npm
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-cache-node-modules-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - uses: cypress-io/github-action@v6
+        name: Cypress run
+        env:
+          CYPRESS_baseUrl: https://${{ github.event.repository.name }}-${{ inputs.target }}-frontend.apps.silver.devops.gov.bc.ca/
+        with:
+          config: pageLoadTimeout=10000
+          working-directory: ./frontend
+          browser: ${{ matrix.browser }}
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: ./cypress/screenshots
+          if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`

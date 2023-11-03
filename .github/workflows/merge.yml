@@ -59,74 +59,16 @@ jobs:
       frontend_tag: ${{ needs.get-digest.outputs.frontend_tag }}
       target: test
 
-  integration-tests:
-    needs: [deploys-test]
-    name: Integration Tests
-    runs-on: ubuntu-22.04
-    timeout-minutes: 1
-    steps:
-      - uses: actions/checkout@v4
-      - id: cache-npm
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-cache-node-modules-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
-      - name: Integration tests
-        env:
-          API_NAME: nest
-          BASE_URL: https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca
-        run: |
-          cd integration-tests
-          npm ci
-          node src/main.js
-
-  cypress-e2e:
-    name: E2E Tests
-    needs: [deploys-test]
-    runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: frontend
-    strategy:
-      matrix:
-        browser: [chrome, firefox, edge]
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - id: cache-npm
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-cache-node-modules-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
-      - uses: cypress-io/github-action@v6
-        name: Cypress run
-        env:
-          CYPRESS_baseUrl: https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca/
-        with:
-          config: pageLoadTimeout=10000
-          working-directory: ./frontend
-          browser: ${{ matrix.browser }}
-
-      - uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: ./cypress/screenshots
-          if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
+  integration-e2e:
+    name: Integration and E2E Tests
+    needs: [deploys]
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: test
 
   deploys-prod:
     name: Deploys (prod)
-    needs: [cypress-e2e, integration-tests, get-digest]
+    needs: [integration-e2e]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
@@ -147,20 +89,3 @@ jobs:
         run: |
           git tag ${{ needs.semver.outputs.semver }}
           git push origin --tag
-
-  cleanup:
-    name: Cleanup
-    environment: ${{ matrix.environment }}
-    needs: [deploys-prod]
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        environment: [test, prod]
-    steps:
-      - name: Remove OpenShift artifacts
-        run: |
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
-          oc project ${{ vars.OC_NAMESPACE }}
-
-          # Remove old build runs, build pods and deployment pods
-          oc delete po --field-selector=status.phase==Succeeded

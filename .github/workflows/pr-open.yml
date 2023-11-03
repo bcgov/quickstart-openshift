@@ -55,7 +55,6 @@ jobs:
       backend_tag: ${{ steps.get_digest.outputs.backend_tag }}
       migrations_tag: ${{ steps.get_digest.outputs.migrations_tag }}
       frontend_tag: ${{ steps.get_digest.outputs.frontend_tag }}
-
     permissions:
       packages: write
     strategy:

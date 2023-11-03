@@ -29,7 +29,6 @@ on:
         required: false
         type: boolean
         default: true
-
       target:
         description: 'PR number, test or prod.'
         required: true
@@ -64,7 +63,6 @@ jobs:
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
-          
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
@@ -76,6 +74,7 @@ jobs:
             helm rollback ${{ github.event.repository.name }}-${{ inputs.target }} || \
               helm uninstall ${{ github.event.repository.name }}-${{ inputs.target }}
           fi
+
           # Deploy Helm Chart
           helm dependency update
           helm upgrade \
@@ -89,3 +88,6 @@ jobs:
             --install --wait --atomic ${{ github.event.repository.name }}-${{ inputs.target }} \
             --timeout ${{ inputs.timeout-minutes }}m \
             --values ${{ inputs.values }} .
+
+          # Remove old build runs, build pods and deployment pods
+          oc delete po --field-selector=status.phase==Succeeded
