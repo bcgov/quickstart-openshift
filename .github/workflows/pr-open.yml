@@ -13,8 +13,8 @@ concurrency:
 jobs:
   semver:
     name: Semantic Version
-    outputs:
-      semver: ${{ steps.changelog.outputs.version }}
+    # outputs:
+    #   semver: ${{ steps.changelog.outputs.version }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -34,7 +34,7 @@ jobs:
           skip-commit: "true"
           skip-version-file: "true"
       - run: |
-          echo "semver: ${{ steps.changelog.outputs.semver }}"
+          echo "semver: ${{ steps.changelog.outputs.version }}"
 
   # conventional-commits:
   #   name: Conventional Commits
