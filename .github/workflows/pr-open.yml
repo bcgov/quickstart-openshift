@@ -18,7 +18,10 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout branch
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/${{ github.head_ref }}
 
       - name: Conventional Changelog Update
         uses: TriPSs/conventional-changelog-action@v4
