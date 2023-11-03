@@ -97,3 +97,10 @@ jobs:
       target: ${{ github.event.number }}
       values: values.yaml
       autoscaling: false
+
+  integration-e2e:
+    name: Integration and E2E Tests
+    needs: [deploys]
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: ${{ github.event.number }}
