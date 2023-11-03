@@ -39,15 +39,3 @@ jobs:
       migrations_tag: ${{ github.event.release.tag_name }}
       frontend_tag: ${{ github.event.release.tag_name }}
       target: prod
-
-  tags:
-    name: Create Tags
-    needs: [deploys-prod]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 1
-    steps:
-      - name: Create Tags
-        if: ${{ needs.semver.outputs.semver != '' }}
-        run: |
-          git tag ${{ needs.semver.outputs.semver }}
-          git push origin --tag
