@@ -29,14 +29,15 @@ jobs:
           skip-commit: 'true'
           skip-on-empty: 'false'
           git-push: 'false'
+          git-branch: refs/heads/${{ github.head_ref }}
 
   vars:
     runs-on: ubuntu-22.04
     needs: [semver]
     steps:
       - name: echos
-      run: |
-        echo "semver: ${{ needs.semver.outputs.semver }}"
+        run: |
+          echo "semver: ${{ needs.semver.outputs.semver }}"
 
 
   # conventional-commits:
