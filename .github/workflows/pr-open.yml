@@ -30,34 +30,14 @@ jobs:
           skip-on-empty: 'false'
           git-push: 'false'
 
-  get-digest:
-    name: Get Digests
-    outputs:
-      backend_tag: ${{ steps.get_digest.outputs.backend_tag }}
-      migrations_tag: ${{ steps.get_digest.outputs.migrations_tag }}
-      frontend_tag: ${{ steps.get_digest.outputs.frontend_tag }}
-    permissions:
-      packages: write
-    runs-on: ubuntu-22.04
-    strategy:
-        matrix:
-            package: [backend, migrations, frontend]
-    steps:
-      - name: return digest
-        id: get_digest
-        run: |
-          DIGEST=$(docker manifest inspect ghcr.io/${{ github.repository }}/${{ matrix.package }}:test | jq '.manifests[0].digest')
-          echo "${{ matrix.package }}_tag=${DIGEST}" >> $GITHUB_OUTPUT
-
   vars:
     runs-on: ubuntu-22.04
-    needs: [get-digests]
+    needs: [semver]
     steps:
       - name: echos
       run: |
-        echo backend_tag: ${{ needs.get-digest.outputs.backend_tag }}
-        echo migrations_tag: ${{ needs.get-digest.outputs.migrations_tag }}
-        echo frontend_tag: ${{ needs.get-digest.outputs.frontend_tag }}
+        echo "semver: ${{ needs.semver.outputs.semver }}"
+
 
   # conventional-commits:
   #   name: Conventional Commits
