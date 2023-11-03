@@ -14,6 +14,8 @@ jobs:
   # Clean up OpenShift when PR closed, no conditions
   cleanup-openshift:
     name: Cleanup OpenShift
+    env:
+      name: ${{ github.event.repository.name }}-${{ github.event.number }}
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
@@ -22,8 +24,9 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
 
-          # Remove old build runs, build pods and deployment pods
-          helm uninstall --no-hooks ${{ github.event.repository.name }}-${{ github.event.number }}
+          # If found, then remove
+          helm status ${{ env.name }} && helm uninstall --no-hooks ${{ env.name }} || \
+            echo "Not found: ${{ env.name }}"
 
           # Remove Bitnami Crunchy PVCs
           oc delete pvc data-${{ github.event.repository.name }}-${{ github.event.number }}-bitnami-pg-0
