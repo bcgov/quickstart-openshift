@@ -68,9 +68,7 @@ jobs:
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
-          tag: |
-            ${{ github.sha }}
-            ${{ github.event.number }}
+          tag: ${{ github.sha }}
           tag_fallback: test
           triggers: ('${{ matrix.triggers }}/')
           build_context: ${{ matrix.build_context }}

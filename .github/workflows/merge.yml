@@ -9,42 +9,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  semver:
-    name: Semantic Version
-    outputs:
-      semver: ${{ steps.changelog.outputs.version }}
-    runs-on: ubuntu-22.04
-    timeout-minutes: 1
-    steps:
-      - uses: actions/checkout@v4
-      - name: Conventional Changelog Update
-        uses: TriPSs/conventional-changelog-action@v4
-        id: changelog
-        continue-on-error: true
-        with:
-          github-token: ${{ github.token }}
-          skip-version-file: 'true'
-          skip-commit: 'true'
-          skip-on-empty: 'false'
-          git-push: 'false'
-
-  get-digest:
-    name: Get Digests
-    outputs:
-      backend_tag: ${{ steps.get_digest.outputs.backend_tag }}
-      migrations_tag: ${{ steps.get_digest.outputs.migrations_tag }}
-      frontend_tag: ${{ steps.get_digest.outputs.frontend_tag }}
-    runs-on: ubuntu-22.04
-    strategy:
-        matrix:
-            package: [backend, migrations, frontend]
-    steps:
-      - name: return digest
-        id: get_digest
-        run: |
-          DIGEST=$(docker manifest inspect ghcr.io/${{ github.repository }}/${{ matrix.package }}:test | jq '.manifests[0].digest')
-          echo "${{ matrix.package }}_tag=${DIGEST}" >> $GITHUB_OUTPUT
-
   deploys-test:
     name: Deploys (test)
     needs: [get-digest]
@@ -52,9 +16,9 @@ jobs:
     secrets: inherit
     with:
       environment: test
-      backend_tag: ${{ needs.get-digest.outputs.backend_tag }}
-      migrations_tag: ${{ needs.get-digest.outputs.migrations_tag }}
-      frontend_tag: ${{ needs.get-digest.outputs.frontend_tag }}
+      backend_tag: ${{ github.event.release.tag_name }}
+      migrations_tag: ${{ github.event.release.tag_name }}
+      frontend_tag: ${{ github.event.release.tag_name }}
       target: test
 
   integration-e2e:
@@ -71,9 +35,9 @@ jobs:
     secrets: inherit
     with:
       environment: prod
-      backend_tag: ${{ needs.get-digest.outputs.backend_tag }}
-      migrations_tag: ${{ needs.get-digest.outputs.migrations_tag }}
-      frontend_tag: ${{ needs.get-digest.outputs.frontend_tag }}
+      backend_tag: ${{ github.event.release.tag_name }}
+      migrations_tag: ${{ github.event.release.tag_name }}
+      frontend_tag: ${{ github.event.release.tag_name }}
       target: prod
 
   tags:

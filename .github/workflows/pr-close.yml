@@ -47,7 +47,6 @@ jobs:
           git-branch: refs/heads/${{ github.head_ref }}
           git-push: "false"
           github-token: ${{ github.token }}
-          output-file: "CHANGELOG.md"
           skip-commit: "true"
           skip-version-file: "true"
 
