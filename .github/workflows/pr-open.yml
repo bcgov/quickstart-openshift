@@ -13,8 +13,8 @@ concurrency:
 jobs:
   semver:
     name: Semantic Version
-    # outputs:
-    #   semver: ${{ steps.changelog.outputs.version }}
+    outputs:
+      semver: ${{ steps.changelog.outputs.version }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
