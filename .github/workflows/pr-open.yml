@@ -13,21 +13,15 @@ concurrency:
 jobs:
   semver:
     name: Semantic Version
-    outputs:
-      semver: ${{ steps.changelog.outputs.version }}
+    # outputs:
+    #   semver: ${{ steps.changelog.outputs.version }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
-
       - name: Checkout branch
-        uses: actions/checkout@v3
-        with:
-          ref: refs/heads/${{ github.head_ref }}
-
       - name: Conventional Changelog Update
         uses: TriPSs/conventional-changelog-action@v4
         id: changelog
-        continue-on-error: true
         with:
           git-branch: refs/heads/${{ github.head_ref }}
           git-push: "false"
@@ -36,15 +30,9 @@ jobs:
           skip-commit: "true"
           skip-version-file: "true"
 
-  vars:
-    runs-on: ubuntu-22.04
-    needs: [semver]
-    steps:
       - name: echos
         run: |
-          echo "semver: ${{ needs.semver.outputs.semver }}"
-          echo "github.head_ref: ${{ github.head_ref }}"
-
+          echo "semver: ${{ steps.changelog.outputs.semver }}"
 
   # conventional-commits:
   #   name: Conventional Commits
