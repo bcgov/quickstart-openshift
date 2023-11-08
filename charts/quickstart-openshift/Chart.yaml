@@ -37,7 +37,6 @@ dependencies:
     repository: https://bcgov.github.io/helm-service
     alias: frontend
 
-
   - name: postgresql
     condition: bitnami-pg.enabled
     version: 13.2.3
