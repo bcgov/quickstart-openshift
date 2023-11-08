@@ -156,7 +156,7 @@ backend:
           topologyKey: kubernetes.io/hostname
           labelSelector:
             matchLabels:
-              {{ include "component.labels" . }}
+              {{- include "component.labels" . }}
               
 
 frontend:
