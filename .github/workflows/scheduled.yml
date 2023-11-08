@@ -26,7 +26,7 @@ jobs:
           artifact_name: "zap_${{ matrix.name }}"
           cmd_options: "-a"
           issue_title: "ZAP: ${{ matrix.name }}"
-          target: https://${{ env.PREFIX }}-${{ matrix.name }}.${{ env.DOMAIN }}s
+          target: https://${{ env.PREFIX }}-${{ matrix.name }}.${{ env.DOMAIN }}
 
   generate-schema-spy:
     name: Generate SchemaSpy Documentation
