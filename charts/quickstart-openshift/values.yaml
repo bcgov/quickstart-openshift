@@ -3,6 +3,8 @@
 global:
   repository: ~ # the repository where the images are stored.
   registry: ghcr.io # the registry where the images are stored. override during runtime for other registry at global level or individual level.
+  tag: prod
+  autoscaling: true
   secrets:
     enabled: true
     databasePassword: ~
@@ -23,7 +25,7 @@ backend:
       registry: '{{ .Values.global.registry }}'
       repository: '{{ .Values.global.repository }}' # example, it includes registry and repository
       image: backend # the exact component name, be it backend, api-1 etc...
-      tag: prod # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      tag: '{{ .Values.global.tag }}' # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
       env:
         fromGlobalSecret:
           - name: POSTGRES_PASSWORD
@@ -73,7 +75,7 @@ backend:
       registry: '{{ .Values.global.registry }}'
       repository: '{{ .Values.global.repository }}' # example, it includes registry and repository
       image: migrations
-      tag: prod
+      tag: '{{ .Values.global.tag }}'
       env:
         fromGlobalSecret:
           - name: FLYWAY_PASSWORD
@@ -95,7 +97,7 @@ backend:
           cpu: 200m
           memory: 150Mi
   autoscaling:
-    enabled: true
+    enabled: '{{ .Values.global.autoscaling }}'
     minReplicas: 3
     maxReplicas: 7
     targetCPUUtilizationPercentage: 80 # this percentage from request cpu
@@ -174,7 +176,7 @@ frontend:
       registry: '{{ .Values.global.registry }}'
       repository: '{{ .Values.global.repository }}' # example, it includes registry and repository
       image: frontend # the exact component name, be it backend, api-1 etc...
-      tag: prod # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      tag: '{{ .Values.global.tag }}' # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
       securityContext:
         capabilities:
           add: [ "NET_BIND_SERVICE" ]
@@ -224,7 +226,7 @@ frontend:
         periodSeconds: 30
         timeoutSeconds: 5
   autoscaling:
-    enabled: true
+    enabled: '{{ .Values.global.autoscaling }}'
     minReplicas: 3
     maxReplicas: 7
     targetCPUUtilizationPercentage: 80 # this percentage from request cpu

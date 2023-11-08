@@ -15,10 +15,7 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      environment: test
-      backend_tag: ${{ github.event.release.tag_name }}
-      migrations_tag: ${{ github.event.release.tag_name }}
-      frontend_tag: ${{ github.event.release.tag_name }}
+      tag: ${{ github.event.release.tag_name }}
       target: test
 
   integration-e2e:
@@ -34,8 +31,5 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      environment: prod
-      backend_tag: ${{ github.event.release.tag_name }}
-      migrations_tag: ${{ github.event.release.tag_name }}
-      frontend_tag: ${{ github.event.release.tag_name }}
+      tag: ${{ github.event.release.tag_name }}
       target: prod
