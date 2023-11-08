@@ -96,4 +96,4 @@ jobs:
       frontend_tag: ${{ needs.builds.outputs.frontend_tag }}
       target: ${{ github.event.number }}
       values: values.yaml
-      autoscaling: false
+      autoscaling: true

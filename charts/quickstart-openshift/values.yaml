@@ -148,7 +148,16 @@ backend:
         protocol: TCP
   nodeSelector: { }
   tolerations: [ ]
-  affinity: { }
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchLabels:
+              {{ include "component.labels" . }}
+              
 
 frontend:
   enabled: true
