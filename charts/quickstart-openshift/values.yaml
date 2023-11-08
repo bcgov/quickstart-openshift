@@ -3,7 +3,7 @@
 global:
   repository: ~ # the repository where the images are stored.
   registry: ghcr.io # the registry where the images are stored. override during runtime for other registry at global level or individual level.
-  tag: prod
+  tag: ~
   autoscaling: true
   secrets:
     enabled: true

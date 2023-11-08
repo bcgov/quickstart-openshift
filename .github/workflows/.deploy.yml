@@ -69,7 +69,7 @@ jobs:
             --set global.autoscaling=${{ inputs.autoscaling }} \
             --set-string global.repository=${{ github.repository }} \
             --set-string global.secrets.databasePassword=${{ secrets.DB_PASSWORD }} \
-            --set-string global.tag="${{ inputs.target }}" \
+            --set-string global.tag=${{ inputs.target }} \
             --install --wait --atomic ${{ github.event.repository.name }}-${{ inputs.target }} \
             --timeout ${{ inputs.timeout-minutes }}m \
             --values ${{ inputs.values }} .
