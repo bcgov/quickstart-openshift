@@ -61,7 +61,7 @@ jobs:
 
   integration-e2e:
     name: Integration and E2E Tests
-    needs: [deploys]
+    needs: [deploys-test]
     uses: ./.github/workflows/.tests.yml
     with:
       target: test
