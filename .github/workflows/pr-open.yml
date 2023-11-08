@@ -69,7 +69,7 @@ jobs:
           package: ${{ matrix.package }}
           tag: ${{ github.sha }}
           tag_fallback: test
-          triggers: ('${{ matrix.triggers }}/')
+          triggers: ('${{ matrix.package }}/')
           build_context: ${{ matrix.build_context }}
 
       - name: Tag Docker Images
