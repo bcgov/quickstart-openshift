@@ -64,7 +64,7 @@ jobs:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
           tag_fallback: test
-          triggers: ('${{ matrix.triggers }}/')
+          triggers: ('${{ matrix.package }}/')
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
