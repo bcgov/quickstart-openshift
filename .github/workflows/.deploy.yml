@@ -4,35 +4,22 @@ on:
   workflow_call:
     inputs:
       ### Required
-      environment:
-        description: 'GitHub Actions environment for variables and secrets.'
-        required: false
-        type: string
-      tag:
-        description: 'Docker semver tag or SHA.  E.g.: needs.semver.outputs.semver or github.sha.'
-        required: false
-        type: string
-      backend_tag:
-        description: 'backend Tag, could be tag or sha'
+      target:
+        description: 'PR number, test or prod.'
         required: true
         type: string
-      migrations_tag:
-        description: 'migrations Tag, could be tag or sha'
-        required: true
-        type: string
-      frontend_tag:
-        description: 'frontend Tag, could be tag or sha'
-        required: true
-        type: string
+
+      ### Typical / recommended
       autoscaling:
         description: 'Autoscaling enabled or not for the deployments'
         required: false
         type: boolean
         default: true
-      target:
-        description: 'PR number, test or prod.'
-        required: true
+      tag:
+        description: 'Docker tag; e.g. PR number, tag, test or prod'
+        required: false
         type: string
+        default: ${{ github.event.number }}
 
       ### Usually a bad idea / not recommended
       directory:
@@ -50,11 +37,12 @@ on:
         default: 'values.yaml'
         required: false
         type: string
+
 jobs:
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
     name: Helm
-    environment: ${{ inputs.environment }}
+    environment: ${{ github.event.number || github.event.release.tag_name }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
@@ -78,13 +66,13 @@ jobs:
           # Deploy Helm Chart
           helm dependency update
           helm upgrade \
+            --set global.autoscaling=${{ inputs.autoscaling }} \
             --set-string global.repository=${{ github.repository }} \
-            --set-string backend.containers[0].tag="${{ inputs.backend_tag }}" \
-            --set-string backend.initContainers[0].tag="${{ inputs.migrations_tag }}" \
-            --set-string frontend.containers[0].tag="${{ inputs.frontend_tag }}" \
             --set-string global.secrets.databasePassword=${{ secrets.DB_PASSWORD }} \
-            --set backend.autoscaling.enabled=${{ inputs.autoscaling }} \
-            --set frontend.autoscaling.enabled=${{ inputs.autoscaling }} \
+            --set-string global.tag="${{ inputs.target }}" \
+            --set-string backend.containers[0].tag="${{ inputs.target }}" \
+            --set-string backend.initContainers[0].tag="${{ inputs.target }}" \
+            --set-string frontend.containers[0].tag="${{ inputs.target }}" \
             --install --wait --atomic ${{ github.event.repository.name }}-${{ inputs.target }} \
             --timeout ${{ inputs.timeout-minutes }}m \
             --values ${{ inputs.values }} .
