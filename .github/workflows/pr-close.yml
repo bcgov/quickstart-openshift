@@ -53,8 +53,8 @@ jobs:
       - name: Create Tags
         if: ${{ steps.semver.outputs.tag != '' }}
         run: |
-          echo git tag ${{ steps.changelog.outputs.tag }}
-          echo git push origin --tag
+          git tag ${{ steps.changelog.outputs.tag }}
+          git push origin --tag
 
   # If merged into main, then handle any image promotions
   tag-images:
