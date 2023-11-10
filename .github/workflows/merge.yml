@@ -2,34 +2,45 @@ name: Merge
 
 on:
   push:
-    tags:
-      - v*
+    tags: [v*]
 
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
 
 jobs:
-  deploys-test:
-    name: Deploys (test)
-    uses: ./.github/workflows/.deploy.yml
-    secrets: inherit
-    with:
-      tag: ${{ github.ref }}
-      target: test
+  test:
+    name: Test for tagging
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+  # deploys-test:
+  #   name: Deploys (test)
+  #   uses: ./.github/workflows/.deploy.yml
+  #   secrets: inherit
+  #   with:
+  #     tag: ${{ github.ref }}
+  #     target: test
 
-  integration-e2e:
-    name: Integration and E2E Tests
-    needs: [deploys-test]
-    uses: ./.github/workflows/.tests.yml
-    with:
-      target: test
+  # integration-e2e:
+  #   name: Integration and E2E Tests
+  #   needs: [deploys-test]
+  #   uses: ./.github/workflows/.tests.yml
+  #   with:
+  #     target: test
 
-  deploys-prod:
-    name: Deploys (prod)
-    needs: [integration-e2e]
-    uses: ./.github/workflows/.deploy.yml
-    secrets: inherit
-    with:
-      tag: ${{ github.ref }}
-      target: prod
+  # deploys-prod:
+  #   name: Deploys (prod)
+  #   needs: [integration-e2e]
+  #   uses: ./.github/workflows/.deploy.yml
+  #   secrets: inherit
+  #   with:
+  #     tag: ${{ github.ref }}
+  #     target: prod
