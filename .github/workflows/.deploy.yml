@@ -1,4 +1,4 @@
-name: Deploy Workflow
+name: .Deploys
 
 on:
   workflow_call:
