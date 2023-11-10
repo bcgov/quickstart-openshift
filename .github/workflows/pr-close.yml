@@ -48,6 +48,7 @@ jobs:
           git-push: "false"
           github-token: ${{ github.token }}
           skip-commit: "true"
+          skip-on-empty: "false"
           skip-version-file: "true"
 
       - name: Create Tags
