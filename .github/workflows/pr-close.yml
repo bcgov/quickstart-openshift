@@ -59,6 +59,7 @@ jobs:
   # If merged into main, then handle any image promotions
   tag-images:
     name: Tag Images
+    if: ${{ needs.semver.outputs.tag != '' }}
     needs: [semver]
     runs-on: ubuntu-22.04
     permissions:
