@@ -13,14 +13,10 @@ jobs:
     name: Test for tagging
     runs-on: ubuntu-22.04
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Dump job context
-        env:
-          JOB_CONTEXT: ${{ toJson(job) }}
-        run: echo "$JOB_CONTEXT"
+      - name: Check Tag
+        run: |
+          echo "Tag: ${{ github.ref_name }}"
+
   # deploys-test:
   #   name: Deploys (test)
   #   uses: ./.github/workflows/.deploy.yml
