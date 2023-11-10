@@ -34,6 +34,7 @@ jobs:
   # If merged into main, then handle any image promotions
   tag-images:
     name: Tag Images
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-22.04
     permissions:
       packages: write
@@ -52,6 +53,6 @@ jobs:
   # https://github.com/bcgov-nr/action-deployer-openshift
   merge:
     name: Merge
-    needs: [builds]
+    needs: [tag-images]
     uses: ./.github/workflows/.merge.yml
     secrets: inherit
