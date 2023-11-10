@@ -2,7 +2,8 @@ name: Merge
 
 on:
   push:
-    tags: ['*']
+    tags:
+      - v*
 
 concurrency:
   group: ${{ github.workflow }}
@@ -14,7 +15,7 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      tag: ${{ github.event.release.tag_name }}
+      tag: ${{ github.ref }}
       target: test
 
   integration-e2e:
@@ -30,5 +31,5 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      tag: ${{ github.event.release.tag_name }}
+      tag: ${{ github.ref }}
       target: prod
