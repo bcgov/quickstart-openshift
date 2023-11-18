@@ -61,6 +61,7 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
+      environment: test
       tag: test
       target: test
 
@@ -77,6 +78,7 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
+      environment: prod
       tag: test
       target: prod
 
