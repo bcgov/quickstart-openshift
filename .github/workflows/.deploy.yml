@@ -84,7 +84,6 @@ jobs:
   deploys:
     name: Helm
     needs: [triggers]
-    environment: ${{ github.event.number || github.event.release.tag_name }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
@@ -93,6 +92,7 @@ jobs:
 
       - name: Deploy if Triggers Fired
         if: ${{ needs.triggers.outputs.triggered == 'true' }}
+        environment: (${{ input.target == 'test' || input.target == 'prod' }}) && ${{ github.event.target }}
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
