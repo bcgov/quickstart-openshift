@@ -11,12 +11,11 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
-      - uses: actions/checkout@v4
       - name: Conventional Changelog Update
         uses: TriPSs/conventional-changelog-action@v4
         id: semver
         with:
-          git-branch: refs/heads/${{ github.head_ref }}
+          git-branch: refs/heads/${{ github.event.repository.default_branch }}
           git-push: "false"
           github-token: ${{ github.token }}
           skip-commit: "true"

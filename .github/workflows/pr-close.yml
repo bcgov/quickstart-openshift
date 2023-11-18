@@ -2,7 +2,7 @@ name: PR Closed
 
 on:
   pull_request:
-    branches: [main]
+    branches: [${{ github.event.repository.default_branch }}]
     types: [closed]
 
 concurrency:
