@@ -83,14 +83,16 @@ jobs:
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
     name: Helm
-    if: ${{ needs.triggers.outputs.triggered == 'true' }}
     needs: [triggers]
     environment: ${{ github.event.number || github.event.release.tag_name }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy
+        if: ${{ needs.triggers.outputs.triggered == 'true' }}
+
+      - name: Deploy if Triggers Fired
+        if: ${{ needs.triggers.outputs.triggered == 'true' }}
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
@@ -122,14 +124,7 @@ jobs:
           # Remove old build runs, build pods and deployment pods
           oc delete po --field-selector=status.phase==Succeeded
 
-  deploys-skipped:
-    name: Helm
-    if: ${{ needs.triggers.outputs.triggered != 'true' }}
-    needs: [triggers]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 1
-    steps:
-      - name: Report Skip and Success
+      - name: Report if Skipped
+        if: ${{ needs.triggers.outputs.triggered != 'true' }}
         shell: bash
-        run: |
-          echo "No triggers have fired, deployment skipped"
+        run: echo "No triggers have fired, deployment skipped"
