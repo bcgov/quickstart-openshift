@@ -33,6 +33,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
+      - uses: actions/checkout@v4
       - name: Conventional Changelog Update
         uses: TriPSs/conventional-changelog-action@v4
         id: semver
