@@ -33,8 +33,8 @@ jobs:
   # https://github.com/bcgov-nr/action-deployer-openshift
   merge:
     name: Merge
-    # if: github.event.pull_request.base.ref == github.event.repository.default_branch &&
-    #   github.event.pull_request.merged == true
+    if: github.event.pull_request.base.ref == github.event.repository.default_branch &&
+      github.event.pull_request.merged == true
     uses: ./.github/workflows/.merge.yml
     secrets: inherit
     with:
