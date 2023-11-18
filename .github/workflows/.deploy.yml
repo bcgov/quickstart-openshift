@@ -5,21 +5,25 @@ on:
     inputs:
       ### Required
       target:
-        description: 'PR number, test or prod'
+        description: PR number, test or prod
         required: true
         type: string
 
       ### Typical / recommended
       autoscaling:
-        description: 'Autoscaling enabled or not for the deployments'
+        description: Autoscaling enabled or not for the deployments
         required: false
         type: boolean
         default: true
       tag:
-        description: 'Docker tag; e.g. PR number, tag, test or prod'
+        description: Docker tag; e.g. PR number, tag, test or prod
         required: false
         type: string
         default: ${{ github.event.number }}
+      triggers:
+        description: Paths used to trigger a build; e.g. ('./backend/' './frontend/')
+        required: false
+        type: string
 
       ### Usually a bad idea / not recommended
       directory:
@@ -39,15 +43,56 @@ on:
         type: string
 
 jobs:
+  triggers:
+    name: Triggers
+    runs-on: ubuntu-22.04
+    outputs:
+      triggered: ${{ steps.trigger.outputs.triggered }}
+    timeout-minutes: 1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Deployment Triggers
+        id: trigger
+        run: |
+          # Expand for trigger processing
+
+          # Always deploy if no triggers are provided
+          if [ -z "${{ inputs.triggers }}" ]; then
+            echo "Always deploy when no triggers are provided"
+            echo "triggered=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Deply if changed files (git diff) match triggers
+          TRIGGERS=${{ inputs.triggers }}
+          git fetch origin ${{ github.event.repository.default_branch }}
+          while read -r check; do
+            for t in "${TRIGGERS[@]}"; do
+              if [[ "${check}" =~ "${t}" ]]; then
+                  echo "Build triggered based on git diff"
+                  echo -e "${t}\n --> ${check}"
+                  echo "triggered=true" >> $GITHUB_OUTPUT
+                  exit 0
+              fi
+            done
+          done < <(git diff origin/${{ github.event.repository.default_branch }} --name-only)
+
+          # Looks like no triggers have fired
+          echo "No triggers have fired"
+
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
     name: Helm
+    needs: [triggers]
     environment: ${{ github.event.number || github.event.release.tag_name }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy
+        if: ${{ needs.triggers.outputs.triggered == 'true' }}
+
+      - name: Deploy if Triggers Fired
+        if: ${{ needs.triggers.outputs.triggered == 'true' }}
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
@@ -78,3 +123,8 @@ jobs:
 
           # Remove old build runs, build pods and deployment pods
           oc delete po --field-selector=status.phase==Succeeded
+
+      - name: Report if Skipped
+        if: ${{ needs.triggers.outputs.triggered != 'true' }}
+        shell: bash
+        run: echo "No triggers have fired, deployment skipped"

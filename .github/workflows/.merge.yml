@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       promote:
-        description: 'PR number to promote'
+        description: PR number to promote
         required: true
         type: string
 
