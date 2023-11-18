@@ -44,7 +44,7 @@ on:
 
 jobs:
   triggers:
-    name: Check Deployment Triggers
+    name: Triggers
     if: ${{ inputs.triggers }}
     runs-on: ubuntu-22.04
     outputs:
@@ -52,7 +52,7 @@ jobs:
     timeout-minutes: 1
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy
+      - name: Check Deployment Triggers
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
