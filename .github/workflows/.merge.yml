@@ -2,8 +2,30 @@ name: .Merge
 
 on:
   workflow_call:
+    inputs:
+      promote:
+        description: 'PR number to promote'
+        required: true
+        type: string
 
 jobs:
+  promote-test:
+    name: Promote Images
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [migrations, backend, frontend]
+    timeout-minutes: 2
+    steps:
+      - uses: shrink/actions-docker-registry-tag@v3
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.package }}
+          target: ${{ inputs.promote }}
+          tags: test
+
   semver:
     name: Semantic Version
     outputs:
@@ -12,15 +34,17 @@ jobs:
     timeout-minutes: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
       - name: Conventional Changelog Update
         uses: TriPSs/conventional-changelog-action@v4
         id: semver
         with:
-          git-branch: refs/heads/${{ github.head_ref }}
+          git-branch: refs/heads/${{ github.event.repository.default_branch }}
           git-push: "false"
           github-token: ${{ github.token }}
           skip-commit: "true"
-          skip-on-empty: "false"
           skip-version-file: "true"
 
       - name: Create Tags
@@ -29,10 +53,10 @@ jobs:
           git tag ${{ steps.changelog.outputs.tag }}
           git push origin --tag
 
-  deploys-test:
-    name: Deploys (test)
+  deploy-test:
+    name: Deploy (test)
     if: ${{ needs.semver.outputs.tag != '' }}
-    needs: [semver]
+    needs: [promote-test, semver]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
@@ -41,13 +65,13 @@ jobs:
 
   integration-e2e:
     name: Integration and E2E Tests
-    needs: [deploys-test]
+    needs: [deploy-test]
     uses: ./.github/workflows/.tests.yml
     with:
       target: test
 
-  deploys-prod:
-    name: Deploys (prod)
+  deploy-prod:
+    name: Deploy (prod)
     needs: [integration-e2e]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
@@ -55,9 +79,9 @@ jobs:
       tag: test
       target: prod
 
-  tag-images:
+  promote-prod:
     name: Tag Images
-    needs: [deploys-prod]
+    needs: [deploy-prod]
     runs-on: ubuntu-22.04
     permissions:
       packages: write

@@ -5,7 +5,7 @@ on:
     inputs:
       ### Required
       target:
-        description: 'PR number, test or prod.'
+        description: 'PR number, test or prod'
         required: true
         type: string
 
@@ -51,9 +51,8 @@ jobs:
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
-          # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ vars.oc_namespace }}
+          oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
 
           # Interrupt any previous jobs (status = pending-upgrade)
           PREVIOUS=$(helm status ${{ github.event.repository.name }}-${{ inputs.target }} -o json | jq .info.status || true)

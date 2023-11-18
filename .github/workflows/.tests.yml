@@ -5,7 +5,7 @@ on:
     inputs:
       ### Required
       target:
-        description: 'PR number, test or prod.'
+        description: 'PR number, test or prod'
         required: true
         type: string
 

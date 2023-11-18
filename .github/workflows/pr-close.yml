@@ -2,7 +2,6 @@ name: PR Closed
 
 on:
   pull_request:
-    branches: [main]
     types: [closed]
 
 concurrency:
@@ -15,44 +14,28 @@ jobs:
   cleanup-openshift:
     name: Cleanup OpenShift
     env:
-      name: ${{ github.event.repository.name }}-${{ github.event.number }}
+      deployment: ${{ github.event.repository.name }}-${{ github.event.number }}
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
       - name: Remove OpenShift artifacts
         run: |
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
-          oc project ${{ vars.OC_NAMESPACE }}
+          oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
 
           # If found, then remove
-          helm status ${{ env.name }} && helm uninstall --no-hooks ${{ env.name }} || \
-            echo "Not found: ${{ env.name }}"
+          helm status ${{ env.deployment }} && helm uninstall --no-hooks ${{ env.deployment }} || \
+            echo "Not found: ${{ env.deployment }}"
 
           # Remove Bitnami Crunchy PVCs
-          oc delete pvc data-${{ github.event.repository.name }}-${{ github.event.number }}-bitnami-pg-0
-
-  # If merged into main, then handle any image promotions
-  tag-images:
-    name: Tag Images
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        package: [migrations, backend, frontend]
-    timeout-minutes: 2
-    steps:
-      - uses: shrink/actions-docker-registry-tag@v3
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ github.event.number }}
-          tags: test
+          oc delete pvc data-${{ env.deployment }}-bitnami-pg-0
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   merge:
     name: Merge
-    needs: [tag-images]
+    if: github.event.pull_request.base.ref == github.event.repository.default_branch &&
+      github.event.pull_request.merged == true
     uses: ./.github/workflows/.merge.yml
     secrets: inherit
+    with:
+      promote: ${{ github.event.number }}
