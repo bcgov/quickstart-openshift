@@ -84,7 +84,7 @@ jobs:
   deploys:
     name: Helm
     needs: [triggers]
-    environment: (${{ input.target == 'test' || input.target == 'prod' }}) && ${{ github.event.target }}
+    environment: (${{ inputs.target == 'test' || inputs.target == 'prod' }}) && ${{ github.event.target }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
