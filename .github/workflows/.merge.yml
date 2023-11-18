@@ -3,10 +3,6 @@ name: .Merge
 on:
   workflow_call:
 
-concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: true
-
 jobs:
   semver:
     name: Semantic Version
