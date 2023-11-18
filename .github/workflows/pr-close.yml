@@ -31,37 +31,10 @@ jobs:
           # Remove Bitnami Crunchy PVCs
           oc delete pvc data-${{ github.event.repository.name }}-${{ github.event.number }}-bitnami-pg-0
 
-  semver:
-    name: Semantic Version
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-    outputs:
-      tag: ${{ steps.semver.outputs.tag }}
-    runs-on: ubuntu-22.04
-    timeout-minutes: 1
-    steps:
-      - uses: actions/checkout@v4
-      - name: Conventional Changelog Update
-        uses: TriPSs/conventional-changelog-action@v4
-        id: semver
-        with:
-          git-branch: refs/heads/${{ github.head_ref }}
-          git-push: "false"
-          github-token: ${{ github.token }}
-          skip-commit: "true"
-          skip-on-empty: "false"
-          skip-version-file: "true"
-
-      - name: Create Tags
-        if: ${{ steps.semver.outputs.tag != '' }}
-        run: |
-          git tag ${{ steps.changelog.outputs.tag }}
-          git push origin --tag
-
   # If merged into main, then handle any image promotions
   tag-images:
     name: Tag Images
-    if: ${{ needs.semver.outputs.tag != '' }}
-    needs: [semver]
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-22.04
     permissions:
       packages: write
@@ -75,4 +48,11 @@ jobs:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
           target: ${{ github.event.number }}
-          tags: ${{ needs.semver.outputs.tag }}
+          tags: test
+
+  # https://github.com/bcgov-nr/action-deployer-openshift
+  merge:
+    name: Merge
+    needs: [tag-images]
+    uses: ./.github/workflows/.merge.yml
+    secrets: inherit
