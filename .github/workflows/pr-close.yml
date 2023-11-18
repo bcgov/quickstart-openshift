@@ -28,7 +28,8 @@ jobs:
             echo "Not found: ${{ env.deployment }}"
 
           # Remove Bitnami Crunchy PVCs
-          oc delete pvc data-${{ env.deployment }}-bitnami-pg-0
+          oc delete pvc data-${{ env.deployment }}-bitnami-pg-0 || \
+            echo "Not found: pvc data-${{ env.deployment }}-bitnami-pg-0"
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   merge:
