@@ -95,7 +95,7 @@ backend:
           cpu: 200m
           memory: 150Mi
   autoscaling:
-    enabled: '{{ .Values.global.autoscaling }}'
+    enabled: true
     minReplicas: 3
     maxReplicas: 7
     targetCPUUtilizationPercentage: 80 # this percentage from request cpu
@@ -224,7 +224,7 @@ frontend:
         periodSeconds: 30
         timeoutSeconds: 5
   autoscaling:
-    enabled: '{{ .Values.global.autoscaling }}'
+    enabled: true
     minReplicas: 3
     maxReplicas: 7
     targetCPUUtilizationPercentage: 80 # this percentage from request cpu
@@ -362,7 +362,7 @@ bitnami-pg:
   image:
     registry: ghcr.io
     repository: bcgov/nr-containers/bitnami/postgresql
-    tag: 15.4.0
+    tag: 15.5.0
   auth:
     existingSecret: '{{ .Release.Name }}'
     username: 'quickstart'
