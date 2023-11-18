@@ -25,7 +25,7 @@ on:
         type: string
         default: ${{ github.event.number }}
       triggers:
-        description: Paths used to trigger a build; e.g. ('./backend/' './frontend/')
+        description: Paths used to trigger a build; e.g. ('backend/' 'frontend/')
         required: false
         type: string
 
@@ -47,16 +47,15 @@ on:
         type: string
 
 jobs:
-  triggers:
-    name: Triggers
+  deploys:
+    name: Helm
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
-    outputs:
-      triggered: ${{ steps.trigger.outputs.triggered }}
-    timeout-minutes: 1
+    timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - uses: actions/checkout@v4
       - name: Check Deployment Triggers
-        id: trigger
+        id: triggers
         run: |
           # Expand for trigger processing
 
@@ -67,7 +66,7 @@ jobs:
             exit 0
           fi
 
-          # Deply if changed files (git diff) match triggers
+          # Deploy if changed files (git diff) match triggers
           TRIGGERS=${{ inputs.triggers }}
           git fetch origin ${{ github.event.repository.default_branch }}
           while read -r check; do
@@ -81,22 +80,11 @@ jobs:
             done
           done < <(git diff origin/${{ github.event.repository.default_branch }} --name-only)
 
-          # Looks like no triggers have fired
-          echo "No triggers have fired"
-
-  # https://github.com/bcgov-nr/action-deployer-openshift
-  deploys:
-    name: Helm
-    needs: [triggers]
-    environment: ${{ inputs.environment }}}
-    runs-on: ubuntu-22.04
-    timeout-minutes: ${{ inputs.timeout-minutes }}
-    steps:
-      - uses: actions/checkout@v4
-        if: ${{ needs.triggers.outputs.triggered == 'true' }}
+          # If here skip deployment
+          echo "No triggers have fired, deployment skipped"
 
       - name: Deploy if Triggers Fired
-        if: ${{ needs.triggers.outputs.triggered == 'true' }}
+        if: ${{ steps.triggers.outputs.triggered == 'true' }}
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
@@ -127,8 +115,3 @@ jobs:
 
           # Remove old build runs, build pods and deployment pods
           oc delete po --field-selector=status.phase==Succeeded
-
-      - name: Report if Skipped
-        if: ${{ needs.triggers.outputs.triggered != 'true' }}
-        shell: bash
-        run: echo "No triggers have fired, deployment skipped"
