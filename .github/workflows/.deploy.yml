@@ -44,32 +44,37 @@ on:
 
 jobs:
   triggers:
-    name: Triggers
+    name: Check Deployment Triggers
     if: ${{ inputs.triggers }}
     runs-on: ubuntu-22.04
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
     timeout-minutes: 1
     steps:
-        if [ -z "${{ inputs.triggers }}" ]; then
-          echo "Always deploy when no triggers are provided"
-          echo "triggered=true" >> $GITHUB_OUTPUT
-          exit 0
-        fi
+      - uses: actions/checkout@v4
+      - name: Deploy
+        working-directory: ${{ inputs.directory }}
+        shell: bash
+        run: |
+          if [ -z "${{ inputs.triggers }}" ]; then
+            echo "Always deploy when no triggers are provided"
+            echo "triggered=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
 
-        # Deply if changed files (git diff) match triggers
-        TRIGGERS=${{ inputs.triggers }}
-        git fetch origin ${{ github.event.repository.default_branch }}
-        while read -r check; do
-          for t in "${TRIGGERS[@]}"; do
-            if [[ "${check}" =~ "${t}" ]]; then
-                echo "Build triggered based on git diff"
-                echo -e "${t}\n --> ${check}"
-                echo "triggered=true" >> $GITHUB_OUTPUT
-                exit 0
-            fi
-          done
-        done < <(git diff origin/${{ github.event.repository.default_branch }} --name-only)
+          # Deply if changed files (git diff) match triggers
+          TRIGGERS=${{ inputs.triggers }}
+          git fetch origin ${{ github.event.repository.default_branch }}
+          while read -r check; do
+            for t in "${TRIGGERS[@]}"; do
+              if [[ "${check}" =~ "${t}" ]]; then
+                  echo "Build triggered based on git diff"
+                  echo -e "${t}\n --> ${check}"
+                  echo "triggered=true" >> $GITHUB_OUTPUT
+                  exit 0
+              fi
+            done
+          done < <(git diff origin/${{ github.event.repository.default_branch }} --name-only)
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
