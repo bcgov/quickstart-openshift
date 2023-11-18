@@ -121,3 +121,15 @@ jobs:
 
           # Remove old build runs, build pods and deployment pods
           oc delete po --field-selector=status.phase==Succeeded
+
+  deploys-skipped:
+    name: Helm
+    if: ${{ needs.triggers.outputs.triggered != 'true' }}
+    needs: [triggers]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
+      - name: Report Skip and Success
+        shell: bash
+        run: |
+          echo "No triggers have fired, deployment skipped"
