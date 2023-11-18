@@ -75,3 +75,4 @@ jobs:
     with:
       autoscaling: false
       target: ${{ github.event.number }}
+      triggers: ('./backend/' './frontend/' './migrations/' './charts/')
