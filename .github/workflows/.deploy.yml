@@ -45,7 +45,6 @@ on:
 jobs:
   triggers:
     name: Triggers
-    if: ${{ inputs.triggers }}
     runs-on: ubuntu-22.04
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
@@ -53,8 +52,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check Deployment Triggers
-        working-directory: ${{ inputs.directory }}
-        shell: bash
+        id: trigger
         run: |
           if [ -z "${{ inputs.triggers }}" ]; then
             echo "Always deploy when no triggers are provided"
