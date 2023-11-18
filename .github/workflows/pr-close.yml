@@ -14,7 +14,7 @@ jobs:
   cleanup-openshift:
     name: Cleanup OpenShift
     env:
-      name: ${{ github.event.repository.name }}-${{ github.event.number }}
+      deployment: ${{ github.event.repository.name }}-${{ github.event.number }}
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
@@ -24,8 +24,8 @@ jobs:
           oc project ${{ vars.OC_NAMESPACE }}
 
           # If found, then remove
-          helm status ${{ env.name }} && helm uninstall --no-hooks ${{ env.name }} || \
-            echo "Not found: ${{ env.name }}"
+          helm status ${{ env.deployment }} && helm uninstall --no-hooks ${{ env.deployment }} || \
+            echo "Not found: ${{ env.deployment }}"
 
           # Remove Bitnami Crunchy PVCs
           oc delete pvc data-${{ github.event.repository.name }}-${{ github.event.number }}-bitnami-pg-0
@@ -35,7 +35,6 @@ jobs:
     name: Merge
     if: github.event.pull_request.base.ref == '${{ github.event.repository.default_branch }}' && \
       github.event.pull_request.merged == true
-    needs: [tag-images]
     uses: ./.github/workflows/.merge.yml
     secrets: inherit
     with:
