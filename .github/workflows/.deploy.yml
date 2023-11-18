@@ -54,6 +54,7 @@ jobs:
       - name: Check Deployment Triggers
         id: trigger
         run: |
+          # Always deploy if no triggers are provided
           if [ -z "${{ inputs.triggers }}" ]; then
             echo "Always deploy when no triggers are provided"
             echo "triggered=true" >> $GITHUB_OUTPUT
