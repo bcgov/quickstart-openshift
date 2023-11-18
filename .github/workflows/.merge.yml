@@ -3,10 +3,6 @@ name: .Merge
 on:
   workflow_call:
 
-concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: true
-
 jobs:
   semver:
     name: Semantic Version
@@ -35,7 +31,7 @@ jobs:
 
   deploys-test:
     name: Deploys (test)
-    if: ${{ steps.semver.outputs.tag != '' }}
+    if: ${{ needs.semver.outputs.tag != '' }}
     needs: [semver]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
