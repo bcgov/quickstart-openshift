@@ -21,7 +21,7 @@ on:
         type: string
         default: ${{ github.event.number }}
       triggers:
-        description: Paths used to trigger a build; e.g. ('./backend/' './frontend/)
+        description: Paths used to trigger a build; e.g. ('./backend/' './frontend/')
         required: false
         type: string
 
