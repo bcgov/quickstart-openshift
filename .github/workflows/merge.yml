@@ -7,23 +7,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  promote-test:
-    name: Promote Images
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        package: [migrations, backend, frontend]
-    timeout-minutes: 2
-    steps:
-      - uses: shrink/actions-docker-registry-tag@v3
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ inputs.promote }}
-          tags: test
-
   semver:
     name: Semantic Version
     outputs:
