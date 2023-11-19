@@ -39,7 +39,7 @@ jobs:
   deploy-test:
     name: Deploy (test)
     if: ${{ needs.semver.outputs.tag != '' }}
-    needs: [promote-test, semver]
+    needs: [semver]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
