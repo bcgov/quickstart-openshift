@@ -1,12 +1,10 @@
-name: .Merge
+name: Merge
 
 on:
-  workflow_call:
-    inputs:
-      promote:
-        description: PR number to promote
-        required: true
-        type: string
+  workflow_run:
+    workflows: [PR Closed]
+    types: [completed]
+  workflow_dispatch:
 
 jobs:
   promote-test:
