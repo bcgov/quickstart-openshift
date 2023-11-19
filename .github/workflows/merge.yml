@@ -1,11 +1,10 @@
 name: Merge
 
 on:
-  pull_request:
-  # workflow_run:
-  #   workflows: [PR Closed]
-  #   types: [completed]
-  # workflow_dispatch:
+  workflow_run:
+    workflows: [PR Closed]
+    types: [completed]
+  workflow_dispatch:
 
 jobs:
   semver:
