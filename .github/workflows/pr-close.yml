@@ -14,7 +14,7 @@ jobs:
   cleanup-openshift:
     name: Cleanup OpenShift
     env:
-      deployment: ${{ github.event.repository.name }}-${{ github.event.number }}
+      release: ${{ github.event.repository.name }}-${{ github.event.number }}
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
@@ -24,13 +24,14 @@ jobs:
           oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
 
           # If found, then remove
-          helm status ${{ env.deployment }} && helm uninstall --no-hooks ${{ env.deployment }} || \
-            echo "Not found: ${{ env.deployment }}"
+          helm status ${{ env.release }} && helm uninstall --no-hooks ${{ env.release }} || \
+            echo "Not found: ${{ env.release }}"
 
           # Remove Bitnami Crunchy PVCs
-          oc delete pvc data-${{ env.deployment }}-bitnami-pg-0 || \
-            echo "Not found: pvc data-${{ env.deployment }}-bitnami-pg-0"
+          oc delete pvc data-${{ env.release }}-bitnami-pg-0 || \
+            echo "Not found: pvc data-${{ env.release }}-bitnami-pg-0"
 
+  # If merged to default branch, then promote/retag images to TEST
   promote-test:
     name: Promote Images
     if: github.event.pull_request.base.ref == github.event.repository.default_branch &&
