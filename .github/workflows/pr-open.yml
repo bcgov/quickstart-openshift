@@ -21,7 +21,7 @@ jobs:
           github-token: ${{github.token}}
           script: |
             const prNumber = context.payload.number;
-            info(toJSON(prNumber));
+            console.log(toJSON(prNumber));
 
   # conventional-commits:
   #   name: Conventional Commits
