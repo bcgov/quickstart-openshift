@@ -20,9 +20,8 @@ jobs:
         with:
           github-token: ${{github.token}}
           script: |
-            const actionscore = require('@actions/core')
             const prNumber = context.payload.number;
-            actionscore.exportVariable('PULL_NUMBER', prNumber);
+            core.exportVariable('PULL_NUMBER', prNumber);
 
   # conventional-commits:
   #   name: Conventional Commits
