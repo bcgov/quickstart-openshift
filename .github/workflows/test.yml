@@ -3,7 +3,6 @@ name: Dump Merge Context
 on:
   pull_request:
   push:
-    branches: [main]
 
 jobs:
   contexts:
