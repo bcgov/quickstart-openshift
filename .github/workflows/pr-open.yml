@@ -22,7 +22,6 @@ jobs:
           script: |
             const prNumber = context.payload.number;
             core.exportVariable('PULL_NUMBER', prNumber);
-            info(toJSON(prNumber));
             echo "$PULL_NUMBER"
 
   # conventional-commits:
