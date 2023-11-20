@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Dump
-        uses: actions/github-script@7
+        uses: actions/github-script@7.0.1
         with:
           github-token: ${{github.token}}
           script: |
