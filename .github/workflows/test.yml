@@ -1,7 +1,7 @@
 name: Dump Merge Context
 
 on:
-  merge: [${{ github.event.repository.default_branch }}]
+  merge: [main]
 
 jobs:
   contexts:
