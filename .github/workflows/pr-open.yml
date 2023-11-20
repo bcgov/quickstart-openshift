@@ -11,80 +11,68 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  contexts:
-    name: GH cli
+  conventional-commits:
+    name: Conventional Commits
     runs-on: ubuntu-22.04
     steps:
-      - name: Dump
-        uses: actions/github-script@v7
+      - uses: amannn/action-semantic-pull-request@v5.4.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  pr-description-add:
+    name: PR Description Add
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+    runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: write
+    timeout-minutes: 1
+    steps:
+      - uses: bcgov-nr/action-pr-description-add@v1.1.0
         with:
-          github-token: ${{github.token}}
-          script: |
-            const prNumber = context.payload.number;
-            console.log(toJson(prNumber));
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          add_markdown: |
+            ---
 
-  # conventional-commits:
-  #   name: Conventional Commits
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - uses: amannn/action-semantic-pull-request@v5.4.0
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            Thanks for the PR!
 
-  # pr-description-add:
-  #   name: PR Description Add
-  #   env:
-  #     DOMAIN: apps.silver.devops.gov.bc.ca
-  #     PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
-  #   runs-on: ubuntu-22.04
-  #   permissions:
-  #     pull-requests: write
-  #   timeout-minutes: 1
-  #   steps:
-  #     - uses: bcgov-nr/action-pr-description-add@v1.1.0
-  #       with:
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
-  #         add_markdown: |
-  #           ---
+            Deployments, as required, will be available below:
+            - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }})
+            - [Backend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api)
 
-  #           Thanks for the PR!
+            Please create PRs in draft mode.  Mark as ready to enable:
+            - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
 
-  #           Deployments, as required, will be available below:
-  #           - [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }})
-  #           - [Backend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api)
+            After merge, new images are promoted to:
+            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
-  #           Please create PRs in draft mode.  Mark as ready to enable:
-  #           - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
+  # https://github.com/bcgov-nr/action-builder-ghcr
+  builds:
+    name: Builds
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [migrations, backend, frontend]
+    timeout-minutes: 10
+    steps:
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.0
+        with:
+          keep_versions: 50
+          package: ${{ matrix.package }}
+          tag: ${{ github.event.number }}
+          tag_fallback: test
+          triggers: ('${{ matrix.package }}/')
 
-  #           After merge, new images are promoted to:
-  #           - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
-
-  # # https://github.com/bcgov-nr/action-builder-ghcr
-  # builds:
-  #   name: Builds
-  #   runs-on: ubuntu-22.04
-  #   permissions:
-  #     packages: write
-  #   strategy:
-  #     matrix:
-  #       package: [migrations, backend, frontend]
-  #   timeout-minutes: 10
-  #   steps:
-  #     - uses: bcgov-nr/action-builder-ghcr@v2.0.0
-  #       with:
-  #         keep_versions: 50
-  #         package: ${{ matrix.package }}
-  #         tag: ${{ github.event.number }}
-  #         tag_fallback: test
-  #         triggers: ('${{ matrix.package }}/')
-
-  # # https://github.com/bcgov-nr/action-deployer-openshift
-  # deploys:
-  #   name: Deploys
-  #   needs: [builds]
-  #   uses: ./.github/workflows/.deploy.yml
-  #   secrets: inherit
-  #   with:
-  #     autoscaling: false
-  #     target: ${{ github.event.number }}
-  #     triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+  # https://github.com/bcgov-nr/action-deployer-openshift
+  deploys:
+    name: Deploys
+    needs: [builds]
+    uses: ./.github/workflows/.deploy.yml
+    secrets: inherit
+    with:
+      autoscaling: false
+      target: ${{ github.event.number }}
+      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
