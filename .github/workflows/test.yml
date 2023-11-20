@@ -10,16 +10,16 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: GitHub context
-        run: echo "${{ toJson(github) }}"
+        run: echo "${{ toJson(github) }}" || true
 
       - name: Job context
-        run: echo "${{ toJson(job) }}"
+        run: echo "${{ toJson(job) }}" || true
 
       - name: Steps context
-        run: echo "${{ toJson(steps) }}"
+        run: echo "${{ toJson(steps) }}" || true
 
       - name: Runner context
-        run: echo "${{ toJson(runner) }}"
+        run: echo "${{ toJson(runner) }}" || true
 
       - name: Strategy context
-        run: echo "${{ toJson(strategy) }}"
+        run: echo "${{ toJson(strategy) }}" || true
