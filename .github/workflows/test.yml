@@ -1,7 +1,8 @@
 name: Dump Merge Context
 
 on:
-  merge: [main]
+  push:
+    branches: [main]
 
 jobs:
   contexts:
