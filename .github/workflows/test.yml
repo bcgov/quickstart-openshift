@@ -6,7 +6,8 @@ on:
 
 jobs:
   event:
-    name: GitHub context
+    name: GitHub Event Number
     runs-on: ubuntu-22.04
     steps:
-      - run: echo "${{ toJson(github.event) }}"
+      - name: Dump
+        run: echo "${{ toJson(github.event.number) }}"
