@@ -5,37 +5,8 @@ on:
   push:
 
 jobs:
-  contexts-1:
+  event:
     name: GitHub context
     runs-on: ubuntu-22.04
     steps:
-      - name: GitHub context
-        run: echo "${{ toJson(github) }}" || true
-
-  contexts-2:
-    name: Job context
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Job context
-        run: echo "${{ toJson(job) }}" || true
-
-  contexts-3:
-    name: Steps context
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Steps context
-        run: echo "${{ toJson(steps) }}" || true
-
-  contexts-4:
-    name: Runner context
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Runner context
-        run: echo "${{ toJson(runner) }}" || true
-
-  contexts-5:
-    name: Strategy context
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Strategy context
-        run: echo "${{ toJson(strategy) }}" || true
+      - run: echo "${{ toJson(github.event) }}"
