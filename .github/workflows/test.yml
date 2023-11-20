@@ -1,0 +1,24 @@
+name: Merge
+
+on:
+  merge: [${{ github.event.repository.default_branch }}]
+
+jobs:
+  contexts:
+    name: Dump Contexts
+    runs-on: ubuntu-22.04
+    steps:
+      - name: GitHub context
+        run: echo "${{ toJson(github) }}"
+
+      - name: Job context
+        run: echo "${{ toJson(job) }}"
+
+      - name: Steps context
+        run: echo "${{ toJson(steps) }}"
+
+      - name: Runner context
+        run: echo "${{ toJson(runner) }}"
+
+      - name: Strategy context
+        run: echo "${{ toJson(strategy) }}"
