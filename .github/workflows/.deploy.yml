@@ -5,7 +5,7 @@ on:
     inputs:
       ### Required
       release:
-        description: Deployment target; usually PR number, test or prod
+        description: Deployment release; usually PR number, test or prod
         required: true
         type: string
 
@@ -47,7 +47,6 @@ on:
         type: string
 
 env:
-  repo_release: ${{ github.event.repository.name }}-${{ inputs.repo_release }}
   package_tag: ${{ inputs.tag }}
 
 jobs:
@@ -89,6 +88,8 @@ jobs:
 
       - name: Deploy if Triggers Fired
         if: ${{ steps.triggers.outputs.triggered == 'true' }}
+        env:
+          repo_release: ${{ github.event.repository.name }}-${{ inputs.repo_release }}
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
