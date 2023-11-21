@@ -44,8 +44,7 @@ jobs:
           # Scrub last commit message for PR number
           echo -e "$Last commit message: \n\t{{ github.event.head_commit.message }}"
 
-          PR_NO=$(echo "${{ github.event.head_commit.message }}" | \
-            jq .head_commit.message | cut -d'#' -f 2 | cut -d')' -f 1)
+          PR_NO=$(echo "${{ github.event.head_commit.message }}" | cut -d'#' -f 2 | cut -d')' -f 1)
           echo "pr=${PR_NO}" >> $GITHUB_OUTPUT
 
   # Add tag number and latest tags to PR image
