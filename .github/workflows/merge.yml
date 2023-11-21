@@ -43,27 +43,29 @@ jobs:
           echo git tag ${{ steps.changelog.outputs.tag }}
           echo git push origin --tag
 
-      # Get PR number, assmuing a PR was merged
+      # Get last merged (or current) PR number
       - name: Get PR Number
         id: pr-number
         run: |
-          # Get PR number from last commit or workflow_dispatch
-          if [ -z "${{ inputs.pr_no }}" ]; then
-            PR_NO=$(echo "${{ github.event.head_commit.message }}" \
-              | head -n1 | cut -d'#' -f 2 | cut -d')' -f 1)
+          # Accept a provided PR number or use the API
+          if [ ! -z "${{ inputs.pr_no }}" ]; then
+            PR_NO="${{ inputs.pr_no }}"
           else
-            PR_NO=${{ inputs.pr_no }}
+            HEAD=$(git log main --oneline | head -n1 | awk '{print $1}')
+            PR_NO=$(\
+              curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ github.token }}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                https://api.github.com/repos/bcgov/quickstart-openshift/commits/${HEAD}/pulls \
+                  | jq .[0].number
+            )
           fi
+          echo -e "Last merged PR: ${PR_NO}"
 
-          # Validate PR_NO, exit on fail
-          echo -e "pr=${PR_NO} \n"
-          echo -e "Last commit message: \n\t${{ github.event.head_commit.message }}"
+          # Validate PR number and send to GitHub Output
           if [ "${PR_NO}" =~ ^[0-9]+$ ]; then
-            echo "No PR number not found in commit message"
+            echo "No PR number not found"
             exit 1
           fi
-
-          # If here, send to GitHub Output
           echo "pr=${PR_NO}" >> $GITHUB_OUTPUT
 
   # Add tag number and latest tags to PR image
