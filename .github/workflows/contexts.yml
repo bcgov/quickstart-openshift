@@ -6,8 +6,8 @@ on:
 
 jobs:
   dump:
-    name: Dump GitHub Context
+    name: Dump GitHub Context.Event
     runs-on: ubuntu-22.04
     steps:
-      - name: Dump GitHub Context
-        run: echo "${{ toJson(github) }}"
+      - name: Dump GitHub Context.Event
+        run: echo "${{ toJson(github.event) }}"
