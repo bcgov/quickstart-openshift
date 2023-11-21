@@ -14,7 +14,7 @@ jobs:
     name: Create Envar
     runs-on: ubuntu-22.04
     steps:
-      - run: echo "$pr=pull_request" >> $GITHUB_ENV
+      - run: echo "pr=pull_request" >> $GITHUB_ENV
 
   echo-envars:
     name: Pick Up Envar
