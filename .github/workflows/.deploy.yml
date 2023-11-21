@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       ### Required
-      target:
+      release:
         description: Deployment target; usually PR number, test or prod
         required: true
         type: string
@@ -16,22 +16,22 @@ on:
         type: boolean
         default: true
       environment:
-        description: Environment name
+        description: Environment name; omit for PRs
         required: false
         type: string
       tag:
-        description: Docker tag; e.g. PR number, tag, test or prod
+        description: Container tag; usually PR number
         required: false
         type: string
         default: ${{ github.event.number }}
       triggers:
-        description: Paths used to trigger a build; e.g. ('backend/' 'frontend/')
+        description: Paths used to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
         required: false
         type: string
 
       ### Usually a bad idea / not recommended
       directory:
-        description: 'Chart directory.'
+        description: 'Chart directory'
         default: 'charts/${{ github.event.repository.name }}'
         required: false
         type: string
@@ -41,14 +41,14 @@ on:
         required: false
         type: number
       values:
-        description: 'Values file.'
+        description: 'Values file'
         default: 'values.yaml'
         required: false
         type: string
 
 env:
-  release: ${{ github.event.repository.name }}-${{ inputs.target }}
-  tag: ${{ inputs.tag }}
+  repo_release: ${{ github.event.repository.name }}-${{ inputs.repo_release }}
+  package_tag: ${{ inputs.tag }}
 
 jobs:
   deploys:
@@ -96,11 +96,11 @@ jobs:
           oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
 
           # Interrupt any previous jobs (status = pending-upgrade)
-          PREVIOUS=$(helm status ${{ env.release }} -o json | jq .info.status || true)
+          PREVIOUS=$(helm status ${{ env.repo_release }} -o json | jq .info.status || true)
           if [[ ${PREVIOUS} =~ pending ]]; then
             echo "Rollback triggered"
-            helm rollback ${{ env.release }} || \
-              helm uninstall ${{ env.release }}
+            helm rollback ${{ env.repo_release }} || \
+              helm uninstall ${{ env.repo_release }}
           fi
 
           # Deploy Helm Chart
@@ -109,10 +109,10 @@ jobs:
             --set global.autoscaling=${{ inputs.autoscaling }} \
             --set-string global.repository=${{ github.repository }} \
             --set-string global.secrets.databasePassword=${{ secrets.DB_PASSWORD }} \
-            --set-string backend.containers[0].tag="${{ env.tag }}" \
-            --set-string backend.initContainers[0].tag="${{ env.tag }}" \
-            --set-string frontend.containers[0].tag="${{ env.tag }}" \
-            --install --wait --atomic ${{ env.release }} \
+            --set-string backend.containers[0].tag="${{ env.package_tag }}" \
+            --set-string backend.initContainers[0].tag="${{ env.package_tag }}" \
+            --set-string frontend.containers[0].tag="${{ env.package_tag }}" \
+            --install --wait --atomic ${{ env.repo_release }} \
             --timeout ${{ inputs.timeout-minutes }}m \
             --values ${{ inputs.values }} .
 

@@ -1,48 +1,62 @@
 name: Merge
 
 on:
-  push: [${{ github.event.repository.default_branch }}]
+  push: #[${{ github.event.repository.default_branch }}]
 
 env:
-  pr: ${{ github.event.number }}
+  tag: ${{ github.event.number }}
 
 jobs:
   semver:
-    name: Semantic Version
+    name: Semantic Version and Tag
     outputs:
-      semver: ${{ steps.tag.outputs.semver }}
+      tag: ${{ steps.changelog.outputs.tag }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.repository.default_branch }}
-
+      # Outputs semver as steps.id.outputs.tag
       - name: Conventional Changelog Update
-        # Outputs semver as steps.id.outputs.tag
         uses: TriPSs/conventional-changelog-action@v4
         id: changelog
         with:
-          git-branch: refs/heads/${{ github.event.repository.default_branch }}
+          # git-branch: refs/heads/${{ github.event.repository.default_branch }}
           git-push: "false"
-          github-token: ${{ github.token }}
+          # github-token: ${{ github.token }}
           skip-commit: "true"
           skip-on-empty: "false"
           skip-version-file: "true"
 
+      # Create tag and output semver
       - name: Create Tags
-        if: ${{ steps.semver.outputs.tag != '' }}
-        id: tag
-        # Create tag and output semver
+        if: ${{ steps.changelog.outputs.tag != '' }}
         run: |
-          git tag ${{ steps.changelog.outputs.tag }}
-          git push origin --tag
-          echo "semver=${{ steps.semver.outputs.tag }}" >> $GITHUB_OUTPUT
+          echo git tag ${{ steps.changelog.outputs.tag }}
+          echo git push origin --tag
+
+  # Add tag number and latest tags to PR image
+  retags:
+    name: Retag Images
+    needs: [semver]
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [migrations, backend, frontend]
+    timeout-minutes: 1
+    steps:
+      - uses: shrink/actions-docker-registry-tag@v3
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.package }}
+          target: ${{ github.event.number }}
+          tags: |
+            ${{ needs.semver.outputs.tag }}
+            latest
 
   deploy-test:
     name: Deploy (test)
-    if: ${{ needs.semver.outputs.semver != '' }}
-    needs: [semver]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
@@ -66,7 +80,7 @@ jobs:
       tag: ${{ env.tag }}
       target: prod
 
-  promote-prod:
+  promote:
     name: Promote Images
     needs: [deploy-prod]
     runs-on: ubuntu-22.04
@@ -75,7 +89,7 @@ jobs:
     strategy:
       matrix:
         package: [migrations, backend, frontend]
-    timeout-minutes: 2
+    timeout-minutes: 1
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
         with:
