@@ -36,10 +36,21 @@ jobs:
           echo git tag ${{ steps.changelog.outputs.tag }}
           echo git push origin --tag
 
+  # Get PR number, assmuing a PR was merged
+  pr-number:
+    name: Get PR Number
+    runs-on: ubuntu-22.04
+    steps:
+      - run: |
+          # Get PR number from commit message
+          PR_NO=$(echo ${{ github.event.head_commit.message }} | \
+            jq .head_commit.message | cut -d'#' -f 2 | cut -d')' -f 1)
+          echo "$pr={PR_NO}" >> $GITHUB_OUTPUT
+
   # Add tag number and latest tags to PR image
   retags:
     name: Retag Images
-    needs: [semver]
+    needs: [semver, pr-number]
     runs-on: ubuntu-22.04
     permissions:
       packages: write
@@ -52,13 +63,14 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ github.event.number }}
+          target: ${{ needs.pr-number.outputs.pr }}
           tags: |
             latest
             ${{ needs.semver.outputs.tag }}
 
   deploy-test:
     name: Deploy (test)
+    needs: [pr-number]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
@@ -75,17 +87,17 @@ jobs:
 
   deploy-prod:
     name: Deploy (prod)
-    needs: [integration-e2e]
+    needs: [integration-e2e, pr-number]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
       environment: prod
-      tag: ${{ github.event.number }}
+      tag: ${{ needs.pr-number.outputs.pr }}
       release: prod
 
   promote:
     name: Promote Images
-    needs: [deploy-prod]
+    needs: [deploy-prod, pr-number]
     runs-on: ubuntu-22.04
     permissions:
       packages: write
@@ -98,5 +110,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ github.event.number }}
+          target: ${{ needs.pr-number.outputs.pr }}
           tags: prod
