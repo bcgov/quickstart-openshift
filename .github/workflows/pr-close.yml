@@ -30,3 +30,23 @@ jobs:
           # Remove Bitnami Crunchy PVCs
           oc delete pvc data-${{ env.release }}-bitnami-pg-0 || \
             echo "Not found: pvc data-${{ env.release }}-bitnami-pg-0"
+
+  # If merged to default branch, then add latest tag
+  promote:
+    name: Promote Images
+    if: github.event.pull_request.base.ref == github.event.repository.default_branch &&
+      github.event.pull_request.merged == true
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [migrations, backend, frontend]
+    timeout-minutes: 1
+    steps:
+      - uses: shrink/actions-docker-registry-tag@v3
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.package }}
+          target: ${{ github.event.number }}
+          tags: latest
