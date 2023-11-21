@@ -30,7 +30,6 @@ jobs:
     steps:
       - uses: bcgov-nr/action-pr-description-add@v1.1.0
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           add_markdown: |
             ---
 
