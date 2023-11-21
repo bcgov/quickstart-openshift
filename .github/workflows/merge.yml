@@ -10,9 +10,10 @@ on:
       - '!.github/workflows/merge.yml'
 
 jobs:
-  semver:
-    name: Semantic Version and Tag
+  vars:
+    name: Output Semver and PR Number
     outputs:
+      pr: ${{ steps.pr-number.outputs.pr }}
       tag: ${{ steps.changelog.outputs.tag }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
@@ -30,27 +31,25 @@ jobs:
           skip-on-empty: "false"
           skip-version-file: "true"
 
-      # Create tag and output semver
+      # Create and push semver tag
       - name: Create Tags
         run: |
           echo git tag ${{ steps.changelog.outputs.tag }}
           echo git push origin --tag
 
-  # Get PR number, assmuing a PR was merged
-  pr-number:
-    name: Get PR Number
-    runs-on: ubuntu-22.04
-    steps:
-      - run: |
+      # Get PR number, assmuing a PR was merged
+      - name: Get PR Number
+        id: pr-number
+        run: |
           # Get PR number from commit message
           PR_NO=$(echo ${{ github.event.head_commit.message }} | \
             jq .head_commit.message | cut -d'#' -f 2 | cut -d')' -f 1)
-          echo "$pr={PR_NO}" >> $GITHUB_OUTPUT
+          echo "pr=${PR_NO}" >> $GITHUB_OUTPUT
 
   # Add tag number and latest tags to PR image
   retags:
     name: Retag Images
-    needs: [semver, pr-number]
+    needs: [vars]
     runs-on: ubuntu-22.04
     permissions:
       packages: write
@@ -63,19 +62,19 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.pr-number.outputs.pr }}
+          target: ${{ needs.vars.outputs.pr }}
           tags: |
             latest
-            ${{ needs.semver.outputs.tag }}
+            ${{ needs.vars.outputs.tag }}
 
   deploy-test:
     name: Deploy (test)
-    needs: [pr-number]
+    needs: [vars]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
       environment: test
-      tag: ${{ github.event.number }}
+      tag: ${{ needs.vars.outputs.pr }}
       release: test
 
   integration-e2e:
@@ -87,17 +86,17 @@ jobs:
 
   deploy-prod:
     name: Deploy (prod)
-    needs: [integration-e2e, pr-number]
+    needs: [integration-e2e, vars]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
       environment: prod
-      tag: ${{ needs.pr-number.outputs.pr }}
+      tag: ${{ needs.vars.outputs.pr }}
       release: prod
 
   promote:
     name: Promote Images
-    needs: [deploy-prod, pr-number]
+    needs: [deploy-prod, vars]
     runs-on: ubuntu-22.04
     permissions:
       packages: write
@@ -110,5 +109,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.pr-number.outputs.pr }}
+          target: ${{ needs.vars.outputs.pr }}
           tags: prod
