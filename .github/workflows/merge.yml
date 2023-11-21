@@ -29,7 +29,6 @@ jobs:
 
       # Create tag and output semver
       - name: Create Tags
-        if: ${{ steps.changelog.outputs.tag != '' }}
         run: |
           echo git tag ${{ steps.changelog.outputs.tag }}
           echo git push origin --tag
@@ -52,8 +51,8 @@ jobs:
           repository: ${{ github.repository }}/${{ matrix.package }}
           target: ${{ github.event.number }}
           tags: |
-            ${{ needs.semver.outputs.tag }}
             latest
+            ${{ needs.semver.outputs.tag }}
 
   deploy-test:
     name: Deploy (test)
@@ -61,7 +60,8 @@ jobs:
     secrets: inherit
     with:
       environment: test
-      target: ${{ env.tag }}
+      tag: ${{ env.tag }}
+      target: test
 
   integration-e2e:
     name: Integration and E2E Tests

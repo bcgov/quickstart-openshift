@@ -5,7 +5,7 @@ on:
     inputs:
       ### Required
       release:
-        description: Deployment target; usually PR number, test or prod
+        description: Deployment release; usually PR number, test or prod
         required: true
         type: string
 
@@ -25,7 +25,7 @@ on:
         type: string
         default: ${{ github.event.number }}
       triggers:
-        description: Paths used to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
+        description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
         required: false
         type: string
 
@@ -47,7 +47,7 @@ on:
         type: string
 
 env:
-  repo_release: ${{ github.event.repository.name }}-${{ inputs.repo_release }}
+  repo_release: ${{ github.event.repository.name }}-${{ inputs.release }}
   package_tag: ${{ inputs.tag }}
 
 jobs:
