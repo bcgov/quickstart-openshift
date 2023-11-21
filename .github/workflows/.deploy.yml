@@ -88,8 +88,6 @@ jobs:
 
       - name: Deploy if Triggers Fired
         if: ${{ steps.triggers.outputs.triggered == 'true' }}
-        env:
-          repo_release: ${{ github.event.repository.name }}-${{ inputs.repo_release }}
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
@@ -97,11 +95,11 @@ jobs:
           oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
 
           # Interrupt any previous jobs (status = pending-upgrade)
-          PREVIOUS=$(helm status ${{ env.repo_release }} -o json | jq .info.status || true)
+          PREVIOUS=$(helm status ${{ github.event.repository.name }}-${{ inputs.repo_release }} -o json | jq .info.status || true)
           if [[ ${PREVIOUS} =~ pending ]]; then
             echo "Rollback triggered"
-            helm rollback ${{ env.repo_release }} || \
-              helm uninstall ${{ env.repo_release }}
+            helm rollback ${{ github.event.repository.name }}-${{ inputs.repo_release }} || \
+              helm uninstall ${{ github.event.repository.name }}-${{ inputs.repo_release }}
           fi
 
           # Deploy Helm Chart
@@ -113,7 +111,7 @@ jobs:
             --set-string backend.containers[0].tag="${{ env.package_tag }}" \
             --set-string backend.initContainers[0].tag="${{ env.package_tag }}" \
             --set-string frontend.containers[0].tag="${{ env.package_tag }}" \
-            --install --wait --atomic ${{ env.repo_release }} \
+            --install --wait --atomic ${{ github.event.repository.name }}-${{ inputs.repo_release }} \
             --timeout ${{ inputs.timeout-minutes }}m \
             --values ${{ inputs.values }} .
 
