@@ -1,7 +1,12 @@
 name: Merge
 
 on:
-  push: [${{ github.event.repository.default_branch }}]
+  push: [main]
+    ignore:
+      - '*.md'
+      - '.graphics/**'
+      - '.github/**'
+      - '!.github/workflows/merge.yml'
 
 jobs:
   semver:
