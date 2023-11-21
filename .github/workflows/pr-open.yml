@@ -18,13 +18,12 @@ jobs:
         id: pr-number
         run: |
           # Get PR number from commit message
-          echo ${{ toJSON(github.event) }}
-          echo ${{ toJSON(github.event.head_commit) }}
-          echo ${{ toJSON(github.event.head_commit.message) }}
+          echo ${{ toJSON(github.event.number) }}
+          echo ${{ github.event.number }}
 
-          PR_NO=$(echo ${{ github.event.head_commit.message }} | \
-            jq .head_commit.message | cut -d'#' -f 2 | cut -d')' -f 1)
-          echo "pr=${PR_NO}" >> $GITHUB_OUTPUT
+          # PR_NO=$(echo ${{ github.event.head_commit.message }} | \
+          #   jq .head_commit.message | cut -d'#' -f 2 | cut -d')' -f 1)
+          # echo "pr=${PR_NO}" >> $GITHUB_OUTPUT
 
 # jobs:
 #   # Enforce conventional commits in PR titles
