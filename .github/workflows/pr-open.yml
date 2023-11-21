@@ -5,10 +5,14 @@ on:
 
 concurrency:
   # PR open and close use the same group, allowing only one at a time
-  group: pr-${{ github.workflow }}-${{ github.event.number }}
+  group: ${{ github.workflow }}-${{ github.event.number }}
   cancel-in-progress: true
 
+env:
+  tag: ${{ github.event.number }}
+
 jobs:
+  # Enforce conventional commits in PR titles
   conventional-commits:
     name: Conventional Commits
     runs-on: ubuntu-22.04
@@ -21,7 +25,7 @@ jobs:
     name: PR Description Add
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+      PREFIX: ${{ github.event.repository.name }}-${{ env.tag }}
     runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
@@ -42,8 +46,8 @@ jobs:
             Please create PRs in draft mode.  Mark as ready to enable:
             - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
 
-            After merge, new images are promoted to:
-            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+            After merge, new images are deployed in:
+            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
 
   # https://github.com/bcgov-nr/action-builder-ghcr
   builds:
@@ -60,7 +64,7 @@ jobs:
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
+          tag: ${{ env.tag }}
           tag_fallback: test
           triggers: ('${{ matrix.package }}/')
 
@@ -72,6 +76,6 @@ jobs:
     secrets: inherit
     with:
       autoscaling: false
-      tag: ${{ github.event.number }}
-      target: ${{ github.event.number }}
+      tag: ${{ env.tag }}
+      target: ${{ env.tag }}
       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
