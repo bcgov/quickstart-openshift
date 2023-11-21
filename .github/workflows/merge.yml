@@ -1,7 +1,13 @@
 name: Merge
 
 on:
-  push: [main]
+  push:
+    branches: [main]
+    paths-ignore:
+      - '*.md'
+      - '.graphics/**'
+      - '.github/**'
+      - '!.github/workflows/merge.yml'
 
 jobs:
   semver:
