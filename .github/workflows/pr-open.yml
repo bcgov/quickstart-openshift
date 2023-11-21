@@ -36,8 +36,8 @@ jobs:
           result-encoding: string
           script: |
             github.rest.issues.get({
-              owner: ${{ context.repo.owner }},
-              repo: ${{ context.repo.repo }},
+              owner: bcgov,
+              repo: quickstart-openshift,
               ref: 'main'
             })
 
