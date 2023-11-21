@@ -46,7 +46,7 @@ jobs:
 
           # Echos
           echo -e "pr=${PR_NO}"
-          echo -e "$Last commit message: \n\t${{ github.event.head_commit.message }}"
+          echo -e "Last commit message: \n\t${{ github.event.head_commit.message }}"
 
           # Send to GitHub Output
           echo "pr=${PR_NO}" >> $GITHUB_OUTPUT
