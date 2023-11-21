@@ -1,26 +1,26 @@
 name: Merge
 
 on:
-  workflow_run:
-    workflows: [PR Closed]
-    types: [completed]
-  workflow_dispatch:
+  push: [main]
+    ignore:
+      - '*.md'
+      - '.graphics/**'
+      - '.github/**'
+      - '!.github/workflows/merge.yml'
 
 jobs:
   semver:
-    name: Semantic Version
+    name: Semantic Version and Tag
     outputs:
-      tag: ${{ steps.semver.outputs.tag }}
+      tag: ${{ steps.changelog.outputs.tag }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.repository.default_branch }}
-
+      # Outputs semver as steps.id.outputs.tag
       - name: Conventional Changelog Update
         uses: TriPSs/conventional-changelog-action@v4
-        id: semver
+        id: changelog
         with:
           git-branch: refs/heads/${{ github.event.repository.default_branch }}
           git-push: "false"
@@ -29,21 +29,40 @@ jobs:
           skip-on-empty: "false"
           skip-version-file: "true"
 
+      # Create tag and output semver
       - name: Create Tags
-        if: ${{ steps.semver.outputs.tag != '' }}
         run: |
-          git tag ${{ steps.changelog.outputs.tag }}
-          git push origin --tag
+          echo git tag ${{ steps.changelog.outputs.tag }}
+          echo git push origin --tag
+
+  # Add tag number and latest tags to PR image
+  retags:
+    name: Retag Images
+    needs: [semver]
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [migrations, backend, frontend]
+    timeout-minutes: 1
+    steps:
+      - uses: shrink/actions-docker-registry-tag@v3
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.package }}
+          target: ${{ github.event.number }}
+          tags: |
+            latest
+            ${{ needs.semver.outputs.tag }}
 
   deploy-test:
     name: Deploy (test)
-    if: ${{ needs.semver.outputs.tag != '' }}
-    needs: [semver]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
       environment: test
-      tag: test
+      tag: ${{ github.event.number }}
       target: test
 
   integration-e2e:
@@ -60,11 +79,11 @@ jobs:
     secrets: inherit
     with:
       environment: prod
-      tag: test
+      tag: ${{ github.event.number }}
       target: prod
 
-  promote-prod:
-    name: Tag Images
+  promote:
+    name: Promote Images
     needs: [deploy-prod]
     runs-on: ubuntu-22.04
     permissions:
@@ -72,11 +91,11 @@ jobs:
     strategy:
       matrix:
         package: [migrations, backend, frontend]
-    timeout-minutes: 2
+    timeout-minutes: 1
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: test
+          target: ${{ github.event.number }}
           tags: prod
