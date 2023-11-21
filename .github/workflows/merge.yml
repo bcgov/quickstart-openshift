@@ -8,6 +8,12 @@ on:
       - '.graphics/**'
       - '.github/**'
       - '!.github/workflows/merge.yml'
+  workflow_dispatch:
+    inputs:
+      pr_no:
+        description: "PR-numbered container set to deploy"
+        type: number
+        required: true
 
 jobs:
   vars:
@@ -41,15 +47,23 @@ jobs:
       - name: Get PR Number
         id: pr-number
         run: |
-          # Scrub last commit message for PR number
-          PR_NO=$(echo "${{ github.event.head_commit.message }}" \
-            | head -n1 | cut -d'#' -f 2 | cut -d')' -f 1)
+          # Get PR number from last commit or workflow_dispatch
+          if [ -z "${{ inputs.pr_no }}" ]; then
+            PR_NO=$(echo "${{ github.event.head_commit.message }}" \
+              | head -n1 | cut -d'#' -f 2 | cut -d')' -f 1)
+          else
+            PR_NO=${{ inputs.pr_no }}
+          fi
 
-          # Echos
-          echo -e "pr=${PR_NO}"
+          # Validate PR_NO, exit on fail
+          echo -e "pr=${PR_NO} \n"
           echo -e "Last commit message: \n\t${{ github.event.head_commit.message }}"
+          if [ "${PR_NO}" =~ ^[0-9]+$ ]; then
+            echo "No PR number not found in commit message"
+            exit 1
+          fi
 
-          # Send to GitHub Output
+          # If here, send to GitHub Output
           echo "pr=${PR_NO}" >> $GITHUB_OUTPUT
 
   # Add tag number and latest tags to PR image
