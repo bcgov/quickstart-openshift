@@ -1,10 +1,7 @@
 name: Merge
 
 on:
-  push: #[${{ github.event.repository.default_branch }}]
-
-env:
-  tag: ${{ github.event.number }}
+  push: [${{ github.event.repository.default_branch }}]
 
 jobs:
   semver:
@@ -20,9 +17,9 @@ jobs:
         uses: TriPSs/conventional-changelog-action@v4
         id: changelog
         with:
-          # git-branch: refs/heads/${{ github.event.repository.default_branch }}
+          git-branch: refs/heads/${{ github.event.repository.default_branch }}
           git-push: "false"
-          # github-token: ${{ github.token }}
+          github-token: ${{ github.token }}
           skip-commit: "true"
           skip-on-empty: "false"
           skip-version-file: "true"
@@ -60,7 +57,7 @@ jobs:
     secrets: inherit
     with:
       environment: test
-      tag: ${{ env.tag }}
+      tag: ${{ github.event.number }}
       target: test
 
   integration-e2e:
@@ -77,7 +74,7 @@ jobs:
     secrets: inherit
     with:
       environment: prod
-      tag: ${{ env.tag }}
+      tag: ${{ github.event.number }}
       target: prod
 
   promote:
@@ -95,5 +92,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ env.tag }}
+          target: ${{ github.event.number }}
           tags: prod
