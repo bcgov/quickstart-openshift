@@ -2,11 +2,6 @@ name: Merge
 
 on:
   push: [main]
-    ignore:
-      - '*.md'
-      - '.graphics/**'
-      - '.github/**'
-      - '!.github/workflows/merge.yml'
 
 jobs:
   semver:
