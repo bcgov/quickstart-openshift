@@ -15,12 +15,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - run: echo "pr=pull_request" >> $GITHUB_ENV
-
-  echo-envars:
-    name: Pick Up Envar
-    needs: [envars]
-    runs-on: ubuntu-22.04
-    steps:
       - run: echo $pr
 
 # jobs:
