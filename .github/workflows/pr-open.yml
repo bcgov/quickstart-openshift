@@ -9,69 +9,111 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Enforce conventional commits in PR titles
-  conventional-commits:
-    name: Conventional Commits
+  pr-number-bash:
+    name: Get PR Number with Bash
     runs-on: ubuntu-22.04
     steps:
-      - uses: amannn/action-semantic-pull-request@v5.4.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - uses: actions/checkout@v4
+      #   with:
+      #     ref: main
+      
+      - name: Get PR Number with Bash
+        run: |
+          MAIN=$(git log main --oneline | head -n1 | awk '{print $1}')
+          curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ github.token }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/bcgov/quickstart-openshift/commits/${HEAD}/pulls | jq .[0].number
 
-  pr-description-add:
-    name: PR Description Add
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}
+  pr-number-js:
+    name: Get PR Number with JavaScript
     runs-on: ubuntu-22.04
-    permissions:
-      pull-requests: write
-    timeout-minutes: 1
     steps:
-      - uses: bcgov-nr/action-pr-description-add@v1.1.0
+      - name: Get PR Number with JavaScript
+        uses: actions/github-script@v7
         with:
-          add_markdown: |
-            ---
+          result-encoding: string
+          script: |
+            github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'main'
+            })
 
-            Thanks for the PR!
+            # await octokit.request('GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls', {
+            #   owner: 'OWNER',
+            #   repo: 'REPO',
+            #   commit_sha: 'COMMIT_SHA',
+            #   headers: {
+            #     'X-GitHub-Api-Version': '2022-11-28'
+            #   }
+            # })
 
-            Deployments, as required, will be available below:
-            - [Frontend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }})
-            - [Backend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/api)
 
-            Please create PRs in draft mode.  Mark as ready to enable:
-            - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
 
-            After merge, new images are deployed in:
-            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
+# jobs:
+#   # Enforce conventional commits in PR titles
+#   conventional-commits:
+#     name: Conventional Commits
+#     runs-on: ubuntu-22.04
+#     steps:
+#       - uses: amannn/action-semantic-pull-request@v5.4.0
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # https://github.com/bcgov-nr/action-builder-ghcr
-  builds:
-    name: Builds
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        package: [migrations, backend, frontend]
-    timeout-minutes: 10
-    steps:
-      - uses: bcgov-nr/action-builder-ghcr@v2.0.0
-        with:
-          keep_versions: 50
-          package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
-          tag_fallback: latest
-          triggers: ('${{ matrix.package }}/')
+#   pr-description-add:
+#     name: PR Description Add
+#     env:
+#       DOMAIN: apps.silver.devops.gov.bc.ca
+#       PREFIX: ${{ github.event.repository.name }}
+#     runs-on: ubuntu-22.04
+#     permissions:
+#       pull-requests: write
+#     timeout-minutes: 1
+#     steps:
+#       - uses: bcgov-nr/action-pr-description-add@v1.1.0
+#         with:
+#           add_markdown: |
+#             ---
 
-  # https://github.com/bcgov-nr/action-deployer-openshift
-  deploys:
-    name: Deploys
-    needs: [builds]
-    uses: ./.github/workflows/.deploy.yml
-    secrets: inherit
-    with:
-      autoscaling: false
-      tag: ${{ github.event.number }}
-      release: ${{ github.event.number }}
-      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+#             Thanks for the PR!
+
+#             Deployments, as required, will be available below:
+#             - [Frontend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }})
+#             - [Backend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/api)
+
+#             Please create PRs in draft mode.  Mark as ready to enable:
+#             - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
+
+#             After merge, new images are deployed in:
+#             - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
+
+#   # https://github.com/bcgov-nr/action-builder-ghcr
+#   builds:
+#     name: Builds
+#     runs-on: ubuntu-22.04
+#     permissions:
+#       packages: write
+#     strategy:
+#       matrix:
+#         package: [migrations, backend, frontend]
+#     timeout-minutes: 10
+#     steps:
+#       - uses: bcgov-nr/action-builder-ghcr@v2.0.0
+#         with:
+#           keep_versions: 50
+#           package: ${{ matrix.package }}
+#           tag: ${{ github.event.number }}
+#           tag_fallback: latest
+#           triggers: ('${{ matrix.package }}/')
+
+#   # https://github.com/bcgov-nr/action-deployer-openshift
+#   deploys:
+#     name: Deploys
+#     needs: [builds]
+#     uses: ./.github/workflows/.deploy.yml
+#     secrets: inherit
+#     with:
+#       autoscaling: false
+#       tag: ${{ github.event.number }}
+#       release: ${{ github.event.number }}
+#       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')

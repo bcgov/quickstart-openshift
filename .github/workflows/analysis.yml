@@ -3,8 +3,8 @@ name: Analysis
 on:
   push:
     branches: [main]
-  pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
+  # pull_request:
+  #   types: [opened, reopened, synchronize, ready_for_review]
   schedule:
     - cron: "0 11 * * 0" # 3 AM PST = 12 PM UDT, runs sundays
   workflow_dispatch:
