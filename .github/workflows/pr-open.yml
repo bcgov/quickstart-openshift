@@ -15,7 +15,13 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - run: echo "pr=pull_request" >> $GITHUB_ENV
-      - run: echo $pr
+
+  echo-envars:
+    name: Pick Up Envar
+    needs: [envars]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo ${{ env.pr }}
 
 # jobs:
 #   # Enforce conventional commits in PR titles
