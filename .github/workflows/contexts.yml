@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Dump GitHub.Event
-        run: echo "${{ github.event }}"
+        run: echo "${{ toJson(github.event.number) }}"
