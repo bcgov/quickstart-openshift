@@ -1,16 +1,16 @@
 name: Merge
 
 on:
-  workflow_run:
-    workflows: [PR Closed]
-    types: [completed]
-  workflow_dispatch:
+  push: [${{ github.event.repository.default_branch }}]
+
+env:
+  pr: ${{ github.event.number }}
 
 jobs:
   semver:
     name: Semantic Version
     outputs:
-      tag: ${{ steps.semver.outputs.tag }}
+      semver: ${{ steps.tag.outputs.semver }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -19,8 +19,9 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
 
       - name: Conventional Changelog Update
+        # Outputs semver as steps.id.outputs.tag
         uses: TriPSs/conventional-changelog-action@v4
-        id: semver
+        id: changelog
         with:
           git-branch: refs/heads/${{ github.event.repository.default_branch }}
           git-push: "false"
@@ -31,20 +32,22 @@ jobs:
 
       - name: Create Tags
         if: ${{ steps.semver.outputs.tag != '' }}
+        id: tag
+        # Create tag and output semver
         run: |
           git tag ${{ steps.changelog.outputs.tag }}
           git push origin --tag
+          echo "semver=${{ steps.semver.outputs.tag }}" >> $GITHUB_OUTPUT
 
   deploy-test:
     name: Deploy (test)
-    if: ${{ needs.semver.outputs.tag != '' }}
+    if: ${{ needs.semver.outputs.semver != '' }}
     needs: [semver]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
       environment: test
-      tag: test
-      target: test
+      target: ${{ env.tag }}
 
   integration-e2e:
     name: Integration and E2E Tests
@@ -60,11 +63,11 @@ jobs:
     secrets: inherit
     with:
       environment: prod
-      tag: test
+      tag: ${{ env.tag }}
       target: prod
 
   promote-prod:
-    name: Tag Images
+    name: Promote Images
     needs: [deploy-prod]
     runs-on: ubuntu-22.04
     permissions:
@@ -78,5 +81,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: test
+          target: ${{ env.tag }}
           tags: prod
