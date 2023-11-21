@@ -64,7 +64,7 @@ jobs:
     with:
       environment: test
       tag: ${{ github.event.number }}
-      target: test
+      release: test
 
   integration-e2e:
     name: Integration and E2E Tests
@@ -81,7 +81,7 @@ jobs:
     with:
       environment: prod
       tag: ${{ github.event.number }}
-      target: prod
+      release: prod
 
   promote:
     name: Promote Images
