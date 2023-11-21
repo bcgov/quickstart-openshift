@@ -6,7 +6,7 @@ on:
 concurrency:
   # PR open and close use the same group, allowing only one at a time
   group: ${{ github.workflow }}-${{ github.event.number }}
-  cancel-in-progress: true
+  # cancel-in-progress: true
 
 jobs:
   pr-number-bash:
@@ -19,6 +19,8 @@ jobs:
       
       - name: Get PR Number with Bash
         run: |
+          git checkout main
+          git pull
           MAIN=$(git log main --oneline | head -n1 | awk '{print $1}')
           curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ github.token }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
@@ -34,19 +36,19 @@ jobs:
           result-encoding: string
           script: |
             github.rest.issues.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+              owner: ${{ context.repo.owner }},
+              repo: ${{ context.repo.repo }},
               ref: 'main'
             })
 
-            # await octokit.request('GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls', {
-            #   owner: 'OWNER',
-            #   repo: 'REPO',
-            #   commit_sha: 'COMMIT_SHA',
-            #   headers: {
-            #     'X-GitHub-Api-Version': '2022-11-28'
-            #   }
-            # })
+# await octokit.request('GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls', {
+#   owner: 'OWNER',
+#   repo: 'REPO',
+#   commit_sha: 'COMMIT_SHA',
+#   headers: {
+#     'X-GitHub-Api-Version': '2022-11-28'
+#   }
+# })
 
 
 
