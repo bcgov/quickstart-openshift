@@ -1,0 +1,13 @@
+name: Dump Contexts
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  dump:
+    name: Dump GitHub.Event
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Dump GitHub.Event
+        run: echo "${{ github.event }}"

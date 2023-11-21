@@ -75,4 +75,4 @@ jobs:
       autoscaling: false
       tag: ${{ github.event.number }}
       release: ${{ github.event.number }}
-      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/' '.github/workflows/')
+      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
