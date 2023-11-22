@@ -89,19 +89,8 @@ jobs:
             latest
             ${{ needs.vars.outputs.tag }}
 
-  deploy-test:
-    name: Deploy (test)
-    needs: [vars]
-    uses: ./.github/workflows/.deploy.yml
-    secrets: inherit
-    with:
-      environment: test
-      tag: ${{ needs.vars.outputs.pr }}
-      release: test
-
   integration-e2e:
     name: Integration and E2E Tests
-    needs: [deploy-test]
     uses: ./.github/workflows/.tests.yml
     with:
       target: test

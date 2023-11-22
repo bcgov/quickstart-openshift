@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   merge_group:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
   schedule:
     - cron: "0 11 * * 0" # 3 AM PST = 12 PM UDT, runs sundays
   workflow_dispatch:
@@ -15,6 +17,7 @@ concurrency:
 jobs:
   codeql:
     name: CodeQL
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     steps:
@@ -31,6 +34,7 @@ jobs:
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
     name: Trivy Security Scan
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -52,6 +56,7 @@ jobs:
 
   tests:
     name: Tests
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     services:
@@ -86,6 +91,7 @@ jobs:
           commands: |
             npm ci
             npm run test:cov
+            npm run break everything
           dir: ${{ matrix.dir }}
           node_version: "20"
           sonar_args: >
