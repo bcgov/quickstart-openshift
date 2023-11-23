@@ -48,6 +48,14 @@ jobs:
             After merge, new images are deployed in:
             - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
 
+  # Dump GitHub Context.Event
+  dump:
+    name: Dump GitHub Context.Event
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Dump GitHub Context.Event
+        run: echo "${{ toJson(github.event) }}"
+
   # https://github.com/bcgov-nr/action-builder-ghcr
   builds:
     name: Builds
@@ -70,6 +78,7 @@ jobs:
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
     name: Deploys
+    if: github.event.action != 'enqueued'
     needs: [builds]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
