@@ -63,7 +63,7 @@ jobs:
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
-          tag: ${{ github.event.number || 'main' }}
+          tag: ${{ github.event.number || 'queue' }}
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
@@ -76,5 +76,5 @@ jobs:
     with:
       autoscaling: false
       tag: ${{ github.event.number }}
-      release: ${{ github.event.number || 'main' }}
+      release: ${{ github.event.number || 'queue' }}
       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
