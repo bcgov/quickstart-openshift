@@ -91,7 +91,6 @@ jobs:
           commands: |
             npm ci
             npm run test:cov
-            npm run break everything
           dir: ${{ matrix.dir }}
           node_version: "20"
           sonar_args: >

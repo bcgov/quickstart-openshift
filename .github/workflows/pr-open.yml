@@ -2,6 +2,7 @@ name: PR
 
 on:
   pull_request:
+  merge_group:
 
 concurrency:
   # PR open and close use the same group, allowing only one at a time
@@ -11,6 +12,7 @@ concurrency:
 jobs:
   # Enforce conventional commits in PR titles
   conventional-commits:
+    if: github.event_name == 'pull_request'
     name: Conventional Commits
     runs-on: ubuntu-22.04
     steps:
@@ -20,6 +22,7 @@ jobs:
 
   pr-description-add:
     name: PR Description Add
+    if: github.event_name == 'pull_request'
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}
@@ -60,7 +63,7 @@ jobs:
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
+          tag: ${{ github.event.number || 'main' }}
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
@@ -73,5 +76,5 @@ jobs:
     with:
       autoscaling: false
       tag: ${{ github.event.number }}
-      release: ${{ github.event.number }}
+      release: ${{ github.event.number || 'main' }}
       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
