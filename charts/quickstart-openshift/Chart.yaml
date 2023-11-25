@@ -27,24 +27,24 @@ appVersion: "1.16.0"
 dependencies:
   - name: component
     condition: backend.enabled
-    version: 0.1.1
+    version: 0.2.0
     repository: https://bcgov.github.io/helm-service
     alias: backend
 
   - name: component
     condition: frontend.enabled
-    version: 0.1.1
+    version: 0.2.0
     repository: https://bcgov.github.io/helm-service
     alias: frontend
 
   - name: postgresql
     condition: bitnami-pg.enabled
-    version: 13.2.15
+    version: 13.2.16
     repository: https://charts.bitnami.com/bitnami
     alias: bitnami-pg
 
   - name: component
     condition: backup.enabled
-    version: 0.1.1
+    version: 0.2.0
     repository: https://bcgov.github.io/helm-service
     alias: backup
