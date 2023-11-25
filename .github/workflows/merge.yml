@@ -123,6 +123,7 @@ jobs:
       environment: prod
       tag: ${{ needs.vars.outputs.tag }}
       release: prod
+      semver: ${{ needs.vars.outputs.semver }}
 
   promote:
     name: Promote Images
