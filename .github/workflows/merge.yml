@@ -1,13 +1,9 @@
 name: Merge
 
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      - '*.md'
-      - '.graphics/**'
-      - '.github/**'
-      - '!.github/workflows/merge.yml'
+  workflow_run:
+    workflows: [PR Closed]
+    types: [completed]
   workflow_dispatch:
     inputs:
       pr_no:
@@ -17,10 +13,9 @@ on:
 
 jobs:
   vars:
-    name: Output Semver and PR Number
+    name: PR Number and Semver
     outputs:
-      pr: ${{ steps.pr-number.outputs.pr }}
-      tag: ${{ steps.changelog.outputs.tag }}
+      tag: ${{ steps.tag.outputs.tag }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -40,14 +35,14 @@ jobs:
       # Create and push semver tag
       - name: Create Tags
         run: |
-          echo git tag ${{ steps.changelog.outputs.tag }}
-          echo git push origin --tag
+          git tag ${{ steps.changelog.outputs.tag }}
+          git push origin --tag
 
       # Get last merged (or current) PR number
       - name: Get PR Number
-        id: pr-number
+        id: tag
         run: |
-          # Accept a provided PR number or use the API
+          # Accept a provided PR as input or use the API
           if [ ! -z "${{ inputs.pr_no }}" ]; then
             PR_NO="${{ inputs.pr_no }}"
           else
@@ -59,41 +54,14 @@ jobs:
                   | jq .[0].number
             )
           fi
-          echo -e "Last merged PR: ${PR_NO}"
+          echo -e "Last PR: ${PR_NO}"
 
-          # Validate PR number and send to GitHub Output
+          # Validate PR number and send to output
           if [ "${PR_NO}" =~ ^[0-9]+$ ]; then
             echo "No PR number not found"
             exit 1
           fi
-          echo "pr=${PR_NO}" >> $GITHUB_OUTPUT
-
-  # Add tag number and latest tags to PR image
-  retags:
-    name: Retag Images
-    needs: [vars]
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        package: [migrations, backend, frontend]
-    timeout-minutes: 1
-    steps:
-      - uses: shrink/actions-docker-registry-tag@v3
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.vars.outputs.pr }}
-          tags: |
-            latest
-            ${{ needs.vars.outputs.tag }}
-
-  integration-e2e:
-    name: Integration and E2E Tests
-    uses: ./.github/workflows/.tests.yml
-    with:
-      target: test
+          echo "tag=${PR_NO}" >> $GITHUB_OUTPUT
 
   deploy-prod:
     name: Deploy (prod)
@@ -101,8 +69,9 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
+      directory: charts/quickstart-openshift
       environment: prod
-      tag: ${{ needs.vars.outputs.pr }}
+      tag: ${{ needs.vars.outputs.tag }}
       release: prod
 
   promote:
@@ -120,5 +89,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.vars.outputs.pr }}
+          target: ${{ needs.vars.outputs.tag }}
           tags: prod
