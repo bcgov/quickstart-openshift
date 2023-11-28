@@ -2,6 +2,7 @@ name: PR
 
 on:
   pull_request:
+  merge_group:
 
 concurrency:
   # PR open and close use the same group, allowing only one at a time
@@ -11,6 +12,7 @@ concurrency:
 jobs:
   # Enforce conventional commits in PR titles
   conventional-commits:
+    if: github.event_name == 'pull_request'
     name: Conventional Commits
     runs-on: ubuntu-22.04
     steps:
@@ -20,6 +22,7 @@ jobs:
 
   pr-description-add:
     name: PR Description Add
+    if: github.event_name == 'pull_request'
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}
@@ -45,9 +48,44 @@ jobs:
             After merge, new images are deployed in:
             - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
 
+  # Find initial PR number (for merge queues)
+  vars:
+    name: Build and Deploy Vars
+    outputs:
+      asg: ${{ steps.deploys.outputs.asg }}
+      env: ${{ steps.deploys.outputs.env }}
+      tag: ${{ steps.deploys.outputs.tag }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Set Variables
+        id: deploys
+        run: |
+          if [ ${{ github.event_name }} == 'pull_request' ]
+          then
+            # Pull request event
+            asg=false
+            env=""
+            tag=${{ github.event.number }}
+          else
+            # Merge group event
+            asg=true
+            env=test
+            tag=$(echo ${{ github.event.merge_group.head_ref }} | grep -Eo "queue/main/pr-[0-9]+" | cut -d '-' -f2)
+          fi
+
+          echo "Summary ---"
+          echo -e "\tAutoscaling: ${asg}"
+          echo -e "\tEnvironment: ${env}"
+          echo -e "\tTag (PR no): ${tag}"
+
+          echo "asg=${asg}" >> $GITHUB_OUTPUT
+          echo "env=${env}" >> $GITHUB_OUTPUT
+          echo "tag=${tag}" >> $GITHUB_OUTPUT
+
   # https://github.com/bcgov-nr/action-builder-ghcr
   builds:
     name: Builds
+    needs: [vars]
     runs-on: ubuntu-22.04
     permissions:
       packages: write
@@ -60,18 +98,27 @@ jobs:
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
+          tag: ${{ needs.vars.outputs.tag }}
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
     name: Deploys
-    needs: [builds]
+    needs: [builds, vars]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      autoscaling: false
-      tag: ${{ github.event.number }}
-      release: ${{ github.event.number }}
-      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+      autoscaling: ${{ needs.vars.outputs.asg }}
+      directory: charts/quickstart-openshift
+      environment: ${{ needs.vars.outputs.env }}
+      tag: ${{ needs.vars.outputs.tag }}
+      release: ${{ needs.vars.outputs.tag }}
+      # triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+
+  integration-e2e:
+    name: Integration and E2E Tests
+    needs: [deploys, vars]
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: ${{ needs.vars.outputs.tag }}
