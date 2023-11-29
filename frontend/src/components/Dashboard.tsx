@@ -27,5 +27,7 @@ export default function Dashboard() {
       })
   }, [])
 
-  return <MUIDataTable title={'User List'} data={data} columns={columns} />
+  return (
+    <MUIDataTable title={'User List CHANGE'} data={data} columns={columns} />
+  )
 }
