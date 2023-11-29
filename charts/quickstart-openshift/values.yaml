@@ -15,6 +15,8 @@ global:
   domain: "apps.silver.devops.gov.bc.ca" # it is required, apps.silver.devops.gov.bc.ca for silver cluster
   openshiftImageRegistry: "image-registry.openshift-image-registry.svc:5000"
   databaseAlias: bitnami-pg # this is the alias for bitnami postgres, change it based on db type(crunchy,patroni...) and alias used in the chart.
+  podAnnotations: |
+      app.kubernetes.io/timestamp: {{now | toString }}
 
 backend:
   enabled: true
