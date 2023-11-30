@@ -45,6 +45,11 @@ on:
         default: 'values.yaml'
         required: false
         type: string
+      semver:
+        description: 'The Semantic version that is being released. Mainly used for TEST and PROD'
+        default: ''
+        required: false
+        type: string
 
 env:
   repo_release: ${{ github.event.repository.name }}-${{ inputs.release }}
@@ -92,6 +97,13 @@ jobs:
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
+          # Check Semver or default to 0.0.1
+          if [ -z "${{ inputs.semver }}" ]; then
+            VERSION=0.0.1
+          else
+            VERSION=${{ inputs.semver }}
+          fi
+
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
 
@@ -105,6 +117,8 @@ jobs:
 
           # Deploy Helm Chart
           helm dependency update
+          helm package --app-version="${{ env.package_tag }}" --version=$VERSION .
+          
           helm upgrade \
             --set global.autoscaling=${{ inputs.autoscaling }} \
             --set-string global.repository=${{ github.repository }} \
@@ -112,9 +126,12 @@ jobs:
             --set-string backend.containers[0].tag="${{ env.package_tag }}" \
             --set-string backend.initContainers[0].tag="${{ env.package_tag }}" \
             --set-string frontend.containers[0].tag="${{ env.package_tag }}" \
-            --install --wait --atomic ${{ env.repo_release }} \
+            --install --wait --atomic  ${{ env.repo_release }} ./${{ github.event.repository.name }}-$VERSION.tgz \
             --timeout ${{ inputs.timeout-minutes }}m \
-            --values ${{ inputs.values }} .
+            --values ${{ inputs.values }}
 
+          # print history 
+          helm history ${{ env.repo_release }}
+          
           # Remove old build runs, build pods and deployment pods
           oc delete po --field-selector=status.phase==Succeeded
