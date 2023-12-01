@@ -17,32 +17,14 @@ on:
 
 jobs:
   vars:
-    name: PR Number and Semver
+    name: Set Variables
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
-      - uses: actions/checkout@v4
-      # Outputs semver as steps.id.outputs.tag
-      - name: Conventional Changelog Update
-        uses: TriPSs/conventional-changelog-action@v4
-        id: changelog
-        with:
-          git-branch: refs/heads/${{ github.event.repository.default_branch }}
-          git-push: "false"
-          github-token: ${{ github.token }}
-          skip-commit: "true"
-          skip-on-empty: "false"
-          skip-version-file: "true"
-
-      # Create and push semver tag
-      - name: Create Tags
-        run: |
-          git tag ${{ steps.changelog.outputs.tag }}
-          git push origin --tag
-
       # Get last merged (or current) PR number
+      - uses: actions/checkout@v4
       - name: Get PR Number
         id: pr-number
         run: |
@@ -123,7 +105,7 @@ jobs:
       environment: prod
       tag: ${{ needs.vars.outputs.tag }}
       release: prod
-      semver: ${{ needs.vars.outputs.semver }}
+      semver: ${{ needs.vars.outputs.tag }}
 
   promote:
     name: Promote Images
