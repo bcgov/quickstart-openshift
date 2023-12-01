@@ -39,8 +39,8 @@ jobs:
       # Create and push semver tag
       - name: Create Tags
         run: |
-          echo git tag ${{ steps.changelog.outputs.tag }}
-          echo git push origin --tag
+          git tag ${{ steps.changelog.outputs.tag }}
+          git push origin --tag
 
       # Get last merged (or current) PR number
       - name: Get PR Number
