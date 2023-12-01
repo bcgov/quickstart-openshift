@@ -39,7 +39,7 @@ dependencies:
 
   - name: postgresql
     condition: bitnami-pg.enabled
-    version: 13.2.21
+    version: 13.2.23
     repository: https://charts.bitnami.com/bitnami
     alias: bitnami-pg
 
