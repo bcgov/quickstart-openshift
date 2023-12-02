@@ -89,6 +89,8 @@ backend:
             value: "true"
           - name: FLYWAY_DEFAULT_SCHEMA
             value: "USERS"
+          - name: FLYWAY_CONNECT_RETRIES
+            value: "30"
       resources:
         limits:
           cpu: 500m
