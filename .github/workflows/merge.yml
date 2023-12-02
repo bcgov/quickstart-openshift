@@ -24,53 +24,6 @@ jobs:
     timeout-minutes: 1
     steps:
       # Get last merged (or current) PR number
-      - uses: actions/checkout@v4
-      - name: Get PR Number
-        id: pr-number
-        run: |
-          # Accept a provided PR number or use the API
-          if [ ! -z "${{ inputs.pr_no }}" ]; then
-            PR_NO="${{ inputs.pr_no }}"
-          else
-            HEAD=$(git log main --oneline | head -n1 | awk '{print $1}')
-            PR_NO=$(\
-              curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ github.token }}" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                https://api.github.com/repos/bcgov/quickstart-openshift/commits/${HEAD}/pulls \
-                  | jq .[0].number
-            )
-          fi
-          echo -e "Last merged PR: ${PR_NO}"
-
-          # Validate PR number and send to GitHub Output
-          if ! [[ "${PR_NO}" =~ ^[0-9]+$ ]]; then
-            echo "No PR number not found"
-            exit 1
-          fi
-          echo "pr=${PR_NO}" >> $GITHUB_OUTPUT
-
-  # Add tag number and latest tags to PR image
-  retags:
-    name: Retag Images
-    needs: [vars]
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        package: [migrations, backend, frontend]
-    timeout-minutes: 1
-    steps:
-      - uses: shrink/actions-docker-registry-tag@v3
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.vars.outputs.pr }}
-          tags: |
-            latest
-            ${{ needs.vars.outputs.tag }}
-
-      # Get last merged (or current) PR number
       - name: Get PR Number
         id: tag
         run: |

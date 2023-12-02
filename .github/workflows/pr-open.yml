@@ -114,7 +114,7 @@ jobs:
       environment: ${{ needs.vars.outputs.env }}
       tag: ${{ needs.vars.outputs.tag }}
       release: ${{ needs.vars.outputs.tag }}
-      # triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
 
   integration-e2e:
     name: Integration and E2E Tests
