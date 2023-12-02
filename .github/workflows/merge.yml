@@ -43,7 +43,7 @@ jobs:
           echo -e "Last merged PR: ${PR_NO}"
 
           # Validate PR number and send to GitHub Output
-          if ! [[ "${PR_NO}" =~ ^[0-9]+$ ]]; then
+          if [[ "${PR_NO}" =~ ^[0-9]+$ ]]; then
             echo "No PR number not found"
             exit 1
           fi
