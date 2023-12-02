@@ -114,9 +114,10 @@ jobs:
             --set-string backend.containers[0].tag="${{ env.package_tag }}" \
             --set-string backend.initContainers[0].tag="${{ env.package_tag }}" \
             --set-string frontend.containers[0].tag="${{ env.package_tag }}" \
-            --install --wait --atomic  ${{ env.repo_release }} ./${{ github.event.repository.name }}-$VERSION.tgz \
+            --install --wait --atomic  ${{ env.repo_release }} \
             --timeout ${{ inputs.timeout-minutes }}m \
-            --values ${{ inputs.values }}
+            --values ${{ inputs.values }} \
+            ./${{ github.event.repository.name }}-${{ inputs.tag }}.tgz
 
           # print history 
           helm history ${{ env.repo_release }}
