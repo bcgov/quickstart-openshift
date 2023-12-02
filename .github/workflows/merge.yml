@@ -90,7 +90,7 @@ jobs:
 
           # Validate PR number and send to output
           if [ ! "${PR_NO}" =~ ^[0-9]+$ ]; then
-            echo "No PR number not found"
+            echo "PR number not found"
             exit 1
           fi
           echo "tag=${PR_NO}" >> $GITHUB_OUTPUT
