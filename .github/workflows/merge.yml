@@ -24,6 +24,7 @@ jobs:
     timeout-minutes: 1
     steps:
       # Get last merged (or current) PR number
+      - uses: actions/checkout@v4
       - name: Get PR Number
         id: tag
         run: |
