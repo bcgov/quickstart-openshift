@@ -2,10 +2,13 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ .Release.Name }}-openshift-ingress
+  name: {{ .Release.Name }}-openshift-ingress-to-frontend
   labels: {{- include "selectorLabels" . | nindent 4 }}
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: frontend
+      app.kubernetes.io/instance: {{ .Release.Name }}
   ingress:
     - from:
         - namespaceSelector:
