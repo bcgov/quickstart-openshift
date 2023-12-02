@@ -89,7 +89,7 @@ jobs:
           echo -e "Last PR: ${PR_NO}"
 
           # Validate PR number and send to output
-          if [ "${PR_NO}" =~ ^[0-9]+$ ]; then
+          if [ ! "${PR_NO}" =~ ^[0-9]+$ ]; then
             echo "No PR number not found"
             exit 1
           fi
