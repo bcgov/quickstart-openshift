@@ -45,11 +45,6 @@ on:
         default: 'values.yaml'
         required: false
         type: string
-      semver:
-        description: 'The Semantic version that is being released. Mainly used for TEST and PROD'
-        default: ''
-        required: false
-        type: string
 
 env:
   repo_release: ${{ github.event.repository.name }}-${{ inputs.release }}
@@ -97,13 +92,6 @@ jobs:
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
-          # Check Semver or default to 0.0.1
-          if [ -z "${{ inputs.semver }}" ]; then
-            VERSION=0.0.1
-          else
-            VERSION=${{ inputs.semver }}
-          fi
-
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
 
@@ -117,7 +105,7 @@ jobs:
 
           # Deploy Helm Chart
           helm dependency update
-          helm package --app-version="${{ env.package_tag }}" --version=$VERSION .
+          helm package --app-version="${{ env.package_tag }}" --version=${{ inputs.tag }} .
           
           helm upgrade \
             --set global.autoscaling=${{ inputs.autoscaling }} \

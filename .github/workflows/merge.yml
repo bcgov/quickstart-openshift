@@ -59,7 +59,6 @@ jobs:
       environment: prod
       tag: ${{ needs.vars.outputs.tag }}
       release: prod
-      semver: ${{ needs.vars.outputs.tag }}
 
   promote:
     name: Promote Images
