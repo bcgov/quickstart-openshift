@@ -52,34 +52,22 @@ jobs:
   vars:
     name: Build and Deploy Vars
     outputs:
-      asg: ${{ steps.deploys.outputs.asg }}
-      env: ${{ steps.deploys.outputs.env }}
       tag: ${{ steps.deploys.outputs.tag }}
     runs-on: ubuntu-22.04
     steps:
       - name: Set Variables
         id: deploys
         run: |
+          # Get PR number (different process for merge queue)
           if [ ${{ github.event_name }} == 'pull_request' ]
           then
-            # Pull request event
-            asg=false
-            env=""
             tag=${{ github.event.number }}
           else
-            # Merge group event
-            asg=true
-            env=test
             tag=$(echo ${{ github.event.merge_group.head_ref }} | grep -Eo "queue/main/pr-[0-9]+" | cut -d '-' -f2)
           fi
 
           echo "Summary ---"
-          echo -e "\tAutoscaling: ${asg}"
-          echo -e "\tEnvironment: ${env}"
           echo -e "\tTag (PR no): ${tag}"
-
-          echo "asg=${asg}" >> $GITHUB_OUTPUT
-          echo "env=${env}" >> $GITHUB_OUTPUT
           echo "tag=${tag}" >> $GITHUB_OUTPUT
 
   # https://github.com/bcgov-nr/action-builder-ghcr
@@ -109,9 +97,7 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      autoscaling: ${{ needs.vars.outputs.asg }}
       directory: charts/quickstart-openshift
-      environment: ${{ needs.vars.outputs.env }}
       tag: ${{ needs.vars.outputs.tag }}
       release: ${{ needs.vars.outputs.tag }}
-      # triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
