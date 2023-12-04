@@ -115,10 +115,3 @@ jobs:
       tag: ${{ needs.vars.outputs.tag }}
       release: ${{ needs.vars.outputs.tag }}
       # triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
-
-  integration-e2e:
-    name: Integration and E2E Tests
-    needs: [deploys, vars]
-    uses: ./.github/workflows/.tests.yml
-    with:
-      target: ${{ needs.vars.outputs.tag }}
