@@ -76,6 +76,7 @@ jobs:
       environment: prod
       tag: ${{ needs.vars.outputs.tag }}
       release: prod
+      extra_params: --set backend.deploymentStrategy.type=RollingUpdate --set frontend.deploymentStrategy.type=RollingUpdate --set bitnami-pg.primary.updateStrategy=RollingUpdate
 
   promote:
     name: Promote Images
