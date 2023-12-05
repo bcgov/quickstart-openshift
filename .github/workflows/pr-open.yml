@@ -12,7 +12,6 @@ concurrency:
 jobs:
   # Enforce conventional commits in PR titles
   conventional-commits:
-    if: github.event_name == 'pull_request'
     name: Conventional Commits
     runs-on: ubuntu-22.04
     steps:
