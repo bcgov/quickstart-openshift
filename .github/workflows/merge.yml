@@ -5,8 +5,9 @@ on:
     branches: [main]
     paths-ignore:
       - '*.md'
-      - '.graphics/**'
       - '.github/**'
+      - '.graphics/**'
+      - '!.github/workflows/.deploy.yml'
       - '!.github/workflows/merge.yml'
   workflow_dispatch:
     inputs:
@@ -55,10 +56,9 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      directory: charts/quickstart-openshift
       environment: test
       tag: ${{ needs.vars.outputs.tag }}
-      release: ${{ needs.vars.output.tag }}
+      release: test
 
   integration-e2e:
     name: Integration and E2E Tests
@@ -73,7 +73,6 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      directory: charts/quickstart-openshift
       environment: prod
       tag: ${{ needs.vars.outputs.tag }}
       release: prod

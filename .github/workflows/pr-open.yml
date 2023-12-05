@@ -97,6 +97,7 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
+      autoscaling: false
       directory: charts/quickstart-openshift
       tag: ${{ needs.vars.outputs.tag }}
       release: ${{ needs.vars.outputs.tag }}
