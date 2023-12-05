@@ -49,9 +49,27 @@ jobs:
           fi
           echo "tag=${PR_NO}" >> $GITHUB_OUTPUT
 
+  deploy-test:
+    name: Deploy (test)
+    needs: [vars]
+    uses: ./.github/workflows/.deploy.yml
+    secrets: inherit
+    with:
+      directory: charts/quickstart-openshift
+      environment: test
+      tag: ${{ needs.vars.outputs.tag }}
+      release: ${{ needs.vars.output.tag }}
+
+  integration-e2e:
+    name: Integration and E2E Tests
+    needs: [deploy-test, vars]
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: test
+
   deploy-prod:
     name: Deploy (prod)
-    needs: [vars]
+    needs: [integration-e2e]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
