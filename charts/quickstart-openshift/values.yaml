@@ -386,7 +386,8 @@ bitnami-pg:
       storage:
         size: 200Mi
   primary:
-    updateStrategy: Recreate
+    updateStrategy:
+      type: Recreate
     persistence:
       enabled: true
       storageClass: netapp-file-standard
