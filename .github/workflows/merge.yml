@@ -69,7 +69,7 @@ jobs:
 
   deploy-prod:
     name: Deploy (prod)
-    needs: [integration-e2e]
+    needs: [integration-e2e, vars]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
