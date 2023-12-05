@@ -22,6 +22,8 @@ backend:
   enabled: true
   deployment: # can be either a statefulSet or a deployment not both
     enabled: true
+  deploymentStrategy:
+    type: Recreate
   containers:
     - name: backend
       registry: '{{ .Values.global.registry }}'
@@ -158,6 +160,8 @@ frontend:
   enabled: true
   deployment: # can be either a statefulSet or a deployment not both
     enabled: true
+  deploymentStrategy:
+    type: Recreate
   configmap:
     enabled: true
     data: # below is just for example.

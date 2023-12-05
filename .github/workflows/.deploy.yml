@@ -45,6 +45,11 @@ on:
         default: 'values.yaml'
         required: false
         type: string
+      params:
+        description: 'Extra parameters to pass to helm upgrade'
+        default: ''
+        required: false
+        type: string
 
 env:
   repo_release: ${{ github.event.repository.name }}-${{ inputs.release }}
@@ -114,6 +119,7 @@ jobs:
             --set-string backend.containers[0].tag="${{ env.package_tag }}" \
             --set-string backend.initContainers[0].tag="${{ env.package_tag }}" \
             --set-string frontend.containers[0].tag="${{ env.package_tag }}" \
+            ${{ inputs.params }} \
             --install --wait --atomic  ${{ env.repo_release }} \
             --timeout ${{ inputs.timeout-minutes }}m \
             --values ${{ inputs.values }} \
