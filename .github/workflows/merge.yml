@@ -20,35 +20,14 @@ jobs:
   vars:
     name: Set Variables
     outputs:
-      tag: ${{ steps.tag.outputs.tag }}
+      tag: ${{ steps.pr.outputs.pr }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
-      # Get last merged (or current) PR number
-      - uses: actions/checkout@v4
-      - name: Get PR Number
-        id: tag
-        run: |
-          # Accept a provided PR as input or use the API
-          if [ ! -z "${{ inputs.pr_no }}" ]; then
-            PR_NO="${{ inputs.pr_no }}"
-          else
-            HEAD=$(git log main --oneline | head -n1 | awk '{print $1}')
-            PR_NO=$(\
-              curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ github.token }}" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                https://api.github.com/repos/${{ github.repository }}/commits/${HEAD}/pulls \
-                  | jq .[0].number
-            )
-          fi
-          echo -e "Last PR: ${PR_NO}"
-
-          # Validate PR number and send to output
-          if [ ! "${PR_NO}" =~ ^[0-9]+$ ]; then
-            echo "PR number not found"
-            exit 1
-          fi
-          echo "tag=${PR_NO}" >> $GITHUB_OUTPUT
+      # Get PR number for squash merges to main
+      - name: PR Number
+        id: pr
+        uses: bcgov-nr/action-get-pr@main
 
   deploy-test:
     name: Deploy (test)
@@ -58,7 +37,7 @@ jobs:
     with:
       autoscaling: false
       environment: test
-      tag: ${{ needs.vars.outputs.tag }}
+      tag: ${{ needs.vars.outputs.pr }}
       release: test
 
   integration-e2e:
@@ -75,7 +54,7 @@ jobs:
     secrets: inherit
     with:
       environment: prod
-      tag: ${{ needs.vars.outputs.tag }}
+      tag: ${{ needs.vars.outputs.pr }}
       release: prod
       params: --set backend.deploymentStrategy.type=RollingUpdate --set frontend.deploymentStrategy.type=RollingUpdate
 
@@ -94,5 +73,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.vars.outputs.tag }}
+          target: ${{ needs.vars.outputs.pr }}
           tags: prod
