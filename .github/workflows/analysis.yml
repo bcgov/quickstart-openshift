@@ -15,9 +15,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  scans:
-    name: Security Scans
-    if: ${{ ! github.event.pull_request.draft}}
+  codeql:
+    name: CodeQL
+    if: ${{ ! github.event.pull_request.draft }}
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     steps:
@@ -31,7 +31,14 @@ jobs:
         with:
           category: "/language:javascript"
 
-      # https://github.com/marketplace/actions/aqua-security-trivy
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy:
+    name: Trivy Security Scan
+    if: ${{ ! github.event.pull_request.draft }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
+      - uses: actions/checkout@v4
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@0.14.0
         with:
@@ -47,18 +54,9 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
-  scan-results:
-    name: Security Scan Results
-    needs: [scans]
-    if: always() &&(! failure())
-    runs-on: ubuntu-22.04
-    timeout-minutes: 1
-    steps:
-      - run: echo "Success!"
-
   tests:
     name: Tests
-    if: ${{ ! github.event.pull_request.draft}}
+    if: ${{ ! github.event.pull_request.draft }}
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     services:
@@ -98,3 +96,12 @@ jobs:
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_token: ${{ secrets[matrix.token] }}
           triggers: ('${{ matrix.dir }}/')
+
+  results:
+    name: Validate Results
+    needs: [codeql, trivy, tests]
+    if: always() &&(! failure())
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
+      - run: echo "Success!"
