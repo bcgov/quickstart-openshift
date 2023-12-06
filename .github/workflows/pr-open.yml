@@ -57,7 +57,7 @@ jobs:
       # Get PR number for merge queues, otherwise use github.event.nuber
       - name: PR Number
         id: pr
-        uses: bcgov-nr/action-pr-number@main
+        uses: bcgov-nr/action-get-pr@main
 
   # https://github.com/bcgov-nr/action-builder-ghcr
   builds:
