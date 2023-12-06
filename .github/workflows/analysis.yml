@@ -17,7 +17,7 @@ concurrency:
 jobs:
   scans:
     name: Security Scans
-    if: ! github.event.pull_request.draft
+    if: ${{ ! github.event.pull_request.draft}}
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     steps:
@@ -58,7 +58,7 @@ jobs:
 
   tests:
     name: Tests
-    if: ! github.event.pull_request.draft
+    if: ${{ ! github.event.pull_request.draft}}
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     services:
