@@ -84,7 +84,7 @@ jobs:
         with:
           commands: |
             npm ci
-            npm run test:cov
+            npm run test:cov-bdsafdsafsd
           dir: ${{ matrix.dir }}
           node_version: "20"
           sonar_args: >
@@ -98,7 +98,7 @@ jobs:
           triggers: ('${{ matrix.dir }}/')
 
   results:
-    name: Validate Results
+    name: Results
     needs: [codeql, trivy, tests]
     if: always() &&(! failure())
     runs-on: ubuntu-22.04
