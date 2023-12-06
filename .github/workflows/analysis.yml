@@ -17,7 +17,7 @@ concurrency:
 jobs:
   codeql:
     name: CodeQL
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    if: ${{ ! github.event.pull_request.draft }}
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     steps:
@@ -34,7 +34,7 @@ jobs:
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
     name: Trivy Security Scan
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    if: ${{ ! github.event.pull_request.draft }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -56,7 +56,7 @@ jobs:
 
   tests:
     name: Tests
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    if: ${{ ! github.event.pull_request.draft }}
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     services:
@@ -76,13 +76,9 @@ jobs:
         dir: [backend, frontend]
         include:
           - dir: backend
-            sonar_projectKey: quickstart-openshift_backend
             token: SONAR_TOKEN_BACKEND
-            triggers: ('backend/')
           - dir: frontend
-            sonar_projectKey: quickstart-openshift_frontend
             token: SONAR_TOKEN_FRONTEND
-            triggers: ('frontend/')
     steps:
       - uses: bcgov-nr/action-test-and-analyse@v1.1.0
         with:
@@ -94,9 +90,17 @@ jobs:
           sonar_args: >
             -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
             -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
+            -Dsonar.projectKey=quickstart-openshift_${{ matrix.dir }}
             -Dsonar.sources=src
             -Dsonar.tests.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_token: ${{ secrets[matrix.token] }}
-          triggers: ${{ matrix.triggers }}
+          triggers: ('${{ matrix.dir }}/')
+
+  results:
+    name: Results
+    needs: [codeql, trivy, tests]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
+      - run: echo "Success!"
