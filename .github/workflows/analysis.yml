@@ -100,12 +100,8 @@ jobs:
   results:
     name: Results
     needs: [codeql, trivy, tests]
-    if: always()
+    if: always() &&(! failure())
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
-      - if: (! failure())
-        run: echo "Success!"
-      
-      - if: failure()
-        run: echo "Failure!"
+      - run: echo "Success!"
