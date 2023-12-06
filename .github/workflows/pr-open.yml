@@ -51,23 +51,13 @@ jobs:
   vars:
     name: Build and Deploy Vars
     outputs:
-      tag: ${{ steps.deploys.outputs.tag }}
+      pr: ${{ steps.pr.outputs.pr }}
     runs-on: ubuntu-22.04
     steps:
-      - name: Set Variables
-        id: deploys
-        run: |
-          # Get PR number (different process for merge queue)
-          if [ ${{ github.event_name }} == 'pull_request' ]
-          then
-            tag=${{ github.event.number }}
-          else
-            tag=$(echo ${{ github.event.merge_group.head_ref }} | grep -Eo "queue/main/pr-[0-9]+" | cut -d '-' -f2)
-          fi
-
-          echo "Summary ---"
-          echo -e "\tTag (PR no): ${tag}"
-          echo "tag=${tag}" >> $GITHUB_OUTPUT
+      # Get PR number for merge queues, otherwise use github.event.nuber
+      - name: PR Number
+        id: pr
+        uses: bcgov-nr/action-pr-number@main
 
   # https://github.com/bcgov-nr/action-builder-ghcr
   builds:
@@ -85,7 +75,7 @@ jobs:
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
-          tag: ${{ needs.vars.outputs.tag }}
+          tag: ${{ needs.vars.outputs.pr }}
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
@@ -98,6 +88,6 @@ jobs:
     with:
       autoscaling: false
       directory: charts/quickstart-openshift
-      tag: ${{ needs.vars.outputs.tag }}
-      release: ${{ needs.vars.outputs.tag }}
+      tag: ${{ needs.vars.outputs.pr }}
+      release: ${{ needs.vars.outputs.pr }}
       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
