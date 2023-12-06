@@ -15,8 +15,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  codeql:
-    name: CodeQL
+  scans:
+    name: Security Scans
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     timeout-minutes: 5
@@ -31,14 +31,7 @@ jobs:
         with:
           category: "/language:javascript"
 
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy:
-    name: Trivy Security Scan
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    runs-on: ubuntu-22.04
-    timeout-minutes: 1
-    steps:
-      - uses: actions/checkout@v4
+      # https://github.com/marketplace/actions/aqua-security-trivy
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@0.14.0
         with:
@@ -53,6 +46,15 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: "trivy-results.sarif"
+
+  scan-results:
+    name: Security Scans
+    needs: [scans]
+    if: always() &&(! failure())
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
+      - run: echo "Success!"
 
   tests:
     name: Tests
@@ -76,13 +78,9 @@ jobs:
         dir: [backend, frontend]
         include:
           - dir: backend
-            sonar_projectKey: quickstart-openshift_backend
             token: SONAR_TOKEN_BACKEND
-            triggers: ('backend/')
           - dir: frontend
-            sonar_projectKey: quickstart-openshift_frontend
             token: SONAR_TOKEN_FRONTEND
-            triggers: ('frontend/')
     steps:
       - uses: bcgov-nr/action-test-and-analyse@v1.1.0
         with:
@@ -94,9 +92,9 @@ jobs:
           sonar_args: >
             -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
             -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=${{ matrix.sonar_projectKey }}
+            -Dsonar.projectKey=quickstart-openshift_${{ matrix.dir }}
             -Dsonar.sources=src
             -Dsonar.tests.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_token: ${{ secrets[matrix.token] }}
-          triggers: ${{ matrix.triggers }}
+          triggers: ('${{ matrix.dir }}/')
