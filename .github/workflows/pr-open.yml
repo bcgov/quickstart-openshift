@@ -13,6 +13,7 @@ jobs:
   # Enforce conventional commits in PR titles
   conventional-commits:
     name: Conventional Commits
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-22.04
     steps:
       - uses: amannn/action-semantic-pull-request@v5.4.0
