@@ -1,10 +1,16 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+#-- global variables, can be accessed by sub-charts.
 global:
-  repository: ~ # the repository where the images are stored.
-  registry: ghcr.io # the registry where the images are stored. override during runtime for other registry at global level or individual level.
+  #-- the registry where the images are stored. override during runtime for other registry at global level or individual level.
+  repository:
+  #-- the registry where the images are stored. override during runtime for other registry at global level or individual level. default is ghcr.io
+  registry: ghcr.io
+  #-- the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
   tag: ~
+  #-- turn off autoscaling for the entire suite by setting this to false. default is true.
   autoscaling: true
+  #-- global secrets, can be accessed by sub-charts.
   secrets:
     enabled: true
     databasePassword: ~
@@ -12,25 +18,40 @@ global:
     databaseName: ~
     annotation:
       helm.sh/policy: "keep"
-  domain: "apps.silver.devops.gov.bc.ca" # it is required, apps.silver.devops.gov.bc.ca for silver cluster
+  #-- domain of the application, it is required, apps.silver.devops.gov.bc.ca for silver cluster and apps.devops.gov.bc.ca for gold cluster
+  domain: "apps.silver.devops.gov.bc.ca"
+  #-- the image registry of OpenShift. It is used in conjunction with ImageStreams which is a OpenShift specific resource.
   openshiftImageRegistry: "image-registry.openshift-image-registry.svc:5000"
+  #-- the database Alias gives a nice way to switch to different databases, crunchy, patroni ... etc.
   databaseAlias: bitnami-pg # this is the alias for bitnami postgres, change it based on db type(crunchy,patroni...) and alias used in the chart.
+  #-- extra annotations for the pod, it is optional and is an object.
   podAnnotations: |
       app.kubernetes.io/timestamp: {{now | toString }}
-
+#-- the components of the application, backend.
 backend:
+  #-- enable or disable a component deployment.
   enabled: true
+  #-- can be either a statefulSet or a deployment not both. TBD (StatefulSet)
   deployment: # can be either a statefulSet or a deployment not both
     enabled: true
+  #-- the deployment strategy, can be "Recreate" or "RollingUpdate"
   deploymentStrategy:
     type: Recreate
+  #-- containers specific to the component. one or many containers can be defined.
   containers:
+    #-- name of the container.
     - name: backend
+      #-- the registry where the image is stored. override during runtime for other registry at global level or individual level.
       registry: '{{ .Values.global.registry }}'
-      repository: '{{ .Values.global.repository }}' # example, it includes registry and repository
-      image: backend # the exact component name, be it backend, api-1 etc...
-      tag: '{{ .Values.global.tag }}' # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      #-- the repository where the image is stored. override during runtime for other repository at global level or individual level.
+      repository: '{{ .Values.global.repository }}'
+      #-- the exact component name, in this case backend.
+      image: backend
+      #-- the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      tag: '{{ .Values.global.tag }}'
+      #-- environment variables for the container. it is optional and is an object.
       env:
+        #-- the environment variables from global secrets, the secret name is auto deciphered from the release name.
         fromGlobalSecret:
           - name: POSTGRES_PASSWORD
             key: password
@@ -38,13 +59,16 @@ backend:
             key: databaseUser
           - name: POSTGRES_DATABASE
             key: databaseName
+        #-- the environment variables from values, these are interpolated during runtime and can contain tpl.
         fromValues:
           - name: POSTGRES_HOST
             value: '{{ .Release.Name }}-{{.Values.global.databaseAlias}}'
+      #-- the ports for the container. it is optional and is an array of objects.
       ports:
         - name: http
           containerPort: 3000
           protocol: TCP
+      #-- the resources for the container. it is optional and is an object. for default values check this link:   https://github.com/bcgov/helm-service/blob/main/charts/component/templates/deployment.yaml#L298-L304
       resources: # this is optional
         limits:
           cpu: 250m
@@ -52,6 +76,7 @@ backend:
         requests:
           cpu: 100m
           memory: 150Mi
+      #-- the readiness probe for the container. it is optional and is an object. for default values check this link: https://github.com/bcgov/helm-service/blob/main/charts/component/templates/deployment.yaml#L312-L316
       readinessProbe:
         httpGet:
           path: /api
@@ -62,6 +87,7 @@ backend:
         timeoutSeconds: 2
         successThreshold: 1
         failureThreshold: 30
+      #-- the liveness probe for the container. it is optional and is an object. for default values check this link: https://github.com/bcgov/helm-service/blob/main/charts/component/templates/deployment.yaml#L324-L328
       livenessProbe:
         successThreshold: 1
         failureThreshold: 3
@@ -72,13 +98,21 @@ backend:
         initialDelaySeconds: 15
         periodSeconds: 30
         timeoutSeconds: 5
+  #-- init containers specific to the component. one or many containers can be defined.
   initContainers:
+    #-- name of the container.
     - name: database-migrations
+      #-- the registry where the image is stored. override during runtime for other registry at global level or individual level.
       registry: '{{ .Values.global.registry }}'
+      #-- the repository where the image is stored. override during runtime for other repository at global level or individual level.
       repository: '{{ .Values.global.repository }}' # example, it includes registry and repository
+      #-- the exact image name, in this case migrations
       image: migrations
+      #-- the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
       tag: '{{ .Values.global.tag }}'
+      #-- the security context for the container. it is optional and is an object.
       env:
+        #-- the environment variables from global secrets, the secret name is auto deciphered from the release name.
         fromGlobalSecret:
           - name: FLYWAY_PASSWORD
             key: databasePassword
@@ -86,6 +120,7 @@ backend:
             key: databaseJDBCURLNoCreds
           - name: FLYWAY_USER
             key: databaseUser
+        #-- the environment variables from values, these are interpolated during runtime and can contain tpl.
         fromValues:
           - name: FLYWAY_BASELINE_ON_MIGRATE
             value: "true"
@@ -93,6 +128,7 @@ backend:
             value: "USERS"
           - name: FLYWAY_CONNECT_RETRIES
             value: "30"
+      #-- the resources for the container. it is optional and is an object. for default values check this link:
       resources:
         limits:
           cpu: 500m
@@ -100,11 +136,17 @@ backend:
         requests:
           cpu: 200m
           memory: 150Mi
+  #-- autoscaling for the component. it is optional and is an object.
   autoscaling:
+    #-- enable or disable autoscaling.
     enabled: true
+    #-- the minimum number of replicas.
     minReplicas: 3
+    #-- the maximum number of replicas.
     maxReplicas: 7
-    targetCPUUtilizationPercentage: 80 # this percentage from request cpu
+    #-- the target cpu utilization percentage, is from request cpu and NOT LIMIT CPU.
+    targetCPUUtilizationPercentage: 80
+    #-- the behavior for the autoscaling. it is optional and is an object.
     behavior:
       scaleDown:
         stabilizationWindowSeconds: 300
@@ -126,17 +168,21 @@ backend:
             value: 2
             periodSeconds: 30
         selectPolicy: Max
+  #-- vault, for injecting secrets from vault. it is optional and is an object. it creates an initContainer which reads from vault and app container can source those secrets. for referring to a working example with vault follow this link: https://github.com/bcgov/onroutebc/blob/main/charts/onroutebc/values.yaml#L171-L186
   vault:
+    #-- enable or disable vault.
     enabled: false
-    entrypoint: ~ # the entrypoint for vault, this is the override of container command.
-    role: ~ #licenseplate-prod or licenseplate-nonprod
-    secretPaths: # the paths where secrets live. dev/api-1, dev/api-2, test/api-1 etc...
+    #-- the role of the vault. it is required, #licenseplate-prod or licenseplate-nonprod, license plate is the namespace without env
+    role: ~
+    #-- the vault path where the secrets live. it is required, dev/api-1, dev/api-2, test/api-1 etc...
+    secretPaths:
       - dev/api-1
       - dev/api-2
       - test/api-1
       - test/api-2
       - prod/api-1
       - prod/api-2
+    #-- resources specific to vault initContainer. it is optional and is an object.
     resources:
       limits:
         cpu: 50m
@@ -144,59 +190,85 @@ backend:
       requests:
         cpu: 50m
         memory: 25Mi
+  #-- the service for the component. for inter namespace communication, use the service name as the hostname.
   service:
+    #-- enable or disable the service.
     enabled: true
+    #-- the type of the service. it can be ClusterIP, NodePort, LoadBalancer, ExternalName. ClusterIP is the default and is recommended.
     type: ClusterIP
+    #-- the ports for the service.
     ports:
+      #-- the name for the port.
       - name: http
+        #-- the port for the service. the service will be accessible on this port within the namespace.
         port: 80
-        targetPort: 3000 # the container port where the application is listening on
+        #-- the container port where the application is listening on.
+        targetPort: 3000
         protocol: TCP
   nodeSelector: { }
   tolerations: [ ]
   affinity: { }
 
 frontend:
+  # -- enable or disable a component deployment.
   enabled: true
+  # -- can be either a statefulSet or a deployment not both. TBD (StatefulSet)
   deployment: # can be either a statefulSet or a deployment not both
     enabled: true
+  # -- the deployment strategy, can be "Recreate" or "RollingUpdate"
   deploymentStrategy:
     type: Recreate
+  # -- the configmap specific to the component.
   configmap:
+    # -- enable or disable the configmap.
     enabled: true
-    data: # below is just for example.
+    # -- dat contains key value pairs for the configmap. can contain multiple files. value can be piped as string.
+    data:
+      #-- sample to create a config.js object.
       config.js: |-
         const envConfig = (() => {
           return {
             "VITE_DEPLOY_ENVIRONMENT":"{{ .Release.Name }}-{{ .Release.Namespace }}"
           };
         })();
+      #-- sample to create a config.prod.js object.
       config.prod.js: |-
         const envConfig = (() => {
           return {
             "VITE_DEPLOY_ENVIRONMENT":"static"
           };
         })();
+  # -- the containers specific to the component. one or many containers can be defined.
   containers:
+    #-- name of the container.
     - name: frontend
+      #-- the registry where the image is stored. override during runtime for other registry at global level or individual level.
       registry: '{{ .Values.global.registry }}'
+      #-- the repository where the image is stored. override during runtime for other repository at global level or individual level.
       repository: '{{ .Values.global.repository }}' # example, it includes registry and repository
-      image: frontend # the exact component name, be it backend, api-1 etc...
-      tag: '{{ .Values.global.tag }}' # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      #-- the exact component name, in this case frontend.
+      image: frontend
+      #-- the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
+      tag: '{{ .Values.global.tag }}'
+      #-- the security context for the container. it is optional and is an object.
       securityContext:
         capabilities:
           add: [ "NET_BIND_SERVICE" ]
+      #-- the environment variables for the container. it is optional and is an object.
       env:
+        #-- the environment variables from values, these are interpolated during runtime and can contain tpl.
         fromValues:
           - name: BACKEND_URL
             value: "http://{{ .Release.Name }}-backend"
           - name: LOG_LEVEL
             value: "info"
-        fromLocalConfigmap: # just for example purpose.
+        #-- the environment variables from local configmap(configmap associated to the component), these are interpolated during runtime and can contain tpl.
+        fromLocalConfigmap:
           - name: frontend-configmap
             key: config.js
           - name: frontend-prod-configmap
             key: config.prod.js
+      #-- the ports for the container. it is optional and is an array of objects.
       ports:
         - name: http
           containerPort: 3000
@@ -204,13 +276,15 @@ frontend:
         - name: http2
           containerPort: 3001
           protocol: TCP
-      resources: # this is optional
+      #-- the resources for the container. it is optional and is an object. for default values check this link: https://github.com/bcgov/helm-service/blob/main/charts/component/templates/deployment.yaml#L298-L304
+      resources:
         limits:
           cpu: 100m
           memory: 150Mi
         requests:
           cpu: 30m
           memory: 50Mi
+      #-- the readiness probe for the container. it is optional and is an object. for default values check this link: https://github.com/bcgov/helm-service/blob/main/charts/component/templates/deployment.yaml#L312-L316
       readinessProbe:
         httpGet:
           path: /health
@@ -221,6 +295,7 @@ frontend:
         timeoutSeconds: 2
         successThreshold: 1
         failureThreshold: 30
+      #-- the liveness probe for the container. it is optional and is an object. for default values check this link: https://github.com/bcgov/helm-service/blob/main/charts/component/templates/deployment.yaml#L324-L328
       livenessProbe:
         successThreshold: 1
         failureThreshold: 3
@@ -231,11 +306,17 @@ frontend:
         initialDelaySeconds: 15
         periodSeconds: 30
         timeoutSeconds: 5
+  #-- autoscaling for the component. it is optional and is an object.
   autoscaling:
+    #-- enable or disable autoscaling.
     enabled: true
+    #-- the minimum number of replicas.
     minReplicas: 3
+    #-- the maximum number of replicas.
     maxReplicas: 7
-    targetCPUUtilizationPercentage: 80 # this percentage from request cpu
+    #-- the target cpu utilization percentage, is from request cpu and NOT LIMIT CPU.
+    targetCPUUtilizationPercentage: 80
+    #-- the behavior for the autoscaling. it is optional and is an object.
     behavior:
       scaleDown:
         stabilizationWindowSeconds: 300
@@ -257,18 +338,29 @@ frontend:
             value: 2
             periodSeconds: 30
         selectPolicy: Max
+  #-- the service for the component. for inter namespace communication, use the service name as the hostname.
   service:
+    #-- enable or disable the service.
     enabled: true
+    #-- the type of the service. it can be ClusterIP, NodePort, LoadBalancer, ExternalName. ClusterIP is the default and is recommended.
     type: ClusterIP
+    #-- the ports for the service.
     ports:
       - name: http
+        #-- the port for the service. the service will be accessible on this port within the namespace.
         port: 80
-        targetPort: 3000 # the container port where the application is listening on
+        #-- the container port where the application is listening on
+        targetPort: 3000
+        #-- the protocol for the port. it can be TCP or UDP. TCP is the default and is recommended.
         protocol: TCP
+  #-- the route for the component. it is optional and is an object. To make the application accessible from internet, use the route.
   route:
+    #-- enable or disable the route.
     enabled: true
+    #-- the hostname for the route. this will be the URL for the application, you can access by https://{{ .Release.Name }}-frontend.{{ .Values.global.domain }}
     host: "{{ .Release.Name }}-frontend.{{ .Values.global.domain }}"
-    targetPort: http # look at line#164 refer to the name.
+    #-- the target port of the service. this is the port where the service is listening on. The name is mapped to the port name in the service.
+    targetPort: http
 
 crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
   enabled: false

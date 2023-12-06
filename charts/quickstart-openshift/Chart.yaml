@@ -48,3 +48,8 @@ dependencies:
     version: 0.2.3
     repository: https://bcgov.github.io/helm-service
     alias: backup
+maintainers:
+  - name: Om Mishra
+    email: omprakash.2.mishra@gov.bc.ca
+  - name: Derek Roberts
+    email: derek.roberts@gov.bc.ca
