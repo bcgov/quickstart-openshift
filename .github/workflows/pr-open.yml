@@ -4,10 +4,10 @@ on:
   pull_request:
   merge_group:
 
-# concurrency:
-#   # PR open and close use the same group, allowing only one at a time
-#   group: ${{ github.workflow }}-${{ github.event.number }}
-#   cancel-in-progress: ${{ github.event.number != '' && 'true' || 'false' }}
+concurrency:
+  # PR open and close use the same group, allowing only one at a time
+  group: ${{ github.workflow }}-${{ github.event.number }}
+  cancel-in-progress: ${{ !github.event.number && 'false' || 'true' }}
 
 jobs:
   conditionals:
