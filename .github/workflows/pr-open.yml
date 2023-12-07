@@ -15,8 +15,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - run: |
-          echo ${{ github.event.number && true || false }}
-          echo ${{ github.event.number && 'true' || 'false' }}
+          echo "one: ${{ github.event.number && true || false }}"
+          echo "two: ${{ github.event.number && 'true' || 'false' }}"
+          echo "three: ${{ !github.event.number && 'false' || 'true' }}"
 
 # jobs:
 #   # PR only, skip for merge_group
