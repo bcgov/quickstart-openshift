@@ -5,102 +5,91 @@ on:
   merge_group:
 
 concurrency:
-  # PR open and close use the same group, allowing only one at a time
+  # Cancel in progress for PR open and close, but not merge_group
   group: ${{ github.workflow }}-${{ github.event.number }}
   cancel-in-progress: ${{ !github.event.number && false || true }}
 
 jobs:
-  conditionals:
-    name: conditionals
+  # PR only, skip for merge_group
+  conventional-commits:
+    name: Conventional Commits
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-22.04
     steps:
-      - run: |
-          echo "one: ${{ github.event.number && true || false }}"
-          echo "two: ${{ github.event.number && 'true' || 'false' }}"
-          echo "three: ${{ !github.event.number && 'false' || 'true' }}"
-          echo "four: ${{ !github.event.number.sandwich && 'false' || 'true' }}"
+      - uses: amannn/action-semantic-pull-request@v5.4.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-# jobs:
-#   # PR only, skip for merge_group
-#   conventional-commits:
-#     name: Conventional Commits
-#     if: github.event_name == 'pull_request'
-#     runs-on: ubuntu-22.04
-#     steps:
-#       - uses: amannn/action-semantic-pull-request@v5.4.0
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # PR only, skip for merge_group
+  pr-description-add:
+    name: PR Description Add
+    if: github.event_name == 'pull_request'
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: ${{ github.event.repository.name }}
+    runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: write
+    timeout-minutes: 1
+    steps:
+      - uses: bcgov-nr/action-pr-description-add@v1.1.0
+        with:
+          add_markdown: |
+            ---
 
-#   # PR only, skip for merge_group
-#   pr-description-add:
-#     name: PR Description Add
-#     if: github.event_name == 'pull_request'
-#     env:
-#       DOMAIN: apps.silver.devops.gov.bc.ca
-#       PREFIX: ${{ github.event.repository.name }}
-#     runs-on: ubuntu-22.04
-#     permissions:
-#       pull-requests: write
-#     timeout-minutes: 1
-#     steps:
-#       - uses: bcgov-nr/action-pr-description-add@v1.1.0
-#         with:
-#           add_markdown: |
-#             ---
+            Thanks for the PR!
 
-#             Thanks for the PR!
+            Deployments, as required, will be available below:
+            - [Frontend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }})
+            - [Backend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/api)
 
-#             Deployments, as required, will be available below:
-#             - [Frontend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }})
-#             - [Backend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/api)
+            Please create PRs in draft mode.  Mark as ready to enable:
+            - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
 
-#             Please create PRs in draft mode.  Mark as ready to enable:
-#             - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
+            After merge, new images are deployed in:
+            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
 
-#             After merge, new images are deployed in:
-#             - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
+  # Find initial PR number (for merge queues)
+  vars:
+    name: Set Variables
+    outputs:
+      pr: ${{ steps.pr.outputs.pr }}
+    runs-on: ubuntu-22.04
+    steps:
+      # Get PR number for merge queues, otherwise use github.event.number
+      - name: PR Number
+        id: pr
+        uses: bcgov-nr/action-get-pr@v0.0.1
 
-#   # Find initial PR number (for merge queues)
-#   vars:
-#     name: Set Variables
-#     outputs:
-#       pr: ${{ steps.pr.outputs.pr }}
-#     runs-on: ubuntu-22.04
-#     steps:
-#       # Get PR number for merge queues, otherwise use github.event.number
-#       - name: PR Number
-#         id: pr
-#         uses: bcgov-nr/action-get-pr@v0.0.1
+  # https://github.com/bcgov-nr/action-builder-ghcr
+  builds:
+    name: Builds
+    needs: [vars]
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [migrations, backend, frontend]
+    timeout-minutes: 10
+    steps:
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.0
+        with:
+          keep_versions: 50
+          package: ${{ matrix.package }}
+          tag: ${{ needs.vars.outputs.pr }}
+          tag_fallback: latest
+          triggers: ('${{ matrix.package }}/')
 
-#   # https://github.com/bcgov-nr/action-builder-ghcr
-#   builds:
-#     name: Builds
-#     needs: [vars]
-#     runs-on: ubuntu-22.04
-#     permissions:
-#       packages: write
-#     strategy:
-#       matrix:
-#         package: [migrations, backend, frontend]
-#     timeout-minutes: 10
-#     steps:
-#       - uses: bcgov-nr/action-builder-ghcr@v2.0.0
-#         with:
-#           keep_versions: 50
-#           package: ${{ matrix.package }}
-#           tag: ${{ needs.vars.outputs.pr }}
-#           tag_fallback: latest
-#           triggers: ('${{ matrix.package }}/')
-
-#   # https://github.com/bcgov-nr/action-deployer-openshift
-#   deploys:
-#     name: Deploys
-#     needs: [builds, vars]
-#     uses: ./.github/workflows/.deploy.yml
-#     secrets: inherit
-#     with:
-#       autoscaling: false
-#       directory: charts/quickstart-openshift
-#       tag: ${{ needs.vars.outputs.pr }}
-#       release: ${{ needs.vars.outputs.pr }}
-#       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+  # https://github.com/bcgov-nr/action-deployer-openshift
+  deploys:
+    name: Deploys
+    needs: [builds, vars]
+    uses: ./.github/workflows/.deploy.yml
+    secrets: inherit
+    with:
+      autoscaling: false
+      directory: charts/quickstart-openshift
+      tag: ${{ needs.vars.outputs.pr }}
+      release: ${{ needs.vars.outputs.pr }}
+      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
