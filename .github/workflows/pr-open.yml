@@ -18,6 +18,7 @@ jobs:
           echo "one: ${{ github.event.number && true || false }}"
           echo "two: ${{ github.event.number && 'true' || 'false' }}"
           echo "three: ${{ !github.event.number && 'false' || 'true' }}"
+          echo "four: ${{ !github.event.number.sandwich && 'false' || 'true' }}"
 
 # jobs:
 #   # PR only, skip for merge_group
