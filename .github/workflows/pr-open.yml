@@ -5,9 +5,9 @@ on:
   merge_group:
 
 concurrency:
-  # PR open and close use the same group, allowing only one at a time
+  # Cancel in progress for PR open and close, but not merge_group
   group: ${{ github.workflow }}-${{ github.event.number }}
-  cancel-in-progress: ${{ github.event.number && true || false }}
+  cancel-in-progress: ${{ !github.event.number && false || true }}
 
 jobs:
   # PR only, skip for merge_group
