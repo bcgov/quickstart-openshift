@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: ${{ github.event.number && true }}
 
 jobs:
-  # Enforce conventional commits in PR titles
+  # PR only, skip for merge_group
   conventional-commits:
     name: Conventional Commits
     if: github.event_name == 'pull_request'
@@ -20,6 +20,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # PR only, skip for merge_group
   pr-description-add:
     name: PR Description Add
     if: github.event_name == 'pull_request'
@@ -55,7 +56,7 @@ jobs:
       pr: ${{ steps.pr.outputs.pr }}
     runs-on: ubuntu-22.04
     steps:
-      # Get PR number for merge queues, otherwise use github.event.nuber
+      # Get PR number for merge queues, otherwise use github.event.number
       - name: PR Number
         id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
