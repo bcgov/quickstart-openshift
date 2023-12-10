@@ -5,12 +5,12 @@ on:
   merge_group:
 
 concurrency:
-  # PR open and close use the same group, allowing only one at a time
-  group: ${{ github.workflow }}-${{ github.event.number }}
+  # Cancel in progress for PR open and close, but not merge_group
+  group: ${{ github.workflow }}-${{ github.event.number || github.event.merge_group.base_sha }}
   cancel-in-progress: true
 
 jobs:
-  # Enforce conventional commits in PR titles
+  # PR only, skip for merge_group
   conventional-commits:
     name: Conventional Commits
     if: github.event_name == 'pull_request'
@@ -20,6 +20,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # PR only, skip for merge_group
   pr-description-add:
     name: PR Description Add
     if: github.event_name == 'pull_request'
@@ -55,7 +56,7 @@ jobs:
       pr: ${{ steps.pr.outputs.pr }}
     runs-on: ubuntu-22.04
     steps:
-      # Get PR number for merge queues, otherwise use github.event.nuber
+      # Get PR number for merge queues, otherwise use github.event.number
       - name: PR Number
         id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
@@ -72,7 +73,7 @@ jobs:
         package: [migrations, backend, frontend]
     timeout-minutes: 10
     steps:
-      - uses: bcgov-nr/action-builder-ghcr@v2.0.0
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.1
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
