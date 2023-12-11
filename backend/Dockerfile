@@ -6,6 +6,7 @@ FROM node:20.10.0-bullseye-slim AS buildWithDevDeps
 WORKDIR /app
 COPY *.json ./
 COPY ./src ./src
+COPY ./prisma ./prisma
 RUN npm ci --ignore-scripts --no-update-notifier
 RUN npm run prisma-generate
 FROM node:20.10.0-bullseye-slim AS build
