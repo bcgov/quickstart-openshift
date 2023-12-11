@@ -7,7 +7,7 @@ WORKDIR /app
 COPY *.json ./
 COPY ./src ./src
 RUN npm ci --ignore-scripts --no-update-notifier
-
+RUN npm run prisma-generate
 FROM node:20.10.0-bullseye-slim AS build
 
 # Install packages, build and keep only prod packages
