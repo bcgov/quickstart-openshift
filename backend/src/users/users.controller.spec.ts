@@ -1,13 +1,12 @@
 import {Test, TestingModule} from "@nestjs/testing";
-import {getRepositoryToken} from "@nestjs/typeorm";
 import {UsersController} from "./users.controller";
 import {UsersService} from "./users.service";
-import {Users} from "./entities/users.entity";
 import * as request from 'supertest';
 import {HttpException, INestApplication} from "@nestjs/common";
 import {CreateUserDto} from "./dto/create-user.dto";
 import {UpdateUserDto} from "./dto/update-user.dto";
 import {UserDto} from "./dto/user.dto";
+import { PrismaService } from "nestjs-prisma";
 
 describe("UserController", () => {
   let controller: UsersController;
@@ -20,7 +19,7 @@ describe("UserController", () => {
       providers: [
         UsersService,
         {
-          provide: getRepositoryToken(Users),
+          provide: PrismaService,
           useValue: {},
         },
       ],
@@ -62,7 +61,7 @@ describe("UserController", () => {
   });
   describe('findAll', () => {
     it('should return an array of users', async () => {
-      const result: Users[] = [];
+      const result = [];
       result.push({id: 1, name: 'Alice', email: 'test@gmail.com'});
       jest.spyOn(usersService, 'findAll').mockResolvedValue(result);
       expect(await controller.findAll()).toBe(result);
@@ -70,11 +69,18 @@ describe("UserController", () => {
   });
   describe('findOne', () => {
     it('should return a user object', async () => {
-      const result = new Users('john', 'John Doe');
-      result.id = 1;
+      const result: UserDto = { id: 1,  name:"john", email:'John_Doe@gmail.com'};
       jest.spyOn(usersService, 'findOne').mockResolvedValue(result);
-
       expect(await controller.findOne('1')).toBe(result);
+    });
+    it('should throw error if user not found', async () => {
+      jest.spyOn(usersService, 'findOne').mockResolvedValue(undefined);
+      try {
+        await controller.findOne('1');
+      }catch (e) {
+        expect(e).toBeInstanceOf(HttpException);
+        expect(e.message).toBe('User not found.');
+      }
     });
   });
   describe('update', () => {

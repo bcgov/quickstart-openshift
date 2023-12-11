@@ -1,106 +1,156 @@
-import {HttpException, Injectable} from "@nestjs/common";
-import {InjectRepository} from "@nestjs/typeorm";
-import {Repository, SelectQueryBuilder} from "typeorm";
-import {Users} from "./entities/users.entity";
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "nestjs-prisma";
 
-import {CreateUserDto} from "./dto/create-user.dto";
-import {UpdateUserDto} from "./dto/update-user.dto";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
+import { UserDto } from "./dto/user.dto";
+import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(Users)
-    private usersRepository: Repository<Users>
+    private prisma: PrismaService
   ) {
   }
 
-  async create(user: CreateUserDto): Promise<Users> {
-    const newUser = this.usersRepository.create(user);
-    await this.usersRepository.save(newUser);
-    return newUser;
+  async create(user: CreateUserDto): Promise<UserDto> {
+    const savedUser = await this.prisma.users.create({
+      data: {
+        name: user.name,
+        email: user.email
+      }
+    });
+
+    return {
+      id: savedUser.id.toNumber(),
+      name: savedUser.name,
+      email: savedUser.email
+    };
   }
 
-  async findAll(): Promise<Users[]> {
-    return this.usersRepository.find();
+  async findAll(): Promise<UserDto[]> {
+    const users = await this.prisma.users.findMany();
+    return users.flatMap(user => {
+      const userDto: UserDto = {
+        id: user.id.toNumber(),
+        name: user.name,
+        email: user.email
+      };
+      return userDto;
+    });
   }
 
-  async findOne(id: any): Promise<Users> {
-    return this.usersRepository.findOne({ where: { id } });
+  async findOne(id: number): Promise<UserDto> {
+    const user = await this.prisma.users.findUnique({
+      where: {
+        id: new Prisma.Decimal(id)
+      }
+    });
+    return {
+      id: user.id.toNumber(),
+      name: user.name,
+      email: user.email
+    };
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<Users> {
-    await this.usersRepository.update({id}, updateUserDto);
-    return this.findOne(id);
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserDto> {
+    const user = await this.prisma.users.update({
+      where: {
+        id: new Prisma.Decimal(id)
+      },
+      data: {
+        name: updateUserDto.name,
+        email: updateUserDto.email
+      }
+    });
+    return {
+      id: user.id.toNumber(),
+      name: user.name,
+      email: user.email
+    };
   }
 
   async remove(id: number): Promise<{ deleted: boolean; message?: string }> {
     try {
-      await this.usersRepository.delete(id);
-      return {deleted: true};
+      await this.prisma.users.delete({
+        where: {
+          id: new Prisma.Decimal(id)
+        }
+      });
+      return { deleted: true };
     } catch (err) {
-      return {deleted: false, message: err.message};
+      return { deleted: false, message: err.message };
     }
   }
 
   async searchUsers(page: number,
                     limit: number,
-                    sort: string, // JSON string to store sort key and sort value, ex: {name: "ASC"}
-                    filter: string): Promise<any> { // JSON array for key, operation and value, ex: [{key: "name", operation: "like", value: "Peter"}]
+                    sort: string, // JSON string to store sort key and sort value, ex: [{"name":"desc"},{"email":"asc"}]
+                    filter: string // JSON array for key, operation and value, ex: [{"key": "name", "operation": "like", "value": "Jo"}]
+  ): Promise<any> {
 
-
-    page = page || 1; // default page is 1
+    page = page || 1;
     if (!limit || limit > 200) {
-      limit = 10; // default limit is 10 for no value or value > 200
+      limit = 10;
     }
 
-    const queryBuilder = this.usersRepository.createQueryBuilder('users');
-    if (filter) {
-      this.setFilter(filter, queryBuilder);
+    let sortObj=[];
+    let filterObj = {};
+    try {
+      sortObj = JSON.parse(sort);
+      filterObj = JSON.parse(filter);
+    } catch (e) {
+      throw new Error("Invalid query parameters");
     }
-    if (sort) {
-      this.setSort(sort, queryBuilder);
-    }
-    // Apply pagination condition
-    queryBuilder.skip((page - 1) * limit).take(limit);
-    const [users, count] = await queryBuilder.getManyAndCount();
+    const users = await this.prisma.users.findMany({
+      skip: (page - 1) * limit,
+      take: parseInt(String(limit)),
+      orderBy: sortObj,
+      where: this.convertFiltersToPrismaFormat(filterObj)
+    });
+
+    const count = await this.prisma.users.count({
+      orderBy: sortObj,
+      where: this.convertFiltersToPrismaFormat(filterObj)
+    });
+
     return {
       users,
       page,
       limit,
       total: count,
-      totalPages: Math.ceil(count / limit),
+      totalPages: Math.ceil(count / limit)
     };
   }
 
-  private setSort(sort: string, queryBuilder: SelectQueryBuilder<Users>) {
-    let sortObj;
-    try {
-      sortObj = JSON.parse(sort);
-    } catch (e) {
-      throw new HttpException("Invalid query parameters as sort", 400);
-    }
-    Object.keys(sortObj).forEach((item, index) => {
-      if (index === 0) {
-        queryBuilder.orderBy(`users.${item}`, sortObj[item]);
-      } else {
-        queryBuilder.addOrderBy(`users.${item}`, sortObj[item]);
-      }
-    });
-  }
+  public convertFiltersToPrismaFormat(filterObj): any {
 
-  private setFilter(filter: string, queryBuilder: SelectQueryBuilder<Users>) {
-    let filterObj;
-    try {
-      filterObj = JSON.parse(filter);
-    } catch (e) {
-      throw new HttpException("Invalid query parameters as filter", 400);
-    }
+    let prismaFilterObj = {};
+
     for (const item of filterObj) {
+
       if (item.operation === "like") {
-        queryBuilder.andWhere(`users.${item.key} ${item.operation} :${item.key}`, {[item.key]: `%${item.value}%`});
-      } else {
-        queryBuilder.andWhere(`users.${item.key} ${item.operation} :${item.key}`, {[item.key]: item.value});
+        prismaFilterObj[item.key] = { contains: item.value };
+      } else if (item.operation === "eq") {
+        prismaFilterObj[item.key] = { equals: item.value };
+      } else if (item.operation === "neq") {
+        prismaFilterObj[item.key] = { not: { equals: item.value } };
+      } else if (item.operation === "gt") {
+        prismaFilterObj[item.key] = { gt: item.value };
+      } else if (item.operation === "gte") {
+        prismaFilterObj[item.key] = { gte: item.value };
+      } else if (item.operation === "lt") {
+        prismaFilterObj[item.key] = { lt: item.value };
+      } else if (item.operation === "lte") {
+        prismaFilterObj[item.key] = { lte: item.value };
+      } else if (item.operation === "in") {
+        prismaFilterObj[item.key] = { in: item.value };
+      } else if (item.operation === "notin") {
+        prismaFilterObj[item.key] = { not: { in: item.value } };
+      } else if (item.operation === "isnull") {
+        prismaFilterObj[item.key] = { equals: null };
       }
     }
+    return prismaFilterObj;
   }
 }
