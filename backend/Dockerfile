@@ -1,11 +1,22 @@
 # Build static files
 # Node Bullseye has npm
+FROM node:20.10.0-bullseye-slim AS buildWithDevDeps
+
+# Install packages, build and keep only prod packages
+WORKDIR /app
+COPY *.json ./
+COPY ./src ./src
+RUN npm ci --ignore-scripts --no-update-notifier
+
 FROM node:20.10.0-bullseye-slim AS build
 
 # Install packages, build and keep only prod packages
 WORKDIR /app
 COPY *.json ./
 COPY ./src ./src
+COPY --from=buildWithDevDeps /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=buildWithDevDeps /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=buildWithDevDeps /app/node_modules/prisma ./node_modules/prisma
 RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
     npm run build
 
