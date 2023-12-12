@@ -1,0 +1,34 @@
+# Run the Load Test with manual workflow dispatch.
+name: Load Test
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  load-test:
+    defaults:
+      run:
+        working-directory: ./load-test
+    runs-on: ubuntu-latest
+    name: Load Test
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: ${{ github.event.repository.name }}-test
+    strategy:
+      matrix:
+        name: [backend, frontend]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run k6 local test
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: ${{ matrix.name }}-test.js
+          flags: --vus 10 --duration 30s
+        env:
+          BACKEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api
+          FRONTEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
