@@ -14,7 +14,7 @@ jobs:
       run:
         working-directory: ./load-test
     runs-on: ubuntu-latest
-    name: Penetration Tests
+    name: Load Test
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}-test
