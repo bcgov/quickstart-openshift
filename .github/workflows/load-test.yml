@@ -3,6 +3,17 @@ name: Load Test
 
 on:
   workflow_dispatch:
+    inputs:
+      vu:
+        description: 'Number of virtual users to simulate'
+        required: false
+        type: number
+        default: 10
+      duration:
+        description: 'Duration of the test in seconds'
+        required: false
+        type: number
+        default: 30
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -10,9 +21,6 @@ concurrency:
 
 jobs:
   load-test:
-    defaults:
-      run:
-        working-directory: ./load-test
     runs-on: ubuntu-latest
     name: Load Test
     env:
@@ -27,8 +35,8 @@ jobs:
       - name: Run k6 local test
         uses: grafana/k6-action@v0.3.1
         with:
-          filename: ${{ matrix.name }}-test.js
-          flags: --vus 10 --duration 30s
+          filename: ./load-test/${{ matrix.name }}-test.js
+          flags: --vus ${{ github.event.inputs.vu }} --duration ${{ github.event.inputs.duration }}s
         env:
           BACKEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api
           FRONTEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
