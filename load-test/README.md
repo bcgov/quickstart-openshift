@@ -3,3 +3,6 @@
 
 1.  The Tests are samples, dev teams are encouraged to write their own tests based on the use cases of their project.
 2. The tests are run using GitHub Actions.
+
+# Please inform platform services team if you would do a HUGE load TEST on OpenShift platform as it impacts the platform performance.
+```
