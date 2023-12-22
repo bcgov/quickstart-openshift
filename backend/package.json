@@ -105,6 +105,7 @@
     "*.{js,ts}": "./node_modules/.bin/eslint --cache --fix"
   },
   "overrides": {
-    "minimist@<1.2.6": "1.2.6"
+    "minimist@<1.2.6": "1.2.6",
+    "reflect-metadata": "^0.2.0"
   }
 }
