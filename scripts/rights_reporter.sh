@@ -2,24 +2,28 @@
 set -euo pipefail
 
 # This script reports on rights in OpenShift projects
-echo -e "OpenShift users for projects accessible to $(oc whoami)\n"
+echo -e "OpenShift users for projects accessible to $(oc whoami)"
 
-# Get the current user's projects
+# Projects available to the current user
 PROJECTS=$(oc projects | grep -v "*" | grep -E "^ +.*-.*(.*)$")
-ROLES="admin edit view"
 
-# Upstream accounts to exclude
-EXCLUDES="admin|legacy-access-github|ministry-viewer|openshift-pipelines-edit|platform-services-controlled-admin|platform-services-controlled-helper|admin-[0-9]*|edit-[0-9]*"
+# Roles to report on, can be overridden with a quoted parameter
+ROLES=${1:-"admin edit view"}
 
 # Loop through the projects and report on rights
 for p in $(echo "${PROJECTS}" | awk '{print $1}'); do
-  echo -e "---\n\nProject: $p"
-  echo -e "Name: $(echo "${PROJECTS}" | grep $p | awk -F" - " '{print $2}')\n"
+  echo -e "\n---\n\nProject: $p"
+  echo -e "Name: $(echo "${PROJECTS}" | grep $p | awk -F" - " '{print $2}')"
 
+  # Skip projects with insufficient rights
   oc get rolebindings -n $p > /dev/null || continue
+
+  # Report on requested roles
   for role in ${ROLES}; do
-    echo -e "${role}:"
-    oc get rolebindings -n $p -o json | jq -r '.items[] | select(.subjects[].kind=="User", .roleRef.name=="${role}") | .subjects[].name' | sort | uniq | sed "s/^/  /g" || echo "Insufficient rights for $p"
-    echo
+    echo -e "\n${role}:"
+    (oc get rolebindings -n $p -o json \
+      | jq -r '.items[] | select(.subjects[].kind=="User", .roleRef.name=="${role}") | .subjects[].name' \
+      | sort | uniq | sed "s/^/  /g" \
+    )|| echo "Insufficient rights for $p"
   done
 done
