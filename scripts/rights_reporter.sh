@@ -5,7 +5,7 @@ set -euo pipefail
 echo -e "OpenShift users for projects accessible to $(oc whoami)"
 
 # Projects available to the current user
-PROJECTS=$(oc projects | grep -v "*" | grep -E "^ +.*-.*(.*)$")
+PROJECTS=$(oc projects | sed "s/\*/ /g" | grep -E "^ +.*-.*(.*)$")
 
 # Roles to report on, can be overridden with a quoted parameter
 ROLES=${1:-"admin edit view"}
