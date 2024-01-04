@@ -15,15 +15,16 @@ for p in $(echo "${PROJECTS}" | awk '{print $1}'); do
   echo -e "\n---\n\nProject: $p"
   echo -e "Name: $(echo "${PROJECTS}" | grep $p | awk -F" - " '{print $2}')"
 
-  # Skip projects with insufficient rights
-  oc get rolebindings -n $p > /dev/null || continue
-
-  # Report on requested roles
-  for role in ${ROLES}; do
-    echo -e "\n${role}:"
-    (oc get rolebindings -n $p -o json \
-      | jq -r '.items[] | select(.subjects[].kind=="User", .roleRef.name=="${role}") | .subjects[].name' \
-      | sort | uniq | sed "s/^/  /g" \
-    )|| echo "Insufficient rights for $p"
-  done
+  # Report on requested roles, where possible
+  if oc get rolebindings -n $p &> /dev/null; then
+    for role in ${ROLES}; do
+      echo -e "\n${role}:"
+      oc get rolebindings -n $p -o json \
+        | jq -r '.items[] | select(.subjects[].kind=="User", .roleRef.name=="${role}") | .subjects[].name' \
+        | sort | uniq | sed "s/^/  /g"
+    done
+  else
+    echo -e "\nInsufficient rights"
+  fi
 done
+echo -e "\n---\n"
