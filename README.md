@@ -39,7 +39,7 @@ Features:
 * Gateable production deployments
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure, and container scan tools
-* Automatic dependency patching available from [bcgov/nr-renovate](https://github.com/bcgov/nr-renovate)
+* Automatic dependency patching available from [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
 * Enforced code reviews and workflow jobs (pass|fail)
 * Helm Package Manager for atomic deployments
 * Sample application stack:
@@ -78,19 +78,17 @@ Initial setup is intended to take an hour or less.  This depends greatly on inte
 The following are required:
 
 * BC Government IDIR accounts for anyone submitting requests
-* GitHub accounts for all participating team members
-    * [Sign Up is free](https://github.com/signup)
+* [GitHub accounts](https://github.com/signup) for all participating team members
 * Membership in the BCGov GitHub organization
     * Provide GitHub IDs to [BCGov's Just Ask](https://just-ask.developer.gov.bc.ca/)
-* Project namespaces:
-    * OpenShift  * [Register a New Project](https://registry.developer.gov.bc.ca)
+* OpenShift project namespaces:
+    * [BCGov signup](https://registry.developer.gov.bc.ca)
 
 ## Using this Template
 
 Create a new repository using this repository as a template.
 
-* Select bcgov/quickstart-openshift under Repository template
-* Check Codecov | Code Coverage to grant access
+* Verify bcgov/quickstart-openshift is selected under Repository template
 
 ![](./.graphics/template.png)
 
@@ -128,7 +126,11 @@ Locate an OpenShift pipeline token:
 
 **SONAR_TOKEN(s)**
 
-If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, while monorepos use multiple, e.g. `${{ secrets.SONAR_TOKEN_BACKEND }}`, `${{ secrets.SONAR_TOKEN_FRONTEND }}`.
+If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, while monorepos use similar names.
+
+E.g.:
+* `${{ secrets.SONAR_TOKEN_BACKEND }}`
+* `${{ secrets.SONAR_TOKEN_FRONTEND }}`
 
 BC Government employees can request SonarCloud projects by creating an [issue](https://github.com/BCDevOps/devops-requests/issues/new/choose) with BCDevOps.  Please make sure to request a monorepo with component names (e.g. backend, frontend), which may not be explained in their directions.
 
@@ -172,6 +174,8 @@ Dependabot and Mend Renovate can both provide dependency updates using pull requ
 A config file (`renovate.json`) is included with this template.  It can source config from our [renovate repository](https://github.com/bcgov/renovate-config).  Renovate can be [self-hosted](https://github.com/renovatebot/github-action) or run using the GitHub App managed at the organization level.  For BC Government the OCIO controls this application, so please opt in with them using a GitHub issue.
 
 To opt-in:
+* Visit the [Renovate GitHub App](https://github.com/apps/renovate/)
+* Click `Configure` and set up your repository
 * Visit [BCDevOps Requests](https://github.com/BCDevOps/devops-requests)
 * Select [Issues](https://github.com/BCDevOps/devops-requests/issues)
 * Select [New Issue](https://github.com/BCDevOps/devops-requests/issues/new/choose)
@@ -225,10 +229,15 @@ This is required to prevent direct pushes and merges to the default branch.  The
         * `[check] Require branches to be up to date before merging`
         * `Status checks that are required`:
             * Select checks as appropriate, e.g. Build x, Deploy y
+        * Select at least one status check to enforce branch protection
     * `[check] Require conversation resolution before merging`
     * `[check] Include administrators` (optional)
 
 ![](./.graphics/branch-protection.png)
+
+### Merge Queues
+
+Queues allow PRs to be merged without being fully up-to-date.  From the queue they are updated against the default branch and the PR workflow is re-run.  This is useful for large teams or repositories with long-running workflows, but generally discouraged.
 
 ### Adding Team Members
 
