@@ -1,6 +1,6 @@
 # Build static files
 # Node Bullseye has npm
-FROM node:20.10.0-bullseye-slim AS build
+FROM node:20.11.0-bullseye-slim AS build
 
 # Install packages, build and keep only prod packages
 WORKDIR /app
