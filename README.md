@@ -341,7 +341,7 @@ After a full workflow run and merge can been run, please do the following:
 
 This repository is provided by NRIDS Architecture and Forestry Digital Services, courtesy of the Government of British Columbia.
 
-* NRID's [Kickstarter Guide](https://github.com/bcgov/nr-arch-templates/blob/main/confluence/pages/Agile_Team_Kickstarter/README.md) (via. Confluence, links may be internal)
+* NRID's [Kickstarter Guide](https://bcgov.github.io/nr-architecture-patterns-library/docs/Agile%20Team%20Kickstarter) (via. Confluence, links may be internal)
 * [OpenShift Backends for Go, Java and Python](https://github.com/bcgov/quickstart-openshift-backends)
 
 # Contributing
