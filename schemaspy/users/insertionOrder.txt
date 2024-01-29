@@ -1,2 +1,0 @@
-flyway_schema_history
-users
