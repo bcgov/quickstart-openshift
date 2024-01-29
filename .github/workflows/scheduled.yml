@@ -84,13 +84,16 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
 
+          # Catch errors, unset variables, and pipe failures (e.g. grep || true )
+          set -euo pipefail
+
           # Echos
           echo "Delete stale Helm releases"
           echo "Cutoff: ${{ env.CUTOFF }}"
 
           # Before date, list of releases
           BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
-          RELEASES=$(helm ls -aq | grep ${{ github.event.repository.name }})
+          RELEASES=$(helm ls -aq | grep ${{ github.event.repository.name }} || :)
 
           # If releases, then iterate
           [ -z "${RELEASES}" ]|| for r in ${RELEASES[@]}; do
