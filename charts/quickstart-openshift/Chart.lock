@@ -7,9 +7,9 @@ dependencies:
   version: 0.3.0
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 13.4.2
+  version: 13.4.3
 - name: component
   repository: https://bcgov.github.io/helm-service
   version: 0.3.0
-digest: sha256:59b554813a00a04e1b863b8e634f070181c9318d8e1c634609a15abfde6a803b
-generated: "2024-01-27T05:39:04.917457752Z"
+digest: sha256:8683790fec948383af69a515f3280cdfdc86c4cdee69ccb004d4764216df3103
+generated: "2024-01-29T23:52:22.249506578Z"
