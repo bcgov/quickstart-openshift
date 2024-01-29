@@ -33,10 +33,10 @@ jobs:
     runs-on: ubuntu-22.04
     services:
       postgres:
-        image: postgres
+        image: postgis/postgis:16-3.4
         env:
           POSTGRES_DB: default
-          POSTGRES_USER: default
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: default
         options: >-
           --health-cmd pg_isready
@@ -48,24 +48,23 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: joshuaavalon/flyway-action@v3.0.0
-        name: Generate SchemaSpy docs for node backend
-        with:
-          url: jdbc:postgresql://postgres:5432/default
-          user: default
-          password: default
+      - name: Flyway
+        uses: docker://flyway/flyway:10
         env:
-          FLYWAY_VALIDATE_MIGRATION_NAMING: true
+          FLYWAY_URL: jdbc:postgresql://postgres:5432/default
+          FLYWAY_USER: postgres
+          FLYWAY_PASSWORD: default
           FLYWAY_LOCATIONS: filesystem:./migrations
-          FLYWAY_DEFAULT_SCHEMA: "users"
+          FLYWAY_DEFAULT_SCHEMA: "public"
+        with:
+          args: info migrate info
 
       - name: Create Output Folder
         run: |
           mkdir output
           chmod a+rwx -R output
-
       - name: Run Schemaspy
-        run: docker run --network host -v "$PWD/output:/output" schemaspy/schemaspy:6.2.4 -t pgsql -db default -host 127.0.0.1 -port 5432 -u default -p default -schemas users
+        run: docker run --network host -v "$PWD/output:/output" schemaspy/schemaspy:6.2.4 -t pgsql11 -db default -host 127.0.0.1 -port 5432 -u postgres -p default -schemas public
       - name: Deploy to Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
