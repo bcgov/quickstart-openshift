@@ -93,7 +93,7 @@ jobs:
 
           # Before date, list of releases
           BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
-          RELEASES=$(helm ls -aq | grep ${{ github.event.repository.name }} || true)
+          RELEASES=$(helm ls -aq | grep ${{ github.event.repository.name }} || :)
 
           # If releases, then iterate
           [ -z "${RELEASES}" ]|| for r in ${RELEASES[@]}; do
