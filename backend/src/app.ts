@@ -5,6 +5,7 @@ import { customLogger } from './common/logger.config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import { VersioningType } from '@nestjs/common';
+import { metricsMiddleware } from "./prom";
 
 /**
  *
@@ -17,6 +18,7 @@ export async function bootstrap() {
   app.use(helmet());
   app.enableCors();
   app.set("trust proxy", 1);
+  app.use(metricsMiddleware);
   app.enableShutdownHooks();
   app.setGlobalPrefix("api");
   app.enableVersioning({

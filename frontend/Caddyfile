@@ -1,6 +1,9 @@
 {
 	auto_https off
-	admin off
+	admin 0.0.0.0:3003
+    servers {
+        metrics
+    }
 }
 :3000 {
 	log {
