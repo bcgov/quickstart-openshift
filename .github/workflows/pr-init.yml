@@ -2,7 +2,7 @@ name: PR Init
 
 on:
   pull_request:
-    type:
+    types:
     	- assigned
       - unassigned
       - labeled
