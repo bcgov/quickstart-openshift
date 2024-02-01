@@ -10,14 +10,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  dump:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Dump context
-        uses: utenx/gh-dump-context@v1
-        with:
-          context: github
-
   # PR only, skip for merge_group
   conventional-commits:
     name: Conventional Commits
