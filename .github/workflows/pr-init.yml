@@ -19,7 +19,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - if: failure()
+      - if: failure() && !success()
         run: |
           echo "Please use conventional commits in your PR title and re-run this job."
           echo "https://www.conventionalcommits.org/en/v1.0.0/"
