@@ -2,7 +2,7 @@ name: PR Validate
 
 on:
   pull_request:
-    types: [edited, opened, reopened]
+    types: [edited, opened, reopened, synchronize]
 
 concurrency:
   # Cancel in progress for PR open and close, but not merge_group
