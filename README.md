@@ -42,6 +42,9 @@ Features:
 * Automatic dependency patching available from [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
 * Enforced code reviews and workflow jobs (pass|fail)
 * Helm Package Manager for atomic deployments
+* Prometheus Metrics export from Backend/Frontend
+* Resource Tuning with Horizontal Pod Autoscaler (in TEST/PROD).
+* Self Healing through Health checks
 * Sample application stack:
     * Database: Postgres, PostGIS, backups
     * Frontend: TypeScript, Caddy Server
