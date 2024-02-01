@@ -2,7 +2,28 @@ name: PR Init
 
 on:
   pull_request:
-    type: [opened, reopened, edited]
+    type:
+    	- assigned
+      - unassigned
+      - labeled
+      - unlabeled
+      - opened
+      - edited
+      - closed
+      - reopened
+      - synchronize
+      - converted_to_draft
+      - locked
+      - unlocked
+      - enqueued
+      - dequeued
+      - milestoned
+      - demilestoned
+      - ready_for_review
+      - review_requested
+      - review_request_removed
+      - auto_merge_enabled
+      - auto_merge_disabled
 
 concurrency:
   # Cancel in progress for PR open and close, but not merge_group
@@ -10,6 +31,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  dump:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Dump context
+        uses: utenx/gh-dump-context@v1
+        with:
+          context: github
+
   # PR only, skip for merge_group
   conventional-commits:
     name: Conventional Commits
