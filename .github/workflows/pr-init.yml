@@ -23,6 +23,7 @@ jobs:
         run: |
           echo "Please use conventional commits in your PR title and re-run this job."
           echo "https://www.conventionalcommits.org/en/v1.0.0/"
+          exit 1
 
   # PR only, skip for merge_group
   pr-description-add:
