@@ -238,10 +238,6 @@ This is required to prevent direct pushes and merges to the default branch.  The
 
 ![](./.graphics/branch-protection.png)
 
-### Merge Queues
-
-Queues allow PRs to be merged without being fully up-to-date.  From the queue they are updated against the default branch and the PR workflow is re-run.  This is useful for large teams or repositories with long-running workflows, but generally discouraged.
-
 ### Adding Team Members
 
 Don't forget to add your team members!  
