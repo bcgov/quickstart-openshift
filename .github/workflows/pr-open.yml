@@ -9,42 +9,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # # https://github.com/bcgov-nr/action-builder-ghcr
-  # builds:
-  #   name: Builds
-  #   runs-on: ubuntu-22.04
-  #   permissions:
-  #     packages: write
-  #   strategy:
-  #     matrix:
-  #       package: [migrations, backend, frontend]
-  #   timeout-minutes: 10
-  #   steps:
-  #     - uses: bcgov-nr/action-builder-ghcr@v2.0.1
-  #       with:
-  #         keep_versions: 50
-  #         package: ${{ matrix.package }}
-  #         tag: ${{ github.event.number }}
-  #         tag_fallback: latest
-  #         triggers: ('${{ matrix.package }}/')
+  # https://github.com/bcgov-nr/action-builder-ghcr
+  builds:
+    name: Builds
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [migrations, backend, frontend]
+    timeout-minutes: 10
+    steps:
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.1
+        with:
+          keep_versions: 50
+          package: ${{ matrix.package }}
+          tag: ${{ github.event.number }}
+          tag_fallback: latest
+          triggers: ('${{ matrix.package }}/')
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
     name: Deploys
-    # needs: [builds]
+    needs: [builds]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
       autoscaling: false
       tag: ${{ github.event.number }}
       release: ${{ github.event.number }}
-      # triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
-
-  # https://github.com/bcgov-nr/action-deployer-openshift
-  load-test:
-    name: Load Test
-    needs: [deploys]
-    uses: ./.github/workflows/.load-test.yml
-    secrets: inherit
-    with:
-      target: ${{ github.event.number }}
+      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')

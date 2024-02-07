@@ -47,6 +47,14 @@ jobs:
     with:
       target: test
 
+  load-test:
+    name: Load Test
+    needs: [deploys]
+    uses: ./.github/workflows/.load-test.yml
+    secrets: inherit
+    with:
+      target: test
+
   deploy-prod:
     name: Deploy (prod)
     needs: [integration-e2e, vars]
