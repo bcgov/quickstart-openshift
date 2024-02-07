@@ -1,9 +1,10 @@
-name: Notifications
+name: Teams Notify
 on:
-  workflow_run: 
-    workflows: [PR,Merge]
-    types:
-      - completed
+  # workflow_run:
+  #   workflows: [PR,Merge]
+  #   types: [completed]
+  workflow_dispatch:
+
 jobs:
   notify-teams-pr:
     if: ${{github.event.workflow_run.event == 'pull_request'}}
@@ -25,6 +26,7 @@ jobs:
                 subtitle: ${{github.event.workflow_run.head_commit.timestamp}}
                 image: ${{github.event.workflow_run.head_repository.owner.avatar_url}}
                 text: PR Opened
+
   notify-teams-merged:
     if: ${{github.event.workflow_run.event == 'push'}}
     runs-on: ubuntu-22.04
