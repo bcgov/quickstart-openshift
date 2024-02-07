@@ -297,6 +297,19 @@ Runs on merge to main branch.
 
 ![](.graphics/merge.png)
 
+## Helpers
+
+These are called by other workflows, generally to avoid repeating code.
+
+* `.github/workflows/.deploy.yml`
+* `.github/workflows/.tests.yml`
+
+## Microsoft Teams Notifications
+
+Notifications can be sent to channels on Microsoft Teams.  This feature is not currently enabled, but can be set up by editing the file below.
+
+* `.github/workflows/notifications.yml`
+
 # App Stack
 
 ## Starter
