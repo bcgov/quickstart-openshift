@@ -1,9 +1,16 @@
 # Run the Load Test with manual workflow dispatch.
-name: Load Test
+name: .Load Test
 
 on:
   workflow_dispatch:
     inputs:
+      ### Required
+      target:
+        description: PR number, test or prod
+        required: true
+        type: string
+
+      ### Typical / recommended
       vu:
         description: 'Number of virtual users to simulate'
         required: false
@@ -25,18 +32,19 @@ jobs:
     name: Load Test
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}-test
+      PREFIX: ${{ github.event.repository.name }}-${{ inputs.target }}
     strategy:
       matrix:
         name: [backend, frontend]
+        include:
+          - name: backend
+            url: https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/api
+          - name: frontend
+            url: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - name: Run k6 local test
         uses: grafana/k6-action@v0.3.1
         with:
-          filename: ./load-test/${{ matrix.name }}-test.js
+          filename: URL=${{ matrix.url }} ./load-test/${{ matrix.name }}-test.js
           flags: --vus ${{ github.event.inputs.vu }} --duration ${{ github.event.inputs.duration }}s
-        env:
-          BACKEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api
-          FRONTEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
