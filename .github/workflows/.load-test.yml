@@ -36,10 +36,6 @@ jobs:
     strategy:
       matrix:
         name: [backend, frontend]
-        include:
-          - name: backend
-            url: https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/api
-          - name: frontend
             url: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
     steps:
       - uses: actions/checkout@v4
