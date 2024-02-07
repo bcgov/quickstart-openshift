@@ -22,7 +22,7 @@ function checkStatus(response, checkName, statusCode = 200) {
 
 
 export default function(token) {
-  let url = `${__ENV.BACKEND_URL}/v1/users`;
+  let url = `${__ENV.URL}/v1/users`;
   let params = {
     headers: {
       "Content-Type": "application/json"

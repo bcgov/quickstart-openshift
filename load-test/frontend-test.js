@@ -22,7 +22,7 @@ function checkStatus(response, checkName, statusCode = 200) {
 
 
 export default function(token) {
-  let url = `${__ENV.FRONTEND_URL}`;
+  let url = `${__ENV.URL}`;
 
   let res = http.get(url);
   checkStatus(res, "frontend", 200);

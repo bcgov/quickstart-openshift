@@ -302,6 +302,7 @@ Runs on merge to main branch.
 These are called by other workflows, generally to avoid repeating code.
 
 * `.github/workflows/.deploy.yml`
+* `.github/workflows/.load-test.yml`
 * `.github/workflows/.tests.yml`
 
 ## Microsoft Teams Notifications
