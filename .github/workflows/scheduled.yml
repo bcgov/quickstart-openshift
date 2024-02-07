@@ -20,7 +20,7 @@ jobs:
         name: [backend, frontend]
     steps:
       - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.8.0
+        uses: zaproxy/action-full-scan@v0.9.0
         with:
           allow_issue_writing: true
           artifact_name: "zap_${{ matrix.name }}"
