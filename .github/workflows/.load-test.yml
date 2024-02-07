@@ -44,5 +44,5 @@ jobs:
           BACKEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api
           FRONTEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
         with:
-          filename: URL=${{ matrix.url }} ./load-test/${{ matrix.name }}-test.js
+          filename: ./load-test/${{ matrix.name }}-test.js
           flags: --vus ${{ inputs.vu }} --duration ${{ inputs.duration }}s
