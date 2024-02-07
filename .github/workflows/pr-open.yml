@@ -47,5 +47,4 @@ jobs:
     uses: ./.github/workflows/.load-test.yml
     secrets: inherit
     with:
-      autoscaling: false
-      tag: ${{ github.event.number }}
+      target: ${{ github.event.number }}
