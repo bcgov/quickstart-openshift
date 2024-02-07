@@ -7,8 +7,7 @@ on:
       - '*.md'
       - '.github/**'
       - '.graphics/**'
-      - '!.github/workflows/.deploy.yml'
-      - '!.github/workflows/merge.yml'
+      - '!.github/workflows/**'
   workflow_dispatch:
     inputs:
       pr_no:
@@ -35,7 +34,6 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      autoscaling: false
       environment: test
       tag: ${{ needs.vars.outputs.pr }}
       release: test
@@ -53,6 +51,7 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
+      autoscaling: true
       environment: prod
       tag: ${{ needs.vars.outputs.pr }}
       release: prod
