@@ -1,15 +1,20 @@
-name: Notifications
+name: Teams Notify
 on:
-  workflow_run: 
-    workflows: [PR,Merge]
-    types:
-      - completed
+  # workflow_run:
+  #   workflows: [PR,Merge]
+  #   types: [completed]
+  workflow_dispatch:
+
+# Note: This workflow requires a Microsoft Teams Channel and webhook URI variable
+# https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook
+
 jobs:
   notify-teams-pr:
     if: ${{github.event.workflow_run.event == 'pull_request'}}
     runs-on: ubuntu-22.04
     steps:
-      - uses: simbo/msteams-message-card-action@latest
+      # https://github.com/simbo/msteams-message-card-action
+      - uses: simbo/msteams-message-card-action@1.4.3
         with:
           webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
           title: "${{github.event.workflow_run.head_commit.message}}" 
@@ -25,6 +30,7 @@ jobs:
                 subtitle: ${{github.event.workflow_run.head_commit.timestamp}}
                 image: ${{github.event.workflow_run.head_repository.owner.avatar_url}}
                 text: PR Opened
+
   notify-teams-merged:
     if: ${{github.event.workflow_run.event == 'push'}}
     runs-on: ubuntu-22.04
@@ -45,7 +51,9 @@ jobs:
             pr=""
           fi
           echo "pr=${pr}" >> $GITHUB_OUTPUT
-      - uses: simbo/msteams-message-card-action@latest
+
+      # https://github.com/simbo/msteams-message-card-action
+      - uses: simbo/msteams-message-card-action@1.4.3
         with:
           webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
           title: "${{github.event.workflow_run.head_commit.message}}" 
