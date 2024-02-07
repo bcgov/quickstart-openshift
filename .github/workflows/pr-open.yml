@@ -39,3 +39,13 @@ jobs:
       tag: ${{ github.event.number }}
       release: ${{ github.event.number }}
       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+
+  # https://github.com/bcgov-nr/action-deployer-openshift
+  load-test:
+    name: Load Test
+    needs: [deploys]
+    uses: ./.github/workflows/.load-test.yml
+    secrets: inherit
+    with:
+      autoscaling: false
+      tag: ${{ github.event.number }}
