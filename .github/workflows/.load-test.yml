@@ -45,6 +45,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run k6 local test
         uses: grafana/k6-action@v0.3.1
+        env:
+          BACKEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api
+          FRONTEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
         with:
           filename: URL=${{ matrix.url }} ./load-test/${{ matrix.name }}-test.js
           flags: --vus ${{ github.event.inputs.vu }} --duration ${{ github.event.inputs.duration }}s
