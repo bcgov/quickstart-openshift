@@ -36,7 +36,6 @@ jobs:
     strategy:
       matrix:
         name: [backend, frontend]
-            url: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
     steps:
       - uses: actions/checkout@v4
       - name: Run k6 local test
