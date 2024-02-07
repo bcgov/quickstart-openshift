@@ -36,7 +36,6 @@ jobs:
     secrets: inherit
     with:
       autoscaling: false
-      directory: charts/quickstart-openshift
       tag: ${{ github.event.number }}
       release: ${{ github.event.number }}
       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
