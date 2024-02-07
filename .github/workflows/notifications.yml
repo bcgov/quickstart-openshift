@@ -10,7 +10,8 @@ jobs:
     if: ${{github.event.workflow_run.event == 'pull_request'}}
     runs-on: ubuntu-22.04
     steps:
-      - uses: simbo/msteams-message-card-action@latest
+      # https://github.com/simbo/msteams-message-card-action
+      - uses: simbo/msteams-message-card-action@1.4.3
         with:
           webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
           title: "${{github.event.workflow_run.head_commit.message}}" 
@@ -47,7 +48,9 @@ jobs:
             pr=""
           fi
           echo "pr=${pr}" >> $GITHUB_OUTPUT
-      - uses: simbo/msteams-message-card-action@latest
+
+      # https://github.com/simbo/msteams-message-card-action
+      - uses: simbo/msteams-message-card-action@1.4.3
         with:
           webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
           title: "${{github.event.workflow_run.head_commit.message}}" 
