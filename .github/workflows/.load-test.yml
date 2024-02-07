@@ -2,7 +2,7 @@
 name: .Load Test
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       ### Required
       target:
