@@ -45,4 +45,4 @@ jobs:
           FRONTEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
         with:
           filename: URL=${{ matrix.url }} ./load-test/${{ matrix.name }}-test.js
-          flags: --vus ${{ github.event.inputs.vu }} --duration ${{ github.event.inputs.duration }}s
+          flags: --vus ${{ inputs.vu }} --duration ${{ inputs.duration }}s
