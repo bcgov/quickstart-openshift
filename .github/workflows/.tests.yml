@@ -3,15 +3,20 @@ name: .Tests
 on:
   workflow_call:
     inputs:
-      ### Required
+      ### Typical / recommended
       target:
         description: PR number, test or prod
         required: true
         type: string
+        default: test
+
+env:
+  DOMAIN: apps.silver.devops.gov.bc.ca
+  PREFIX: ${{ github.event.repository.name }}-${{ inputs.target }}
 
 jobs:
   integration-tests:
-    name: Integration Tests
+    name: Integration
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -26,21 +31,17 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: Integration tests
-        env:
+      - env:
           API_NAME: nest
-          BASE_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-frontend.apps.silver.devops.gov.bc.ca
+          BASE_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-frontend.${{ env.DOMAIN }}
         run: |
           cd integration-tests
           npm ci
           node src/main.js
 
-  cypress-e2e:
-    name: E2E Tests
+  cypress-e2e-tests:
+    name: E2E
     runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: frontend
     strategy:
       matrix:
         browser: [chrome, firefox, edge]
@@ -58,9 +59,8 @@ jobs:
             ${{ runner.os }}-
 
       - uses: cypress-io/github-action@v6
-        name: Cypress run
         env:
-          CYPRESS_baseUrl: https://${{ github.event.repository.name }}-${{ inputs.target }}-frontend.apps.silver.devops.gov.bc.ca/
+          CYPRESS_baseUrl: https://${{ github.event.repository.name }}-${{ inputs.target }}-frontend.${{ env.DOMAIN }}/
         with:
           config: pageLoadTimeout=10000
           working-directory: ./frontend
@@ -72,3 +72,19 @@ jobs:
           name: cypress-screenshots
           path: ./cypress/screenshots
           if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
+
+  load-tests:
+    runs-on: ubuntu-latest
+    name: Load
+    strategy:
+      matrix:
+        name: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/k6-action@v0.3.1
+        env:
+          BACKEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api
+          FRONTEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
+        with:
+          filename: ./load-test/${{ matrix.name }}-test.js
+          flags: --vus 10 --duration 30s

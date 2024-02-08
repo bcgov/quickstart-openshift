@@ -14,7 +14,7 @@ on:
         description: Autoscaling enabled or not for the deployments
         required: false
         type: string
-        default: true
+        default: false
       environment:
         description: Environment name; omit for PRs
         required: false

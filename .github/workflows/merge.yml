@@ -7,8 +7,7 @@ on:
       - '*.md'
       - '.github/**'
       - '.graphics/**'
-      - '!.github/workflows/.deploy.yml'
-      - '!.github/workflows/merge.yml'
+      - '!.github/workflows/**'
   workflow_dispatch:
     inputs:
       pr_no:
@@ -35,28 +34,28 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      autoscaling: false
       environment: test
       tag: ${{ needs.vars.outputs.pr }}
       release: test
 
-  integration-e2e:
-    name: Integration and E2E Tests
+  tests:
+    name: Tests
     needs: [deploy-test, vars]
     uses: ./.github/workflows/.tests.yml
-    with:
-      target: test
 
   deploy-prod:
     name: Deploy (prod)
-    needs: [integration-e2e, vars]
+    needs: [tests, vars]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
+      autoscaling: true
       environment: prod
       tag: ${{ needs.vars.outputs.pr }}
       release: prod
-      params: --set backend.deploymentStrategy.type=RollingUpdate --set frontend.deploymentStrategy.type=RollingUpdate
+      params:
+        --set backend.deploymentStrategy.type=RollingUpdate
+        --set frontend.deploymentStrategy.type=RollingUpdate
 
   promote:
     name: Promote Images
