@@ -31,10 +31,9 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: Integration tests
-        env:
+      - env:
           API_NAME: nest
-          BASE_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-frontend.apps.silver.devops.gov.bc.ca
+          BASE_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-frontend.${{ env.DOMAIN }}
         run: |
           cd integration-tests
           npm ci
@@ -43,9 +42,6 @@ jobs:
   cypress-e2e-tests:
     name: E2E
     runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: frontend
     strategy:
       matrix:
         browser: [chrome, firefox, edge]
@@ -63,9 +59,8 @@ jobs:
             ${{ runner.os }}-
 
       - uses: cypress-io/github-action@v6
-        name: Cypress run
         env:
-          CYPRESS_baseUrl: https://${{ github.event.repository.name }}-${{ inputs.target }}-frontend.apps.silver.devops.gov.bc.ca/
+          CYPRESS_baseUrl: https://${{ github.event.repository.name }}-${{ inputs.target }}-frontend.${{ env.DOMAIN }}/
         with:
           config: pageLoadTimeout=10000
           working-directory: ./frontend
