@@ -3,11 +3,12 @@ name: .Tests
 on:
   workflow_call:
     inputs:
-      ### Required
+      ### Typical / recommended
       target:
         description: PR number, test or prod
         required: true
         type: string
+        default: test
 
 env:
   DOMAIN: apps.silver.devops.gov.bc.ca

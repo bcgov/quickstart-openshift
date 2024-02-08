@@ -9,6 +9,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  tests:
+    name: Tests
+    uses: ./.github/workflows/.tests.yml
+
   zap_scan:
     runs-on: ubuntu-latest
     name: Penetration Tests

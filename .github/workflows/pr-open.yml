@@ -40,7 +40,6 @@ jobs:
   #     triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
 
   tests:
-    name: Tests
     uses: ./.github/workflows/.tests.yml
     with:
       target: ${{ github.event.number }}
