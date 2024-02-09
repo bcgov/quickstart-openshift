@@ -494,7 +494,7 @@ bitnami-pg:
   primary:
     persistence:
       enabled: true
-      storageClass: netapp-file-standard
+      storageClass: netapp-block-standard
       accessModes:
         - ReadWriteOnce
       size: 100Mi
