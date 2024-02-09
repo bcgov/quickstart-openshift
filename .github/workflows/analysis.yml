@@ -58,7 +58,7 @@ jobs:
           triggers: ('${{ matrix.dir }}/')
 
   codeql:
-    name: CodeQL
+    name: CodeQL Security Scan
     if: ${{ ! github.event.pull_request.draft }}
     needs: [tests]
     runs-on: ubuntu-22.04
