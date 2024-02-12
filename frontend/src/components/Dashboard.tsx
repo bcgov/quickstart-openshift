@@ -15,21 +15,21 @@ import UserDto from "@/interfaces/UserDto";
 
 const columns: GridColDef[] = [
   {
-    field: 'Id',
+    field: 'id',
     headerName: 'Employee ID',
     sortable: true,
     filterable: true,
     flex: 1,
   },
   {
-    field: 'Name',
+    field: 'name',
     headerName: 'Employee Name',
     sortable: true,
     filterable: true,
     flex: 1,
   },
   {
-    field: 'Email',
+    field: 'email',
     headerName: 'Employee Email',
     sortable: true,
     filterable: true,
