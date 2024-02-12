@@ -45,4 +45,4 @@ jobs:
     uses: ./.github/workflows/.tests.yml
     with:
       target: ${{ github.event.number }}
-      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+      triggered: ${{ needs.deploys.outputs.triggered }}

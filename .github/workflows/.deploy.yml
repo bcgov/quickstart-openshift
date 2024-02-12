@@ -51,6 +51,9 @@ on:
         required: false
         type: string
 
+    outputs:
+      triggered: ${{ steps.triggers.outputs.triggered }}
+
 env:
   repo_release: ${{ github.event.repository.name }}-${{ inputs.release }}
   package_tag: ${{ inputs.tag }}
