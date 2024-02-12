@@ -39,9 +39,10 @@ jobs:
       release: ${{ github.event.number }}
       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
 
-  integration-e2e:
-    name: Integration and E2E Tests
+  tests:
+    name: Tests
     needs: [deploys]
     uses: ./.github/workflows/.tests.yml
     with:
       target: ${{ github.event.number }}
+      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')

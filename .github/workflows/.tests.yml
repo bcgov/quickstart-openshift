@@ -9,14 +9,57 @@ on:
         required: false
         type: string
         default: test
+      triggers:
+        description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
+        required: false
+        type: string
 
 env:
   DOMAIN: apps.silver.devops.gov.bc.ca
   PREFIX: ${{ github.event.repository.name }}-${{ inputs.target }}
 
 jobs:
+  triggers:
+    name: Triggers
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Deployment Triggers
+        id: triggers
+        run: |
+          # Expand for trigger processing
+
+          # Always deploy if no triggers are provided
+          if [ -z "${{ inputs.triggers }}" ]; then
+            echo "Always deploy when no triggers are provided"
+            echo "triggered=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Deploy if changed files (git diff) match triggers
+          TRIGGERS=${{ inputs.triggers }}
+          git fetch origin ${{ github.event.repository.default_branch }}
+          while read -r check; do
+            for t in "${TRIGGERS[@]}"; do
+              if [[ "${check}" =~ "${t}" ]]; then
+                  echo "Build triggered based on git diff"
+                  echo -e "${t}\n --> ${check}"
+                  echo "triggered=true" >> $GITHUB_OUTPUT
+                  exit 0
+              fi
+            done
+          done < <(git diff origin/${{ github.event.repository.default_branch }} --name-only)
+
+          # If here skip deployment
+          echo "No triggers have fired, deployment skipped"
+
+      - name: Deploy if Triggers Fired
+
   integration-tests:
     name: Integration
+    needs: [triggers]
+    if: ${{ needs.triggers.outputs.triggered == 'true' }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -41,6 +84,8 @@ jobs:
 
   cypress-e2e-tests:
     name: E2E
+    needs: [triggers]
+    if: ${{ needs.triggers.outputs.triggered == 'true' }}
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -74,8 +119,10 @@ jobs:
           if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
 
   load-tests:
-    runs-on: ubuntu-latest
     name: Load
+    needs: [triggers]
+    if: ${{ needs.triggers.outputs.triggered == 'true' }}
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         name: [backend, frontend]
