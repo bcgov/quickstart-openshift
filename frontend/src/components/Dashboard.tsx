@@ -37,7 +37,7 @@ const columns: GridColDef[] = [
   }
   ];
 export default function Dashboard() {
-  const [data, setData] = useState([])
+  const [data, setData] = useState<UserDto[]>([])
 
   useEffect(() => {
     apiService
@@ -82,6 +82,7 @@ export default function Dashboard() {
         rows={data}
         columns={columns}
         pageSizeOptions={[5, 10, 20, 50, 100]}
+        getRowId={(row) => row['id']}
         onRowClick={(params) => setSelectedRow(params.row)}
       />
       <Dialog open={!!selectedRow} onClose={handleClose}>
