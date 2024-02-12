@@ -5,26 +5,25 @@ describe("User Table", () => {
   });
 
   it("renders the table", () => {
-    cy.get("h6.MuiTypography-root").should("exist").should(($div) => {
+    cy.get(".MuiDataGrid-root").should("exist").should(($div) => {
       // access the native DOM element
-      expect($div.get(0).innerText).to.eq('User List')
+      expect($div.get(0).innerText).exist
     });
-    cy.get("th.MuiTableCell-root:nth-child(2) > span:nth-child(1) > button:nth-child(1) > div:nth-child(1) > div:nth-child(1)").should("exist").should(($div) => {
+    cy.get("div.MuiDataGrid-columnHeader:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)").should("exist").should(($div) => {
       // access the native DOM element
-      expect($div.get(0).innerText).to.eq('ID');
+      expect($div.get(0).innerText).to.eq('Employee ID');
     });
-    cy.get("th.MuiTableCell-root:nth-child(3) > span:nth-child(1) > button:nth-child(1)").should("exist").should(($div) => {
+    cy.get("div.MuiDataGrid-columnHeader:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)").should("exist").should(($div) => {
       // access the native DOM element
-      expect($div.get(0).innerText).to.eq('NAME');
+      expect($div.get(0).innerText).to.eq('Employee Name');
     });
-    cy.get("th.MuiTableCell-root:nth-child(4) > span:nth-child(1) > button:nth-child(1) > div:nth-child(1) > div:nth-child(1)").should("exist").should(($div) => {
+    cy.get("div.MuiDataGrid-columnHeader:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)").should("exist").should(($div) => {
       // access the native DOM element
-      expect($div.get(0).innerText).to.eq('EMAIL');
+      expect($div.get(0).innerText).to.eq('Employee Email');
     });
-    cy.get(".MuiTableBody-root").should("exist").should(($div) => {
+    cy.get(".MuiTablePagination-displayedRows").should("exist").should(($div) => {
       // access the native DOM element
-      console.info($div.get(0))
-      expect($div.get(0).childNodes.length).to.eq(5);
+      expect($div.get(0).innerText).to.contains('of 5');
     });
   });
 });
