@@ -54,8 +54,6 @@ jobs:
           # If here skip deployment
           echo "No triggers have fired, deployment skipped"
 
-      - name: Deploy if Triggers Fired
-
   integration-tests:
     name: Integration
     needs: [triggers]
