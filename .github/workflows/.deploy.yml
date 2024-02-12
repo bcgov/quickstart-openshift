@@ -52,7 +52,9 @@ on:
         type: string
 
     outputs:
-      triggered: ${{ jobs.deploys.outputs.triggered }}
+      triggered:
+        description: Have triggers fired?
+        value: ${{ jobs.deploys.outputs.triggered }}
 
 env:
   repo_release: ${{ github.event.repository.name }}-${{ inputs.release }}
