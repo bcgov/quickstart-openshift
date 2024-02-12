@@ -107,7 +107,10 @@ jobs:
             helm rollback ${{ env.repo_release }} || \
               helm uninstall ${{ env.repo_release }}
           fi
-
+          # Clean previous deployments for PR pipeline, if any 
+          if [[ ${{inputs.environment}} == '' ]]; then
+            helm uninstall ${{ env.repo_release }} || true
+          fi
           # Deploy Helm Chart
           helm dependency update
           helm package --app-version="${{ env.package_tag }}" --version=${{ inputs.tag }} .
