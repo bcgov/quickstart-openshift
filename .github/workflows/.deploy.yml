@@ -108,7 +108,7 @@ jobs:
               helm uninstall ${{ env.repo_release }}
           fi
           # Clean previous deployments for PR pipeline, if any 
-          if [[ ${{inputs.environment}} == '' ]]; then
+          if [[ '${{inputs.environment}}' == '' ]]; then
             helm uninstall ${{ env.repo_release }} || true
           fi
           # Deploy Helm Chart
