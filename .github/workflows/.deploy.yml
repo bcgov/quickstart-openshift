@@ -52,7 +52,7 @@ on:
         type: string
 
     outputs:
-      triggered: ${{ steps.triggers.outputs.triggered }}
+      triggered: ${{ jobs.deploys.outputs.triggered }}
 
 env:
   repo_release: ${{ github.event.repository.name }}-${{ inputs.release }}
