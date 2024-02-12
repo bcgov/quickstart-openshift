@@ -17,6 +17,9 @@ const styles = {
     marginLeft: '1em',
     marginBottom: '5em',
     height: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
   },
 }
 export default function App() {

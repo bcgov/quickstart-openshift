@@ -7,7 +7,9 @@ const styles = {
     top: 'auto',
     bottom: 0,
     color: '#ffffff',
-    backgroundColor: '#355992',
+    backgroundColor: '#ffffff',
+    display: 'flex',
+    zIndex: (theme: any) => theme.zIndex.drawer + 1,
   },
   toolbar: {
     display: 'flex',
@@ -15,10 +17,8 @@ const styles = {
     alignItems: 'center',
   },
   footerButton: {
-    margin: '0.1em',
-    padding: '0.1em',
-    color: '#000000',
-    backgroundColor: '#ffffff',
+    margin: '0.2em',
+    padding: '0.2em',
   },
 }
 export default function Footer() {
@@ -29,6 +29,7 @@ export default function Footer() {
           <Button
             sx={styles.footerButton}
             variant="contained"
+            color="secondary"
             id="footer-home"
             target="_blank"
             href="https://www.gov.bc.ca/"
@@ -38,6 +39,7 @@ export default function Footer() {
           <Button
             sx={styles.footerButton}
             variant="contained"
+            color="secondary"
             id="footer-about"
             target="_blank"
             href="https://www2.gov.bc.ca/gov/content/about-gov-bc-ca"
@@ -47,6 +49,7 @@ export default function Footer() {
           <Button
             sx={styles.footerButton}
             variant="contained"
+            color="secondary"
             id="footer-disclaimer"
             target="_blank"
             href="https://gov.bc.ca/disclaimer"
@@ -56,6 +59,7 @@ export default function Footer() {
           <Button
             sx={styles.footerButton}
             variant="contained"
+            color="secondary"
             id="footer-privacy"
             target="_blank"
             href="https://gov.bc.ca/privacy"
@@ -65,6 +69,7 @@ export default function Footer() {
           <Button
             sx={styles.footerButton}
             variant="contained"
+            color="secondary"
             id="footer-accessibility"
             target="_blank"
             href="https://gov.bc.ca/webaccessibility"
@@ -74,6 +79,7 @@ export default function Footer() {
           <Button
             sx={styles.footerButton}
             variant="contained"
+            color="secondary"
             id="footer-copyright"
             target="_blank"
             href="https://gov.bc.ca/copyright"
@@ -83,6 +89,7 @@ export default function Footer() {
           <Button
             sx={styles.footerButton}
             variant="contained"
+            color="secondary"
             id="footer-contact"
             target="_blank"
             href="https://www2.gov.bc.ca/gov/content/home/contact-us"
