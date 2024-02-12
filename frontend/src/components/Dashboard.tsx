@@ -82,7 +82,6 @@ export default function Dashboard() {
         rows={data}
         columns={columns}
         pageSizeOptions={[5, 10, 20, 50, 100]}
-        getRowId={(row) => row['Authorization Number']}
         onRowClick={(params) => setSelectedRow(params.row)}
       />
       <Dialog open={!!selectedRow} onClose={handleClose}>
