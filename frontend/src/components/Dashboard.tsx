@@ -45,11 +45,7 @@ export default function Dashboard() {
       .get('/v1/users')
       .then((response: AxiosResponse) => {
         setData(
-          response.data.map((user: UserDto) => [
-            user.id,
-            user.name,
-            user.email,
-          ]),
+          response.data
         )
       })
       .catch((error) => {
