@@ -52,7 +52,7 @@ on:
         type: string
 
     outputs:
-      triggered: ${{ jobs.deploys.outputs.triggered }}
+      triggered: jobs.deploys.outputs.triggered
 
 env:
   repo_release: ${{ github.event.repository.name }}-${{ inputs.release }}
@@ -64,6 +64,8 @@ jobs:
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
+    outputs:
+      triggered: ${{ steps.triggers.outputs.triggered }}
     steps:
       - uses: actions/checkout@v4
       - name: Check Deployment Triggers
