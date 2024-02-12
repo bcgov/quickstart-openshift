@@ -38,3 +38,11 @@ jobs:
       tag: ${{ github.event.number }}
       release: ${{ github.event.number }}
       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+
+  integration:
+    name: Integration Tests
+    needs: [deploys]
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: ${{ github.event.number }}
+      triggers: ('backend/' 'frontend/' 'migrations/')
