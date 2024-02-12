@@ -14,10 +14,13 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@bcgov/bc-sans": "^2.1.0",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.1",
+    "@mui/system": "^5.15.9",
+    "@mui/x-data-grid": "^6.19.4",
     "@vitejs/plugin-react": "^4.0.0",
     "axios": "^1.4.0",
     "mui-datatables": "^4.3.0",

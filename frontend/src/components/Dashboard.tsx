@@ -1,11 +1,41 @@
-import { useEffect, useState } from 'react'
-import MUIDataTable from 'mui-datatables'
 import apiService from '@/service/api-service'
-import type UserDto from '@/interfaces/UserDto'
-import type { AxiosResponse } from '~/axios'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableRow from '@mui/material/TableRow'
+import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid'
+import { useEffect, useState } from 'react'
+import { AxiosResponse } from '~/axios'
+import UserDto from "@/interfaces/UserDto";
 
-const columns: string[] = ['Id', 'Name', 'Email']
-
+const columns: GridColDef[] = [
+  {
+    field: 'Id',
+    headerName: 'Employee ID',
+    sortable: true,
+    filterable: true,
+    flex: 1,
+  },
+  {
+    field: 'Name',
+    headerName: 'Employee Name',
+    sortable: true,
+    filterable: true,
+    flex: 1,
+  },
+  {
+    field: 'Email',
+    headerName: 'Employee Email',
+    sortable: true,
+    filterable: true,
+    flex: 1,
+  }
+  ];
 export default function Dashboard() {
   const [data, setData] = useState([])
 
@@ -26,6 +56,56 @@ export default function Dashboard() {
         console.error(error)
       })
   }, [])
+  const [selectedRow, setSelectedRow] = useState(null)
 
-  return <MUIDataTable title={'User List'} data={data} columns={columns} />
+  const handleClose = () => {
+    setSelectedRow(null)
+  }
+  return (
+    <div
+      style={{
+        minHeight: '45em',
+        maxHeight: '45em',
+        width: '100%',
+        marginLeft: '4em',
+      }}
+    >
+      <DataGrid
+        slots={{ toolbar: GridToolbar }}
+        slotProps={{
+          toolbar: {
+            showQuickFilter: true,
+          },
+        }}
+        experimentalFeatures={{ ariaV7: true }}
+        checkboxSelection={false}
+        rows={data}
+        columns={columns}
+        pageSizeOptions={[5, 10, 20, 50, 100]}
+        getRowId={(row) => row['Authorization Number']}
+        onRowClick={(params) => setSelectedRow(params.row)}
+      />
+      <Dialog open={!!selectedRow} onClose={handleClose}>
+        <DialogTitle>Row Details</DialogTitle>
+        <DialogContent>
+          <Table>
+            <TableBody>
+              {selectedRow &&
+                Object.entries(selectedRow).map(([key, value]) => (
+                  <TableRow key={key}>
+                    <TableCell>{key}</TableCell>
+                    <TableCell>{value}</TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" color="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  )
 }

@@ -27,6 +27,8 @@ global:
   #-- extra annotations for the pod, it is optional and is an object.
   podAnnotations: |
       app.kubernetes.io/timestamp: {{now | toString }}
+  imagestreams:
+    enabled: true
 #-- the components of the application, backend.
 backend:
   #-- enable or disable a component deployment.
