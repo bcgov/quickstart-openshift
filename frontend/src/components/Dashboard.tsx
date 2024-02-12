@@ -8,12 +8,11 @@ import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
-import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid'
+import { DataGrid, GridToolbar } from '@mui/x-data-grid'
 import { useEffect, useState } from 'react'
 import { AxiosResponse } from '~/axios'
-import UserDto from "@/interfaces/UserDto";
 
-const columns: GridColDef[] = [
+const columns = [
   {
     field: 'id',
     headerName: 'Employee ID',
@@ -34,28 +33,26 @@ const columns: GridColDef[] = [
     sortable: true,
     filterable: true,
     flex: 1,
-  }
-  ];
+  },
+]
 export default function Dashboard() {
-  const [data, setData] = useState<UserDto[]>([])
+  const [data, setData] = useState<any>([])
 
   useEffect(() => {
     apiService
       .getAxiosInstance()
       .get('/v1/users')
       .then((response: AxiosResponse) => {
-        const users: UserDto[] = [];
+        const users = []
         for (const user of response.data) {
-          const userDto: UserDto = {
+          const userDto = {
             id: user.id,
             name: user.name,
-            email: user.email
-          };
-          users.push(userDto);
+            email: user.email,
+          }
+          users.push(userDto)
         }
-        setData(
-          users
-        )
+        setData(users)
       })
       .catch((error) => {
         console.error(error)
