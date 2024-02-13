@@ -24,6 +24,11 @@ on:
         required: false
         type: string
         default: ${{ github.event.number }}
+      test:
+        description: Run tests after deployment?
+        required: false
+        type: string
+        default: true
       triggers:
         description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
         required: false
@@ -140,3 +145,12 @@ jobs:
           
           # Remove old build runs, build pods and deployment pods
           oc delete po --field-selector=status.phase==Succeeded
+
+  tests:
+    name: Tests
+    needs: [deploys]
+    if: ${{ inputs.test == 'true' }}
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: ${{ inputs.release }}
+      triggered: ${{ needs.deploys.outputs.triggered }}
