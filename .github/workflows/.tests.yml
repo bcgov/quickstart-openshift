@@ -22,7 +22,7 @@ env:
 jobs:
   integration-tests:
     name: Integration
-    if: ${{ inputs.triggered == "true" }}
+    if: ${{ inputs.triggered == 'true' }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -47,7 +47,7 @@ jobs:
 
   cypress-e2e-tests:
     name: E2E
-    if: ${{ inputs.triggered == "true" }}
+    if: ${{ inputs.triggered == 'true' }}
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -82,7 +82,7 @@ jobs:
 
   load-tests:
     name: Load
-    if: ${{ inputs.triggered == "true" }}
+    if: ${{ inputs.triggered == 'true' }}
     runs-on: ubuntu-22.04
     strategy:
       matrix:
