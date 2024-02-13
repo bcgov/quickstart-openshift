@@ -49,6 +49,8 @@ jobs:
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}
+    permissions:
+      pull-requests: write
     runs-on: ubuntu-22.04
     steps:
       - uses: amannn/action-semantic-pull-request@v5.4.0
@@ -62,8 +64,6 @@ jobs:
           exit 1
 
       - uses: bcgov-nr/action-pr-description-add@v1.1.0
-        permissions:
-          pull-requests: write
         with:
           add_markdown: |
             ---
