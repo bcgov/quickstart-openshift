@@ -34,7 +34,7 @@ jobs:
   test:
     name: Test
     needs: [builds]
-    uses: bcgov-nr/action-support./.github/workflows/.deploy.yml@main
+    uses: bcgov-nr/action-support/.github/workflows/.deploy.yml@main
     secrets: inherit
     with:
       packages: "migrations, backend, frontend"
