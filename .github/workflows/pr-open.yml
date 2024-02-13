@@ -62,20 +62,3 @@ jobs:
           echo "Please use conventional commits in your PR title and re-run this job."
           echo "https://www.conventionalcommits.org/en/v1.0.0/"
           exit 1
-
-      - uses: bcgov-nr/action-pr-description-add@v1.1.1
-        with:
-          add_markdown: |
-            ---
-
-            Thanks for the PR!
-
-            Deployments, as required, will be available below:
-            - [Frontend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }})
-            - [Backend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/api)
-
-            Please create PRs in draft mode.  Mark as ready to enable:
-            - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
-
-            After merge, new images are deployed in:
-            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
