@@ -38,3 +38,15 @@ jobs:
       tag: ${{ github.event.number }}
       release: ${{ github.event.number }}
       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+
+  results:
+    name: Results
+    needs: [deploys]
+    if: always() && (!cancelled()) && (!failure())
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Success
+        shell: bash
+        run: |
+          echo "Deployment successful!"
