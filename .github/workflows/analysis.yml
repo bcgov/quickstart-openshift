@@ -60,7 +60,6 @@ jobs:
   codeql:
     name: CodeQL Security Scan
     if: ${{ ! github.event.pull_request.draft }}
-    needs: [tests]
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     steps:
@@ -78,7 +77,7 @@ jobs:
   trivy:
     name: Trivy Security Scan
     if: ${{ ! github.event.pull_request.draft }}
-    needs: [tests]
+    needs: [codeql, tests]
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
