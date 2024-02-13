@@ -1,5 +1,3 @@
-# Build static files
-# Node Bullseye has npm
 FROM node:20.11.0-bullseye-slim AS buildWithDevDeps
 
 # Install packages, build and keep only prod packages
