@@ -19,7 +19,7 @@ on:
         description: Build outputs
         required: false
         type: string
-        default: ''
+        default: 'true'
       environment:
         description: Environment name; omit for PRs
         required: false
