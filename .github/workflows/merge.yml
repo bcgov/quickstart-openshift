@@ -47,7 +47,6 @@ jobs:
       autoscaling: true
       environment: prod
       tag: ${{ needs.vars.outputs.pr }}
-      test: false
       release: prod
       params:
         --set backend.deploymentStrategy.type=RollingUpdate
