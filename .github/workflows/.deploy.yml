@@ -28,7 +28,7 @@ on:
         description: Run tests after deployment?
         required: false
         type: string
-        default: true
+        default: "true"
       triggers:
         description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
         required: false
