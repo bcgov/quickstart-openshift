@@ -35,7 +35,6 @@ jobs:
     name: Test
     needs: [builds]
     uses: bcgov-nr/action-support/.github/workflows/pr-close.yml@main
-    secrets: inherit
     with:
       packages: "migrations, backend, frontend"
       repository: ${{ github.repository }}
