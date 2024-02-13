@@ -159,7 +159,7 @@ jobs:
 
   results:
     name: Results
-    needs: [tests]
+    needs: [tests, triggers]
     if: always() && (!cancelled()) && (!failure())
     runs-on: ubuntu-22.04
     timeout-minutes: 5
