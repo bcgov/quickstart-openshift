@@ -19,6 +19,7 @@ on:
         description: Build outputs
         required: false
         type: string
+        default: ''
       environment:
         description: Environment name; omit for PRs
         required: false
@@ -33,10 +34,6 @@ on:
         required: false
         type: string
         default: "true"
-      triggers:
-        description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
-        required: false
-        type: string
 
       ### Usually a bad idea / not recommended
       directory:
@@ -65,52 +62,9 @@ env:
   package_tag: ${{ inputs.tag }}
 
 jobs:
-  triggers:
-    name: Check Triggers
-    runs-on: ubuntu-22.04
-    timeout-minutes: 1
-    outputs:
-      triggered: ${{ steps.triggers.outputs.triggered }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check build.outputs
-        run: |
-          echo "outputs=${{ inputs.build_outputs }}"
-
-      - name: Check Deployment Triggers
-        id: triggers
-        run: |
-          # Expand for trigger processing
-
-          # Always deploy if no triggers are provided
-          if [ -z "${{ inputs.triggers }}" ]; then
-            echo "Always deploy when no triggers are provided"
-            echo "triggered=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # Deploy if changed files (git diff) match triggers
-          TRIGGERS=${{ inputs.triggers }}
-          git fetch origin ${{ github.event.repository.default_branch }}
-          while read -r check; do
-            for t in "${TRIGGERS[@]}"; do
-              if [[ "${check}" =~ "${t}" ]]; then
-                  echo "Build triggered based on git diff"
-                  echo -e "${t}\n --> ${check}"
-                  echo "triggered=true" >> $GITHUB_OUTPUT
-                  exit 0
-              fi
-            done
-          done < <(git diff origin/${{ github.event.repository.default_branch }} --name-only)
-
-          # If here skip deployment
-          echo "No triggers have fired, deployment skipped"
-          echo "triggered=false" >> $GITHUB_OUTPUT
-
   deploys:
     name: Helm
-    needs: [triggers]
-    if: ${{ needs.triggers.outputs.triggered == 'true' }}
+    if: ${{ inputs.build_outputs != '' }}
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
@@ -160,7 +114,7 @@ jobs:
   tests:
     name: Tests
     needs: [deploys]
-    if: ${{ inputs.test == 'true' }}
+    if: ${{ inputs.test == 'true' && inputs.build_outputs != ''  }}
     uses: ./.github/workflows/.tests.yml
     with:
       target: ${{ inputs.release }}
