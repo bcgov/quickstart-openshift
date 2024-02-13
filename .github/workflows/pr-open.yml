@@ -16,7 +16,7 @@ jobs:
     permissions:
       packages: write
     outputs:
-      digest: ${{ steps.builder.outputs.digest }}
+      digest: ${{ steps.builds.outputs.digest }}
     strategy:
       matrix:
         package: [migrations, backend, frontend]
