@@ -115,44 +115,44 @@ jobs:
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
 
-          # Interrupt any previous jobs (status = pending-upgrade)
-          PREVIOUS=$(helm status ${{ env.repo_release }} -o json | jq .info.status || true)
-          if [[ ${PREVIOUS} =~ pending ]]; then
-            echo "Rollback triggered"
-            helm rollback ${{ env.repo_release }} || \
-              helm uninstall ${{ env.repo_release }}
-          fi
-          # Clean previous deployments for PR pipeline, if any 
-          if [[ '${{inputs.environment}}' == '' ]]; then
-            helm uninstall ${{ env.repo_release }} || true
-          fi
-          # Deploy Helm Chart
-          helm dependency update
-          helm package --app-version="${{ env.package_tag }}" --version=${{ inputs.tag }} .
+          # # Interrupt any previous jobs (status = pending-upgrade)
+          # PREVIOUS=$(helm status ${{ env.repo_release }} -o json | jq .info.status || true)
+          # if [[ ${PREVIOUS} =~ pending ]]; then
+          #   echo "Rollback triggered"
+          #   helm rollback ${{ env.repo_release }} || \
+          #     helm uninstall ${{ env.repo_release }}
+          # fi
+          # # Clean previous deployments for PR pipeline, if any 
+          # if [[ '${{inputs.environment}}' == '' ]]; then
+          #   helm uninstall ${{ env.repo_release }} || true
+          # fi
+          # # Deploy Helm Chart
+          # helm dependency update
+          # helm package --app-version="${{ env.package_tag }}" --version=${{ inputs.tag }} .
           
-          helm upgrade \
-            --set global.autoscaling=${{ inputs.autoscaling }} \
-            --set-string global.repository=${{ github.repository }} \
-            --set-string global.secrets.databasePassword=${{ secrets.DB_PASSWORD }} \
-            --set-string backend.containers[0].tag="${{ env.package_tag }}" \
-            --set-string backend.initContainers[0].tag="${{ env.package_tag }}" \
-            --set-string frontend.containers[0].tag="${{ env.package_tag }}" \
-            ${{ inputs.params }} \
-            --install --wait --atomic  ${{ env.repo_release }} \
-            --timeout ${{ inputs.timeout-minutes }}m \
-            --values ${{ inputs.values }} \
-            ./${{ github.event.repository.name }}-${{ inputs.tag }}.tgz
+          # helm upgrade \
+          #   --set global.autoscaling=${{ inputs.autoscaling }} \
+          #   --set-string global.repository=${{ github.repository }} \
+          #   --set-string global.secrets.databasePassword=${{ secrets.DB_PASSWORD }} \
+          #   --set-string backend.containers[0].tag="${{ env.package_tag }}" \
+          #   --set-string backend.initContainers[0].tag="${{ env.package_tag }}" \
+          #   --set-string frontend.containers[0].tag="${{ env.package_tag }}" \
+          #   ${{ inputs.params }} \
+          #   --install --wait --atomic  ${{ env.repo_release }} \
+          #   --timeout ${{ inputs.timeout-minutes }}m \
+          #   --values ${{ inputs.values }} \
+          #   ./${{ github.event.repository.name }}-${{ inputs.tag }}.tgz
 
-          # print history 
-          helm history ${{ env.repo_release }}
+          # # print history 
+          # helm history ${{ env.repo_release }}
           
-          # Remove old build runs, build pods and deployment pods
-          oc delete po --field-selector=status.phase==Succeeded
+          # # Remove old build runs, build pods and deployment pods
+          # oc delete po --field-selector=status.phase==Succeeded
 
   tests:
     name: Tests
     needs: [deploys]
-    if: ${{ needs.deploys.outputs.triggered == 'true' && inputs.test == 'true' }}
+    if: ${{ inputs.test == 'true' }}
     uses: ./.github/workflows/.tests.yml
     with:
       target: ${{ inputs.release }}
@@ -168,3 +168,5 @@ jobs:
         shell: bash
         run: |
           echo "Deployment successful!"
+          echo "inputs.test: ${{ inputs.test }}"
+          echo "needs.triggers.outputs.triggered: ${{ needs.triggers.outputs.triggered }}"
