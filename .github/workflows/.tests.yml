@@ -9,11 +9,6 @@ on:
         required: false
         type: string
         default: test
-      triggered:
-        description: Trigger results from previous job, usually .deploy.yml
-        required: false
-        type: string
-        default: true
 
 env:
   DOMAIN: apps.silver.devops.gov.bc.ca
@@ -22,7 +17,6 @@ env:
 jobs:
   integration-tests:
     name: Integration
-    if: ${{ inputs.triggered == 'true' }}
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -47,7 +41,6 @@ jobs:
 
   cypress-e2e-tests:
     name: E2E
-    if: ${{ inputs.triggered == 'true' }}
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -82,7 +75,6 @@ jobs:
 
   load-tests:
     name: Load
-    if: ${{ inputs.triggered == 'true' }}
     runs-on: ubuntu-22.04
     strategy:
       matrix:
