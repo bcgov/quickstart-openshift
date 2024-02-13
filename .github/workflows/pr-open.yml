@@ -38,10 +38,9 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
+      build_outputs: ${{ needs.builds.outputs.digest }}
       tag: ${{ github.event.number }}
       release: ${{ github.event.number }}
-      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
-      build_outputs: ${{ needs.builds.outputs.digest }}
 
   results:
     name: Results
