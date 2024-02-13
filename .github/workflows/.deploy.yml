@@ -15,6 +15,10 @@ on:
         required: false
         type: string
         default: false
+      build_outputs:
+        description: Build outputs
+        required: false
+        type: string
       environment:
         description: Environment name; omit for PRs
         required: false
@@ -69,6 +73,10 @@ jobs:
       triggered: ${{ steps.triggers.outputs.triggered }}
     steps:
       - uses: actions/checkout@v4
+      - name: Check build.outputs
+        run: |
+          echo "outputs=${{ inputs.build_outputs }}"
+
       - name: Check Deployment Triggers
         id: triggers
         run: |
