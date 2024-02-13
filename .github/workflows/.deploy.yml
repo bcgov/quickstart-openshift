@@ -56,21 +56,15 @@ on:
         required: false
         type: string
 
-    outputs:
-      triggered:
-        description: Have triggers fired?
-        value: ${{ jobs.deploys.outputs.triggered }}
-
 env:
   repo_release: ${{ github.event.repository.name }}-${{ inputs.release }}
   package_tag: ${{ inputs.tag }}
 
 jobs:
-  deploys:
-    name: Helm
-    environment: ${{ inputs.environment }}
+  triggers:
+    name: Check Triggers
     runs-on: ubuntu-22.04
-    timeout-minutes: ${{ inputs.timeout-minutes }}
+    timeout-minutes: 1
     outputs:
       triggered: ${{ steps.triggers.outputs.triggered }}
     steps:
@@ -103,9 +97,17 @@ jobs:
 
           # If here skip deployment
           echo "No triggers have fired, deployment skipped"
+          echo "triggered=false" >> $GITHUB_OUTPUT
 
+  deploys:
+    name: Helm
+    needs: [triggers]
+    if: ${{ needs.triggers.outputs.triggered == 'true' }}
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    steps:
       - name: Deploy if Triggers Fired
-        if: ${{ steps.triggers.outputs.triggered == 'true' }}
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
@@ -149,27 +151,22 @@ jobs:
   tests:
     name: Tests
     needs: [deploys]
-    if: ${{ inputs.test == 'true' }}
+    if: ${{ needs.deploys.outputs.triggered == 'true' && inputs.test == 'true' }}
     uses: ./.github/workflows/.tests.yml
     with:
       target: ${{ inputs.release }}
       triggered: ${{ needs.deploys.outputs.triggered }}
 
-  cleanup:
-    name: Cleanup
+  results:
+    name: Results
     needs: [tests]
     if: always() && (!cancelled()) && (!failure())
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     steps:
-      - name: Deploy if Triggers Fired
-        if: ${{ steps.triggers.outputs.triggered == 'true' }}
+      - name: Success
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
-          
-          # # Remove old build runs, build pods and deployment pods
-          # oc delete po --field-selector=status.phase==Succeeded
+          echo "Deployment successful!"
