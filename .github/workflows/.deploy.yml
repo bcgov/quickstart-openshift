@@ -15,6 +15,11 @@ on:
         required: false
         type: string
         default: false
+      build_outputs:
+        description: Build outputs
+        required: false
+        type: string
+        default: ''
       environment:
         description: Environment name; omit for PRs
         required: false
@@ -24,10 +29,11 @@ on:
         required: false
         type: string
         default: ${{ github.event.number }}
-      triggers:
-        description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
+      test:
+        description: Run tests after deployment?
         required: false
         type: string
+        default: "true"
 
       ### Usually a bad idea / not recommended
       directory:
@@ -58,42 +64,13 @@ env:
 jobs:
   deploys:
     name: Helm
+    if: ${{ inputs.build_outputs != '' }}
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - uses: actions/checkout@v4
-      - name: Check Deployment Triggers
-        id: triggers
-        run: |
-          # Expand for trigger processing
-
-          # Always deploy if no triggers are provided
-          if [ -z "${{ inputs.triggers }}" ]; then
-            echo "Always deploy when no triggers are provided"
-            echo "triggered=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # Deploy if changed files (git diff) match triggers
-          TRIGGERS=${{ inputs.triggers }}
-          git fetch origin ${{ github.event.repository.default_branch }}
-          while read -r check; do
-            for t in "${TRIGGERS[@]}"; do
-              if [[ "${check}" =~ "${t}" ]]; then
-                  echo "Build triggered based on git diff"
-                  echo -e "${t}\n --> ${check}"
-                  echo "triggered=true" >> $GITHUB_OUTPUT
-                  exit 0
-              fi
-            done
-          done < <(git diff origin/${{ github.event.repository.default_branch }} --name-only)
-
-          # If here skip deployment
-          echo "No triggers have fired, deployment skipped"
-
-      - name: Deploy if Triggers Fired
-        if: ${{ steps.triggers.outputs.triggered == 'true' }}
+      - name: Deploy 
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
@@ -133,3 +110,11 @@ jobs:
           
           # Remove old build runs, build pods and deployment pods
           oc delete po --field-selector=status.phase==Succeeded
+
+  tests:
+    name: Tests
+    needs: [deploys]
+    if: ${{ inputs.test == 'true' && inputs.build_outputs != ''  }}
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: ${{ inputs.release }}

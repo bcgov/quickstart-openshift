@@ -74,8 +74,8 @@ jobs:
           if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
 
   load-tests:
-    runs-on: ubuntu-latest
     name: Load
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         name: [backend, frontend]

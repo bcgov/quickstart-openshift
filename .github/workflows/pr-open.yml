@@ -15,12 +15,15 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       packages: write
+    outputs:
+      digest: ${{ steps.builds.outputs.digest }}
     strategy:
       matrix:
         package: [migrations, backend, frontend]
     timeout-minutes: 10
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+        id: builds
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
@@ -35,6 +38,47 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
+      build_outputs: ${{ needs.builds.outputs.digest }}
       tag: ${{ github.event.number }}
       release: ${{ github.event.number }}
-      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+
+  validate:
+    name: Validate
+    needs: [deploys]
+    if: always() && (!cancelled()) && (!failure())
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: ${{ github.event.repository.name }}
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5.4.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: failure()
+        run: |
+          echo "Please use conventional commits in your PR title and re-run this job."
+          echo "https://www.conventionalcommits.org/en/v1.0.0/"
+          exit 1
+
+      - uses: bcgov-nr/action-pr-description-add@v1.1.1
+        env:
+          DOMAIN: apps.silver.devops.gov.bc.ca
+          PREFIX: ${{ github.event.repository.name }}
+        with:
+          add_markdown: |
+            ---
+
+            Thanks for the PR!
+
+            Deployments, as required, will be available below:
+            - [Frontend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }})
+            - [Backend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/api)
+
+            Please create PRs in draft mode.  Mark as ready to enable:
+            - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
+
+            After merge, new images are deployed in:
+            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
