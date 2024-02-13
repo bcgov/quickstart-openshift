@@ -30,55 +30,66 @@ jobs:
           tag: ${{ github.event.number }}
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
-
-  # https://github.com/bcgov-nr/action-deployer-openshift
-  deploys:
-    name: Deploys
+  
+  test:
+    name: Test
     needs: [builds]
-    uses: ./.github/workflows/.deploy.yml
+    uses: bcgov-nr/action-support./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      build_outputs: ${{ needs.builds.outputs.digest }}
-      tag: ${{ github.event.number }}
-      release: ${{ github.event.number }}
+      packages: "migrations, backend, frontend"
+      repository: ${{ github.repository }}
+      promote_from: ${{ github.event.number }}
+      promote_to: blorf
 
-  validate:
-    name: Validate
-    needs: [deploys]
-    if: always() && (!cancelled()) && (!failure())
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}
-    permissions:
-      pull-requests: write
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: amannn/action-semantic-pull-request@v5.4.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # # https://github.com/bcgov-nr/action-deployer-openshift
+  # deploys:
+  #   name: Deploys
+  #   needs: [builds]
+  #   uses: ./.github/workflows/.deploy.yml
+  #   secrets: inherit
+  #   with:
+  #     build_outputs: ${{ needs.builds.outputs.digest }}
+  #     tag: ${{ github.event.number }}
+  #     release: ${{ github.event.number }}
 
-      - if: failure()
-        run: |
-          echo "Please use conventional commits in your PR title and re-run this job."
-          echo "https://www.conventionalcommits.org/en/v1.0.0/"
-          exit 1
+  # validate:
+  #   name: Validate
+  #   needs: [deploys]
+  #   if: always() && (!cancelled()) && (!failure())
+  #   env:
+  #     DOMAIN: apps.silver.devops.gov.bc.ca
+  #     PREFIX: ${{ github.event.repository.name }}
+  #   permissions:
+  #     pull-requests: write
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: amannn/action-semantic-pull-request@v5.4.0
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: bcgov-nr/action-pr-description-add@v1.1.1
-        env:
-          DOMAIN: apps.silver.devops.gov.bc.ca
-          PREFIX: ${{ github.event.repository.name }}
-        with:
-          add_markdown: |
-            ---
+  #     - if: failure()
+  #       run: |
+  #         echo "Please use conventional commits in your PR title and re-run this job."
+  #         echo "https://www.conventionalcommits.org/en/v1.0.0/"
+  #         exit 1
 
-            Thanks for the PR!
+  #     - uses: bcgov-nr/action-pr-description-add@v1.1.1
+  #       env:
+  #         DOMAIN: apps.silver.devops.gov.bc.ca
+  #         PREFIX: ${{ github.event.repository.name }}
+  #       with:
+  #         add_markdown: |
+  #           ---
 
-            Deployments, as required, will be available below:
-            - [Frontend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }})
-            - [Backend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/api)
+  #           Thanks for the PR!
 
-            Please create PRs in draft mode.  Mark as ready to enable:
-            - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
+  #           Deployments, as required, will be available below:
+  #           - [Frontend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }})
+  #           - [Backend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/api)
 
-            After merge, new images are deployed in:
-            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
+  #           Please create PRs in draft mode.  Mark as ready to enable:
+  #           - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
+
+  #           After merge, new images are deployed in:
+  #           - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
