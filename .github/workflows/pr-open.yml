@@ -40,7 +40,7 @@ jobs:
     with:
       cleanup: helm
       oc_namespace: ${{ vars.oc_namespace }}
-      # packages: backend frontend
+      packages: backend frontend
 
   # # https://github.com/bcgov-nr/action-deployer-openshift
   # deploys:
