@@ -35,6 +35,7 @@ jobs:
     name: Test
     # needs: [builds]
     uses: bcgov-nr/action-support/.github/workflows/.pr-close.yml@feat/pr-close
+    secrets: inherit
     with:
       cleanup: helm
       packages: backend frontend
