@@ -38,7 +38,9 @@ jobs:
     secrets: inherit
     with:
       cleanup: helm
-      packages: backend frontend
+      oc_namespace: ${{ vars.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+      # packages: backend frontend
 
   # # https://github.com/bcgov-nr/action-deployer-openshift
   # deploys:
