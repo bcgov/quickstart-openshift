@@ -46,12 +46,12 @@ jobs:
     name: Test
     # needs: [deploys]
     uses: bcgov/quickstart-openshift-helpers/test.yml@main
-    secrets:
-      oc_namespace: ${{ vars.OC_NAMESPACE }}
-      oc_token: ${{ secrets.OC_TOKEN }}
-    with:
-      cleanup: helm
-      packages: backend frontend migrations
+    # secrets:
+    #   oc_namespace: ${{ vars.OC_NAMESPACE }}
+    #   oc_token: ${{ secrets.OC_TOKEN }}
+    # with:
+      # cleanup: helm
+      # packages: backend frontend migrations
 
   # validate:
   #   name: Validate
