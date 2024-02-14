@@ -34,7 +34,7 @@ jobs:
   test:
     name: Test
     # needs: [builds]
-    uses: bcgov-nr/action-support/.github/workflows/pr-close.yml@feat/pr-close
+    uses: bcgov-nr/action-support/.github/workflows/.pr-close.yml@feat/pr-close
     with:
       cleanup: helm
       packages: backend frontend
