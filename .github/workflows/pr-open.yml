@@ -32,7 +32,7 @@ jobs:
   #         # triggers: ('${{ matrix.package }}/')
   
   test:
-    # name: Test
+    name: Test
     # needs: [builds]
     uses: bcgov-nr/action-support/.github/workflows/.pr-close.yml@feat/pr-close
     secrets:
