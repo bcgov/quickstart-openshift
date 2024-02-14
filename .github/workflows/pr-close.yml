@@ -10,42 +10,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Clean up OpenShift when PR closed, no conditions
-  cleanup-openshift:
-    name: Cleanup OpenShift
-    env:
-      release: ${{ github.event.repository.name }}-${{ github.event.number }}
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    steps:
-      - name: Remove OpenShift artifacts
-        run: |
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
-          oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
-
-          # If found, then remove
-          helm status ${{ env.release }} && helm uninstall --no-hooks ${{ env.release }} || \
-            echo "Not found: ${{ env.release }}"
-
-          # Remove Bitnami Crunchy PVCs
-          oc delete pvc data-${{ env.release }}-bitnami-pg-0 || \
-            echo "Not found: pvc data-${{ env.release }}-bitnami-pg-0"
-
-  # Add tags to PR image
-  retags:
-    name: Promote Images
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        package: [migrations, backend, frontend]
-    timeout-minutes: 1
-    steps:
-      - uses: shrink/actions-docker-registry-tag@v4
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ github.event.number }}
-          tags: latest
+  cleanup:
+    name: Cleanup OpenShift and/or Promote Images
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-close.yml@main
+    secrets:
+      oc_namespace: ${{ vars.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+    with:
+      cleanup: helm
+      packages: backend frontend migrations
