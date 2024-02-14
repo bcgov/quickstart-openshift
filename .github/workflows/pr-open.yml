@@ -47,10 +47,10 @@ jobs:
     needs: [deploys]
     uses: bcgov-nr/action-support/.github/workflows/.pr-close.yml@feat/pr-close
     secrets:
+      oc_namespace: ${{ vars.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       cleanup: helm
-      oc_namespace: ${{ vars.OC_NAMESPACE }}
       packages: backend frontend migrations
 
   # validate:
