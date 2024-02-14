@@ -34,12 +34,10 @@ jobs:
   test:
     name: Test
     # needs: [builds]
-    uses: bcgov-nr/action-support/.github/workflows/pr-close.yml@main
+    uses: bcgov-nr/action-support/.github/workflows/pr-close.yml@feat/pr-close
     with:
-      packages: "[migrations, backend, frontend]"
-      repository: ${{ github.repository }}
-      promote_from: ${{ github.event.number }}
-      promote_to: testy
+      cleanup: helm
+      packages: backend frontend
 
   # # https://github.com/bcgov-nr/action-deployer-openshift
   # deploys:
