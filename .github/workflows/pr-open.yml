@@ -13,42 +13,42 @@ env:
   PREFIX: ${{ github.event.repository.name }}
 
 jobs:
-  # # https://github.com/bcgov-nr/action-builder-ghcr
-  # builds:
-  #   name: Builds
-  #   runs-on: ubuntu-22.04
-  #   permissions:
-  #     packages: write
-  #   outputs:
-  #     digest: ${{ steps.builds.outputs.digest }}
-  #   strategy:
-  #     matrix:
-  #       package: [migrations, backend, frontend]
-  #   timeout-minutes: 10
-  #   steps:
-  #     - uses: bcgov-nr/action-builder-ghcr@v2.0.2
-  #       id: builds
-  #       with:
-  #         keep_versions: 50
-  #         package: ${{ matrix.package }}
-  #         tag: ${{ github.event.number }}
-  #         tag_fallback: latest
-  #         triggers: ('${{ matrix.package }}/')
+  # https://github.com/bcgov-nr/action-builder-ghcr
+  builds:
+    name: Builds
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    outputs:
+      digest: ${{ steps.builds.outputs.digest }}
+    strategy:
+      matrix:
+        package: [migrations, backend, frontend]
+    timeout-minutes: 10
+    steps:
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+        id: builds
+        with:
+          keep_versions: 50
+          package: ${{ matrix.package }}
+          tag: ${{ github.event.number }}
+          tag_fallback: latest
+          triggers: ('${{ matrix.package }}/')
 
-  # # https://github.com/bcgov-nr/action-deployer-openshift
-  # deploys:
-  #   name: Deploys
-  #   needs: [builds]
-  #   uses: ./.github/workflows/.deploy.yml
-  #   secrets: inherit
-  #   with:
-  #     build_outputs: ${{ needs.builds.outputs.digest }}
-  #     tag: ${{ github.event.number }}
-  #     release: ${{ github.event.number }}
+  # https://github.com/bcgov-nr/action-deployer-openshift
+  deploys:
+    name: Deploys
+    needs: [builds]
+    uses: ./.github/workflows/.deploy.yml
+    secrets: inherit
+    with:
+      build_outputs: ${{ needs.builds.outputs.digest }}
+      tag: ${{ github.event.number }}
+      release: ${{ github.event.number }}
 
   validate:
     name: Validate PR
-    # needs: [deploys]
+    needs: [deploys]
     if: always() && (!cancelled()) && (!failure())
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@main
     with:
