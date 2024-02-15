@@ -5,7 +5,6 @@ on:
     types: [edited]
 
 concurrency:
-  # Cancel in progress for PR open and close, but not merge_group
   group: ${{ github.workflow }}-edit-${{ github.event.number }}
   cancel-in-progress: true
 

@@ -47,7 +47,7 @@ jobs:
       release: ${{ github.event.number }}
 
   validate:
-    name: Validate PR
+    name: Validate
     needs: [deploys]
     if: always() && (!cancelled()) && (!failure())
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@main
