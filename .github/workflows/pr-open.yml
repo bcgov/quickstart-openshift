@@ -49,8 +49,8 @@ jobs:
     # env:
     #   DOMAIN: apps.silver.devops.gov.bc.ca
     #   PREFIX: ${{ github.event.repository.name }}
-    # permissions:
-    #   pull-requests: write
+    permissions:
+      pull-requests: write
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@main
     with:
       markdown_links: |
