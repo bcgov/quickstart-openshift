@@ -8,6 +8,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number }}
   cancel-in-progress: true
 
+env:
+  DOMAIN: apps.silver.devops.gov.bc.ca
+  PREFIX: ${{ github.event.repository.name }}
+
 jobs:
   # https://github.com/bcgov-nr/action-builder-ghcr
   builds:
@@ -46,39 +50,8 @@ jobs:
     name: Validate
     needs: [deploys]
     if: always() && (!cancelled()) && (!failure())
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}
-    permissions:
-      pull-requests: write
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: amannn/action-semantic-pull-request@v5.4.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - if: failure()
-        run: |
-          echo "Please use conventional commits in your PR title and re-run this job."
-          echo "https://www.conventionalcommits.org/en/v1.0.0/"
-          exit 1
-
-      - uses: bcgov-nr/action-pr-description-add@v1.1.1
-        env:
-          DOMAIN: apps.silver.devops.gov.bc.ca
-          PREFIX: ${{ github.event.repository.name }}
-        with:
-          add_markdown: |
-            ---
-
-            Thanks for the PR!
-
-            Deployments, as required, will be available below:
-            - [Frontend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }})
-            - [Backend](https://${{ env.PREFIX }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}/api)
-
-            Please create PRs in draft mode.  Mark as ready to enable:
-            - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
-
-            After merge, new images are deployed in:
-            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@v0.2.0
+    with:
+      markdown_links: |
+        - [Frontend](https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca)
+        - [Backend](https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/api)
