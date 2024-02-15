@@ -45,10 +45,10 @@ jobs:
   validate:
     name: Validate PR
     # needs: [deploys]
-    # if: always() && (!cancelled()) && (!failure())
-    # env:
-    #   DOMAIN: apps.silver.devops.gov.bc.ca
-    #   PREFIX: ${{ github.event.repository.name }}
+    if: always() && (!cancelled()) && (!failure())
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: ${{ github.event.repository.name }}
     permissions:
       pull-requests: write
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@main
