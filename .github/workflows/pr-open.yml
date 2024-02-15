@@ -45,7 +45,7 @@ jobs:
   validate:
     name: Validate PR
     # needs: [deploys]
-    # if: always() && (!cancelled()) && (!failure())
+    if: always() && (!cancelled()) && (!failure())
     # env:
     #   DOMAIN: apps.silver.devops.gov.bc.ca
     #   PREFIX: ${{ github.event.repository.name }}
