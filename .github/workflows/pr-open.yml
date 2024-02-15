@@ -8,6 +8,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number }}
   cancel-in-progress: true
 
+env:
+  DOMAIN: apps.silver.devops.gov.bc.ca
+  PREFIX: ${{ github.event.repository.name }}
+
 jobs:
   # # https://github.com/bcgov-nr/action-builder-ghcr
   # builds:
@@ -46,9 +50,6 @@ jobs:
     name: Validate PR
     # needs: [deploys]
     if: always() && (!cancelled()) && (!failure())
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}
     permissions:
       pull-requests: write
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@main
