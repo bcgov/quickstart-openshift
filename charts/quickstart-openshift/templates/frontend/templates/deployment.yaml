@@ -31,9 +31,10 @@ spec:
         - name: {{ include "frontend.fullname" . }}
           {{- if .Values.frontend.securityContext }}
           securityContext:
-            {{- toYaml .Values.frontend.securityContext | nindent 12 }}
+            capabilities:
+              add: [ "NET_BIND_SERVICE" ]
           {{- end }}
-          image: {{.Values.global.registry}}/{{.Values.global.repository}}/frontend:{{ .Values.global.tag | default .Chart.AppVersion }}"
+          image: "{{.Values.global.registry}}/{{.Values.global.repository}}/frontend:{{ .Values.global.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ default "IfNotPresent" .Values.frontend.imagePullPolicy }}
           env:
             - name: BACKEND_URL
