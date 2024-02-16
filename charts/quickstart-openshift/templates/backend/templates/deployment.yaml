@@ -30,7 +30,7 @@ spec:
       initContainers:
         - name: {{ include "backend.fullname" . }}-init
           image: "{{.Values.global.registry}}/{{.Values.global.repository}}/migrations:{{ .Values.global.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ default "IfNotPresent" .Values.backend.image.pullPolicy }}
+          imagePullPolicy: {{ default "IfNotPresent" .Values.backend.imagePullPolicy }}
           envFrom:
             - secretRef:
                 name: {{.Release.Name}}

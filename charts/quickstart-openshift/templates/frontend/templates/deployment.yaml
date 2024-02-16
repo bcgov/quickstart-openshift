@@ -34,6 +34,7 @@ spec:
             {{- toYaml .Values.frontend.securityContext | nindent 12 }}
           {{- end }}
           image: {{.Values.global.registry}}/{{.Values.global.repository}}/frontend:{{ .Values.global.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ default "IfNotPresent" .Values.frontend.imagePullPolicy }}
           env:
             - name: BACKEND_URL
               value: "http://{{ .Release.Name }}-backend"
