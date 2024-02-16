@@ -49,8 +49,8 @@ jobs:
       tag: ${{ needs.vars.outputs.pr }}
       release: prod
       params:
-        --set backend.deploymentStrategy.type=RollingUpdate
-        --set frontend.deploymentStrategy.type=RollingUpdate
+        --set backend.deploymentStrategy=RollingUpdate
+        --set frontend.deploymentStrategy=RollingUpdate
 
   promote:
     name: Promote Images
