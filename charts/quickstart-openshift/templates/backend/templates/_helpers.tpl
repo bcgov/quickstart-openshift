@@ -24,7 +24,9 @@ Common labels
 */}}
 {{- define "backend.labels" -}}
 {{ include "backend.selectorLabels" . }}
+{{- if .Values.global.tag }}
 app.kubernetes.io/image-version: {{ .Values.global.tag | quote }}
+{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/short-name: {{ include "backend.name" . }}
 {{- end }}

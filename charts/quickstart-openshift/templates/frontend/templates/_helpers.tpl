@@ -24,7 +24,10 @@ If release name contains chart name it will be used as a full name.
 Common labels
 */}}
 {{- define "frontend.labels" -}}
+{{ include "frontend.selectorLabels" . }}
+{{- if .Values.global.tag }}
 app.kubernetes.io/image-version: {{ .Values.global.tag | quote }}
+{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/short-name: {{ include "frontend.name" . }}
 {{- end }}
