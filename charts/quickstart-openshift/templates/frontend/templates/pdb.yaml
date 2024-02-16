@@ -1,0 +1,13 @@
+{{- if and .Values.frontend.pdb  .Values.frontend.pdb.enabled }}
+---
+apiVersion: policy/v1
+metadata:
+  name: {{ include "frontend.fullname" . }}
+  labels:
+    {{- include "frontend.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "frontend.fullname" . }}
+  minAvailable: {{ .Values.frontend.pdb.minAvailable }}
+{{- end }}

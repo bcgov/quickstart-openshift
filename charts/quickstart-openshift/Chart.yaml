@@ -25,29 +25,11 @@ version: 0.1.0
 appVersion: "1.16.0"
 
 dependencies:
-  - name: component
-    condition: backend.enabled
-    version: 0.3.0
-    repository: https://bcgov.github.io/helm-service
-    alias: backend
-
-  - name: component
-    condition: frontend.enabled
-    version: 0.3.0
-    repository: https://bcgov.github.io/helm-service
-    alias: frontend
-
   - name: postgresql
     condition: bitnami-pg.enabled
     version: 14.0.5
     repository: https://charts.bitnami.com/bitnami
     alias: bitnami-pg
-
-  - name: component
-    condition: backup.enabled
-    version: 0.3.0
-    repository: https://bcgov.github.io/helm-service
-    alias: backup
 maintainers:
   - name: Om Mishra
     email: omprakash.2.mishra@gov.bc.ca
