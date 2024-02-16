@@ -51,7 +51,7 @@
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-import-resolver-typescript": "^3.5.5",
     "eslint-plugin-cypress": "^2.13.3",
-    "eslint-plugin-html": "^7.1.0",
+    "eslint-plugin-html": "^8.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-promise": "^6.1.1",
