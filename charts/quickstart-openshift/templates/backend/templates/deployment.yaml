@@ -21,7 +21,7 @@ spec:
         prometheus.io/port: '3000'
         prometheus.io/path: '/api/metrics'
       labels:
-        {{- include "backend.selectorLabels" . | nindent 8 }}
+        {{- include "backend.labels" . | nindent 8 }}
     spec:
       {{- if .Values.backend.podSecurityContext }}
       securityContext:

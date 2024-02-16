@@ -21,7 +21,7 @@ spec:
         prometheus.io/port: '3003'
         prometheus.io/path: '/metrics'
       labels:
-        {{- include "frontend.selectorLabels" . | nindent 8 }}
+        {{- include "frontend.labels" . | nindent 8 }}
     spec:
       {{- if .Values.frontend.podSecurityContext }}
       securityContext:
