@@ -98,10 +98,7 @@ jobs:
           helm upgrade \
             --set global.autoscaling=${{ inputs.autoscaling }} \
             --set-string global.repository=${{ github.repository }} \
-            --set-string global.secrets.databasePassword=${{ secrets.DB_PASSWORD }} \
-            --set-string backend.containers[0].tag="${{ env.package_tag }}" \
-            --set-string backend.initContainers[0].tag="${{ env.package_tag }}" \
-            --set-string frontend.containers[0].tag="${{ env.package_tag }}" \
+            --set-string global.tag=${{ env.package_tag }} \
             ${{ inputs.params }} \
             --install --wait --atomic  ${{ env.repo_release }} \
             --timeout ${{ inputs.timeout-minutes }}m \
