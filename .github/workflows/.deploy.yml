@@ -70,7 +70,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy 
+      - name: Deploy
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
@@ -87,6 +87,9 @@ jobs:
           # Clean previous deployments for PR pipeline, if any 
           if [[ '${{inputs.environment}}' == '' ]]; then
             helm uninstall ${{ env.repo_release }} || true
+            # Remove Bitnami Postgres PVCs
+            oc delete pvc data-${{ env.repo_release }}-bitnami-pg-0 || \
+              echo "Not found: pvc data-${{ env.repo_release }}-bitnami-pg-0"
           fi
           # Deploy Helm Chart
           helm dependency update
