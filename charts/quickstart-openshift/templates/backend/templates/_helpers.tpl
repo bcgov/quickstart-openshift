@@ -35,7 +35,7 @@ app.kubernetes.io/short-name: {{ include "backend.name" . }}
 Selector labels
 */}}
 {{- define "backend.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "backend.fullname" . }}
+app.kubernetes.io/name: {{ include "backend.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
