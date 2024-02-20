@@ -1,4 +1,4 @@
-name: PR
+name: PR Edit
 
 on:
   pull_request:

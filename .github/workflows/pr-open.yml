@@ -8,10 +8,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number }}
   cancel-in-progress: true
 
-env:
-  DOMAIN: apps.silver.devops.gov.bc.ca
-  PREFIX: ${{ github.event.repository.name }}
-
 jobs:
   # https://github.com/bcgov-nr/action-builder-ghcr
   builds:
