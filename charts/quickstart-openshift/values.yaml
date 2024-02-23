@@ -113,6 +113,9 @@ frontend:
     host: "{{ .Release.Name }}-frontend.{{ .Values.global.domain }}"
     #-- the target port of the service. this is the port where the service is listening on. The name is mapped to the port name in the service.
     targetPort: http
+  pdb:
+    enabled: false # enable it in PRODUCTION for having pod disruption budget.
+    minAvailable: 1 # the minimum number of pods that must be available during the disruption budget.
 
 crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
   enabled: false

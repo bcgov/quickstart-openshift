@@ -51,6 +51,8 @@ jobs:
       params:
         --set backend.deploymentStrategy=RollingUpdate
         --set frontend.deploymentStrategy=RollingUpdate
+        --set backend.pdb.enabled=true 
+        --set frontend.pdb.enabled=true
 
   promote:
     name: Promote Images
