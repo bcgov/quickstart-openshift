@@ -118,3 +118,10 @@ jobs:
     uses: ./.github/workflows/.tests.yml
     with:
       target: ${{ inputs.release }}
+
+  checks:
+    name: Checks
+    needs: [tests]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "Workflow completed successfully!"
