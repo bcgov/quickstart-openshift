@@ -43,7 +43,7 @@ jobs:
       release: ${{ github.event.number }}
 
   results:
-    name: Results
+    name: PR Results
     needs: [deploys]
     runs-on: ubuntu-22.04
     steps:
