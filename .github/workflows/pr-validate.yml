@@ -1,4 +1,4 @@
-name: PR Validate
+name: PR Edited
 
 on:
   pull_request:
