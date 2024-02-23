@@ -77,7 +77,6 @@ jobs:
   trivy:
     name: Trivy Security Scan
     if: ${{ ! github.event.pull_request.draft }}
-    needs: [codeql, tests]
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -96,3 +95,10 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: "trivy-results.sarif"
+
+  results:
+    name: Analysis Results
+    needs: [tests, codeql, trivy]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "Workflow completed successfully!"

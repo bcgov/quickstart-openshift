@@ -59,7 +59,6 @@ on:
 
 env:
   repo_release: ${{ github.event.repository.name }}-${{ inputs.release }}
-  package_tag: ${{ inputs.tag }}
 
 jobs:
   deploys:
@@ -93,12 +92,12 @@ jobs:
           fi
           # Deploy Helm Chart
           helm dependency update
-          helm package --app-version="${{ env.package_tag }}" --version=${{ inputs.tag }} .
+          helm package --app-version="${{ inputs.tag }}" --version=${{ inputs.tag }} .
           
           helm upgrade \
             --set global.autoscaling=${{ inputs.autoscaling }} \
             --set-string global.repository=${{ github.repository }} \
-            --set-string global.tag=${{ env.package_tag }} \
+            --set-string global.tag=${{ inputs.tag }} \
             ${{ inputs.params }} \
             --install --wait --atomic  ${{ env.repo_release }} \
             --timeout ${{ inputs.timeout-minutes }}m \

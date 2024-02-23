@@ -42,12 +42,9 @@ jobs:
       tag: ${{ github.event.number }}
       release: ${{ github.event.number }}
 
-  validate:
-    name: Validate
+  results:
+    name: PR Results
     needs: [deploys]
-    if: always() && (!cancelled()) && (!failure())
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@v0.3.0
-    with:
-      markdown_links: |
-        - [Frontend](https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca)
-        - [Backend](https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/api)
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "Workflow completed successfully!"
