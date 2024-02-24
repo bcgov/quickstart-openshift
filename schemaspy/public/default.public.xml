@@ -67,7 +67,7 @@ BEGIN
   -- Raises a NOTICE if it was deprecated in this version,
   -- a WARNING if in a previous version (only up to minor version checked)
   --
-	curver_text := '3.4.1';
+	curver_text := '3.4.2';
 	IF pg_catalog.split_part(curver_text,'.',1)::int > pg_catalog.split_part(version,'.',1)::int OR
 	   ( pg_catalog.split_part(curver_text,'.',1) = pg_catalog.split_part(version,'.',1) AND
 		 pg_catalog.split_part(curver_text,'.',2) != split_part(version,'.',2) )
@@ -106,7 +106,7 @@ END;]]></definition>
          <comment/>
          <definition language="sql"><![CDATA[SELECT CASE WHEN pg_catalog.split_part(s,'.',1)::integer > 9 THEN pg_catalog.split_part(s,'.',1) || '0'
 	ELSE pg_catalog.split_part(s,'.', 1) || pg_catalog.split_part(s,'.', 2) END AS v
-	FROM pg_catalog.substring(version(), 'PostgreSQL ([0-9\.]+)') AS s;]]></definition>
+	FROM pg_catalog.substring(version(), E'PostgreSQL ([0-9\\.]+)') AS s;]]></definition>
          <parameters>
             <parameter mode="IN"/>
          </parameters>
@@ -3471,14 +3471,14 @@ END]]></definition>
       </routine>
       <routine dataAccess="MODIFIES" deterministic="true" name="postgis_scripts_build_date()" returnType="text" securityType="INVOKER" type="FUNCTION">
          <comment><![CDATA[Returns build date of the PostGIS scripts.]]></comment>
-         <definition language="sql"><![CDATA[SELECT '2023-11-20 19:00:22'::text AS version]]></definition>
+         <definition language="sql"><![CDATA[SELECT '2024-02-08 17:55:49'::text AS version]]></definition>
          <parameters>
             <parameter mode="IN"/>
          </parameters>
       </routine>
       <routine dataAccess="MODIFIES" deterministic="true" name="postgis_scripts_installed()" returnType="text" securityType="INVOKER" type="FUNCTION">
          <comment><![CDATA[Returns version of the PostGIS scripts installed in this database.]]></comment>
-         <definition language="sql"><![CDATA[SELECT trim('3.4.1'::text || $rev$ ca035b9 $rev$) AS version]]></definition>
+         <definition language="sql"><![CDATA[SELECT trim('3.4.2'::text || $rev$ c19ce56 $rev$) AS version]]></definition>
          <parameters>
             <parameter mode="IN"/>
          </parameters>

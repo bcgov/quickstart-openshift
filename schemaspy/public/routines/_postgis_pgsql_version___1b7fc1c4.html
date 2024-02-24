@@ -115,7 +115,7 @@
                             </div>
                         </div>
                         <div class="box-body">
-                            <textarea id="sql-script-codemirror" name="sql-script-codemirror" rows="" style="display: none;">SELECT CASE WHEN pg_catalog.split_part(s,&#39;.&#39;,1)::integer &gt; 9 THEN pg_catalog.split_part(s,&#39;.&#39;,1) || &#39;0&#39;&#10;&#9;ELSE pg_catalog.split_part(s,&#39;.&#39;, 1) || pg_catalog.split_part(s,&#39;.&#39;, 2) END AS v&#10;&#9;FROM pg_catalog.substring(version(), &#39;PostgreSQL ([0-9\.]+)&#39;) AS s;</textarea>
+                            <textarea id="sql-script-codemirror" name="sql-script-codemirror" rows="" style="display: none;">SELECT CASE WHEN pg_catalog.split_part(s,&#39;.&#39;,1)::integer &gt; 9 THEN pg_catalog.split_part(s,&#39;.&#39;,1) || &#39;0&#39;&#10;&#9;ELSE pg_catalog.split_part(s,&#39;.&#39;, 1) || pg_catalog.split_part(s,&#39;.&#39;, 2) END AS v&#10;&#9;FROM pg_catalog.substring(version(), E&#39;PostgreSQL ([0-9\\.]+)&#39;) AS s;</textarea>
                         </div>
                     </div>
                 </section>
