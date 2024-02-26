@@ -29,6 +29,10 @@ on:
         required: false
         type: string
         default: "true"
+      triggers:
+        description: Paths used to trigger a build; e.g. ('./backend/' './frontend/)
+        required: false
+        type: string
 
       ### Usually a bad idea / not recommended
       directory:
