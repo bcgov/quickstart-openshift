@@ -37,7 +37,7 @@ on:
       ### Usually a bad idea / not recommended
       directory:
         description: 'Chart directory'
-        default: 'charts/${{ github.event.repository.name }}'
+        default: 'charts'
         required: false
         type: string
       timeout-minutes:
