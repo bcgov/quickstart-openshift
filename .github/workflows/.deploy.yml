@@ -56,6 +56,9 @@ on:
         required: false
         type: string
 
+  outputs:
+    triggered: ${{ steps.deploys.outputs.triggered }}
+
 env:
   repo_release: ${{ github.event.repository.name }}-${{ inputs.release }}
 
@@ -65,6 +68,8 @@ jobs:
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
+    outputs:
+      triggered: ${{ steps.triggers.outputs.triggered }}
     steps:
       - uses: bcgov-nr/action-diff-triggers@v0.1.0
         id: triggers
@@ -115,11 +120,3 @@ jobs:
           
           # Remove old build runs, build pods and deployment pods
           oc delete po --field-selector=status.phase==Succeeded || true
-
-  tests:
-    name: Tests
-    needs: [deploys]
-    if: inputs.test == 'true' && needs.deploys.outputs.triggered == 'true'
-    uses: ./.github/workflows/.tests.yml
-    with:
-      target: ${{ inputs.release }}
