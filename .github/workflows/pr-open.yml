@@ -33,7 +33,8 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      tag: ${{ github.event.number }}
+      params: |
+        --set global.autoscaling=false
       release: ${{ github.event.number }}
       triggers: ('backend/', 'frontend/', 'migrations/')
 

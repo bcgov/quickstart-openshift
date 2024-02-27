@@ -35,20 +35,19 @@ jobs:
     secrets: inherit
     with:
       environment: test
-      tag: ${{ needs.vars.outputs.pr }}
       release: test
+      params: |
+        --set global.autoscaling=false
 
   deploy-prod:
     name: Deploy (prod)
-    needs: [deploy-test, vars]
+    needs: [deploy-test]
     uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
-      autoscaling: true
       environment: prod
-      tag: ${{ needs.vars.outputs.pr }}
       release: prod
-      params:
+      params: |
         --set backend.deploymentStrategy=RollingUpdate
         --set frontend.deploymentStrategy=RollingUpdate
 

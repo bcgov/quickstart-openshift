@@ -10,25 +10,15 @@ on:
         type: string
 
       ### Typical / recommended
-      autoscaling:
-        description: Autoscaling enabled or not for the deployments
-        required: false
-        type: string
-        default: false
       environment:
         description: Environment name; omit for PRs
         required: false
         type: string
-      tag:
-        description: Container tag; usually PR number
+      params:
+        description: 'Extra parameters to pass to helm upgrade'
+        default: ''
         required: false
         type: string
-        default: ${{ github.event.number }}
-      test:
-        description: Run tests after deployment?
-        required: false
-        type: string
-        default: "true"
       triggers:
         description: Paths used to trigger a build; e.g. ('./backend/' './frontend/)
         required: false
@@ -40,6 +30,10 @@ on:
         default: 'charts'
         required: false
         type: string
+      tag:
+        description: `Tag, which defaults to a PR number (even on PR merge)`
+        required: false
+        type: string
       timeout-minutes:
         description: 'Timeout minutes'
         default: 10
@@ -48,11 +42,6 @@ on:
       values:
         description: 'Values file'
         default: 'values.yaml'
-        required: false
-        type: string
-      params:
-        description: 'Extra parameters to pass to helm upgrade'
-        default: ''
         required: false
         type: string
 
@@ -77,6 +66,19 @@ jobs:
         id: triggers
         with:
           triggers: ${{ inputs.triggers }}
+
+      - name: Get PR Number
+        id: pr
+        uses: bcgov-nr/action-get-pr@v0.0.1
+
+      - name: Set Tag
+        id: tag
+        run: |
+          if [ -z ${{ inputs.tag }} ]; then
+            echo "tag=${{ steps.pr.outputs.pr }}" >> $GITHUB_ENV
+          else
+            echo "tag=${{ inputs.tag }}" >> $GITHUB_ENV
+          fi
 
       - name: Deploy
         if: steps.triggers.outputs.triggered == 'true'
@@ -104,18 +106,17 @@ jobs:
 
           # Prepare Helm chart
           helm dependency update
-          helm package --app-version="${{ inputs.tag }}" --version=${{ inputs.tag }} .
+          helm package --app-version="$tag" --version=$tag .
           
           # Deploy Helm chart
           helm upgrade \
-            --set global.autoscaling=${{ inputs.autoscaling }} \
             --set-string global.repository=${{ github.repository }} \
-            --set-string global.tag=${{ inputs.tag }} \
+            --set-string global.tag=$tag \
             ${{ inputs.params }} \
             --install --wait --atomic  ${{ env.repo_release }} \
             --timeout ${{ inputs.timeout-minutes }}m \
             --values ${{ inputs.values }} \
-            ./${{ github.event.repository.name }}-${{ inputs.tag }}.tgz
+            ./${{ github.event.repository.name }}-$tag.tgz
 
           # Print history
           helm history ${{ env.repo_release }}
