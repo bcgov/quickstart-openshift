@@ -53,6 +53,7 @@ jobs:
   results:
     name: PR Results
     needs: [tests]
+    if: always() && !failure()
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"
