@@ -13,17 +13,12 @@ jobs:
   builds:
     name: Builds
     runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    outputs:
-      digest: ${{ steps.builds.outputs.digest }}
     strategy:
       matrix:
         package: [migrations, backend, frontend]
     timeout-minutes: 10
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
-        id: builds
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
