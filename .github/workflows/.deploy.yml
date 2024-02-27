@@ -119,7 +119,7 @@ jobs:
   tests:
     name: Tests
     needs: [deploys]
-    if: inputs.test == 'true' && steps.triggers.outputs.triggered == 'true'
+    if: inputs.test == 'true' && needs.deploys.outputs.triggered == 'true'
     uses: ./.github/workflows/.tests.yml
     with:
       target: ${{ inputs.release }}
