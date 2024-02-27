@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
-      - uses: bcgov-nr/action-deployer-helm@feat/init
+      - uses: bcgov-nr/action-deployer-helm@main
         with:
           params: |
             --set global.autoscaling=false
