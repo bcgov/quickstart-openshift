@@ -56,8 +56,8 @@ on:
         required: false
         type: string
 
-  outputs:
-    triggered: ${{ steps.deploys.outputs.triggered }}
+    outputs:
+      triggered: ${{ steps.deploys.outputs.triggered }}
 
 env:
   repo_release: ${{ github.event.repository.name }}-${{ inputs.release }}
