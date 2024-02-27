@@ -47,7 +47,7 @@ on:
 
     outputs:
       triggered:
-        description: 'Has a deployment has been triggered?'
+        description: 'Has a deployment has been triggered? [true|false]'
         value: ${{ jobs.deploys.outputs.triggered }}
 
 env:

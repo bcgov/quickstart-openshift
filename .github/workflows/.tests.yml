@@ -35,7 +35,7 @@ jobs:
           API_NAME: nest
           BASE_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-frontend.${{ env.DOMAIN }}
         run: |
-          cd integration-tests
+          cd test/integration/
           npm ci
           node src/main.js
 
@@ -86,5 +86,5 @@ jobs:
           BACKEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api
           FRONTEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
         with:
-          filename: ./load-test/${{ matrix.name }}-test.js
+          filename: ./tests/load/${{ matrix.name }}-test.js
           flags: --vus 10 --duration 30s
