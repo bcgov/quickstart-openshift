@@ -66,8 +66,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: bcgov-nr/action-diff-triggers@vX.Y.X
+      - uses: bcgov-nr/action-diff-triggers@v0.1.0
         id: triggers
         with:
           triggers: ${{ inputs.triggers }}
