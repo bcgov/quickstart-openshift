@@ -31,7 +31,7 @@ on:
         required: false
         type: string
       tag:
-        description: `Tag, which defaults to a PR number (even on PR merge)`
+        description: 'Tag, which defaults to a PR number (even on PR merge)'
         required: false
         type: string
       timeout-minutes:
