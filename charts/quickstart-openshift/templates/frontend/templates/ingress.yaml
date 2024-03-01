@@ -23,5 +23,5 @@ spec:
               service:
                 name: {{ include "frontend.fullname" . }}
                 port:
-                  number: 3000
+                  number: 80
 {{- end }}
