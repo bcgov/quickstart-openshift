@@ -105,14 +105,9 @@ frontend:
         targetPort: 3003
         protocol: TCP
         name: metrics
-  #-- the route for the component. it is optional and is an object. To make the application accessible from internet, use the route.
-  route:
-    #-- enable or disable the route.
-    enabled: true
-    #-- the hostname for the route. this will be the URL for the application, you can access by https://{{ .Release.Name }}-frontend.{{ .Values.global.domain }}
-    host: "{{ .Release.Name }}-frontend.{{ .Values.global.domain }}"
-    #-- the target port of the service. this is the port where the service is listening on. The name is mapped to the port name in the service.
-    targetPort: http
+  ingres:
+    annotations:
+      route.openshift.io/termination: "edge"
 
 crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
   enabled: false
