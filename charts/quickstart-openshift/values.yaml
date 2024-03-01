@@ -105,7 +105,7 @@ frontend:
         targetPort: 3003
         protocol: TCP
         name: metrics
-  ingres:
+  ingress:
     annotations:
       route.openshift.io/termination: "edge"
 
