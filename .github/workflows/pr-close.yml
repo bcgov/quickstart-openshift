@@ -14,7 +14,7 @@ jobs:
     name: Cleanup OpenShift and/or Promote Images
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-close.yml@v0.3.0
     secrets:
-      oc_namespace: ${{ vars.OC_NAMESPACE }}
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       cleanup: helm

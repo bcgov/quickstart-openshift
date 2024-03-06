@@ -20,7 +20,7 @@ jobs:
       - name: Clean up Helm Releases
         run: |
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
-          oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
+          oc project ${{ secrets.OC_NAMESPACE }} # Safeguard!
 
           # Catch errors, unset variables, and pipe failures (e.g. grep || true )
           set -euo pipefail
