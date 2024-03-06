@@ -42,9 +42,16 @@ jobs:
       tag: ${{ github.event.number }}
       release: ${{ github.event.number }}
 
+  tests:
+    name: Tests
+    needs: [deploys]
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: ${{ github.event.number }}
+
   results:
     name: PR Results
-    needs: [deploys]
+    needs: [tests]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"

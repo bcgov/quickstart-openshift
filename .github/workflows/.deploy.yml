@@ -109,11 +109,3 @@ jobs:
           
           # Remove old build runs, build pods and deployment pods
           oc delete po --field-selector=status.phase==Succeeded
-
-  tests:
-    name: Tests
-    needs: [deploys]
-    if: ${{ inputs.test == 'true' && inputs.build_outputs != ''  }}
-    uses: ./.github/workflows/.tests.yml
-    with:
-      target: ${{ inputs.release }}
