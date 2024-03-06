@@ -9,15 +9,14 @@ global:
   #-- the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
   tag: ~
   #-- turn off autoscaling for the entire suite by setting this to false. default is true.
-  autoscaling: true
+  autoscaling: false
   #-- global secrets, can be accessed by sub-charts.
   secrets:
     enabled: true
     databasePassword: ~
     databaseUser: ~
     databaseName: ~
-    annotation:
-      helm.sh/policy: "keep"
+    persist: true
   #-- domain of the application, it is required, apps.silver.devops.gov.bc.ca for silver cluster and apps.devops.gov.bc.ca for gold cluster
   domain: "apps.silver.devops.gov.bc.ca" # it is apps.gold.devops.gov.bc.ca for gold cluster
   #-- the database Alias gives a nice way to switch to different databases, crunchy, patroni ... etc.
