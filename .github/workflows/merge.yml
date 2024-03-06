@@ -36,7 +36,6 @@ jobs:
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploy-test:
     name: Deploy (test)
-    needs: [vars]
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.0
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
