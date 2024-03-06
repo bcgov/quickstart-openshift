@@ -33,25 +33,27 @@ jobs:
         id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
 
+  # https://github.com/bcgov-nr/action-deployer-openshift
   deploy-test:
     name: Deploy (test)
     needs: [vars]
-    uses: ./.github/workflows/.deploy.yml
-    secrets: inherit
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.0
+    secrets:
+      oc_namespace: ${{ vars.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
     with:
       environment: test
-      tag: ${{ needs.vars.outputs.pr }}
       release: test
 
   deploy-prod:
     name: Deploy (prod)
     needs: [deploy-test, vars]
-    uses: ./.github/workflows/.deploy.yml
-    secrets: inherit
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.0
+    secrets:
+      oc_namespace: ${{ vars.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
     with:
-      autoscaling: true
       environment: prod
-      tag: ${{ needs.vars.outputs.pr }}
       release: prod
       params:
         --set backend.deploymentStrategy=RollingUpdate
