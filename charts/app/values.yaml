@@ -9,7 +9,7 @@ global:
   #-- the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
   tag: ~
   #-- turn off autoscaling for the entire suite by setting this to false. default is true.
-  autoscaling: true
+  autoscaling: false
   #-- global secrets, can be accessed by sub-charts.
   secrets:
     enabled: true
