@@ -40,7 +40,6 @@ jobs:
       oc_namespace: ${{ vars.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
-      build_outputs: ${{ needs.builds.outputs.digest }}
       triggers: ('backend/', 'frontend/', 'migrations/')
 
   tests:
