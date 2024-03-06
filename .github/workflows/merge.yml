@@ -56,7 +56,7 @@ jobs:
       params:
         --set backend.deploymentStrategy=RollingUpdate
         --set frontend.deploymentStrategy=RollingUpdate
-
+        --set global.autoscaling=true
   promote:
     name: Promote Images
     needs: [deploy-prod, vars]
