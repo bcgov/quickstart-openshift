@@ -37,7 +37,7 @@ jobs:
     needs: [builds]
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.0
     secrets:
-      oc_namespace: ${{ vars.OC_NAMESPACE }}
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       triggers: ('backend/', 'frontend/', 'migrations/')

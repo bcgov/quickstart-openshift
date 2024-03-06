@@ -127,6 +127,13 @@ Locate an OpenShift pipeline token:
 5. Under Data, copy `token`
 6. Paste into the GitHub Secret `OC_TOKEN`
 
+**OC_NAMESPACE**
+
+OpenShift project/namespace.  Provided by your OpenShift platform team.
+
+* Consume: `{{ secrets.OC_NAMESPACE }}`
+* Value: format `abc123-dev | test | prod`
+
 **SONAR_TOKEN(s)**
 
 If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, while monorepos use similar names.
@@ -146,13 +153,6 @@ BC Government employees can request SonarCloud projects by creating an [issue](h
 OpenShift server address.
 * Consume: `{{ vars.OC_SERVER }}`
 * Value: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
-
-**OC_NAMESPACE**
-
-OpenShift project/namespace.  Provided by your OpenShift platform team.
-
-* Consume: `{{ vars.OC_NAMESPACE }}`
-* Value: format `abc123-dev | test | prod`
 
 ## Environments
 

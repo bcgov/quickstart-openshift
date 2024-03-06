@@ -39,7 +39,7 @@ jobs:
     needs: [vars]
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.0
     secrets:
-      oc_namespace: ${{ vars.OC_NAMESPACE }}
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       environment: test
@@ -49,7 +49,7 @@ jobs:
     needs: [deploy-test, vars]
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.0
     secrets:
-      oc_namespace: ${{ vars.OC_NAMESPACE }}
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       environment: prod
