@@ -19,7 +19,7 @@ jobs:
       digest: ${{ steps.builds.outputs.digest }}
     strategy:
       matrix:
-        package: [migrations, backend, frontend]
+        package: [backend, frontend, migrations]
     timeout-minutes: 10
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
@@ -35,16 +35,23 @@ jobs:
   deploys:
     name: Deploys
     needs: [builds]
-    uses: ./.github/workflows/.deploy.yml
-    secrets: inherit
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.0
+    secrets:
+      oc_namespace: ${{ vars.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
     with:
-      build_outputs: ${{ needs.builds.outputs.digest }}
-      tag: ${{ github.event.number }}
-      release: ${{ github.event.number }}
+      triggers: ('backend/', 'frontend/', 'migrations/')
+
+  tests:
+    name: Tests
+    needs: [deploys]
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: ${{ github.event.number }}
 
   results:
     name: PR Results
-    needs: [deploys]
+    needs: [tests]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"
