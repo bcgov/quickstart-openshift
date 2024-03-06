@@ -6,7 +6,7 @@ on:
     paths-ignore:
       - '*.md'
       - '.github/**'
-      - '.graphics/**'
+      - '.github/graphics/**'
       - '!.github/workflows/**'
   workflow_dispatch:
     inputs:

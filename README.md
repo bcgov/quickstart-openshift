@@ -93,7 +93,7 @@ Create a new repository using this repository as a template.
 
 * Verify bcgov/quickstart-openshift is selected under Repository template
 
-![](./.graphics/template.png)
+![](./.github/graphics/template.png)
 
 ## Secrets and Variables
 
@@ -236,7 +236,7 @@ This is required to prevent direct pushes and merges to the default branch.  The
     * `[check] Require conversation resolution before merging`
     * `[check] Include administrators` (optional)
 
-![](./.graphics/branch-protection.png)
+![](./.github/graphics/branch-protection.png)
 
 ### Adding Team Members
 
@@ -261,7 +261,7 @@ Runs on pull request submission.
 * Deployment includes curl checks and optional penetration tests
 * Other checks and updates as required
 
-![](.graphics/pr-open.png)
+![](.github/graphics/pr-open.png)
 
 ## Analysis
 
@@ -272,7 +272,7 @@ Runs on pull request submission or merge to the default branch.
 * CodeQL/GitHub security reporting
 * Trivy password, vulnerability and security scanning
 
-![](.graphics/analysis.png)
+![](.github/graphics/analysis.png)
 
 ## Pull Request Closed
 
@@ -281,7 +281,7 @@ Runs on pull request close or merge.
 * Cleans up OpenShift objects/artifacts
 * Merge promotes successful build images to TEST
 
-![](.graphics/pr-close.png)
+![](.github/graphics/pr-close.png)
 
 ## Merge
 
@@ -295,7 +295,7 @@ Runs on merge to main branch.
 
 \* excludes database changes
 
-![](.graphics/merge.png)
+![](.github/graphics/merge.png)
 
 # App Stack
 
@@ -334,7 +334,7 @@ After a full workflow run and merge can been run, please do the following:
 3. Select `gh-pages`
 4. Click `Save`
 
-![img.png](.graphics/schemaspy.png)
+![img.png](.github/graphics/schemaspy.png)
 
 # Resources
 
