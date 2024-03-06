@@ -49,6 +49,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- define "secretLabels" -}}
 {{ include "labels" . }}
 {{- if .Values.global.secrets.persist }}
-helm.sh/resource-policy: keep
+annotations:
+    "helm.sh/resource-policy": "keep"
 {{- end }}
 {{- end }}
