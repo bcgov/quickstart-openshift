@@ -10,7 +10,7 @@ import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
 import { DataGrid, GridToolbar } from '@mui/x-data-grid'
 import { useEffect, useState } from 'react'
-import { AxiosResponse } from '~/axios'
+import type { AxiosResponse } from '~/axios'
 
 const columns = [
   {
