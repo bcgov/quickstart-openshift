@@ -15,7 +15,7 @@ import { AxiosResponse } from '~/axios'
 const columns = [
   {
     field: 'id',
-    headerName: 'Employee Id',
+    headerName: 'Employee ID',
     sortable: true,
     filterable: true,
     flex: 1,
