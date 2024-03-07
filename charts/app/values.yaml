@@ -107,6 +107,9 @@ frontend:
   ingress:
     annotations:
       route.openshift.io/termination: "edge"
+  pdb:
+    enabled: false # enable it in PRODUCTION for having pod disruption budget.
+    minAvailable: 1 # the minimum number of pods that must be available during the disruption budget.
 
 crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
   enabled: false
