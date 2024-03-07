@@ -17,6 +17,7 @@ spec:
   template:
     metadata:
       annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
         prometheus.io/scrape: 'true'
         prometheus.io/port: '3003'
         prometheus.io/path: '/metrics'
