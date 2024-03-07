@@ -36,7 +36,7 @@
     "express-prom-bundle": "^7.0.0",
     "helmet": "^7.0.0",
     "nest-winston": "^1.9.4",
-    "nestjs-prisma": "^0.22.0",
+    "nestjs-prisma": "^0.23.0",
     "pg": "^8.11.3",
     "prom-client": "^15.1.0",
     "reflect-metadata": "^0.2.0",
