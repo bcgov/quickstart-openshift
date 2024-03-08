@@ -44,9 +44,13 @@ Features:
 * Helm Package Manager for atomic deployments
 * Prometheus Metrics export from Backend/Frontend
 * Resource Tuning with Horizontal Pod Autoscaler (in TEST/PROD).
+* Affinity and Anti-Affinity for Scheduling on different worker nodes
+* Rolling updates with zero downtime in PROD
+* Database Migrations with Flyway
+* Pod Disruption Budgets for High Availability
 * Self Healing through Health checks
 * Sample application stack:
-    * Database: Postgres, PostGIS, backups
+    * Database: Postgres, PostGIS, backups, Flyway
     * Frontend: TypeScript, Caddy Server
     * Backend: TypeScript, Nest.js
     * Alternative backends for [Java/Quarkus, Go/Fiber and Python/FastAPI](https://github.com/bcgov/quickstart-openshift-backends)

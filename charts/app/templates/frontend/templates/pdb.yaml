@@ -1,6 +1,7 @@
 {{- if and .Values.frontend.pdb  .Values.frontend.pdb.enabled }}
 ---
 apiVersion: policy/v1
+kind: PodDisruptionBudget
 metadata:
   name: {{ include "frontend.fullname" . }}
   labels:
@@ -8,6 +9,6 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "frontend.fullname" . }}
+      {{- include "frontend.selectorLabels" . | nindent 6 }}
   minAvailable: {{ .Values.frontend.pdb.minAvailable }}
 {{- end }}
