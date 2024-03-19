@@ -43,6 +43,7 @@ jobs:
       triggers: ('backend/' 'frontend/' 'migrations/')
       params:
         --set global.secrets.persist=false
+
   tests:
     name: Tests
     needs: [deploys]

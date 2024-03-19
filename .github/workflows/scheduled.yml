@@ -96,6 +96,8 @@ jobs:
   tests:
     name: Tests
     uses: ./.github/workflows/.tests.yml
+    with:
+      target: test
 
   zap_scan:
     runs-on: ubuntu-latest

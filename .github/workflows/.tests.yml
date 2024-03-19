@@ -3,20 +3,39 @@ name: .Tests
 on:
   workflow_call:
     inputs:
-      ### Typical / recommended
+      ### Required
       target:
         description: PR number, test or prod
+        required: true
+        type: string
+
+      ### Typical / recommended
+      triggers:
+        description: Bash array to diff for build triggering; omit to always fire
         required: false
         type: string
-        default: test
 
 env:
   DOMAIN: apps.silver.devops.gov.bc.ca
   PREFIX: ${{ github.event.repository.name }}-${{ inputs.target }}
 
 jobs:
+  check:
+    name: Check Triggers Against Diff
+    outputs:
+      pr: ${{ steps.triggers.outputs.triggered }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
+      - id: triggers
+        uses: bcgov-nr/action-diff-triggers@v0.2.0
+        with:
+          triggers: ${{ inputs.triggers }}
+
   integration-tests:
     name: Integration
+    if: needs.check.outputs.triggered == 'true'
+    needs: [check]
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -41,6 +60,8 @@ jobs:
 
   cypress-e2e-tests:
     name: E2E
+    if: needs.check.outputs.triggered == 'true'
+    needs: [check]
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -75,6 +96,8 @@ jobs:
 
   load-tests:
     name: Load
+    if: needs.check.outputs.triggered == 'true'
+    needs: [check]
     runs-on: ubuntu-22.04
     strategy:
       matrix:
