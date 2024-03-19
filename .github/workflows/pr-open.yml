@@ -40,7 +40,7 @@ jobs:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
-      triggers: ('backend/', 'frontend/', 'migrations/')
+      triggers: ('backend/' 'frontend/' 'migrations/')
       params:
         --set global.secrets.persist=false
   tests:
