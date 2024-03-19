@@ -3,12 +3,17 @@ name: .Tests
 on:
   workflow_call:
     inputs:
-      ### Typical / recommended
+      ### Required
       target:
         description: PR number, test or prod
+        required: true
+        type: string
+
+      ### Typical / recommended
+      triggers:
+        description: Bash array to diff for build triggering; omit to always fire
         required: false
         type: string
-        default: test
 
 env:
   DOMAIN: apps.silver.devops.gov.bc.ca

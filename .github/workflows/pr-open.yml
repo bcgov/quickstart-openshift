@@ -43,8 +43,10 @@ jobs:
       triggers: ('backend/' 'frontend/' 'migrations/')
       params:
         --set global.secrets.persist=false
+
   tests:
     name: Tests
+    if: needs.deploys.triggered == 'true'
     needs: [deploys]
     uses: ./.github/workflows/.tests.yml
     with:
@@ -52,6 +54,7 @@ jobs:
 
   results:
     name: PR Results
+    if: always() || !failure()
     needs: [tests]
     runs-on: ubuntu-22.04
     steps:
