@@ -50,6 +50,7 @@ jobs:
     uses: ./.github/workflows/.tests.yml
     with:
       target: ${{ github.event.number }}
+      triggers: ('backend/' 'frontend/' 'migrations/')
 
   results:
     name: PR Results
