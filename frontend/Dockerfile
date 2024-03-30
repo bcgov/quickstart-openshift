@@ -5,6 +5,7 @@ FROM node:20.12.0-bullseye-slim AS build
 # Install packages, build and keep only prod packages
 WORKDIR /app
 COPY *.json *.ts index.html ./
+COPY public ./public
 COPY ./src ./src
 RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
     npm run build
