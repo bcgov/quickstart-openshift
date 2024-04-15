@@ -20,7 +20,7 @@
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.1",
     "@mui/system": "^5.15.9",
-    "@mui/x-data-grid": "^7.0.0",
+    "@mui/x-data-grid": "^6.19.4",
     "@vitejs/plugin-react": "^4.0.0",
     "axios": "^1.6.8",
     "mui-datatables": "^4.3.0",
