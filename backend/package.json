@@ -57,7 +57,7 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-n": "^17.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-promise": "^6.1.1",
     "istanbul-badges-readme": "^1.8.4",
