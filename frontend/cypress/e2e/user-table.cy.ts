@@ -9,15 +9,15 @@ describe("User Table", () => {
       // access the native DOM element
       expect($div.get(0).innerText).exist
     });
-    cy.get("div.MuiDataGrid-columnHeader:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)").should("exist").should(($div) => {
+    cy.get("#id").should("exist").should(($div) => {
       // access the native DOM element
       expect($div.get(0).innerText).to.eq('Employee ID');
     });
-    cy.get("div.MuiDataGrid-columnHeader:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)").should("exist").should(($div) => {
+    cy.get("#name").should("exist").should(($div) => {
       // access the native DOM element
       expect($div.get(0).innerText).to.eq('Employee Name');
     });
-    cy.get("div.MuiDataGrid-columnHeader:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)").should("exist").should(($div) => {
+    cy.get("#email").should("exist").should(($div) => {
       // access the native DOM element
       expect($div.get(0).innerText).to.eq('Employee Email');
     });
