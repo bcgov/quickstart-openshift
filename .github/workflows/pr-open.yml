@@ -35,7 +35,7 @@ jobs:
   deploys:
     name: Deploys
     needs: [builds]
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.0
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.1
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
@@ -46,7 +46,7 @@ jobs:
 
   tests:
     name: Tests
-    if: needs.deploys.triggered == 'true'
+    if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
     uses: ./.github/workflows/.tests.yml
     with:
@@ -55,7 +55,7 @@ jobs:
   results:
     name: PR Results
     if: always() && !failure()
-    needs: [tests]
+    needs: [builds, deploys, tests]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"
