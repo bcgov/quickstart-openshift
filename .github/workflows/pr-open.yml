@@ -54,8 +54,17 @@ jobs:
 
   results:
     name: PR Results
-    if: always() && !failure()
+    if: always()
     needs: [builds, deploys, tests]
     runs-on: ubuntu-22.04
     steps:
-      - run: echo "Workflow completed successfully!"
+      - if: contains(needs.*.result, 'failure')
+        run: |
+          echo "At least one job has failed"
+          echo "needs.*.result: ${{ needs.*.result }}"
+          exit 1
+
+      - if: (! contains(needs.*.result, 'failure'))
+        run: |
+          echo "Workflow completed successfully!"
+          echo "needs.*.result: ${{ needs.*.result }}"
