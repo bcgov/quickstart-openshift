@@ -98,7 +98,16 @@ jobs:
 
   results:
     name: Analysis Results
+    if: always()
     needs: [tests, codeql, trivy]
     runs-on: ubuntu-22.04
     steps:
-      - run: echo "Workflow completed successfully!"
+      - run: |
+          # View results
+          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
+
+      - if: contains(needs.*.result, 'failure')
+        run: |
+          # Job failure found
+          echo "At least one job has failed"
+          exit 1

@@ -58,13 +58,12 @@ jobs:
     needs: [builds, deploys, tests]
     runs-on: ubuntu-22.04
     steps:
+      - run: |
+          # View results
+          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
+
       - if: contains(needs.*.result, 'failure')
         run: |
+          # Job failure found
           echo "At least one job has failed"
-          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
           exit 1
-
-      - if: (! contains(needs.*.result, 'failure'))
-        run: |
-          echo "Workflow completed successfully!"
-          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
