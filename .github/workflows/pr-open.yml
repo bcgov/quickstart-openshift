@@ -54,7 +54,7 @@ jobs:
 
   results:
     name: PR Results
-    if: always()
+    if: always() &&( !failure() )
     needs: [builds, deploys, tests]
     runs-on: ubuntu-22.04
     steps:
