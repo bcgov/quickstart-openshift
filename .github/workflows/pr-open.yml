@@ -9,32 +9,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # https://github.com/bcgov-nr/action-builder-ghcr
-  builds:
-    name: Builds
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    outputs:
-      digest: ${{ steps.builds.outputs.digest }}
-    strategy:
-      matrix:
-        package: [backend, frontend, migrations]
-    timeout-minutes: 10
-    steps:
-      - uses: bcgov-nr/action-builder-ghcr@v2.0.2
-        id: builds
-        with:
-          keep_versions: 50
-          package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
-          tag_fallback: latest
-          triggers: ('${{ matrix.package }}/')
+  # # https://github.com/bcgov-nr/action-builder-ghcr
+  # builds:
+  #   name: Builds
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     packages: write
+  #   outputs:
+  #     digest: ${{ steps.builds.outputs.digest }}
+  #   strategy:
+  #     matrix:
+  #       package: [backend, frontend, migrations]
+  #   timeout-minutes: 10
+  #   steps:
+  #     - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+  #       id: builds
+  #       with:
+  #         keep_versions: 50
+  #         package: ${{ matrix.package }}
+  #         tag: ${{ github.event.number }}
+  #         tag_fallback: latest
+  #         triggers: ('${{ matrix.package }}/')
 
   # https://github.com/bcgov-nr/action-deployer-openshift
   deploys:
     name: Deploys
-    needs: [builds]
+    # needs: [builds]
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.0
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
