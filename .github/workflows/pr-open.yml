@@ -54,8 +54,16 @@ jobs:
 
   results:
     name: PR Results
-    if: always() && !failure()
+    if: always()
     needs: [builds, deploys, tests]
     runs-on: ubuntu-22.04
     steps:
-      - run: echo "Workflow completed successfully!"
+      - run: |
+          # View results
+          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
+
+      - if: contains(needs.*.result, 'failure')
+        run: |
+          # Job failure found
+          echo "At least one job has failed"
+          exit 1
