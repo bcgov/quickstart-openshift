@@ -61,10 +61,10 @@ jobs:
       - if: contains(needs.*.result, 'failure')
         run: |
           echo "At least one job has failed"
-          echo "needs.*.result: ${{ needs.*.result }}"
+          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
           exit 1
 
       - if: (! contains(needs.*.result, 'failure'))
         run: |
           echo "Workflow completed successfully!"
-          echo "needs.*.result: ${{ needs.*.result }}"
+          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
