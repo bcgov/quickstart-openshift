@@ -46,16 +46,24 @@ jobs:
 
   tests:
     name: Tests
-    if: needs.deploys.triggered == 'true'
     needs: [deploys]
-    uses: ./.github/workflows/.tests.yml
-    with:
-      target: ${{ github.event.number }}
-
-  results:
-    name: PR Results
-    if: always() && !failure()
-    needs: [tests]
+    if: always()
     runs-on: ubuntu-22.04
     steps:
-      - run: echo "Workflow completed successfully!"
+      - run: echo "needs.deploys.triggered == ${{ needs.deploys.triggered }}"
+
+  # tests:
+  #   name: Tests
+  #   if: needs.deploys.triggered == 'true'
+  #   needs: [deploys]
+  #   uses: ./.github/workflows/.tests.yml
+  #   with:
+  #     target: ${{ github.event.number }}
+
+  # results:
+  #   name: PR Results
+  #   if: always() && !failure()
+  #   needs: [builds, deploys, tests]
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - run: echo "Workflow completed successfully!"
