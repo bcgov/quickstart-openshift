@@ -65,7 +65,7 @@ jobs:
       - name: Generate Error Annotations
         run: |
           # text="This is an Error"
-          echo "::error file=app.js,line=10,col=15::${{ toJson(needs) }}"
+          echo "::error file=app.js::${{ needs.*.result }}"
 
       # - name: Create annotation for build error
       #   run: |
