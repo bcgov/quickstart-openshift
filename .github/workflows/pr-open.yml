@@ -60,7 +60,7 @@ jobs:
     steps:
       - run: |
           # View results
-          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
+          echo "needs: ${{ toJson(needs) }}"
 
       - if: contains(needs.*.result, 'failure')
         run: |
