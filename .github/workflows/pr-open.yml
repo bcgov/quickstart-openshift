@@ -62,8 +62,13 @@ jobs:
           # View results
           echo "needs: ${{ toJson(needs) }}"
 
+      - name: Create annotation for build error
+        run: |
+          echo "::error ${{ toJson(needs) }}::Error in annotation"
+
       - if: contains(needs.*.result, 'failure')
         run: |
           # Job failure found
           echo "At least one job has failed"
           exit 1
+
