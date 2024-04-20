@@ -64,12 +64,12 @@ jobs:
 
       - name: Generate Error Annotations
         run: |
-          text="This is an Error"
-          echo "::error file=app.js,line=10,col=15::$text"
+          # text="This is an Error"
+          echo "::error file=app.js,line=10,col=15::${{ toJson(needs) }}"
 
-      - name: Create annotation for build error
-        run: |
-          echo "::error ${{ toJson(needs) }}::Error in annotation"
+      # - name: Create annotation for build error
+      #   run: |
+      #     echo "::error ${{ toJson(needs) }}::Error in annotation"
 
       - if: contains(needs.*.result, 'failure')
         run: |
