@@ -43,7 +43,7 @@ jobs:
             if [[ ${UPDATED} < ${BEFORE} ]]; then
               echo -e "\nOlder than cutoff: ${r}"
               helm uninstall --no-hooks ${r}
-              oc delete pvc/${r}-bitnami-pg-0
+              oc delete pvc/${r}-bitnami-pg-0 || true
             else
               echo -e "\nNewer than cutoff: ${r}"
               echo "No need to delete"
