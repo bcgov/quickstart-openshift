@@ -45,7 +45,7 @@
     "cypress": "^13.0.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-plugin-api": "^2.11.1",
-    "eslint": "^8.57.0",
+    "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-config-love": "^43.1.0",
     "eslint-import-resolver-alias": "^1.1.2",
