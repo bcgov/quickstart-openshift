@@ -44,11 +44,11 @@ spec:
               value: "10"
           resources:
             limits:
-              cpu: 500m
-              memory: 250Mi
-            requests:
               cpu: 200m
-              memory: 150Mi
+              memory: 100Mi
+            requests:
+              cpu: 50m
+              memory: 25Mi
       containers:
         - name: {{ include "backend.fullname" . }}
           {{- if .Values.backend.securityContext }}
