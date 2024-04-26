@@ -44,11 +44,11 @@ spec:
               value: "10"
           resources:
             limits:
-              cpu: 500m
-              memory: 250Mi
-            requests:
               cpu: 200m
-              memory: 150Mi
+              memory: 100Mi
+            requests:
+              cpu: 50m
+              memory: 25Mi
       containers:
         - name: {{ include "backend.fullname" . }}
           {{- if .Values.backend.securityContext }}
@@ -89,11 +89,11 @@ spec:
             timeoutSeconds: 5
           resources: # this is optional
             limits:
-              cpu: 250m
-              memory: 250Mi
-            requests:
-              cpu: 100m
+              cpu: 150m
               memory: 150Mi
+            requests:
+              cpu: 50m
+              memory: 75Mi
       {{- with .Values.backend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
