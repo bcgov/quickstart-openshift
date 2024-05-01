@@ -43,6 +43,7 @@ export default function Header() {
                 xs: '.25em',
                 sm: '.5em',
               },
+              color: 'rgb(0 0 0 / 87%)'
             }}
           >
             QuickStart OpenShift
