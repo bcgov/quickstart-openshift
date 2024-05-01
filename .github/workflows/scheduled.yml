@@ -77,7 +77,7 @@ jobs:
           FLYWAY_USER: postgres
           FLYWAY_PASSWORD: default
           FLYWAY_LOCATIONS: filesystem:./migrations
-          FLYWAY_DEFAULT_SCHEMA: "public"
+          FLYWAY_DEFAULT_SCHEMA: "USERS"
         with:
           args: info migrate info
 
@@ -86,7 +86,7 @@ jobs:
           mkdir output
           chmod a+rwx -R output
       - name: Run Schemaspy
-        run: docker run --network host -v "$PWD/output:/output" schemaspy/schemaspy:6.2.4 -t pgsql11 -db default -host 127.0.0.1 -port 5432 -u postgres -p default -schemas public
+        run: docker run --network host -v "$PWD/output:/output" schemaspy/schemaspy:6.2.4 -t pgsql11 -db default -host 127.0.0.1 -port 5432 -u postgres -p default -schemas USERS
       - name: Deploy to Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
