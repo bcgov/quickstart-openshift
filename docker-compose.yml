@@ -35,11 +35,18 @@ services:
       FLYWAY_USER: *POSTGRES_USER
       FLYWAY_PASSWORD: *POSTGRES_PASSWORD
       FLYWAY_BASELINE_ON_MIGRATE: true
-      FLYWAY_DEFAULT_SCHEMA: USERS
+      FLYWAY_DEFAULT_SCHEMA: users
     depends_on:
       database:
         condition: service_healthy
-
+  schema_spy:
+    image: schemaspy/schemaspy:6.2.4
+    container_name: schemaspy
+    command: -t pgsql11 -db postgres -host database -port 5432 -u postgres -p default -schemas users
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    volumes: ["./output:/output"]
   backend:
     container_name: backend
     entrypoint: sh -c "npm i && npm run start:dev"
