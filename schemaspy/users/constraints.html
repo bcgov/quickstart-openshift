@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>default.USERS</title>
+        <title>default.users</title>
         <!-- Tell the browser to be responsive to screen width -->
         <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
         <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
@@ -46,7 +46,7 @@
                 <nav class="navbar navbar-static-top">
                     <div class="container">
                         <div class="navbar-header">
-                            <a href="../index.html" class="navbar-brand"><b>default</b></a><span class="navbar-brand" style="padding-left: 0">.USERS</span>
+                            <a href="../index.html" class="navbar-brand"><b>default</b></a><span class="navbar-brand" style="padding-left: 0">.users</span>
                             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse"><i class="fa fa-bars"></i></button>
                         </div>
 
@@ -73,18 +73,22 @@
             <div class="content-wrapper">
                 <!-- Content Header (Page header) -->
                 <section class="content-header">
-                    <h1>Routines</h1>
+                    <h1>Constraints</h1>
                 </section>
                 <!-- Main content -->
                 <section class="content">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <i class="fa fa-file-code-o" aria-hidden="true"></i>
-                            <h3 class="box-title">Routines</h3>
+                            <i class="ion ion-key"></i>
+                            <h3 class="box-title">0 Foreign Key Constraints</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                            </div>
                         </div>
                         <div class="box-body">
                             <table
-                                    id="routine_table"
+                                    id="fk_table"
                                     class="table table-bordered table-striped dataTable"
                                     role="grid"
                                     data-paging="true"
@@ -92,13 +96,39 @@
                                     data-length-change="false">
                                 <thead align='left'>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Type</th>
-                                        <th>Language</th>
-                                        <th>Deterministic</th>
-                                        <th>Return Type</th>
-                                        <th>Security Restriction</th>
-                                        <th title='Comments' class="toggle"><span>Comments</span></th>
+                                        <th>Constraint Name</th>
+                                        <th>Child Column</th>
+                                        <th>Parent Column</th>
+                                        <th>Delete Rule</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <i class="fa fa-sitemap"></i>
+                            <h3 class="box-title">Check Constraints</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <table
+                                    id="check_table"
+                                    class="table table-bordered table-striped dataTable"
+                                    role="grid"
+                                    data-paging="true"
+                                    data-page-length="10"
+                                    data-length-change="false">
+                                <thead align='left'>
+                                    <tr>
+                                        <th>Table</th>
+                                        <th>Constraint Name</th>
+                                        <th>Constraint</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -158,7 +188,7 @@
         <script src="bower/codemirror/sql.js"></script>
         <!-- AdminLTE App -->
         <script src="bower/admin-lte/dist/js/app.min.js"></script>
-        <script src="routines.js"></script>
+        <script src="constraint.js"></script>
         <script src="schemaSpy.js"></script>
     </body>
 </html>
