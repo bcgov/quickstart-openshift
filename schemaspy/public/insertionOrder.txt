@@ -1,2 +1,0 @@
-spatial_ref_sys
-flyway_schema_history
