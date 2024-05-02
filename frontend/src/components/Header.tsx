@@ -28,7 +28,27 @@ export default function Header() {
     <AppBar position="fixed" sx={styles.appBar}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         <img style={{ maxHeight: '60px' }} alt="Logo" src={BCGovLogo} />
-        <Typography>Quickstart OpenShift</Typography>
+        <div style={{ display: 'inline-flex' }}>
+          <Typography
+            sx={{
+              display: 'inline-flex',
+              fontFamily: 'BCSans',
+              fontSize: {
+                xs: '1.25em',
+                sm: '1.5em',
+              },
+              lineHeight: '100%',
+              alignItems: 'center',
+              marginLeft: {
+                xs: '.25em',
+                sm: '.5em',
+              },
+              color: 'rgb(0 0 0 / 87%)'
+            }}
+          >
+            QuickStart OpenShift
+          </Typography>
+        </div>
         <a href={'/'} target={'_self'}>
           <IconButton color="secondary">
             <HomeRounded color="secondary"></HomeRounded>
