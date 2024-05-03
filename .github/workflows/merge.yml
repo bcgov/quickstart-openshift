@@ -33,7 +33,7 @@ jobs:
         id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
 
-  # https://github.com/bcgov-nr/action-deployer-openshift
+  # https://github.com/bcgov/quickstart-openshift-helpers
   deploy-test:
     name: Deploy (test)
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.1
