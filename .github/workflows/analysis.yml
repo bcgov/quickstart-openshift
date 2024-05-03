@@ -82,7 +82,7 @@ jobs:
 
   results:
     name: Analysis Results
-    if: always() && (!cancelled() || failure())
+    # if: always() && (!cancelled() || failure())
     needs: [tests, trivy]
     runs-on: ubuntu-22.04
     steps:
