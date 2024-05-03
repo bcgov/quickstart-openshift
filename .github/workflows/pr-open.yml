@@ -55,15 +55,7 @@ jobs:
   results:
     name: PR Results
     needs: [builds, deploys, tests]
-    if: always()
+    if: always() && (!failure()) && (!cancelled())
     runs-on: ubuntu-22.04
     steps:
-      - run: |
-          # View results
-          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
-
-      - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'failure')
-        run: |
-          # Job failure or cancel found
-          echo "At least one job has failed or cancelled"
-          exit 1
+      - run: echo "Success!"
