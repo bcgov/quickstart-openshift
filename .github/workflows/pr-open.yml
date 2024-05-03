@@ -13,17 +13,12 @@ jobs:
   builds:
     name: Builds
     runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    outputs:
-      digest: ${{ steps.builds.outputs.digest }}
     strategy:
       matrix:
         package: [backend, frontend, migrations]
     timeout-minutes: 10
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
-        id: builds
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
@@ -31,7 +26,7 @@ jobs:
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
-  # https://github.com/bcgov-nr/action-deployer-openshift
+  # https://github.com/bcgov/quickstart-openshift-helpers
   deploys:
     name: Deploys
     needs: [builds]
@@ -54,16 +49,8 @@ jobs:
 
   results:
     name: PR Results
-    if: always()
     needs: [builds, deploys, tests]
+    if: always() && (!failure()) && (!cancelled())
     runs-on: ubuntu-22.04
     steps:
-      - run: |
-          # View results
-          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
-
-      - if: contains(needs.*.result, 'failure')
-        run: |
-          # Job failure found
-          echo "At least one job has failed"
-          exit 1
+      - run: echo "Success!"

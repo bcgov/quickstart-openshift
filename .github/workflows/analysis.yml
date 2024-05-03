@@ -82,16 +82,8 @@ jobs:
 
   results:
     name: Analysis Results
-    if: always()
     needs: [tests, trivy]
     runs-on: ubuntu-22.04
     steps:
-      - run: |
-          # View results
-          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
+      - run: echo "Success!"
 
-      - if: contains(needs.*.result, 'failure')
-        run: |
-          # Job failure found
-          echo "At least one job has failed"
-          exit 1
