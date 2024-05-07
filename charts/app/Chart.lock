@@ -1,6 +1,6 @@
 dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 15.2.8
-digest: sha256:e277d511053c7ce78ba17bd61498f1087644841b805924e0bf8425b6c1de724a
-generated: "2024-05-03T00:10:21.119679881Z"
+  version: 15.2.9
+digest: sha256:29021117a32b5284e090d69cd2e99001fa4d183072ecf8233ba1b0205f368254
+generated: "2024-05-06T12:25:07.359687046Z"
