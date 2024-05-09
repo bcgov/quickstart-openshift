@@ -291,6 +291,14 @@ Runs on merge to main branch.
 
 ![](.github/graphics/merge.png)
 
+## Scheduled
+
+Runs on scheduled job (cronjob) or workflow dispatch.
+
+* PR environment purge
+* Generate SchemaSpy documentation
+* Tests (e2e, load, integration) on TEST deployment
+
 # App Stack
 
 ## Starter
