@@ -241,7 +241,7 @@ Runs on pull request submission.
 * Provides safe, sandboxed deployment environments
 * Build action pushes to GitHub Container Registry (ghcr.io)
 * Build triggers select new builds vs reusing builds
-* Deployment triggers to only deploy when changes are made
+* Deployment triggers to only deploy and test when changes are made
 * Deployment includes curl checks and optional penetration tests
 * Other checks and updates as required
 
