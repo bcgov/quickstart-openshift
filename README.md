@@ -252,8 +252,7 @@ Runs on pull request submission.
 Runs on pull request submission or merge to the default branch.
 
 * Unit tests (should include coverage)
-* SonarCloud coverage and analysis
-* CodeQL/GitHub security reporting
+* CodeQL/GitHub security reporting (now handled as GitHub default!)
 * Trivy password, vulnerability and security scanning
 
 ![](.github/graphics/analysis.png)
