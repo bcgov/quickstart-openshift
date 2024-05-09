@@ -299,6 +299,8 @@ Runs on scheduled job (cronjob) or workflow dispatch.
 * Generate SchemaSpy documentation
 * Tests (e2e, load, integration) on TEST deployment
 
+![](.github/graphics/scheduled.png)
+
 # App Stack
 
 ## Starter
