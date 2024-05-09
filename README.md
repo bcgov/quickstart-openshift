@@ -283,7 +283,7 @@ Runs on merge to main branch.
 
 * Code scanning and reporting to GitHub Security overview
 * Zero-downtime* TEST deployment
-* Penetration tests on TEST deployment
+* Penetration tests on TEST deployment (optional)
 * Zero-downtime* PROD deployment
 * Labels successful deployment images as PROD
 
