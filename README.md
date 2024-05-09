@@ -57,27 +57,6 @@ Features:
     * Backend: TypeScript, Nest.js
     * Alternative backends for [Java/Quarkus, Go/Fiber and Python/FastAPI](https://github.com/bcgov/quickstart-openshift-backends)
 
-# Table of Contents
-
-* [Setup](#Setup)
-  * [Prerequisites](#Prerequisites)
-  * [Using this Template](#Using-this-Template)
-  * [Secrets and Variables](#Secrets-and-Variables)
-  * [Environments](#environments)
-  * [Updating Dependencies](#Updating-Dependencies)
-  * [Repository Configuration](#Repository-Configuration)
-* [Workflows](#Workflows)
-  * [Pull Request](#Pull-Request)
-  * [Analysis](#Analysis)
-  * [Pull Request Closed](#Pull-Request-Closed)
-  * [Merge](#Merge)
-* [App Stack](#App-Stack)
-  * [Starter](#Starter)
-  * [Pluggable Backends](#Pluggable-Backends)
-  * [SchemaSpy](#SchemaSpy)
-* [Resources](#Resources)
-* [Contributing](#Contributing)
-
 # Setup
 
 Initial setup is intended to take an hour or less.  This depends greatly on intended complexity, features selected/excluded and outside cooperation.
