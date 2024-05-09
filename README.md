@@ -5,7 +5,8 @@
 [![Analysis](https://github.com/bcgov/quickstart-openshift/actions/workflows/analysis.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/analysis.yml)
 [![Scheduled](https://github.com/bcgov/quickstart-openshift/actions/workflows/scheduled.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/scheduled.yml)
 
-##### Frontend (JavaScript/TypeScript)
+Frontend (JavaScript/TypeScript)
+
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
@@ -16,7 +17,8 @@
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
 
-##### Backend (JavaScript/TypeScript)
+Backend (JavaScript/TypeScript)
+
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
@@ -43,38 +45,17 @@ Features:
 * Enforced code reviews and workflow jobs (pass|fail)
 * Helm Package Manager for atomic deployments
 * Prometheus Metrics export from Backend/Frontend
-* Resource Tuning with Horizontal Pod Autoscaler (in TEST/PROD).
-* Affinity and Anti-Affinity for Scheduling on different worker nodes
+* Resource Tuning with Horizontal Pod Autoscaler (TEST/PROD only)
+* Affinity and anti-affinity for Scheduling on different worker nodes
 * Rolling updates with zero downtime in PROD
 * Database Migrations with Flyway
-* Pod Disruption Budgets for High Availability
-* Self Healing through Health checks
+* Pod disruption budgets for high availability
+* Self-healing through with probes/checks (startup, readiness, liveness)
 * Sample application stack:
     * Database: Postgres, PostGIS, backups, Flyway
     * Frontend: TypeScript, Caddy Server
     * Backend: TypeScript, Nest.js
     * Alternative backends for [Java/Quarkus, Go/Fiber and Python/FastAPI](https://github.com/bcgov/quickstart-openshift-backends)
-
-# Table of Contents
-
-* [Setup](#Setup)
-  * [Prerequisites](#Prerequisites)
-  * [Using this Template](#Using-this-Template)
-  * [Secrets and Variables](#Secrets-and-Variables)
-  * [Environments](#environments)
-  * [Updating Dependencies](#Updating-Dependencies)
-  * [Repository Configuration](#Repository-Configuration)
-* [Workflows](#Workflows)
-  * [Pull Request](#Pull-Request)
-  * [Analysis](#Analysis)
-  * [Pull Request Closed](#Pull-Request-Closed)
-  * [Merge](#Merge)
-* [App Stack](#App-Stack)
-  * [Starter](#Starter)
-  * [Pluggable Backends](#Pluggable-Backends)
-  * [SchemaSpy](#SchemaSpy)
-* [Resources](#Resources)
-* [Contributing](#Contributing)
 
 # Setup
 
@@ -110,11 +91,6 @@ Note: Dependabot, which we don't recommend as highly as Renovate, requires its o
 ### Secrets Values
 
 > Click Settings > Secrets and Variables > Actions > Secrets > New repository secret
-
-**GITHUB_TOKEN**
-
-Default token.  Replaced every workflow run, available to all workflows.
-* Consume: `{{ secrets.GITHUB_TOKEN }}`
 
 **OC_TOKEN**
 
@@ -236,6 +212,10 @@ This is required to prevent direct pushes and merges to the default branch.  The
         * `[check] Require branches to be up to date before merging`
         * `Status checks that are required`:
             * Select checks as appropriate, e.g. Build x, Deploy y
+            * Recommended:
+                * Analysis Results
+                * PR Results
+                * Validate Results
         * Select at least one status check to enforce branch protection
     * `[check] Require conversation resolution before merging`
     * `[check] Include administrators` (optional)
@@ -261,19 +241,29 @@ Runs on pull request submission.
 * Provides safe, sandboxed deployment environments
 * Build action pushes to GitHub Container Registry (ghcr.io)
 * Build triggers select new builds vs reusing builds
-* Deployment triggers to only deploy when changes are made
+* Deploy only when changes are made
 * Deployment includes curl checks and optional penetration tests
+* Run tests (e2e, load, integration) when changes are made
 * Other checks and updates as required
 
 ![](.github/graphics/pr-open.png)
+
+## Validation
+
+Runs on pull request submission.
+
+* Enforces conventional commits in PR title
+* Adds greetings/directions to PR descriptions
+
+![](.github/graphics/pr-validate.png)
+
 
 ## Analysis
 
 Runs on pull request submission or merge to the default branch.
 
 * Unit tests (should include coverage)
-* SonarCloud coverage and analysis
-* CodeQL/GitHub security reporting
+* CodeQL/GitHub security reporting (now handled as GitHub default!)
 * Trivy password, vulnerability and security scanning
 
 ![](.github/graphics/analysis.png)
@@ -283,7 +273,7 @@ Runs on pull request submission or merge to the default branch.
 Runs on pull request close or merge.
 
 * Cleans up OpenShift objects/artifacts
-* Merge promotes successful build images to TEST
+* Merge retags successful build images as `latest`
 
 ![](.github/graphics/pr-close.png)
 
@@ -293,13 +283,23 @@ Runs on merge to main branch.
 
 * Code scanning and reporting to GitHub Security overview
 * Zero-downtime* TEST deployment
-* Penetration tests on TEST deployment
+* Penetration tests on TEST deployment (optional)
 * Zero-downtime* PROD deployment
 * Labels successful deployment images as PROD
 
 \* excludes database changes
 
 ![](.github/graphics/merge.png)
+
+## Scheduled
+
+Runs on scheduled job (cronjob) or workflow dispatch.
+
+* PR environment purge
+* Generate SchemaSpy documentation
+* Tests (e2e, load, integration) on TEST deployment
+
+![](.github/graphics/scheduled.png)
 
 # App Stack
 
