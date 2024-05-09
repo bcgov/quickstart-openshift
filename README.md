@@ -45,12 +45,12 @@ Features:
 * Enforced code reviews and workflow jobs (pass|fail)
 * Helm Package Manager for atomic deployments
 * Prometheus Metrics export from Backend/Frontend
-* Resource Tuning with Horizontal Pod Autoscaler (in TEST/PROD).
-* Affinity and Anti-Affinity for Scheduling on different worker nodes
+* Resource Tuning with Horizontal Pod Autoscaler (TEST/PROD only)
+* Affinity and anti-affinity for Scheduling on different worker nodes
 * Rolling updates with zero downtime in PROD
 * Database Migrations with Flyway
-* Pod Disruption Budgets for High Availability
-* Self Healing through Health checks
+* Pod disruption budgets for high availability
+* Self-healing through with probes/checks (startup, readiness, liveness)
 * Sample application stack:
     * Database: Postgres, PostGIS, backups, Flyway
     * Frontend: TypeScript, Caddy Server
@@ -91,11 +91,6 @@ Note: Dependabot, which we don't recommend as highly as Renovate, requires its o
 ### Secrets Values
 
 > Click Settings > Secrets and Variables > Actions > Secrets > New repository secret
-
-**GITHUB_TOKEN**
-
-Default token.  Replaced every workflow run, available to all workflows.
-* Consume: `{{ secrets.GITHUB_TOKEN }}`
 
 **OC_TOKEN**
 
