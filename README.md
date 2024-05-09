@@ -212,6 +212,10 @@ This is required to prevent direct pushes and merges to the default branch.  The
         * `[check] Require branches to be up to date before merging`
         * `Status checks that are required`:
             * Select checks as appropriate, e.g. Build x, Deploy y
+            * Recommended:
+                * Analysis Results
+                * PR Results
+                * Validate Results
         * Select at least one status check to enforce branch protection
     * `[check] Require conversation resolution before merging`
     * `[check] Include administrators` (optional)
