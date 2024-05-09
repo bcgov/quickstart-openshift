@@ -248,6 +248,16 @@ Runs on pull request submission.
 
 ![](.github/graphics/pr-open.png)
 
+## Validation
+
+Runs on pull request submission.
+
+* Enforces conventional commits in PR title
+* Adds greetings/directions to PR descriptions
+
+![](.github/graphics/pr-validate.png)
+
+
 ## Analysis
 
 Runs on pull request submission or merge to the default branch.
