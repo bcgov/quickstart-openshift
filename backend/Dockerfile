@@ -7,7 +7,7 @@ COPY . ./
 RUN npm run deploy
 
 # Deploy using minimal Distroless image
-FROM gcr.io/distroless/nodejs20-debian11:nonroot
+FROM gcr.io/distroless/nodejs22-debian12:nonroot
 ENV NODE_ENV production
 
 # Copy app and dependencies
