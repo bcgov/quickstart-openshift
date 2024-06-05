@@ -76,7 +76,7 @@ backend:
     hosts: 
       - host: "{{.Release.Name}}.{{.Values.global.domain}}"
         paths:
-          - path: /frontend
+          - path: /api
             pathType: ImplementationSpecific
   pdb:
     enabled: false # enable it in PRODUCTION for having pod disruption budget.
@@ -122,7 +122,7 @@ frontend:
     hosts: 
       - host: "{{.Release.Name}}.{{.Values.global.domain}}"
         paths:
-          - path: /api
+          - path: /frontend
             pathType: ImplementationSpecific
   pdb:
     enabled: false # enable it in PRODUCTION for having pod disruption budget.
