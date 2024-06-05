@@ -65,6 +65,16 @@ backend:
     type: ClusterIP
     port: 80 # this is the service port, where it will be exposed internal to the namespace.
     targetPort: 3000 # this is container port where app listens on
+  ingress:
+    className: openshift-default
+    annotations:
+      route.openshift.io/termination: "edge"
+    enabled: true
+    hosts: 
+      - host: "{{.Release.Name}}.{{.Values.global.domain}}"
+        paths:
+          - path: /frontend
+            pathType: ImplementationSpecific
   pdb:
     enabled: false # enable it in PRODUCTION for having pod disruption budget.
     minAvailable: 1 # the minimum number of pods that must be available during the disruption budget.
@@ -110,9 +120,9 @@ frontend:
       route.openshift.io/termination: "edge"
     enabled: true
     hosts: 
-      - host: "{{.Release.Name}}.{{.Values.global.domain}}/frontend"
+      - host: "{{.Release.Name}}.{{.Values.global.domain}}"
         paths:
-          - path: /
+          - path: /api
             pathType: ImplementationSpecific
   pdb:
     enabled: false # enable it in PRODUCTION for having pod disruption budget.
