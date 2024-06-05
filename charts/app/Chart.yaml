@@ -30,6 +30,14 @@ dependencies:
     version: 15.5.1
     repository: https://charts.bitnami.com/bitnami
     alias: bitnami-pg
+  - name: component
+    repository: "https://bcgov.github.io/helm-service"
+    alias: frontend
+    version: 0.3.0
+  - name: component
+    repository: "https://bcgov.github.io/helm-service"
+    alias: backend
+    version: 0.3.0
 maintainers:
   - name: Om Mishra
     email: omprakash.2.mishra@gov.bc.ca

@@ -63,8 +63,11 @@ backend:
   service:
     #-- the type of the service. it can be ClusterIP, NodePort, LoadBalancer, ExternalName. ClusterIP is the default and is recommended.
     type: ClusterIP
-    port: 80 # this is the service port, where it will be exposed internal to the namespace.
-    targetPort: 3000 # this is container port where app listens on
+    ports:
+      - name: 3000-tcp
+        protocol: TCP
+        port: 80 #this is the service port, where it will be exposed internal to the namespace.
+        targetPort: 3000 # this is container port where app listens on
   ingress:
     className: openshift-default
     annotations:
@@ -74,7 +77,7 @@ backend:
       - host: "{{.Release.Name}}.{{.Values.global.domain}}"
         paths:
           - path: /frontend
-            pathType: Prefix
+            pathType: ImplementationSpecific
   pdb:
     enabled: false # enable it in PRODUCTION for having pod disruption budget.
     minAvailable: 1 # the minimum number of pods that must be available during the disruption budget.
@@ -104,16 +107,13 @@ frontend:
     #-- the ports for the service.
     ports:
       - name: http
-        #-- the port for the service. the service will be accessible on this port within the namespace.
-        port: 80
-        #-- the container port where the application is listening on
-        targetPort: 3000
-        #-- the protocol for the port. it can be TCP or UDP. TCP is the default and is recommended.
         protocol: TCP
-      - port: 3003
+        port: 80 #this is the service port, where it will be exposed internal to the namespace.
+        targetPort: 3000 # this is container port where app listens on
+      - name: metrics
+        protocol: TCP
+        port: 3003
         targetPort: 3003
-        protocol: TCP
-        name: metrics
   ingress:
     className: openshift-default
     annotations:
