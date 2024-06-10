@@ -39,7 +39,7 @@ services:
       database:
         condition: service_healthy
 
-  schema_spy:
+  schemaspy:
     image: schemaspy/schemaspy:6.2.4
     container_name: schemaspy
     command: -t pgsql11 -db postgres -host database -port 5432 -u postgres -p default -schemas users
@@ -47,21 +47,29 @@ services:
       migrations:
         condition: service_completed_successfully
     volumes: ["./output:/output"]
+
   backend:
     container_name: backend
+    depends_on:
+      migrations:
+        condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app
+          ignore:
+            - dist
+            - node_modules
     entrypoint: sh -c "npm i && npm run start:dev"
     environment:
       <<: *postgres-vars
       NODE_ENV: development
     image: node:20-bullseye
     ports: ["3001:3000"]
-    volumes: ["./backend:/app", "/app/node_modules"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api"]
     working_dir: "/app"
-    depends_on:
-      migrations:
-        condition: service_started
 
   frontend:
     container_name: frontend
