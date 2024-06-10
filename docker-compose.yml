@@ -1,6 +1,4 @@
----
-version: "3.9"
-
+# Reusable vars
 x-var:
   - &POSTGRES_USER
     postgres
@@ -9,6 +7,7 @@ x-var:
   - &POSTGRES_DATABASE
     postgres
 
+# Reusable envars for postgres
 x-postgres-vars: &postgres-vars
   POSTGRES_HOST: database
   POSTGRES_USER: *POSTGRES_USER
@@ -39,6 +38,7 @@ services:
     depends_on:
       database:
         condition: service_healthy
+
   schema_spy:
     image: schemaspy/schemaspy:6.2.4
     container_name: schemaspy
