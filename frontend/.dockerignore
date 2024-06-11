@@ -1,7 +1,5 @@
 *.md
 LICENSE
-.idea
-.vscode
 coverage
 cypress
 dist
@@ -10,3 +8,4 @@ e2e
 migrations
 output
 tests
+Dockerfile

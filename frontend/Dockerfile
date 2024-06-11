@@ -5,14 +5,13 @@ FROM node:20.14.0-bullseye-slim AS build
 # See .dockerignore for exclusions
 WORKDIR /app
 COPY . ./
-RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
-    npm run build
+RUN npm run deploy
 
 # Deploy using Caddy to host static files
 FROM caddy:2.8.4-alpine
 RUN apk add --no-cache ca-certificates
 
-# Copy static files and run formatting
+# Copy static files, verify Caddyfile formatting
 COPY --from=build /app/dist /srv
 COPY Caddyfile /etc/caddy/Caddyfile
 RUN caddy fmt /etc/caddy/Caddyfile
