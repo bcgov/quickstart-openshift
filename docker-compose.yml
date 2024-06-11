@@ -41,6 +41,7 @@ services:
 
   schemaspy:
     image: schemaspy/schemaspy:6.2.4
+    profiles: ["schemaspy"]
     container_name: schemaspy
     command: -t pgsql11 -db postgres -host database -port 5432 -u postgres -p default -schemas users
     depends_on:
@@ -68,8 +69,9 @@ services:
     container_name: frontend
     entrypoint: sh -c "npm ci && npm run dev"
     environment:
-      NODE_ENV: development
       BACKEND_URL: http://backend:3000
+      PORT: 3000
+      NODE_ENV: development
     image: node:20-bullseye
     ports: ["3000:3000"]
     volumes: ["./frontend:/app", "/app/node_modules"]
