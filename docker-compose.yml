@@ -53,9 +53,10 @@ services:
     depends_on:
       migrations:
         condition: service_started
+    # Deployment uses Distroless, which doesn't work fully with WATCH
     develop:
       watch:
-        - action: sync
+        - action: sync+restart
           path: ./backend
           target: /app
           ignore:
@@ -70,6 +71,7 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api"]
     working_dir: "/app"
+    volumes: ["./backend:/app", "/app/node_modules"]
 
   frontend:
     container_name: frontend
