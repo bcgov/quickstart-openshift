@@ -1,8 +1,7 @@
-# Build static files
+# Build
 FROM node:20.14.0-bullseye-slim AS build
 
-# Copy files, install packages and build static files
-# See .dockerignore for exclusions
+# Copy, build static files; see .dockerignore for exclusions
 WORKDIR /app
 COPY . ./
 RUN npm run deploy
@@ -20,5 +19,5 @@ RUN caddy fmt /etc/caddy/Caddyfile
 EXPOSE 3000 3001
 HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3001/health
 
-# Run as non-root user
+# Nonroot user
 USER 1001
