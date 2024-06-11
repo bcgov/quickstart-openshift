@@ -1,6 +1,12 @@
+*.md
+LICENSE
 .idea
 .vscode
 coverage
 cypress
 dist
 node_modules
+e2e
+migrations
+output
+tests

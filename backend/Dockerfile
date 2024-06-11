@@ -2,6 +2,7 @@
 FROM node:20.14.0-bullseye-slim AS build
 
 # Copy, install deps, build static files
+# See .dockerignore for exclusions
 WORKDIR /app
 COPY . ./
 RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
