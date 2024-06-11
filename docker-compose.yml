@@ -53,15 +53,6 @@ services:
     depends_on:
       migrations:
         condition: service_started
-    # Deployment uses Distroless, which doesn't work fully with WATCH
-    develop:
-      watch:
-        - action: sync+restart
-          path: ./backend
-          target: /app
-          ignore:
-            - dist
-            - node_modules
     entrypoint: sh -c "npm i && npm run start:dev"
     environment:
       <<: *postgres-vars
@@ -78,7 +69,6 @@ services:
     entrypoint: sh -c "npm ci && npm run dev"
     environment:
       NODE_ENV: development
-      PORT: 3000
       BACKEND_URL: http://backend:3000
     image: node:20-bullseye
     ports: ["3000:3000"]
