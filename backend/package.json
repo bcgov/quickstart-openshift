@@ -5,8 +5,9 @@
   "scripts": {
     "prisma-generate": "prisma generate",
     "prebuild": "rimraf dist",
-    "build": "nest build",
+    "build": "prisma generate && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "deploy": "npm ci --ignore-scripts --no-update-notifier --omit=dev && npm run build",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",

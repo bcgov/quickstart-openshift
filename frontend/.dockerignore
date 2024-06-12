@@ -1,6 +1,24 @@
+# Standard exclusions
+*.md
+.git
+.github
 .idea
 .vscode
-coverage
-cypress
+Dockerfile
+CODE_OF_CONDUCT*
+CONTRIBUTING*
+LICENSE*
+SECURITY*
+
+# Node exclusions
 dist
 node_modules
+
+# App-specific exclusions
+coverage
+cypress
+e2e
+migrations
+output
+test
+tests

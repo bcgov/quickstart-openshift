@@ -1,6 +1,4 @@
----
-version: "3.9"
-
+# Reusable vars
 x-var:
   - &POSTGRES_USER
     postgres
@@ -9,6 +7,7 @@ x-var:
   - &POSTGRES_DATABASE
     postgres
 
+# Reusable envars for postgres
 x-postgres-vars: &postgres-vars
   POSTGRES_HOST: database
   POSTGRES_USER: *POSTGRES_USER
@@ -39,37 +38,40 @@ services:
     depends_on:
       database:
         condition: service_healthy
-  schema_spy:
+
+  schemaspy:
     image: schemaspy/schemaspy:6.2.4
+    profiles: ["schemaspy"]
     container_name: schemaspy
     command: -t pgsql11 -db postgres -host database -port 5432 -u postgres -p default -schemas users
     depends_on:
       migrations:
         condition: service_completed_successfully
     volumes: ["./output:/output"]
+
   backend:
     container_name: backend
+    depends_on:
+      migrations:
+        condition: service_started
     entrypoint: sh -c "npm i && npm run start:dev"
     environment:
       <<: *postgres-vars
       NODE_ENV: development
     image: node:20-bullseye
     ports: ["3001:3000"]
-    volumes: ["./backend:/app", "/app/node_modules"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api"]
     working_dir: "/app"
-    depends_on:
-      migrations:
-        condition: service_started
+    volumes: ["./backend:/app", "/app/node_modules"]
 
   frontend:
     container_name: frontend
     entrypoint: sh -c "npm ci && npm run dev"
     environment:
-      NODE_ENV: development
-      PORT: 3000
       BACKEND_URL: http://backend:3000
+      PORT: 3000
+      NODE_ENV: development
     image: node:20-bullseye
     ports: ["3000:3000"]
     volumes: ["./frontend:/app", "/app/node_modules"]
