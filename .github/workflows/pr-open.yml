@@ -30,7 +30,7 @@ jobs:
   deploys:
     name: Deploys
     needs: [builds]
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@feat/deployerAtomicParam
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.1
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
