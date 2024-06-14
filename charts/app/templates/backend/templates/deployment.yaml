@@ -40,17 +40,20 @@ spec:
             - name: FLYWAY_CONNECT_RETRIES
               value: "10"
             - name: FLYWAY_URL
-              value: "jdbc:postgresql://{{ .Values.database.service.name }}:5432/postgres"
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Release.Name}}
+                  key: FLYWAY_URL
             - name: FLYWAY_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{.Release.Name}}
-                  key: POSTGRES_PASSWORD
+                  key: FLYWAY_PASSWORD
             - name: FLYWAY_USER
               valueFrom:
                 secretKeyRef:
                   name: {{.Release.Name}}
-                  key: POSTGRES_USER
+                  key: FLYWAY_USER
           resources:
             limits:
               cpu: 200m
