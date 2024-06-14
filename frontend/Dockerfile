@@ -1,5 +1,5 @@
 # Build
-FROM node:20.14.0-bullseye-slim AS build
+FROM node:22-slim AS build
 
 # Copy, build static files; see .dockerignore for exclusions
 WORKDIR /app
