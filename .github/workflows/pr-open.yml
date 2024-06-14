@@ -9,27 +9,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # https://github.com/bcgov-nr/action-builder-ghcr
-  builds:
-    name: Builds
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        package: [backend, frontend, migrations]
-    timeout-minutes: 10
-    steps:
-      - uses: bcgov-nr/action-builder-ghcr@v2.0.2
-        with:
-          keep_versions: 50
-          package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
-          tag_fallback: latest
-          triggers: ('${{ matrix.package }}/')
+  # # https://github.com/bcgov-nr/action-builder-ghcr
+  # builds:
+  #   name: Builds
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       package: [backend, frontend, migrations]
+  #   timeout-minutes: 10
+  #   steps:
+  #     - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+  #       with:
+  #         keep_versions: 50
+  #         package: ${{ matrix.package }}
+  #         tag: ${{ github.event.number }}
+  #         tag_fallback: latest
+  #         triggers: ('${{ matrix.package }}/')
 
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploys:
     name: Deploys
-    needs: [builds]
+    # needs: [builds]
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@feat/atomicParam
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -40,18 +40,18 @@ jobs:
       params:
         --set global.secrets.persist=false
 
-  tests:
-    name: Tests
-    if: needs.deploys.outputs.triggered == 'true'
-    needs: [deploys]
-    uses: ./.github/workflows/.tests.yml
-    with:
-      target: ${{ github.event.number }}
+  # tests:
+  #   name: Tests
+  #   if: needs.deploys.outputs.triggered == 'true'
+  #   needs: [deploys]
+  #   uses: ./.github/workflows/.tests.yml
+  #   with:
+  #     target: ${{ github.event.number }}
 
-  results:
-    name: PR Results
-    needs: [builds, deploys, tests]
-    if: always() && (!failure()) && (!cancelled())
-    runs-on: ubuntu-22.04
-    steps:
-      - run: echo "Success!"
+  # results:
+  #   name: PR Results
+  #   needs: [builds, deploys, tests]
+  #   if: always() && (!failure()) && (!cancelled())
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - run: echo "Success!"
