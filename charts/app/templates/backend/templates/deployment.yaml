@@ -34,7 +34,7 @@ spec:
           imagePullPolicy: {{ default "Always" .Values.backend.imagePullPolicy }}
           envFrom:
             - secretRef:
-                name: {{.Release.Name}}
+                name: {{.Release.Name}}-flyway
           env:
             - name: FLYWAY_BASELINE_ON_MIGRATE
               value: "true"
