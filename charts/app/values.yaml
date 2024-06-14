@@ -213,7 +213,7 @@ bitnami-pg:
     repository: bcgov/nr-containers/bitnami/postgresql
     tag: 15.7.0
   auth:
-    existingSecret: '{{ .Release.Name }}'
+    existingSecret: '{{ .Release.Name }}-database'
     username: 'quickstart'
     database: quickstart
   shmVolume:
