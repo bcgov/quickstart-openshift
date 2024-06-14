@@ -32,9 +32,6 @@ spec:
         - name: {{ include "backend.fullname" . }}-init
           image: "{{.Values.global.registry}}/{{.Values.global.repository}}/migrations:{{ .Values.global.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ default "Always" .Values.backend.imagePullPolicy }}
-          envFrom:
-            - secretRef:
-                name: {{.Release.Name}}
           env:
             - name: FLYWAY_BASELINE_ON_MIGRATE
               value: "true"
@@ -42,6 +39,18 @@ spec:
               value: "USERS"
             - name: FLYWAY_CONNECT_RETRIES
               value: "10"
+            - name: FLYWAY_URL
+              value: "jdbc:postgresql://{{ .Values.database.service.name }}:5432/postgres"
+            - name: FLYWAY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Release.Name}}
+                  key: POSTGRES_PASSWORD
+            - name: FLYWAY_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Release.Name}}
+                  key: POSTGRES_USER
           resources:
             limits:
               cpu: 200m
