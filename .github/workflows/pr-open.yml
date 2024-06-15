@@ -36,7 +36,7 @@ jobs:
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       triggers: ('backend/' 'frontend/' 'migrations/')
-      params: |
+      params:
         --set global.secrets.persist=false
 
   tests:
