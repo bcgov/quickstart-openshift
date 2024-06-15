@@ -25,7 +25,7 @@ services:
     ports: ["5432:5432"]
 
   migrations:
-    image: flyway/flyway:9-alpine
+    image: flyway/flyway:10-alpine
     container_name: migrations
     command: info migrate info
     volumes: ["./migrations/sql:/flyway/sql:ro"]
@@ -58,7 +58,7 @@ services:
     environment:
       <<: *postgres-vars
       NODE_ENV: development
-    image: node:20-bullseye
+    image: node:22
     ports: ["3001:3000"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api"]
