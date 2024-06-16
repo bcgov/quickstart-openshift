@@ -1,5 +1,5 @@
 # Build
-FROM node:22.2.0-slim AS build
+FROM node:22.3.0-slim AS build
 
 # Copy, build static files; see .dockerignore for exclusions
 WORKDIR /app
