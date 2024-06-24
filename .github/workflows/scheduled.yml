@@ -99,21 +99,28 @@ jobs:
     with:
       target: test
 
+  # Run sequentially to reduce chances of rate limiting
   zap_scan:
     runs-on: ubuntu-latest
-    name: Penetration Tests
+    name: Penetration Tests - Backend
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}-test
-    strategy:
-      matrix:
-        name: [backend, frontend]
     steps:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.10.0
         with:
           allow_issue_writing: true
-          artifact_name: "zap_${{ matrix.name }}"
+          artifact_name: "zap_backend"
           cmd_options: "-a"
-          issue_title: "ZAP: ${{ matrix.name }}"
-          target: https://${{ env.PREFIX }}-${{ matrix.name }}.${{ env.DOMAIN }}
+          issue_title: "ZAP: backend"
+          target: https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}
+
+      - name: ZAP Scan - Frontend
+        uses: zaproxy/action-full-scan@v0.10.0
+        with:
+          allow_issue_writing: true
+          artifact_name: "zap_frontend"
+          cmd_options: "-a"
+          issue_title: "ZAP: frontend"
+          target: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
