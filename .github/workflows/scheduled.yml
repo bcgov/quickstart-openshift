@@ -10,100 +10,100 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ageOutPRs:
-  #   name: PR Env Purge
-  #   env:
-  #     # https://tecadmin.net/getting-yesterdays-date-in-bash/
-  #     CUTOFF: "1 week ago"
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 10
-  #   steps:
-  #     - name: Clean up Helm Releases
-  #       run: |
-  #         oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
-  #         oc project ${{ secrets.OC_NAMESPACE }} # Safeguard!
+  ageOutPRs:
+    name: PR Env Purge
+    env:
+      # https://tecadmin.net/getting-yesterdays-date-in-bash/
+      CUTOFF: "1 week ago"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Clean up Helm Releases
+        run: |
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          oc project ${{ secrets.OC_NAMESPACE }} # Safeguard!
 
-  #         # Catch errors, unset variables, and pipe failures (e.g. grep || true )
-  #         set -euo pipefail
+          # Catch errors, unset variables, and pipe failures (e.g. grep || true )
+          set -euo pipefail
 
-  #         # Echos
-  #         echo "Delete stale Helm releases"
-  #         echo "Cutoff: ${{ env.CUTOFF }}"
+          # Echos
+          echo "Delete stale Helm releases"
+          echo "Cutoff: ${{ env.CUTOFF }}"
 
-  #         # Before date, list of releases
-  #         BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
-  #         RELEASES=$(helm ls -aq | grep ${{ github.event.repository.name }} || :)
+          # Before date, list of releases
+          BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
+          RELEASES=$(helm ls -aq | grep ${{ github.event.repository.name }} || :)
 
-  #         # If releases, then iterate
-  #         [ -z "${RELEASES}" ]|| for r in ${RELEASES[@]}; do
+          # If releases, then iterate
+          [ -z "${RELEASES}" ]|| for r in ${RELEASES[@]}; do
 
-  #           # Get last update and convert the date
-  #           UPDATED=$(date "+%s" -d <<< echo $(helm status $r -o json | jq -r .info.last_deployed))
+            # Get last update and convert the date
+            UPDATED=$(date "+%s" -d <<< echo $(helm status $r -o json | jq -r .info.last_deployed))
 
-  #           # Compare to cutoff and delete as necessary
-  #           if [[ ${UPDATED} < ${BEFORE} ]]; then
-  #             echo -e "\nOlder than cutoff: ${r}"
-  #             helm uninstall --no-hooks ${r}
-  #             oc delete pvc/${r}-bitnami-pg-0 || true
-  #           else
-  #             echo -e "\nNewer than cutoff: ${r}"
-  #             echo "No need to delete"
-  #           fi
-  #         done
+            # Compare to cutoff and delete as necessary
+            if [[ ${UPDATED} < ${BEFORE} ]]; then
+              echo -e "\nOlder than cutoff: ${r}"
+              helm uninstall --no-hooks ${r}
+              oc delete pvc/${r}-bitnami-pg-0 || true
+            else
+              echo -e "\nNewer than cutoff: ${r}"
+              echo "No need to delete"
+            fi
+          done
 
-  # generate-schema-spy:
-  #   name: Generate SchemaSpy Documentation
-  #   runs-on: ubuntu-22.04
-  #   services:
-  #     postgres:
-  #       image: postgis/postgis:16-3.4
-  #       env:
-  #         POSTGRES_DB: default
-  #         POSTGRES_USER: postgres
-  #         POSTGRES_PASSWORD: default
-  #       options: >-
-  #         --health-cmd pg_isready
-  #         --health-interval 10s
-  #         --health-timeout 5s
-  #         --health-retries 5
-  #       ports:
-  #         - 5432:5432
-  #   timeout-minutes: 10
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Flyway
-  #       uses: docker://flyway/flyway:10
-  #       env:
-  #         FLYWAY_URL: jdbc:postgresql://postgres:5432/default
-  #         FLYWAY_USER: postgres
-  #         FLYWAY_PASSWORD: default
-  #         FLYWAY_LOCATIONS: filesystem:./migrations
-  #         FLYWAY_DEFAULT_SCHEMA: "users"
-  #       with:
-  #         args: info migrate info
+  generate-schema-spy:
+    name: Generate SchemaSpy Documentation
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: default
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: default
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Flyway
+        uses: docker://flyway/flyway:10
+        env:
+          FLYWAY_URL: jdbc:postgresql://postgres:5432/default
+          FLYWAY_USER: postgres
+          FLYWAY_PASSWORD: default
+          FLYWAY_LOCATIONS: filesystem:./migrations
+          FLYWAY_DEFAULT_SCHEMA: "users"
+        with:
+          args: info migrate info
 
-  #     - name: Create Output Folder
-  #       run: |
-  #         mkdir output
-  #         chmod a+rwx -R output
-  #     - name: Run Schemaspy
-  #       run: docker run --network host -v "$PWD/output:/output" schemaspy/schemaspy:6.2.4 -t pgsql11 -db default -host 127.0.0.1 -port 5432 -u postgres -p default -schemas users
-  #     - name: Deploy to Pages
-  #       uses: JamesIves/github-pages-deploy-action@v4
-  #       with:
-  #         folder: output
-  #         target-folder: schemaspy
+      - name: Create Output Folder
+        run: |
+          mkdir output
+          chmod a+rwx -R output
+      - name: Run Schemaspy
+        run: docker run --network host -v "$PWD/output:/output" schemaspy/schemaspy:6.2.4 -t pgsql11 -db default -host 127.0.0.1 -port 5432 -u postgres -p default -schemas users
+      - name: Deploy to Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: output
+          target-folder: schemaspy
 
-  # tests:
-  #   name: Tests
-  #   uses: ./.github/workflows/.tests.yml
-  #   with:
-  #     target: test
+  tests:
+    name: Tests
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: test
 
   # Run sequentially to reduce chances of rate limiting
   zap_scan:
     runs-on: ubuntu-latest
-    name: Penetration Tests - Backend
+    name: ZAP Scans
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}-test
