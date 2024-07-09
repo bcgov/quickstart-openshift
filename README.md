@@ -196,31 +196,51 @@ Packages are available from your repository (link on right).  All should have vi
 
 E.g. https://github.com/bcgov/quickstart-openshift/packages
 
-### Branch Protection
+### Branch Protection Rules
 
-This is required to prevent direct pushes and merges to the default branch.  These steps must be run after one full pull request pipeline has been run.
+This is required to prevent direct pushes and merges to the default branch.  These steps must be run after one full pull request pipeline has been run to populate the required status checks.
 
-1. Select Settings (gear, top right)  *> Branches (under Code and Automation)
-2. Click `Add Rule` or edit an existing rule
-3. Under `Protect matching branches` specify the following:
-    * Branch name pattern: `main`
-    * `[check] Require a pull request before merging`
-        * `[check] Require approvals` (default = 1)
-        * `[check] Dismiss stale pull request approvals when new commits are pushed`
-        * `[check] Require review from Code Owners`
-    * `[check] Require status checks to pass before merging`
-        * `[check] Require branches to be up to date before merging`
-        * `Status checks that are required`:
-            * Select checks as appropriate, e.g. Build x, Deploy y
-            * Recommended:
-                * Analysis Results
-                * PR Results
-                * Validate Results
-        * Select at least one status check to enforce branch protection
-    * `[check] Require conversation resolution before merging`
-    * `[check] Include administrators` (optional)
+1. Select `Settings` (gear, top right) > `Rules` > `Rulesets` (under Code and Automation)
+2. Click `New ruleset` > `New branch ruleset`
+3. Setup Ruleset:
+    * Ruleset Name: `main`
+    * Enforcement status: `Active`
+    * Bypass list:
+        * Click `+ Add bypass`
+        * Check `[x] Repository admin`
+        * Click `Add selected`
+    * Target branches:
+        * Click `Add target`
+        * Select `Add default branch`
+    * Branch protections:
+        * `[x] Restrict deletions`
+        * `[x] Require linear history`
+        * `[x] Require a pull request before merging`
+            * Additional settings:
+                * `Require approvals: 1` (or more!)
+                * `[x] Require conversation resolution before merging`
+        * `[x] Require status checks to pass`
+            * `[x] Require branches to be up to date before merging`
+            * Required checks: *These will be populated after a full pull request pipeline run!*
+                * Click `+Add checks`
+                * This is our default set, yours may differ:
+                    * `Analysis Results`
+                    * `PR Results`
+                    * `Validate Results`
+    * `[x] Block force pushes`
+    * `[x] Require code scanning results`
+        * Click `+ Add tool`
+        * This is our default set, yours may differ:
+            * `CodeQL`
+            * `Trivy`
+    * Click `Create`
 
+#### Status checks example
 ![](./.github/graphics/branch-protection.png)
+
+#### Required tools and alerts example
+![](./.github/graphics/branch-code-results.png)
+
 
 ### Adding Team Members
 
