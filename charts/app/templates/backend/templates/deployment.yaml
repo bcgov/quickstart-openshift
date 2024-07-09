@@ -17,6 +17,9 @@ spec:
   template:
     metadata:
       annotations:
+        {{- if and .Values.backend.vault .Values.backend.vault.enabled }}
+        {{- include "backend.vaultAnnotations" . | nindent 8 }}
+        {{- end }}
         rollme: {{ randAlphaNum 5 | quote }}
         prometheus.io/scrape: 'true'
         prometheus.io/port: '3000'
@@ -49,12 +52,21 @@ spec:
             requests:
               cpu: 50m
               memory: 25Mi
+      {{- if $.Values.backend.serviceAccount }}
+      serviceAccountName: {{tpl $.Values.backend.serviceAccount.name .}}
+      {{- end }}
       containers:
         - name: {{ include "backend.fullname" . }}
           {{- if .Values.backend.securityContext }}
           securityContext:
             {{- toYaml .Values.backend.securityContext | nindent 12 }}
           {{- end }}
+          {{- if (index .Values.backend.containers 0).command }}
+          command:
+            {{- range (index .Values.backend.containers 0).command }}
+            - "{{tpl . $}}"
+          {{- end }}
+          {{- end}}
           image: "{{.Values.global.registry}}/{{.Values.global.repository}}/backend:{{ .Values.global.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ default "Always" .Values.backend.imagePullPolicy }}
           envFrom:

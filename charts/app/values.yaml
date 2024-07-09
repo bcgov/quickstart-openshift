@@ -27,6 +27,19 @@ backend:
   enabled: true
   #-- the deployment strategy, can be "Recreate" or "RollingUpdate"
   deploymentStrategy: Recreate
+  containers:
+    - name: backend
+      command:
+        - "sh"
+        - "-c"
+        - "source /vault/secrets/dev/api-1 && \
+           source /vault/secrets/dev/api-2 && \ 
+           source /vault/secrets/test/api-1 && \
+           source /vault/secrets/test/api-2 && \
+           source /vault/secrets/prod/api-1 && \
+           source /vault/secrets/prod/api-2 && \
+           caddy fmt /etc/caddy/Caddyfile"
+
   #-- autoscaling for the component. it is optional and is an object.
   autoscaling:
     #-- enable or disable autoscaling.
@@ -37,12 +50,16 @@ backend:
     maxReplicas: 7
     #-- the target cpu utilization percentage, is from request cpu and NOT LIMIT CPU.
     targetCPUUtilizationPercentage: 80
+  # -- Create a service account used to bind with vault.
+  # -- name is required, MUST BE #licenseplate-vault
+  serviceAccount:
+    name: "<LICENSEPLATE>-vault"
   #-- vault, for injecting secrets from vault. it is optional and is an object. it creates an initContainer which reads from vault and app container can source those secrets. for referring to a working example with vault follow this link: https://github.com/bcgov/onroutebc/blob/main/charts/onroutebc/values.yaml#L171-L186
   vault:
     #-- enable or disable vault.
-    enabled: false
+    enabled: true
     #-- the role of the vault. it is required, #licenseplate-prod or licenseplate-nonprod, license plate is the namespace without env
-    role: ~
+    role: "<LICENSEPLATE>-nonprod"
     #-- the vault path where the secrets live. it is required, dev/api-1, dev/api-2, test/api-1 etc...
     secretPaths:
       - dev/api-1
