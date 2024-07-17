@@ -100,7 +100,7 @@ OpenShift token, different for every project/namespace.  This guide assumes your
 
 Locate an OpenShift pipeline token:
 
-1. Login to your OpenShift cluster, e.g.: [Gold](https://console.apps.silver.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/)
+1. Login to your OpenShift cluster, e.g.: [Gold](https://console.apps.gold.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/)
 2. Select your DEV namespace
 3. Click Workloads > Secrets (under Workloads for Administrator view)
 4. Select `pipeline-token-...` or a similarly privileged token
