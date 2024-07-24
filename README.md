@@ -51,6 +51,7 @@ Features:
 * Database Migrations with Flyway
 * Pod disruption budgets for high availability
 * Self-healing through with probes/checks (startup, readiness, liveness)
+* Point the long-lived DEMO route to PRs by using the `demo` label
 * Sample application stack:
     * Database: Postgres, PostGIS, backups, Flyway
     * Frontend: TypeScript, Caddy Server
@@ -320,6 +321,22 @@ Runs on scheduled job (cronjob) or workflow dispatch.
 * Tests (e2e, load, integration) on TEST deployment
 
 ![](.github/graphics/scheduled.png)
+
+## DEMO Routing
+
+There is a long-lived custom route available to be assigned to specific Pull Request deployments.  Add the label `demo` to that pull request or run the `DEMO Route` workflow.
+
+Typical route: `https://<REPO_NAME>-demo.apps.silver.devops.gov.bc.ca`
+
+#### PR Label
+
+Please note that the label must be manually created using GitHub's web interface.
+
+![](.github/graphics/demo-label.png)
+
+#### Workflow
+![](.github/graphics/workflow.png)
+
 
 # App Stack
 
