@@ -1,3 +1,4 @@
+import "@bcgov/bc-sans/css/BC_Sans.css";
 import * as React from 'react'
 import * as ReactDOM from 'react-dom/client'
 import { ThemeProvider } from '@emotion/react'
