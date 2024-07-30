@@ -1,8 +1,10 @@
 import Box from '@mui/material/Box'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import AppRoutes from '@/routes'
 import { BrowserRouter } from 'react-router-dom'
+import {
+  Footer,
+  Header,
+} from "@bcgov/design-system-react-components";
 
 const styles = {
   container: {
