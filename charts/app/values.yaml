@@ -241,7 +241,7 @@ bitnami-pg:
       scripts: # remove the below script, if POSTGIS is not required.
         postgis.sh: |
           #!/bin/sh
-          PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -d postgres -c "CREATE EXTENSION postgis;"
+          PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -d quickstart -c "CREATE EXTENSION postgis;"
     resources:
       requests:
         cpu: 50m
