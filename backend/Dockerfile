@@ -4,12 +4,12 @@ FROM node:22.6.0-slim AS build
 # Copy, build static files; see .dockerignore for exclusions
 WORKDIR /app
 COPY . ./
-ENV PRISMA_CLI_BINARY_TARGETS debian-openssl-3.0.x
+ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
 RUN npm run deploy
 
 # Deploy using minimal Distroless image
 FROM gcr.io/distroless/nodejs22-debian12:nonroot
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 # Copy app and dependencies
 WORKDIR /app
