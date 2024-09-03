@@ -50,7 +50,19 @@ jobs:
   results:
     name: PR Results
     needs: [builds, deploys, tests]
-    if: always() && (!failure()) && (!cancelled())
+    if: always()
     runs-on: ubuntu-22.04
     steps:
-      - run: echo "Success!"
+      - run: echo '${{ toJSON(needs) }}' | jq .'
+      - run: echo '${{ toJSON(needs) }}' | jq -e 'to_entries | all(.value.result == "success")'
+      - run: |
+          # View results
+          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
+      - if: contains(needs.*.result, 'failure')
+        run: |
+          # Job failure found
+          echo "At least one job has failed"
+          exit 1
+      - run: |
+          echo "Purposeful fail!"
+          exit 1
