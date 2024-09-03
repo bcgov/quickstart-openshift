@@ -53,7 +53,7 @@ jobs:
     if: always()
     runs-on: ubuntu-22.04
     steps:
-      - run: echo '${{ toJSON(needs) }}' | jq .'
+      - run: echo '${{ toJSON(needs) }} | jq .'
       - run: echo '${{ toJSON(needs) }}' | jq -e 'to_entries | all(.value.result == "success")'
       - run: |
           # View results
