@@ -50,7 +50,9 @@ jobs:
   results:
     name: PR Results
     needs: [builds, deploys, tests]
-    if: always() && (!failure()) && (!cancelled())
+    if: always()
     runs-on: ubuntu-22.04
     steps:
+      - if: contains(needs.*.result, 'failure')
+        run: echo "At least one job has failed." && exit 1
       - run: echo "Success!"
