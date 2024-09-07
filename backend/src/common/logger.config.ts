@@ -17,7 +17,8 @@ export const customLogger: LoggerService = WinstonModule.createLogger({
       level: 'silly',
       format: winston.format.combine(
         globalLoggerFormat,
-        localLoggerFormat
+        localLoggerFormat,
+        winston.format.colorize({ all: true })
       ),
     }),
   ],
