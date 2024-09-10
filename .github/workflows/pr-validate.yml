@@ -12,7 +12,7 @@ jobs:
   validate:
     name: Validate PR
     if: (! github.event.pull_request.draft)
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@v0.6.1
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@v0.7.0
     with:
       markdown_links: |
         - [Frontend](https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca)
