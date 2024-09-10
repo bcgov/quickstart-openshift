@@ -228,7 +228,7 @@ bitnami-pg:
   image:
     registry: ghcr.io
     repository: bcgov/nr-containers/bitnami/postgresql
-    tag: 15.7.0
+    tag: 15.8.0
   auth:
     existingSecret: '{{ .Release.Name }}-database'
     username: 'quickstart'
@@ -258,7 +258,7 @@ bitnami-pg:
       scripts: # remove the below script, if POSTGIS is not required.
         postgis.sh: |
           #!/bin/sh
-          PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -d postgres -c "CREATE EXTENSION postgis;"
+          PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -d quickstart -c "CREATE EXTENSION postgis;"
     resources:
       requests:
         cpu: 50m
