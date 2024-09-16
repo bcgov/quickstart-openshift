@@ -7,13 +7,25 @@ COPY . ./
 ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
 RUN npm run deploy
 
+# Dependencies
+FROM node:22.8.0-slim AS dependencies
+
+# Copy, build static files; see .dockerignore for exclusions
+WORKDIR /app
+COPY . ./
+ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
+RUN npm ci --ignore-scripts --no-update-notifier --omit=dev
+
 # Deploy using minimal Distroless image
 FROM gcr.io/distroless/nodejs22-debian12:nonroot
 ENV NODE_ENV=production
 
 # Copy app and dependencies
 WORKDIR /app
-COPY --from=build /app/node_modules ./node_modules
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build /app/node_modules/prisma ./node_modules/prisma
 COPY --from=build /app/dist ./dist
 
 # Boilerplate, not used in OpenShift/Kubernetes

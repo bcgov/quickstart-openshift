@@ -7,7 +7,7 @@
     "prebuild": "rimraf dist",
     "build": "prisma generate && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "deploy": "npm ci --ignore-scripts --no-update-notifier --omit=dev && npm run build",
+    "deploy": "npm ci --ignore-scripts --no-update-notifier && npm run build",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -47,6 +47,8 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
+    "@swc/cli": "^0.4.0",
+    "@swc/core": "^1.7.26",
     "@types/express": "^4.17.15",
     "@types/jest": "^29.0.0",
     "@types/node": "^20.12.10",
