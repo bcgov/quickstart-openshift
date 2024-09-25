@@ -135,6 +135,11 @@ OpenShift server address.
 * Consume: `{{ vars.OC_SERVER }}`
 * Value: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 
+**MS_TEAMS_WEBHOOK_URI**
+* Consume: `{{ vars.MS_TEAMS_WEBHOOK_URI }}`
+* Value: `![https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif](https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif)`
+* Refrence: 'https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet' & 'https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference'
+
 ## Environments
 
 Environments are groups of secrets and variables that can be gatekept.  This includes limting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values override any default values.
