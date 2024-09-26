@@ -53,7 +53,7 @@ jobs:
 
   generate-schema-spy:
     name: Generate SchemaSpy Documentation
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgis/postgis:16-3.4
