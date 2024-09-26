@@ -22,7 +22,7 @@ env:
 jobs:
   integration-tests:
     name: Integration
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 1
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +49,7 @@ jobs:
     defaults:
       run:
         working-directory: frontend
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     strategy:
       matrix:
@@ -85,7 +85,7 @@ jobs:
 
   load-tests:
     name: Load
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         name: [backend, frontend]
