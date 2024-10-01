@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><database name="default" schema="users" type="PostgreSQL - 16.4 (Debian 16.4-1.pgdg110+1)">
+<?xml version="1.0" encoding="UTF-8"?><database name="default" schema="users" type="PostgreSQL - 16.4 (Debian 16.4-1.pgdg110+2)">
    <sequences>
       <sequence increment="1" name="USER_SEQ" startValue="1"/>
    </sequences>
