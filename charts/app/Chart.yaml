@@ -27,7 +27,7 @@ appVersion: "1.16.0"
 dependencies:
   - name: postgresql
     condition: bitnami-pg.enabled
-    version: 15.5.34
+    version: 15.5.35
     repository: https://charts.bitnami.com/bitnami
     alias: bitnami-pg
 maintainers:
