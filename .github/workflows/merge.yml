@@ -36,7 +36,7 @@ jobs:
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploy-test:
     name: Deploy (test)
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.7.1
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.8.0
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
@@ -46,7 +46,7 @@ jobs:
   deploy-prod:
     name: Deploy (prod)
     needs: [deploy-test, vars]
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.7.1
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.8.0
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
