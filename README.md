@@ -365,7 +365,7 @@ Postgres is default.  Switch to PostGIS by copying the appropriate Dockerfile to
 The pluggable backends repository has been archived, but we have lots of other great examples of active projects you can learn from!
 
 * [NR-RFC-AlertAuthoring - Python with FastAPI and Alembic](https://github.com/bcgov/nr-rfc-alertauthoring)
-* [NR-SPAR - Java with Quarkus, Cloud Native and Flyway](https://github.com/bcgov/nr-spar)
+* [NR-SPAR - Java with SpringBoot and Flyway](https://github.com/bcgov/nr-spar) (Quarkus and Cloud Native coming soon!)
 
 ## SchemaSpy
 
