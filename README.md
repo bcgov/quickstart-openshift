@@ -56,7 +56,7 @@ Features:
     * Database: Postgres, PostGIS, backups, Flyway
     * Frontend: TypeScript, Caddy Server
     * Backend: TypeScript, Nest.js
-    * Alternative backends for [Java/Quarkus, Go/Fiber and Python/FastAPI](https://github.com/bcgov/quickstart-openshift-backends)
+    * Alternative backend examples - see [Alternative Backends](#alternative-backends)
 
 # Setup
 
@@ -347,7 +347,7 @@ Please note that the label must be manually created using GitHub's web interface
 
 ## Starter
 
-The starter stack includes a (React, MUI, Vite, Caddy) frontend, Pluggable backend(Nest/Node, Quarkus/Java On Native, FastAPI/Python, Fiber/Golang) and postgres database.  See subfolder for source, including Dockerfiles and OpenShift templates.
+The starter stack includes a frontend (React, MUI, Vite, Caddy), backend (Nest/Node) and postgres or postgis database.  See subfolder for source, including Dockerfiles and OpenShift templates.  Alternative backends are available.
 
 Features:
 * [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
@@ -360,14 +360,13 @@ Postgres is default.  Switch to PostGIS by copying the appropriate Dockerfile to
 
 > cp ./database/postgis/Dockerfile ./database
 
-## Pluggable Backends
+## Alternative Backends
 
-This quickstart works with more than just JavaScript.  Please check out our pluggable [backends repository](https://github.com/bcgov/quickstart-openshift-backends).  Flyway-based database migrations for each are included.
+The sample Java, Python and Go backends repository has been archived, but we have lots of other great examples of active projects you can learn from!
 
-Supported languages:
-* [Go with Fiber](https://github.com/bcgov/quickstart-openshift-backends/tree/main/backend-go)
-* [Java with Quarkus, Cloud Native](https://github.com/bcgov/quickstart-openshift-backends/tree/main/backend-go)
-* [Python with FastAPI](https://github.com/bcgov/quickstart-openshift-backends/tree/main/backend-py)
+* [NR-RFC-AlertAuthoring - Python with FastAPI and Alembic](https://github.com/bcgov/nr-rfc-alertauthoring)
+* [NR-SPAR - Java with SpringBoot and Flyway](https://github.com/bcgov/nr-spar) (Quarkus and Cloud Native coming soon!)
+* [QuickStart OpenShift Backends](https://github.com/bcgov/quickstart-openshift-backends) (archived, maintainer needed!)
 
 ## SchemaSpy
 
@@ -387,7 +386,6 @@ After a full workflow run and merge can been run, please do the following:
 This repository is provided by NRIDS Architecture and Forestry Digital Services, courtesy of the Government of British Columbia.
 
 * NRID's [Kickstarter Guide](https://bcgov.github.io/nr-architecture-patterns-library/docs/Agile%20Team%20Kickstarter) (via. Confluence, links may be internal)
-* [OpenShift Backends for Go, Java and Python](https://github.com/bcgov/quickstart-openshift-backends)
 
 # Contributing
 
