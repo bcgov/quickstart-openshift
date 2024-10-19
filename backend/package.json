@@ -34,7 +34,7 @@
     "@nestjs/testing": "^10.0.0",
     "@prisma/client": "^5.7.0",
     "dotenv": "^16.0.1",
-    "express-prom-bundle": "^7.0.0",
+    "express-prom-bundle": "^8.0.0",
     "helmet": "^8.0.0",
     "nest-winston": "^1.9.4",
     "nestjs-prisma": "^0.23.0",
