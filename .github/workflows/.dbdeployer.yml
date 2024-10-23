@@ -54,7 +54,7 @@ jobs:
       - name: Validate Inputs
         shell: bash
         run: |
-          if [ ${{ inputs.s3_enabled }} ]; then
+          if [ ${{ inputs.s3_enabled }} == true ]; then
             echo "S3 ie enabled for backups, checking for mandatory secrets"
             if [ ! "${{ secrets.s3_access_key }}" ]; then
               echo "S3 access key not found"
