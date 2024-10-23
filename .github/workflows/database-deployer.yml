@@ -77,7 +77,7 @@ jobs:
               exit 1
             fi
           fi
-          
+
       - name: OC Login
         shell: bash
         run: |
@@ -103,11 +103,14 @@ jobs:
           fi
       - name: Add PR specific user to Crunchy DB # only for PRs
         shell: bash
-        if: github.event.inputs.environment == '' 
+        if: github.event.inputs.environment == ''
         run: |
           echo 'Adding PR specific user to Crunchy DB'
-          # Add PR specific user to Crunchy DB
-          # This is a placeholder for the actual command
-          # The command will be added in a future PR
+          new_user='{"databases":["app-${{github.event.number}}"],"name":"app-${{github.event.number}}"}'
+          current_users=$(oc get PostgresCluster/postgres-crunchy -o json | jq '.spec.users')
+          echo $current_users
+          updated_users=$(echo $current_users | jq --argjson new_user "$new_user" '. + [$new_user]')
+          patch_json=$(jq -n --argjson users "$updated_users" '{"spec": {"users": $users}}')
+          oc patch PostgresCluster/postgres-crunchy --type=merge -p "$patch_json"
           
 
