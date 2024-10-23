@@ -105,6 +105,11 @@ jobs:
           new_user='{"databases":["app-${{github.event.number}}"],"name":"app-${{github.event.number}}"}'
           current_users=$(oc get PostgresCluster/postgres-crunchy -o json | jq '.spec.users')
           echo $current_users
+          # check if current_users already contains the new_user
+          if [[ $current_users == *"${new_user}"* ]]; then
+            echo "User already exists"
+            exit 0
+          fi
           updated_users=$(echo $current_users | jq --argjson new_user "$new_user" '. + [$new_user]')
           patch_json=$(jq -n --argjson users "$updated_users" '{"spec": {"users": $users}}')
           oc patch PostgresCluster/postgres-crunchy --type=merge -p "$patch_json"
