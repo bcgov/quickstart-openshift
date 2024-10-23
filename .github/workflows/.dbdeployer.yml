@@ -3,10 +3,6 @@ name: .Database Deploy
 on:
   workflow_call:
     inputs: ### Required
-      target:
-        description: PR number, test or prod
-        required: true
-        type: string
       directory:
         description: Crunchy Chart directory
         default: 'charts/crunchy'
