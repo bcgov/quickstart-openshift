@@ -26,33 +26,10 @@ jobs:
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
-  # https://github.com/bcgov/quickstart-openshift-helpers
-  deploys:
-    name: Deploys
-    needs: [builds]
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.8.1
+  deploy_db:
+    name: Deploys Database
+    uses: ./.github/workflows/database-deployer.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
-    with:
-      triggers: ('backend/' 'frontend/' 'migrations/')
-      params:
-        --set global.secrets.persist=false
-
-  tests:
-    name: Tests
-    if: needs.deploys.outputs.triggered == 'true'
-    needs: [deploys]
-    uses: ./.github/workflows/.tests.yml
-    with:
-      target: ${{ github.event.number }}
-
-  results:
-    name: PR Results
-    needs: [builds, deploys, tests]
-    if: always()
-    runs-on: ubuntu-24.04
-    steps:
-      - if: contains(needs.*.result, 'failure')
-        run: echo "At least one job has failed." && exit 1
-      - run: echo "Success!"
+  
