@@ -19,3 +19,38 @@ jobs:
     with:
       cleanup: helm
       packages: backend frontend migrations
+  cleanup_db: # TODO move it off to another action later.
+    name: Remove DB User from crunchy.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+      - name: Install CLI tools from OpenShift Mirror
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: "4.14.37"
+      - name: OC Login
+        shell: bash
+        run: |
+          # OC Login
+          OC_TEMP_TOKEN=$(curl -k -X POST https://api.silver.devops.gov.bc.ca:6443/api/v1/namespaces/${{ secrets.oc_namespace }}/serviceaccounts/pipeline/token --header "Authorization: Bearer ${{ secrets.oc_token }}" -d '{"spec": {"expirationSeconds": 600}}' -H 'Content-Type: application/json; charset=utf-8' | jq -r '.status.token' )
+
+          oc login --token=$OC_TEMP_TOKEN --server=https://api.silver.devops.gov.bc.ca:6443
+          oc project ${{ secrets.oc_namespace }} # Safeguard!
+      - name: Remove PR user and database from crunchy.
+        shell: bash
+        run: |
+          
+          USER_TO_REMOVE='{"databases":["app-${{ github.event.number }}"],"name":"app-${{ github.event.number }}"}'
+          
+          echo 'getting current users from crunchy'
+          CURRENT_USERS=$(oc get PostgresCluster/postgres-crunchy -o json | jq '.spec.users')
+          echo "${CURRENT_USERS}"
+          
+          # Remove the user from the list, 
+          UPDATED_USERS=$(echo "${CURRENT_USERS}" | jq --argjson user "${USER_TO_REMOVE}" 'map(select(. != $user))')
+
+          PATCH_JSON=$(jq -n --argjson users "${UPDATED_USERS}" '{"spec": {"users": $users}}')
+          oc patch PostgresCluster/postgres-crunchy --type=merge -p "${PATCH_JSON}"
+          exit 0
+        
