@@ -89,6 +89,13 @@ spec:
           requests:
             storage: {{ .Values.crunchy.instances.dataVolumeClaimSpec.storage }}
         storageClassName: {{ .Values.crunchy.instances.dataVolumeClaimSpec.storageClassName }}
+      walVolumeClaimSpec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: {{ .Values.crunchy.instances.dataVolumeClaimSpec.walStorage }}
+        storageClassName: {{ .Values.crunchy.instances.dataVolumeClaimSpec.storageClassName }}
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
