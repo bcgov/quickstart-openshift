@@ -112,7 +112,7 @@ jobs:
             echo "User already exists"
             exit 0
             fi
-            UPDATED_USERS=$(echo "$CURRENT_USERS" | jq --argjson NEW_USER "$NEW_USER" '. + [$new_user]')
+            UPDATED_USERS=$(echo "$CURRENT_USERS" | jq --argjson NEW_USER "$NEW_USER" '. + [$NEW_USER]')
             PATCH_JSON=$(jq -n --argjson users "$UPDATED_USERS" '{"spec": {"users": $users}}')
             oc patch PostgresCluster/postgres-crunchy --type=merge -p "$PATCH_JSON"
 
