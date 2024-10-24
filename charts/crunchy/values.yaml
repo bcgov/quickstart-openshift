@@ -32,7 +32,7 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
         prometheus.io/scrape: 'true'
         prometheus.io/port: '9187'
     dataVolumeClaimSpec:
-      storage: 480Mi
+      storage: 450Mi
       storageClassName: netapp-block-standard
 
     requests:
@@ -73,7 +73,7 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
       incrementalBackupSchedule: 0 0,12 * * * # every 12 hour incremental
       volume:
         accessModes: "ReadWriteOnce"
-        storage: 128Mi
+        storage: 100Mi
         storageClassName: netapp-file-backup
 
     config:
