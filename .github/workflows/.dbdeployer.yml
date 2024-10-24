@@ -102,15 +102,15 @@ jobs:
         if: github.event.inputs.environment == ''
         run: |
             echo 'Adding PR specific user to Crunchy DB'
-            new_user='{"databases":["app-${{github.event.number}}"],"name":"app-${{github.event.number}}"}'
-            current_users=$(oc get PostgresCluster/postgres-crunchy -o json | jq '.spec.users')
-            echo $current_users
+            NEW_USER='{"databases":["app-${{github.event.number}}"],"name":"app-${{github.event.number}}"}'
+            CURRENT_USERS=$(oc get PostgresCluster/postgres-crunchy -o json | jq '.spec.users')
+            echo "$CURRENT_USERS"
             # check if current_users already contains the new_user
-            if echo "$current_users" | jq -e ".[] | select(.name == \"app-${{github.event.number}}\")" > /dev/null; then
+            if echo "$CURRENT_USERS" | jq -e ".[] | select(.name == \"app-${{github.event.number}}\")" > /dev/null; then
             echo "User already exists"
             exit 0
             fi
-            updated_users=$(echo $current_users | jq --argjson new_user "$new_user" '. + [$new_user]')
-            patch_json=$(jq -n --argjson users "$updated_users" '{"spec": {"users": $users}}')
-            oc patch PostgresCluster/postgres-crunchy --type=merge -p "$patch_json"
+            UPDATED_USERS=$(echo "$CURRENT_USERS" | jq --argjson NEW_USER "$NEW_USER" '. + [$new_user]')
+            PATCH_JSON=$(jq -n --argjson users "$UPDATED_USERS" '{"spec": {"users": $users}}')
+            oc patch PostgresCluster/postgres-crunchy --type=merge -p "$PATCH_JSON"
 
