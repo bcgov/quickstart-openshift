@@ -88,14 +88,16 @@ jobs:
         run: |
           echo 'Deploying crunchy helm chart'
           if [ ${{ secrets.s3_endpoint }} ]; then
-            helm upgrade --install --wait --set crunchy.pgBackRest.s3.enabled=true \
+            helm status postgres || \
+            helm install --wait --set crunchy.pgBackRest.s3.enabled=true \
              --set-string crunchy.pgBackRest.s3.accessKey=${{ secrets.s3_access_key }} \
               --set-string crunchy.pgBackRest.s3.secretKey=${{ secrets.s3_secret_key }} \
               --set-string crunchy.pgBackRest.s3.bucket=${{ secrets.s3_bucket }} \
               --set-string crunchy.pgBackRest.s3.endpoint=${{ secrets.s3_endpoint }} \
               postgres .
           else
-            helm upgrade --install --wait postgres .
+            helm status postgres || \
+            helm install --wait postgres .
           fi
       - name: Add PR specific user to Crunchy DB # only for PRs
         shell: bash
