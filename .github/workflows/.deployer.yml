@@ -160,6 +160,8 @@ jobs:
           helm upgrade \
             --set-string global.repository=${{ github.repository }} \
             --set-string global.tag=${{ steps.vars.outputs.tag }} \
+            --set-string global.config.databaseUser= ${{ inputs.db_user }} \
+          
             ${{ inputs.params }} \
             --install --wait --atomic ${{ steps.vars.outputs.release }} \
             --timeout ${{ inputs.timeout-minutes }}m \

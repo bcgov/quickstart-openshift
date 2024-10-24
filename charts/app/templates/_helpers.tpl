@@ -46,13 +46,13 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "validation" -}}
-{{- if and( (not .Values.crunchy.enabled)  (not  .Values.bitnamiPostgis.enabled  )) }}
+{{- if and (not .Values.crunchy.enabled)  (not  .Values.bitnamiPostgis.enabled ) }}
 {{- fail "Both Database options are disabled" }}
 {{- end }}
-{{- if and( (.Values.crunchy.enabled)  (.Values.bitnamiPostgis.enabled)) }}
+{{- if and (.Values.crunchy.enabled)  (.Values.bitnamiPostgis.enabled) }}
 {{- fail "Both Database options are enabled" }}
 {{- end }}
-{{- if and (.Values.crunchy.enabled (not .Values.global.config.databaseUser)) }}
+{{- if and (.Values.crunchy.enabled) (not .Values.global.config.databaseUser) }}
 {{- fail "Database user is mandatory when crunchy is enabled." }}
 {{- end}}
 {{- end }}
