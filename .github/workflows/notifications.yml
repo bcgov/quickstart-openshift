@@ -5,6 +5,11 @@ on:
     types:
       - completed
 jobs:
+  troubleshoot:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "${{ vars.MS_TEAMS_WEBHOOK_URI }}"
+
   notify-teams-pr:
     if: ${{github.event.workflow_run.event == 'pull_request' && vars.MS_TEAMS_WEBHOOK_URI != null}}
     runs-on: ubuntu-24.04
