@@ -52,5 +52,15 @@ jobs:
 
           PATCH_JSON=$(jq -n --argjson users "${UPDATED_USERS}" '{"spec": {"users": $users}}')
           oc patch PostgresCluster/postgres-crunchy --type=merge -p "${PATCH_JSON}"
+          
+          # get primary crunchy pod and remove the role and db
+          CRUNCHY_PG_PRIMARY_POD_NAME=$(oc get pods -l postgres-operator.crunchydata.com/role=master -o json | jq -r '.items[0].metadata.name')
+          
+          echo "${CRUNCHY_PG_PRIMARY_POD_NAME}"
+
+          oc exec "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- psql -c "DROP DATABASE \"app-${{ github.event.number }}\" --cascade"
+          oc exec "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- psql -c "DROP ROLE \"app-${{ github.event.number }}\" --cascade"
+          echo 'database and role deleted'
+          
           exit 0
         
