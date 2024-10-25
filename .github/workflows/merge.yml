@@ -32,7 +32,14 @@ jobs:
       - name: PR Number
         id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
-
+  deploy_db:
+    name: Deploys Database
+    uses: ./.github/workflows/.dbdeployer.yml
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+    with:
+      environment: test
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploy-test:
     name: Deploy (test)
@@ -44,6 +51,14 @@ jobs:
       environment: test
       db_user: app
 
+  deploy_db_prod:
+    name: Deploys Database PROD
+    uses: ./.github/workflows/.dbdeployer.yml
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+    with:
+      environment: prod
   deploy-prod:
     name: Deploy (prod)
     needs: [deploy-test, vars]
