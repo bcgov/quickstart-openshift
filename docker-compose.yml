@@ -16,7 +16,7 @@ x-postgres-vars: &postgres-vars
 
 services:
   database:
-    image: postgres:15
+    image: postgis/postgis:16-3.4 # if using crunchy , make sure to align with crunchy version, currently it is at 16 and postgis 3.3
     container_name: database
     environment:
       <<: *postgres-vars
