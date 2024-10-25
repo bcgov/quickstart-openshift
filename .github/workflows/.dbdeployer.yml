@@ -103,7 +103,7 @@ jobs:
 
       - name: Add PR specific user to Crunchy DB # only for PRs
         shell: bash
-        if: ${{ github.event.inputs.environment }} == ''
+        if: github.event_name == 'pull_request'
         run: |
             echo 'Adding PR specific user to Crunchy DB'
             NEW_USER='{"databases":["app-${{ github.event.number }}"],"name":"app-${{ github.event.number }}"}'
