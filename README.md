@@ -53,7 +53,7 @@ Features:
 * Self-healing through with probes/checks (startup, readiness, liveness)
 * Point the long-lived DEMO route to PRs by using the `demo` label
 * Sample application stack:
-    * Database: Postgres, PostGIS, backups, Flyway
+    * Database: Crunchy(Postgres, PostGIS), backups, Flyway
     * Frontend: TypeScript, Caddy Server
     * Backend: TypeScript, Nest.js
     * Alternative backend examples - see [Alternative Backends](#alternative-backends)
@@ -353,20 +353,23 @@ Features:
 * [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
 * [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
 * [Flyway](https://flywaydb.org/) database migrations
-* [Postgres](https://www.postgresql.org/) or [PostGIS](https://postgis.net/) database
-* [backup-container](https://github.com/BCDevOps/backup-container) provided by BCDevOps
+* [Crunchy](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes) Postgres/Postgis Database
 
-Postgres is default.  Switch to PostGIS by copying the appropriate Dockerfile to `./database`:
+Postgis is default.  Switch to Postgres by removing the image names in [crunchy helm chart values](./charts/crunchy/values.yaml)
 
-> cp ./database/postgis/Dockerfile ./database
+## Crunchy
+
+Crunchy is the default choice for HA postgres/postgis DB in BCGov. provided chart is to get up and going fast, it is upto teams to fine tune resource allocation and patroni parameters of crunchy DB to get the best out of database.
+
+* For specifying different resources for different envs, just add values-test.yml and values-prod.yml , then provide them to the [DB Deployer in GHA](.github/workflows/.dbdeployer.yml#L24).
+* For enabling S3 backups/recovery, please enable in [values file](./charts/crunchy/values.yaml#L62),  and in the [DB Deployer in GHA](.github/workflows/.dbdeployer.yml#L20), then provide necessary secret values which are prefixed with `s3` [DB Deployer in GHA](.github/workflows/.dbdeployer.yml#L36)
 
 ## Alternative Backends
 
 The sample Java, Python and Go backends repository has been archived, but we have lots of other great examples of active projects you can learn from!
 
 * [NR-RFC-AlertAuthoring - Python with FastAPI and Alembic](https://github.com/bcgov/nr-rfc-alertauthoring)
-* [NR-SPAR - Java with SpringBoot and Flyway](https://github.com/bcgov/nr-spar) (Quarkus and Cloud Native coming soon!)
-* [QuickStart OpenShift Backends](https://github.com/bcgov/quickstart-openshift-backends) (archived, maintainer needed!)
+* [QuickStart OpenShift Backends](https://github.com/bcgov/quickstart-openshift-backends)
 
 ## SchemaSpy
 

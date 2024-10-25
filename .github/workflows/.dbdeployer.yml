@@ -21,6 +21,11 @@ on:
         description: Enable S3 backups
         required: false
         type: boolean
+      values:
+        description: 'Values file'
+        default: 'values.yaml'
+        required: false
+        type: string
     secrets:
       oc_namespace:
         description: OpenShift namespace
@@ -95,10 +100,10 @@ jobs:
               --set-string crunchy.pgBackRest.s3.secretKey=${{ secrets.s3_secret_key }} \
               --set-string crunchy.pgBackRest.s3.bucket=${{ secrets.s3_bucket }} \
               --set-string crunchy.pgBackRest.s3.endpoint=${{ secrets.s3_endpoint }} \
-              postgres .
+              --values ${{ inputs.values }} postgres  .
           else
             helm status postgres || \
-            helm upgrade --install --wait postgres .
+            helm upgrade --install --wait --values ${{ inputs.values }} postgres .
           fi
 
       - name: Add PR specific user to Crunchy DB # only for PRs
