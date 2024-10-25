@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: simbo/msteams-message-card-action@latest
+        if: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
         with:
           webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
           title: "${{github.event.workflow_run.head_commit.message}}" 
@@ -30,6 +31,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: PR Number
+        if: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
         id: pr
         shell: bash
         run: |
@@ -46,6 +48,7 @@ jobs:
           fi
           echo "pr=${pr}" >> $GITHUB_OUTPUT
       - uses: simbo/msteams-message-card-action@latest
+        if: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
         with:
           webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
           title: "${{github.event.workflow_run.head_commit.message}}" 
