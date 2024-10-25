@@ -26,18 +26,25 @@ jobs:
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
+  deploy_db:
+    name: Deploys Database
+    uses: ./.github/workflows/.dbdeployer.yml
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploys:
     name: Deploys
-    needs: [builds]
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.8.1
+    needs: [builds, deploy_db]
+    uses: ./.github/workflows/.deployer.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
-      triggers: ('backend/' 'frontend/' 'migrations/')
-      params:
-        --set global.secrets.persist=false
+      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+      db_user: app-${{github.event.number}}
+      params: --set global.secrets.persist=false
 
   tests:
     name: Tests

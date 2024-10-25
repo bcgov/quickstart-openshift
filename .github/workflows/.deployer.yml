@@ -1,0 +1,195 @@
+name: .Helm Deployer
+
+on:
+  workflow_call:
+    inputs:
+      ### Required
+      # Only secrets!
+
+      ### Typical / recommended
+      atomic:
+        description: Atomic deployment?  That means fail all or nothing
+        default: true
+        required: false
+        type: string
+      directory:
+        description: Chart directory
+        default:  'charts/app'
+        required: false
+        type: string
+      environment:
+        description: Environment name; omit for PRs
+        required: false
+        type: string
+      oc_server:
+        default: https://api.silver.devops.gov.bc.ca:6443
+        description: 'OpenShift server'
+        required: false
+        type: string
+      params:
+        description: 'Extra parameters to pass to helm upgrade'
+        default: ''
+        required: false
+        type: string
+      tag:
+        description: Specify a tag to deploy; defaults to PR number
+        required: false
+        type: string
+      triggers:
+        description: Paths used to trigger a deployment; e.g. ('./backend/' './frontend/)
+        required: false
+        type: string
+      db_user:
+        description: The database user
+        required: false
+        type: string
+
+      ### Usually a bad idea / not recommended
+      timeout-minutes:
+        description: 'Timeout minutes'
+        default: 10
+        required: false
+        type: number
+      values:
+        description: 'Values file'
+        default: 'values.yaml'
+        required: false
+        type: string
+
+    outputs:
+      triggered:
+        description: 'Has a deployment has been triggered?'
+        value: ${{ jobs.deployer.outputs.triggered }}
+
+    secrets:
+      oc_namespace:
+        description: OpenShift namespace
+        required: true
+      oc_token:
+        description: OpenShift token
+        required: true
+
+jobs:
+  deployer:
+    name: Helm
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-24.04
+    outputs:
+      triggered: ${{ steps.triggers.outputs.triggered }}
+    steps:
+      ### Triggers, tag and release
+
+      # Check triggers (omitted or matched) for deployment
+      - uses: bcgov-nr/action-diff-triggers@v0.2.0
+        id: triggers
+        with:
+          triggers: ${{ inputs.triggers }}
+
+      # Variables
+      - if: ${{ steps.triggers.outputs.triggered == 'true' &&  inputs.tag  == '' }}
+        id: pr
+        uses: bcgov-nr/action-get-pr@v0.0.1
+      - if: steps.triggers.outputs.triggered == 'true'
+        id: vars
+        run: |
+          # Vars: tag and release
+
+          # Tag defaults to PR number, but can be overridden by inputs.tag
+          tag=${{ inputs.tag || steps.pr.outputs.pr }}
+
+          # Release name includes run numbers to ensure uniqueness
+          release=${{ github.event.repository.name }}-${{ inputs.environment || steps.pr.outputs.pr || inputs.tag }}
+          
+          # version, to support helm packaging for non-pr based releases (workflow_dispatch). default to 1.0.0+github run number
+          version=1.0.0+${{ github.run_number }}
+          
+            # Summary
+          echo "tag=${tag}"
+          echo "release=${release}"
+          echo "version=${version}"
+
+          # Output
+          echo "tag=${tag}" >> $GITHUB_OUTPUT
+          echo "release=${release}" >> $GITHUB_OUTPUT
+          echo "version=${version}" >> $GITHUB_OUTPUT
+
+      ### Deploy
+      - name: Install CLI tools from OpenShift Mirror
+        if: steps.triggers.outputs.triggered == 'true'
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: "4"
+
+
+      # OC login and acquire short lived token
+      - if: steps.triggers.outputs.triggered == 'true'
+        shell: bash
+        run: |
+          # OC Login
+          OC_TEMP_TOKEN=$(curl -k -X POST ${{ inputs.oc_server }}/api/v1/namespaces/${{ secrets.oc_namespace }}/serviceaccounts/pipeline/token --header "Authorization: Bearer ${{ secrets.oc_token }}" -d '{"spec": {"expirationSeconds": 600}}' -H 'Content-Type: application/json; charset=utf-8' | jq -r '.status.token' )
+
+          oc login --token=$OC_TEMP_TOKEN --server=${{ inputs.oc_server }}
+          oc project ${{ secrets.oc_namespace }} # Safeguard!
+
+      # Only stop pre-existing deployments on PRs (status = pending-upgrade)
+      - if: steps.triggers.outputs.triggered == 'true' && github.event_name == 'pull_request'
+        run: |
+          # Interrupt any previous deployments (PR only)
+          PREVIOUS=$(helm status ${{ steps.vars.outputs.release }} -o json | jq .info.status || true)
+          if [[ ${PREVIOUS} =~ pending ]]; then
+            echo "Rollback triggered"
+            helm rollback ${{ steps.vars.outputs.release }} || \
+              helm uninstall ${{ steps.vars.outputs.release }}
+          fi
+
+      # Package Helm chart
+      - if: steps.triggers.outputs.triggered == 'true'
+        uses: actions/checkout@v4
+      - if: steps.triggers.outputs.triggered == 'true'
+        working-directory: ${{ inputs.directory }}
+        run: |
+          # Helm package
+          sed -i 's/^name:.*/name: ${{ github.event.repository.name }}/' Chart.yaml
+          helm package -u . --app-version="tag-${{ steps.vars.outputs.tag }}_run-${{ github.run_number }}" --version=${{ steps.pr.outputs.pr || steps.vars.outputs.version }}
+
+      # Deploy Helm chart as atomic, with timeout
+      - if: steps.triggers.outputs.triggered == 'true' && inputs.atomic != 'false'
+        working-directory: ${{ inputs.directory }}
+        run: |
+          # Helm upgrade/rollout - atomic, timeout
+          helm upgrade \
+            --set-string global.repository=${{ github.repository }} \
+            --set-string global.tag=${{ steps.vars.outputs.tag }} \
+            --set-string global.config.databaseUser=${{ inputs.db_user }} \
+            ${{ inputs.params }} \
+            --install --wait --atomic ${{ steps.vars.outputs.release }} \
+            --timeout ${{ inputs.timeout-minutes }}m \
+            --values ${{ inputs.values }} \
+            ./${{ github.event.repository.name }}-${{ steps.pr.outputs.pr || steps.vars.outputs.version }}.tgz
+
+      # Deploy Helm chart without atomic or timeout
+      - if: steps.triggers.outputs.triggered == 'true' && inputs.atomic == 'false'
+        working-directory: ${{ inputs.directory }}
+        run: |
+          # Helm upgrade/rollout - non-atomic, no timeout
+          helm upgrade \
+            --set-string global.repository=${{ github.repository }} \
+            --set-string global.tag=${{ steps.vars.outputs.tag }} \
+            ${{ inputs.params }} \
+            ${{ steps.vars.outputs.release }} \
+            --install --wait --values ${{ inputs.values }} \
+            ./${{ github.event.repository.name }}-${{ steps.pr.outputs.pr || steps.vars.outputs.version }}.tgz
+
+      # Helm release history
+      - if: steps.triggers.outputs.triggered == 'true'
+        run: |
+          # Helm release history
+          helm history ${{ steps.vars.outputs.release }}
+
+      ### Cleanup
+
+      # Completed pod cleanup
+      - if: steps.triggers.outputs.triggered == 'true'
+        run: |
+          # Completed pod cleanup
+          oc delete po --field-selector=status.phase==Succeeded || true
