@@ -94,7 +94,6 @@ jobs:
         run: |
           echo 'Deploying crunchy helm chart'
           if [ ${{ inputs.s3_enabled }} == true ]; then
-            helm status postgres || \
             helm upgrade --install --wait --set crunchy.pgBackRest.s3.enabled=true \
              --set-string crunchy.pgBackRest.s3.accessKey=${{ secrets.s3_access_key }} \
               --set-string crunchy.pgBackRest.s3.secretKey=${{ secrets.s3_secret_key }} \
@@ -102,7 +101,6 @@ jobs:
               --set-string crunchy.pgBackRest.s3.endpoint=${{ secrets.s3_endpoint }} \
               --values ${{ inputs.values }} postgres  .
           else
-            helm status postgres || \
             helm upgrade --install --wait --values ${{ inputs.values }} postgres .
           fi
 
