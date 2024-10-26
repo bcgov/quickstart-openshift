@@ -212,8 +212,7 @@ spec:
   patroni:
     dynamicConfiguration:
       postgresql:
-        pg_hba:
-          - {{ .Values.crunchy.patroni.postgresql.pg_hba}}
+        pg_hba: {{ toYaml .Values.crunchy.patroni.postgresql.pg_hba | nindent 10 }}
         parameters:
           shared_buffers: {{ .Values.crunchy.patroni.postgresql.parameters.shared_buffers }}
           wal_buffers: {{ .Values.crunchy.patroni.postgresql.parameters.wal_buffers }}
