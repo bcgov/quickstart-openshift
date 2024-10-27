@@ -229,7 +229,7 @@ spec:
         global:
           client_tls_sslmode: disable
           pool_mode: session
-          max_db_connections: {{ include "pgbouncer.max.db.connections" . }}
+          max_db_connections: {{ include "pgbouncer.max.db.connections" . | int }}
       {{ if .Values.crunchy.proxy.pgBouncer.image }}
       image: {{ .Values.crunchy.proxy.pgBouncer.image }}
       {{ end }}
