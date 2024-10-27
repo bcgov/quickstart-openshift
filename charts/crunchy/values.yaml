@@ -108,15 +108,16 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
 
   patroni:
     postgresql:
-      pg_hba: 
+      pg_hba:
         - "host all all 0.0.0.0/0 md5"
         - "host all all ::1/128 md5"
       parameters:
-        shared_buffers: 16MB # default is 128MB; a good tuned default for shared_buffers is 25% of the memory allocated to the pod
-        wal_buffers: "64kB" # this can be set to -1 to automatically set as 1/32 of shared_buffers or 64kB, whichever is larger
         min_wal_size: 32MB
         max_wal_size: 64MB # default is 1GB
         max_slot_wal_keep_size: 96MB # default is -1, allowing unlimited wal growth when replicas fall behind
+        max_connections: 20 # based on small cluster.
+        work_mem: 2MB # a work_mem value of 2 MB, so for 20 database connections, PostgreSQL could use 40 MB of RAM for query operations.
+        log_min_duration_statement: 1000ms # log queries taking more than 1 second to respond.
 
   proxy:
     enabled: true

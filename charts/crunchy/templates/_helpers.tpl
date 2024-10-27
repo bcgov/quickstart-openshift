@@ -68,3 +68,51 @@ repo2-s3-key={{ .Values.crunchy.pgBackRest.s3.accessKey }}
 repo2-s3-key-secret={{ .Values.crunchy.pgBackRest.s3.secretKey }}
 {{ end }}
 {{ end }}
+
+{{/*
+Calculate the shared buffer to be 20% of allocated memory
+https://vladmihalcea.com/postgresql-performance-tuning-settings/
+*/}}
+
+{{- define "shared.buffers"}}
+{{- $memory := .Values.crunchy.instances.limits.memory -}}
+{{- $unit := regexFind "([a-zA-Z]+)" $memory -}}
+{{- $memoryValue := regexReplaceAll "([a-zA-Z]+)" $memory "" | int -}}
+{{- $percentValue := (mulf $memoryValue 0.2) | int -}}
+{{- printf "%d%s" $percentValue $unit -}}
+{{- end }}
+
+{{/*
+Calculate the effective cache size to be 50% of allocated memory
+ this value is closer to the official recommendation of setting it to a value between 50% and 75% of the available RAM.
+*/}}
+
+{{- define "effective.cache.size"}}
+{{- $memory := .Values.crunchy.instances.limits.memory -}}
+{{- $unit := regexFind "([a-zA-Z]+)" $memory -}}
+{{- $memoryValue := regexReplaceAll "([a-zA-Z]+)" $memory "" | int -}}
+{{- $percentValue := (mulf $memoryValue 0.5) | int -}}
+{{- printf "%d%s" $percentValue $unit -}}
+{{- end }}
+
+{{/*
+Another setting used for maintenance operations is wal_buffers, which allows storing in memory the WAL (Write-Ahead Log or Redo Log) segments before writing them to disk. By default, PostgreSQL uses a value that’s 1/32 of the shared_buffer setting. Therefore, my local PostgreSQL uses a value of 4 MB for the wal_buffers setting.
+*/}}
+
+{{- define "wal.buffers"}}
+{{- $sharedBuffers := include "shared.buffers" . -}}
+{{- $unit := regexFind "([a-zA-Z]+)" $sharedBuffers -}}
+{{- $memoryValue := regexReplaceAll "([a-zA-Z]+)" $sharedBuffers "" | int -}}
+{{- $percentValue := (mulf $memoryValue 0.03) | int -}}
+{{- printf "%d%s" $percentValue $unit -}}
+{{- end }}
+
+{{/*
+Calculate pg bouncer max connections to DB, 20% of overall.
+*/}}
+
+{{- define "pgbouncer.max.db.connections"}}
+{{- $connections := .Values.crunchy.patroni.postgresql.parameters.max_connections -}}
+{{- $pgBouncerMaxCon := (mulf $connections 0.1) | int -}}
+{{- printf "%d" $pgBouncerMaxCon -}}
+{{- end }}
