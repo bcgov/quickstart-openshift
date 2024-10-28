@@ -68,19 +68,3 @@ repo2-s3-key={{ .Values.crunchy.pgBackRest.s3.accessKey }}
 repo2-s3-key-secret={{ .Values.crunchy.pgBackRest.s3.secretKey }}
 {{ end }}
 {{ end }}
-
-
-{{/*
-Calculate the effective cache size to be 50% of allocated memory
- this value is closer to the official recommendation of setting it to a value between 50% and 75% of the available RAM.
-*/}}
-
-{{- define "effective.cache.size"}}
-{{- $memory := .Values.crunchy.instances.limits.memory -}}
-{{- $unit := regexFind "([a-zA-Z]+)" $memory -}}
-{{- $memoryValue := regexReplaceAll "([a-zA-Z]+)" $memory "" | int -}}
-{{- $percentValue := (mulf $memoryValue 0.5) | int -}}
-{{- printf "%d%s" $percentValue $unit -}}
-{{- end }}
-
-
