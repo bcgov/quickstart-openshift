@@ -27,7 +27,7 @@ appVersion: "1.16.0"
 dependencies:
   - name: postgresql
     condition: bitnamiPostgis.enabled
-    version: 16.0.3
+    version: 16.0.4
     repository: https://charts.bitnami.com/bitnami
     alias: bitnamiPostgis
 maintainers:
