@@ -28,7 +28,7 @@ on:
         type: string
       enabled:
         description: 'Enable the deployment of the crunchy database, easy switch to turn it on/off'
-        default: false
+        default: true
         required: false
         type: boolean
 

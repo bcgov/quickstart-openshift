@@ -21,7 +21,8 @@ global:
   #-- domain of the application, it is required, apps.silver.devops.gov.bc.ca for silver cluster and apps.devops.gov.bc.ca for gold cluster
   domain: "apps.silver.devops.gov.bc.ca" # it is apps.gold.devops.gov.bc.ca for gold cluster
   #-- the database Alias gives a nice way to switch to different databases, crunchy, patroni ... etc.
-  databaseAlias: bitnamipg #postgres-crunchy #bitnamipg # when using crunchy make it postgres-crunchy
+  #databaseAlias: bitnamipg #uncomment when using bitnami pg and comment below.
+  databaseAlias: postgres-crunchy #uncomment when using crunchy and comment above.
 
 #-- the components of the application, backend.
 backend:
@@ -114,10 +115,10 @@ frontend:
     minAvailable: 1 # the minimum number of pods that must be available during the disruption budget.
 
 crunchy:
-  enabled: false # make this false and bitnami-pg true to switch from crunchy to bitnami single postgis.
+  enabled: true # make this false and bitnami-pg true to switch from crunchy to bitnami single postgis.
 
 bitnamipg:
-  enabled: true
+  enabled: false
   image:
     registry: ghcr.io
     repository: bcgov/nr-containers/bitnami/postgresql
