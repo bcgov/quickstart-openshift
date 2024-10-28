@@ -36,7 +36,7 @@ jobs:
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploys:
     name: Deploys
-    needs: [builds, deploy_db]
+    needs: [builds]
     uses: ./.github/workflows/.deployer.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}

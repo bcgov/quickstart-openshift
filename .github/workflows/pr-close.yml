@@ -40,7 +40,10 @@ jobs:
       - name: Remove PR user and database from crunchy.
         shell: bash
         run: |
-          
+          # check if postgres-crunchy exists or else exit
+          oc get PostgresCluster/postgres-crunchy || exit 0
+
+          # Remove the user from the crunchy cluster yaml and apply the changes
           USER_TO_REMOVE='{"databases":["app-${{ github.event.number }}"],"name":"app-${{ github.event.number }}"}'
           
           echo 'getting current users from crunchy'
