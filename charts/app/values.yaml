@@ -114,10 +114,10 @@ frontend:
     minAvailable: 1 # the minimum number of pods that must be available during the disruption budget.
 
 crunchy:
-  enabled: true # make this false and bitnami-pg true to switch from crunchy to bitnami single postgis.
+  enabled: false # make this false and bitnami-pg true to switch from crunchy to bitnami single postgis.
 
 bitnamiPostgis:
-  enabled: false
+  enabled: true
   image:
     registry: ghcr.io
     repository: bcgov/nr-containers/bitnami/postgresql

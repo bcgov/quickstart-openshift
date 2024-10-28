@@ -26,6 +26,12 @@ on:
         default: 'values.yaml'
         required: false
         type: string
+      enabled:
+        description: 'Enable the deployment of the crunchy database, easy switch to turn it on/off'
+        default: false
+        required: false
+        type: boolean
+
     secrets:
       oc_namespace:
         description: OpenShift namespace
@@ -48,6 +54,7 @@ on:
 jobs:
   deploy_db:
     runs-on: ubuntu-24.04
+    if: ${{ inputs.enabled }}
     name: Deploy Or Upgrade Crunchy DB
     environment: ${{ inputs.environment }}
     steps:
