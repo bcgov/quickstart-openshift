@@ -27,7 +27,7 @@ appVersion: "1.16.0"
 dependencies:
   - name: postgresql
     condition: bitnamipg.enabled
-    version: 16.0.4
+    version: 16.0.6
     repository: https://charts.bitnami.com/bitnami
     alias: bitnamipg
 maintainers:

@@ -124,8 +124,8 @@ bitnamipg:
     tag: 15.8.0
   auth:
     existingSecret: '{{ .Release.Name }}-database'
-    username: 'quickstart'
-    database: quickstart
+    username: 'quickstart' # make sure this is aligned with secret.yaml
+    database: quickstart # make sure this is aligned with secret.yaml
   shmVolume:
     enabled: false
   backup:
