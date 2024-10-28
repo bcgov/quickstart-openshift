@@ -26,10 +26,10 @@ appVersion: "1.16.0"
 
 dependencies:
   - name: postgresql
-    condition: bitnamiPostgis.enabled
+    condition: bitnamipg.enabled
     version: 16.0.4
     repository: https://charts.bitnami.com/bitnami
-    alias: bitnamiPostgis
+    alias: bitnamipg
 maintainers:
   - name: Om Mishra
     email: omprakash.2.mishra@gov.bc.ca
