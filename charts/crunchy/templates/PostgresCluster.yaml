@@ -214,11 +214,14 @@ spec:
       postgresql:
         pg_hba: {{ toYaml .Values.crunchy.patroni.postgresql.pg_hba | nindent 10 }}
         parameters:
+          log_min_duration_statement: {{ .Values.crunchy.patroni.postgresql.parameters.log_min_duration_statement }}
           shared_buffers: {{ .Values.crunchy.patroni.postgresql.parameters.shared_buffers }}
           wal_buffers: {{ .Values.crunchy.patroni.postgresql.parameters.wal_buffers }}
+          work_mem: {{ .Values.crunchy.patroni.postgresql.parameters.work_mem }}
           min_wal_size: {{ .Values.crunchy.patroni.postgresql.parameters.min_wal_size }}
           max_wal_size: {{ .Values.crunchy.patroni.postgresql.parameters.max_wal_size }}
           max_slot_wal_keep_size:  {{ .Values.crunchy.patroni.postgresql.parameters.max_slot_wal_keep_size }}
+          effective_io_concurrency: {{ .Values.crunchy.patroni.postgresql.parameters.effective_io_concurrency }}
   {{- if and .Values.crunchy.proxy .Values.crunchy.proxy.enabled }}
   proxy:
     pgBouncer:
@@ -226,6 +229,7 @@ spec:
         global:
           client_tls_sslmode: disable
           pool_mode: session
+          max_db_connections: {{ .Values.crunchy.proxy.pgBouncer.maxConnections | quote }}
       {{ if .Values.crunchy.proxy.pgBouncer.image }}
       image: {{ .Values.crunchy.proxy.pgBouncer.image }}
       {{ end }}

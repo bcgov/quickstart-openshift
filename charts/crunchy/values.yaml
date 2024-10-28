@@ -34,7 +34,7 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
     dataVolumeClaimSpec:
       storage: 200Mi
       storageClassName: netapp-block-standard
-      walStorage: 225Mi
+      walStorage: 255Mi
 
     requests:
       cpu: 50m
@@ -108,7 +108,7 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
 
   patroni:
     postgresql:
-      pg_hba: 
+      pg_hba:
         - "host all all 0.0.0.0/0 md5"
         - "host all all ::1/128 md5"
       parameters:
@@ -116,7 +116,10 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
         wal_buffers: "64kB" # this can be set to -1 to automatically set as 1/32 of shared_buffers or 64kB, whichever is larger
         min_wal_size: 32MB
         max_wal_size: 64MB # default is 1GB
-        max_slot_wal_keep_size: 96MB # default is -1, allowing unlimited wal growth when replicas fall behind
+        max_slot_wal_keep_size: 128MB # default is -1, allowing unlimited wal growth when replicas fall behind
+        work_mem: 2MB # a work_mem value of 2 MB
+        log_min_duration_statement: 1000ms # log queries taking more than 1 second to respond.
+        effective_io_concurrency: 20 #If the underlying disk can handle multiple simultaneous requests, then you should increase the effective_io_concurrency value and test what value provides the best application performance. All BCGov clusters have SSD.
 
   proxy:
     enabled: true
@@ -129,6 +132,7 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
       limits:
         cpu: 20m
         memory: 64Mi
+      maxConnections: 10 # make sure less than postgres max connections
 
   # Postgres Cluster resource values:
   pgmonitor:

@@ -48,7 +48,7 @@ on:
 jobs:
   deploy_db:
     runs-on: ubuntu-24.04
-    name: Deploy Crunchy DB If not Deployed
+    name: Deploy Or Upgrade Crunchy DB
     environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v4
