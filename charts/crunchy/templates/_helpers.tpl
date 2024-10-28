@@ -79,7 +79,8 @@ https://vladmihalcea.com/postgresql-performance-tuning-settings/
 {{- $unit := regexFind "([a-zA-Z]+)" $memory -}}
 {{- $memoryValue := regexReplaceAll "([a-zA-Z]+)" $memory "" | int -}}
 {{- $percentValue := (mulf $memoryValue 0.2) | int -}}
-{{- printf "%d%s" $percentValue $unit -}}
+{{- $newUnit := ternary (eq $unit "Gi") "GB" "MB" -}}
+{{- printf "%d%s" $percentValue $newUnit -}}
 {{- end }}
 
 {{/*
@@ -104,7 +105,8 @@ Another setting used for maintenance operations is wal_buffers, which allows sto
 {{- $unit := regexFind "([a-zA-Z]+)" $sharedBuffers -}}
 {{- $memoryValue := regexReplaceAll "([a-zA-Z]+)" $sharedBuffers "" | int -}}
 {{- $percentValue := (mulf $memoryValue 0.03) | int -}}
-{{- printf "%d%s" $percentValue $unit -}}
+{{- $newUnit := ternary (eq $unit "Gi") "GB" "MB" -}}
+{{- printf "%d%s" $percentValue $newUnit -}}
 {{- end }}
 
 {{/*
