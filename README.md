@@ -363,6 +363,10 @@ Crunchy is the default choice for HA postgres/postgis DB in BCGov. provided char
 
 * For specifying different resources for different envs, just add values-test.yml and values-prod.yml , then provide them to the [DB Deployer in GHA](.github/workflows/.dbdeployer.yml#L24).
 * For enabling S3 backups/recovery, please enable in [values file](./charts/crunchy/values.yaml#L62),  and in the [DB Deployer in GHA](.github/workflows/.dbdeployer.yml#L20), then provide necessary secret values which are prefixed with `s3` [DB Deployer in GHA](.github/workflows/.dbdeployer.yml#L36)
+* To disable crunchy deployment, make the following changes
+  * make crunchy enabled to false in [values.yaml](./charts/app/values.yaml#L117)
+  * make bitnami postgis enabled to true in [values.yaml](./charts/app/values.yaml#L120)
+  * make the db-deployer false in gha workflow [.dbdeployer.yaml](./.github/workflows/.dbdeployer.yml#L31)
 
 ## Alternative Backends
 
