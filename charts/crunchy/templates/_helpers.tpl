@@ -84,12 +84,3 @@ Calculate the effective cache size to be 50% of allocated memory
 {{- end }}
 
 
-{{/*
-Calculate pg bouncer max connections to DB, 20% of overall.
-*/}}
-
-{{- define "pgbouncer.max.db.connections"}}
-{{- $connections := .Values.crunchy.patroni.postgresql.parameters.max_connections -}}
-{{- $pgBouncerMaxCon := (mulf $connections 0.1) | int -}}
-{{- printf "%d" $pgBouncerMaxCon -}}
-{{- end }}
