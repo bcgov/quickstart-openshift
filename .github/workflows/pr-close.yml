@@ -29,6 +29,7 @@ jobs:
         uses: redhat-actions/openshift-tools-installer@v1
         with:
           oc: "4.14.37"
+
       - name: OC Login
         shell: bash
         run: |
@@ -37,6 +38,7 @@ jobs:
 
           oc login --token=$OC_TEMP_TOKEN --server=https://api.silver.devops.gov.bc.ca:6443
           oc project ${{ secrets.oc_namespace }} # Safeguard!
+
       - name: Remove PR user and database from crunchy.
         shell: bash
         run: |
