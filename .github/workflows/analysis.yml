@@ -82,7 +82,7 @@ jobs:
 
   results:
     name: Analysis Results
-    needs: [tests, trivy]
+    needs: [tests] # Restore trivy when/if fixed
     if: always()
     runs-on: ubuntu-24.04
     steps:
