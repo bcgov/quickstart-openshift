@@ -57,7 +57,7 @@ jobs:
           sonar_token: ${{ secrets[matrix.token] }}
           triggers: ('${{ matrix.dir }}/')
 
-    lint:
+  lint:
     name: Lint PR
     if: ${{ ! github.event.pull_request.draft }}
     runs-on: ubuntu-24.04
