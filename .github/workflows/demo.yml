@@ -28,8 +28,10 @@ jobs:
         run: |
           # Set Up Routing
 
-          # Login
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          # OC Login
+          OC_TEMP_TOKEN=$(curl -k -X POST ${{ vars.oc_server }}/api/v1/namespaces/${{ secrets.oc_namespace }}/serviceaccounts/pipeline/token --header "Authorization: Bearer ${{ secrets.oc_token }}" -d '{"spec": {"expirationSeconds": 600}}' -H 'Content-Type: application/json; charset=utf-8' | jq -r '.status.token' )
+
+          oc login --token=$OC_TEMP_TOKEN --server=${{ vars.oc_server }}
           oc project ${{ secrets.oc_namespace }} #Safeguard!
 
           # Delete and replace route
