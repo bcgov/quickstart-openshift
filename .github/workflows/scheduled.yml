@@ -58,7 +58,7 @@ jobs:
   # https://github.com/bcgov/quickstart-openshift-helpers
   schema-spy:
     name: SchemaSpy Documentation
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@main
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@v0.9.0
 
 
   tests:
