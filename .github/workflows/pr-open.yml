@@ -1,8 +1,7 @@
 name: PR
 
 on:
-  # pull_request:
-  workflow_dispatch:
+  pull_request:
 
 concurrency:
   # Cancel in progress for PR open and close
