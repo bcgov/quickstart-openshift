@@ -19,6 +19,7 @@ jobs:
     with:
       cleanup: helm
       packages: backend frontend migrations
+
   cleanup_db: # TODO move it off to another action later.
     name: Remove DB User from crunchy.
     runs-on: ubuntu-24.04
