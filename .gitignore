@@ -364,3 +364,4 @@ pyrightconfig.json
 .idea
 *.key
 *.pem
+*.pub
