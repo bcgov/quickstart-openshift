@@ -361,3 +361,7 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/node,java,python,go
+.idea
+*.key
+*.pem
+*.pub
