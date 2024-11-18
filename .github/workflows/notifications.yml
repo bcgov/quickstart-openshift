@@ -1,0 +1,72 @@
+name: Notifications
+on:
+  workflow_run: 
+    workflows: [PR,Merge]
+    types:
+      - completed
+jobs:
+  troubleshoot:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "${{ vars.MS_TEAMS_WEBHOOK_URI }}"
+
+  notify-teams-pr:
+    if: ${{github.event.workflow_run.event == 'pull_request' && vars.MS_TEAMS_WEBHOOK_URI != null}}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: simbo/msteams-message-card-action@latest
+        if: ${{ vars.MS_TEAMS_WEBHOOK_URI != null}}
+        with:
+          webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
+          title: "${{github.event.workflow_run.head_commit.message}}" 
+          message: "${{github.event.workflow_run.head_commit.message}}" 
+          color: 'dodger blue'
+          buttons: |
+            Pull Request ${{github.event.workflow_run.pull_requests[0].number}} ${{github.event.workflow_run.repository.html_url}}/pull/${{github.event.workflow_run.pull_requests[0].number}}
+            Diff ${{github.event.workflow_run.repository.html_url}}/pull/${{github.event.workflow_run.pull_requests[0].number}}/files
+          sections: |
+            - 
+              activity:
+                title: ${{github.event.workflow_run.head_commit.committer.name}}
+                subtitle: ${{github.event.workflow_run.head_commit.timestamp}}
+                image: ${{github.event.workflow_run.head_repository.owner.avatar_url}}
+                text: PR Opened
+  notify-teams-merged:
+    if: ${{github.event.workflow_run.event == 'push' && vars.MS_TEAMS_WEBHOOK_URI != null}}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: PR Number
+        if: ${{ vars.MS_TEAMS_WEBHOOK_URI != null }}
+        id: pr
+        shell: bash
+        run: |
+          pr=$(\
+            curl -sL -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ github.token }}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/${{ github.repository }}/commits/${{ github.event.workflow_run.head_sha }}/pulls \
+                | jq .[0].number
+          )
+          if [ -z "${pr}" ]
+          then
+            echo "No PR number found. Was this push triggered by a squashed PR merge?"
+            pr=""
+          fi
+          echo "pr=${pr}" >> $GITHUB_OUTPUT
+      - uses: simbo/msteams-message-card-action@latest
+        if: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
+        with:
+          webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI != null }}
+          title: "${{github.event.workflow_run.head_commit.message}}" 
+          message: "${{github.event.workflow_run.head_commit.message}}" 
+          color: 'dark orange'
+          summary: "${{github.event.workflow_run.event}}-${{github.event.workflow_run.status}}"
+          buttons: |
+            Pull Request ${{steps.pr.outputs.pr}} ${{github.event.workflow_run.repository.html_url}}/pull/${{steps.pr.outputs.pr}}
+            Diff ${{github.event.workflow_run.repository.html_url}}/pull/${{steps.pr.outputs.pr}}/files
+          sections: |
+            - 
+              activity:
+                title: ${{github.event.workflow_run.head_commit.committer.name}}
+                subtitle: ${{github.event.workflow_run.head_commit.timestamp}}
+                image: ${{github.event.workflow_run.head_repository.owner.avatar_url}}
+                text: Merged

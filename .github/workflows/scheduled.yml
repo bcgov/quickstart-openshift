@@ -3,6 +3,7 @@ name: Scheduled
 on:
   schedule: [cron: "0 11 * * 6"] # 3 AM PST = 12 PM UDT, Saturdays
   workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -19,7 +20,10 @@ jobs:
     steps:
       - name: Clean up Helm Releases
         run: |
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
+          # OC Login
+          OC_TEMP_TOKEN=$(curl -k -X POST ${{ vars.oc_server }}/api/v1/namespaces/${{ secrets.oc_namespace }}/serviceaccounts/pipeline/token --header "Authorization: Bearer ${{ secrets.oc_token }}" -d '{"spec": {"expirationSeconds": 600}}' -H 'Content-Type: application/json; charset=utf-8' | jq -r '.status.token' )
+
+          oc login --token=$OC_TEMP_TOKEN --server=${{ vars.oc_server }}
           oc project ${{ secrets.OC_NAMESPACE }} # Safeguard!
 
           # Catch errors, unset variables, and pipe failures (e.g. grep || true )
@@ -50,48 +54,11 @@ jobs:
             fi
           done
 
-  generate-schema-spy:
-    name: Generate SchemaSpy Documentation
-    runs-on: ubuntu-22.04
-    services:
-      postgres:
-        image: postgis/postgis:16-3.4
-        env:
-          POSTGRES_DB: default
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: default
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - name: Flyway
-        uses: docker://flyway/flyway:10
-        env:
-          FLYWAY_URL: jdbc:postgresql://postgres:5432/default
-          FLYWAY_USER: postgres
-          FLYWAY_PASSWORD: default
-          FLYWAY_LOCATIONS: filesystem:./migrations
-          FLYWAY_DEFAULT_SCHEMA: "users"
-        with:
-          args: info migrate info
+  # https://github.com/bcgov/quickstart-openshift-helpers
+  schema-spy:
+    name: SchemaSpy Documentation
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@v0.9.0
 
-      - name: Create Output Folder
-        run: |
-          mkdir output
-          chmod a+rwx -R output
-      - name: Run Schemaspy
-        run: docker run --network host -v "$PWD/output:/output" schemaspy/schemaspy:6.2.4 -t pgsql11 -db default -host 127.0.0.1 -port 5432 -u postgres -p default -schemas users
-      - name: Deploy to Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: output
-          target-folder: schemaspy
 
   tests:
     name: Tests
@@ -99,21 +66,28 @@ jobs:
     with:
       target: test
 
+  # Run sequentially to reduce chances of rate limiting
   zap_scan:
     runs-on: ubuntu-latest
-    name: Penetration Tests
+    name: ZAP Scans
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}-test
-    strategy:
-      matrix:
-        name: [backend, frontend]
     steps:
       - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.10.0
+        uses: zaproxy/action-full-scan@v0.11.0
         with:
           allow_issue_writing: true
-          artifact_name: "zap_${{ matrix.name }}"
+          artifact_name: "zap_backend"
           cmd_options: "-a"
-          issue_title: "ZAP: ${{ matrix.name }}"
-          target: https://${{ env.PREFIX }}-${{ matrix.name }}.${{ env.DOMAIN }}
+          issue_title: "ZAP: Backend"
+          target: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api
+
+      - name: ZAP Scan - Frontend
+        uses: zaproxy/action-full-scan@v0.11.0
+        with:
+          allow_issue_writing: true
+          artifact_name: "zap_frontend"
+          cmd_options: "-a"
+          issue_title: "ZAP: Frontend"
+          target: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}

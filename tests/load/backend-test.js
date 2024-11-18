@@ -1,5 +1,5 @@
 import { check } from "k6";
-import * as http from "k6/http";
+import http from "k6/http";
 import { Rate } from "k6/metrics";
 
 
@@ -21,7 +21,7 @@ function checkStatus(response, checkName, statusCode = 200) {
 }
 
 
-export default function(token) {
+export default function() {
   let url = `${__ENV.BACKEND_URL}/v1/users`;
   let params = {
     headers: {

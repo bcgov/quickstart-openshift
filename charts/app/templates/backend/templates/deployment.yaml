@@ -34,7 +34,7 @@ spec:
           imagePullPolicy: {{ default "Always" .Values.backend.imagePullPolicy }}
           envFrom:
             - secretRef:
-                name: {{.Release.Name}}
+                name: {{.Release.Name}}-flyway
           env:
             - name: FLYWAY_BASELINE_ON_MIGRATE
               value: "true"
@@ -45,10 +45,10 @@ spec:
           resources:
             limits:
               cpu: 200m
-              memory: 100Mi
+              memory: 200Mi
             requests:
               cpu: 50m
-              memory: 25Mi
+              memory: 75Mi
       containers:
         - name: {{ include "backend.fullname" . }}
           {{- if .Values.backend.securityContext }}
@@ -59,7 +59,7 @@ spec:
           imagePullPolicy: {{ default "Always" .Values.backend.imagePullPolicy }}
           envFrom:
             - secretRef:
-                name: {{.Release.Name}}
+                name: {{.Release.Name}}-backend
           env:
             - name: LOG_LEVEL
               value: info

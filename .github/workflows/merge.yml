@@ -25,33 +25,50 @@ jobs:
     name: Set Variables
     outputs:
       pr: ${{ steps.pr.outputs.pr }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 1
     steps:
       # Get PR number for squash merges to main
       - name: PR Number
         id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
-
-  # https://github.com/bcgov/quickstart-openshift-helpers
-  deploy-test:
-    name: Deploy (test)
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.1
+  deploy_db:
+    name: Deploys Database
+    uses: ./.github/workflows/.dbdeployer.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       environment: test
+  # https://github.com/bcgov/quickstart-openshift-helpers
+  deploy-test:
+    name: Deploy (test)
+    uses: ./.github/workflows/.deployer.yml
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+    with:
+      environment: test
+      db_user: app
 
-  deploy-prod:
-    name: Deploy (prod)
-    needs: [deploy-test, vars]
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer.yml@v0.4.1
+  deploy_db_prod:
+    name: Deploys Database PROD
+    uses: ./.github/workflows/.dbdeployer.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       environment: prod
+  deploy-prod:
+    name: Deploy (prod)
+    needs: [deploy-test, vars]
+    uses: ./.github/workflows/.deployer.yml
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+    with:
+      environment: prod
+      db_user: app
       params:
         --set backend.deploymentStrategy=RollingUpdate
         --set frontend.deploymentStrategy=RollingUpdate
@@ -61,7 +78,7 @@ jobs:
   promote:
     name: Promote Images
     needs: [deploy-prod, vars]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       packages: write
     strategy:

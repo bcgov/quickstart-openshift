@@ -14,13 +14,16 @@ global:
   secrets:
     enabled: true
     databasePassword: ~
-    databaseUser: ~
     databaseName: ~
     persist: true
+  config:
+    databaseUser: ~
   #-- domain of the application, it is required, apps.silver.devops.gov.bc.ca for silver cluster and apps.devops.gov.bc.ca for gold cluster
   domain: "apps.silver.devops.gov.bc.ca" # it is apps.gold.devops.gov.bc.ca for gold cluster
   #-- the database Alias gives a nice way to switch to different databases, crunchy, patroni ... etc.
-  databaseAlias: bitnami-pg
+  #databaseAlias: bitnamipg #uncomment when using bitnami pg and comment below.
+  databaseAlias: postgres-crunchy #uncomment when using crunchy and comment above.
+
 #-- the components of the application, backend.
 backend:
   #-- enable or disable backend
@@ -111,111 +114,19 @@ frontend:
     enabled: false # enable it in PRODUCTION for having pod disruption budget.
     minAvailable: 1 # the minimum number of pods that must be available during the disruption budget.
 
-crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
+crunchy:
+  enabled: true # make this false and bitnami-pg true to switch from crunchy to bitnami single postgis.
+
+bitnamipg:
   enabled: false
-
-  crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres-gis:ubi8-15.2-3.3-0
-
-  postgresVersion: 15
-  postGISVersion: '3.3'
-  imagePullPolicy: Always
-  instances:
-    name: ha # high availability
-    replicas: 1 # 2 or 3 for high availability in TEST and PROD.
-    metadata:
-      annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9187'
-    dataVolumeClaimSpec:
-      storage: 120Mi
-      storageClassName: netapp-block-standard
-    requests:
-      cpu: 25m
-      memory: 256Mi
-    limits:
-      cpu: 100m
-      memory: 512Mi
-    replicaCertCopy:
-      requests:
-        cpu: 1m
-        memory: 32Mi
-      limits:
-        cpu: 50m
-        memory: 64Mi
-
-  pgBackRest:
-    enabled: false
-    image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
-    retention: "1" # Ideally a larger number such as 30 backups/days
-    # If retention-full-type set to 'count' then the oldest backups will expire when the number of backups reach the number defined in retention
-    # If retention-full-type set to 'time' then the number defined in retention will take that many days worth of full backups before expiration
-    retentionFullType: count
-    repos:
-      schedules:
-        full: 0 8 * * *
-        incremental: 0 0,4,12,16,20 * * *
-      volume:
-        accessModes: "ReadWriteOnce"
-        storage: 64Mi
-        storageClassName: netapp-file-backup
-    repoHost:
-      requests:
-        cpu: 1m
-        memory: 64Mi
-      limits:
-        cpu: 50m
-        memory: 128Mi
-    sidecars:
-      requests:
-        cpu: 1m
-        memory: 64Mi
-      limits:
-        cpu: 50m
-        memory: 128Mi
-
-  patroni:
-    postgresql:
-      pg_hba: "host all all 0.0.0.0/0 md5"
-      parameters:
-        shared_buffers: 16MB # default is 128MB; a good tuned default for shared_buffers is 25% of the memory allocated to the pod
-        wal_buffers: "64kB" # this can be set to -1 to automatically set as 1/32 of shared_buffers or 64kB, whichever is larger
-        min_wal_size: 32MB
-        max_wal_size: 64MB # default is 1GB
-        max_slot_wal_keep_size: 128MB # default is -1, allowing unlimited wal growth when replicas fall behind
-
-  proxy:
-    pgBouncer:
-      image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
-      replicas: 1
-      requests:
-        cpu: 1m
-        memory: 64Mi
-      limits:
-        cpu: 50m
-        memory: 128Mi
-
-  # Postgres Cluster resource values:
-  pgmonitor:
-    enabled: false
-    exporter:
-      image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
-      requests:
-        cpu: 1m
-        memory: 64Mi
-      limits:
-        cpu: 50m
-        memory: 128Mi
-
-bitnami-pg:
-  enabled: true
   image:
     registry: ghcr.io
     repository: bcgov/nr-containers/bitnami/postgresql
-    tag: 15.7.0
+    tag: 15.8.0
   auth:
-    existingSecret: '{{ .Release.Name }}'
-    username: 'quickstart'
-    database: quickstart
+    existingSecret: '{{ .Release.Name }}-database'
+    username: 'quickstart' # make sure this is aligned with secret.yaml
+    database: quickstart # make sure this is aligned with secret.yaml
   shmVolume:
     enabled: false
   backup:
@@ -241,7 +152,7 @@ bitnami-pg:
       scripts: # remove the below script, if POSTGIS is not required.
         postgis.sh: |
           #!/bin/sh
-          PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -d postgres -c "CREATE EXTENSION postgis;"
+          PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -d quickstart -c "CREATE EXTENSION postgis;"
     resources:
       requests:
         cpu: 50m
@@ -250,67 +161,3 @@ bitnami-pg:
         cpu: 150m
         memory: 250Mi
 
-backup:
-  enabled: true
-  pvc:
-    enabled: true
-    size: 256Mi
-    storageClassName: netapp-file-standard
-    accessModes: ReadWriteOnce
-  cronjob:
-    enabled: true
-    volumes:
-      - name: "{{.Release.Name}}-backup"
-        persistentVolumeClaim:
-          claimName: "{{.Release.Name}}-backup"
-    restartPolicy: "Never"
-    schedule: "0 0 * * *"
-    concurrencyPolicy: "Replace"
-    failedJobsHistoryLimit: 7
-    successfulJobsHistoryLimit: 30
-    startingDeadlineSeconds: 3600
-  containers:
-    - name: backup
-      registry: 'docker.io'
-      repository: 'bcgovimages' # example, it includes registry and repository
-      image: backup-container # the exact component name, be it backend, api-1 etc...
-      tag: latest # the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
-      command:
-        - "/bin/bash"
-        - "-c"
-        - "/backup.sh -1"
-      volumeMounts:
-        - mountPath: "/backups/"
-          name: "{{.Release.Name}}-backup"
-      env:
-        fromValues:
-          - name: BACKUP_DIR
-            value: "/backups/"
-          - name: BACKUP_STRATEGY
-            value: "rolling"
-          - name: NUM_BACKUPS
-            value: '5'
-          - name: DAILY_BACKUPS
-            value: '7'
-          - name: WEEKLY_BACKUPS
-            value: '4'
-          - name: MONTHLY_BACKUPS
-            value: '1'
-          - name: DATABASE_SERVICE_NAME # depends on which chart being used, adjust accordingly.
-            value: '{{.Release.Name}}-{{.Values.global.databaseAlias}}'
-          - name: DEFAULT_PORT
-            value: "5432"
-        fromGlobalSecret:
-          - name: DATABASE_PASSWORD
-            key: password
-          - name: POSTGRESQL_DATABASE
-            key: databaseName
-          - name: DATABASE_USER
-            key: databaseUser
-      resources:
-        limits:
-          cpu: 50m
-          memory: 256Mi
-        requests:
-          cpu: 20m
-          memory: 128Mi

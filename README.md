@@ -51,11 +51,12 @@ Features:
 * Database Migrations with Flyway
 * Pod disruption budgets for high availability
 * Self-healing through with probes/checks (startup, readiness, liveness)
+* Point the long-lived DEMO route to PRs by using the `demo` label
 * Sample application stack:
-    * Database: Postgres, PostGIS, backups, Flyway
+    * Database: Crunchy(Postgres, PostGIS), backups, Flyway
     * Frontend: TypeScript, Caddy Server
     * Backend: TypeScript, Nest.js
-    * Alternative backends for [Java/Quarkus, Go/Fiber and Python/FastAPI](https://github.com/bcgov/quickstart-openshift-backends)
+    * Alternative backend examples - see [Alternative Backends](#alternative-backends)
 
 # Setup
 
@@ -100,7 +101,7 @@ OpenShift token, different for every project/namespace.  This guide assumes your
 
 Locate an OpenShift pipeline token:
 
-1. Login to your OpenShift cluster, e.g.: [Gold](https://console.apps.silver.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/)
+1. Login to your OpenShift cluster, e.g.: [Gold](https://console.apps.gold.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/)
 2. Select your DEV namespace
 3. Click Workloads > Secrets (under Workloads for Administrator view)
 4. Select `pipeline-token-...` or a similarly privileged token
@@ -133,6 +134,11 @@ BC Government employees can request SonarCloud projects by creating an [issue](h
 OpenShift server address.
 * Consume: `{{ vars.OC_SERVER }}`
 * Value: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
+
+**MS_TEAMS_WEBHOOK_URI**
+* Consume: `{{ vars.MS_TEAMS_WEBHOOK_URI }}`
+* Value: ![https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif](https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif)
+* Refrence: 'https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet' & 'https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference'
 
 ## Environments
 
@@ -196,31 +202,51 @@ Packages are available from your repository (link on right).  All should have vi
 
 E.g. https://github.com/bcgov/quickstart-openshift/packages
 
-### Branch Protection
+### Branch Protection Rules
 
-This is required to prevent direct pushes and merges to the default branch.  These steps must be run after one full pull request pipeline has been run.
+This is required to prevent direct pushes and merges to the default branch.  These steps must be run after one full pull request pipeline has been run to populate the required status checks.
 
-1. Select Settings (gear, top right)  *> Branches (under Code and Automation)
-2. Click `Add Rule` or edit an existing rule
-3. Under `Protect matching branches` specify the following:
-    * Branch name pattern: `main`
-    * `[check] Require a pull request before merging`
-        * `[check] Require approvals` (default = 1)
-        * `[check] Dismiss stale pull request approvals when new commits are pushed`
-        * `[check] Require review from Code Owners`
-    * `[check] Require status checks to pass before merging`
-        * `[check] Require branches to be up to date before merging`
-        * `Status checks that are required`:
-            * Select checks as appropriate, e.g. Build x, Deploy y
-            * Recommended:
-                * Analysis Results
-                * PR Results
-                * Validate Results
-        * Select at least one status check to enforce branch protection
-    * `[check] Require conversation resolution before merging`
-    * `[check] Include administrators` (optional)
+1. Select `Settings` (gear, top right) > `Rules` > `Rulesets` (under Code and Automation)
+2. Click `New ruleset` > `New branch ruleset`
+3. Setup Ruleset:
+    * Ruleset Name: `main`
+    * Enforcement status: `Active`
+    * Bypass list:
+        * Click `+ Add bypass`
+        * Check `[x] Repository admin`
+        * Click `Add selected`
+    * Target branches:
+        * Click `Add target`
+        * Select `Add default branch`
+    * Branch protections:
+        * `[x] Restrict deletions`
+        * `[x] Require linear history`
+        * `[x] Require a pull request before merging`
+            * Additional settings:
+                * `Require approvals: 1` (or more!)
+                * `[x] Require conversation resolution before merging`
+        * `[x] Require status checks to pass`
+            * `[x] Require branches to be up to date before merging`
+            * Required checks: *These will be populated after a full pull request pipeline run!*
+                * Click `+Add checks`
+                * This is our default set, yours may differ:
+                    * `Analysis Results`
+                    * `PR Results`
+                    * `Validate Results`
+    * `[x] Block force pushes`
+    * `[x] Require code scanning results`
+        * Click `+ Add tool`
+        * This is our default set, yours may differ:
+            * `CodeQL`
+            * `Trivy`
+    * Click `Create`
 
+#### Status checks example
 ![](./.github/graphics/branch-protection.png)
+
+#### Required tools and alerts example
+![](./.github/graphics/branch-code-results.png)
+
 
 ### Adding Team Members
 
@@ -301,31 +327,53 @@ Runs on scheduled job (cronjob) or workflow dispatch.
 
 ![](.github/graphics/scheduled.png)
 
+## DEMO Routing
+
+There is a long-lived custom route available to be assigned to specific Pull Request deployments.  Add the label `demo` to that pull request or run the `DEMO Route` workflow.
+
+Typical route: `https://<REPO_NAME>-demo.apps.silver.devops.gov.bc.ca`
+
+#### PR Label
+
+Please note that the label must be manually created using GitHub's web interface.
+
+![](.github/graphics/demo-label.png)
+
+#### Workflow
+![](.github/graphics/workflow.png)
+
+
 # App Stack
 
 ## Starter
 
-The starter stack includes a (React, MUI, Vite, Caddy) frontend, Pluggable backend(Nest/Node, Quarkus/Java On Native, FastAPI/Python, Fiber/Golang) and postgres database.  See subfolder for source, including Dockerfiles and OpenShift templates.
+The starter stack includes a frontend (React, MUI, Vite, Caddy), backend (Nest/Node) and postgres or postgis database.  See subfolder for source, including Dockerfiles and OpenShift templates.  Alternative backends are available.
 
 Features:
 * [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
 * [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
 * [Flyway](https://flywaydb.org/) database migrations
-* [Postgres](https://www.postgresql.org/) or [PostGIS](https://postgis.net/) database
-* [backup-container](https://github.com/BCDevOps/backup-container) provided by BCDevOps
+* [Crunchy](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes) Postgres/Postgis Database
 
-Postgres is default.  Switch to PostGIS by copying the appropriate Dockerfile to `./database`:
+Postgis is default.  Switch to Postgres by removing the image names in [crunchy helm chart values](./charts/crunchy/values.yaml)
 
-> cp ./database/postgis/Dockerfile ./database
+## Crunchy
 
-## Pluggable Backends
+Crunchy is the default choice for HA postgres/postgis DB in BCGov. provided chart is to get up and going fast, it is upto teams to fine tune resource allocation and patroni parameters of crunchy DB to get the best out of database.
 
-This quickstart works with more than just JavaScript.  Please check out our pluggable [backends repository](https://github.com/bcgov/quickstart-openshift-backends).  Flyway-based database migrations for each are included.
+* For specifying different resources for different envs, just add values-test.yml and values-prod.yml , then provide them to the [DB Deployer in GHA](.github/workflows/.dbdeployer.yml#L24).
+* For enabling S3 backups/recovery, please enable in [values file](./charts/crunchy/values.yaml#L62),  and in the [DB Deployer in GHA](.github/workflows/.dbdeployer.yml#L20), then provide necessary secret values which are prefixed with `s3` [DB Deployer in GHA](.github/workflows/.dbdeployer.yml#L36)
+* To disable crunchy deployment, make the following changes
+  * make crunchy enabled to false in [values.yaml](./charts/app/values.yaml#L117)
+  * make bitnami postgis enabled to true in [values.yaml](./charts/app/values.yaml#L120)
+  * make the db-deployer false in gha workflow [.dbdeployer.yaml](./.github/workflows/.dbdeployer.yml#L31)
 
-Supported languages:
-* [Go with Fiber](https://github.com/bcgov/quickstart-openshift-backends/tree/main/backend-go)
-* [Java with Quarkus, Cloud Native](https://github.com/bcgov/quickstart-openshift-backends/tree/main/backend-go)
-* [Python with FastAPI](https://github.com/bcgov/quickstart-openshift-backends/tree/main/backend-py)
+## Alternative Backends
+
+The sample Java, Python and Go backends repository has been archived, but we have lots of other great examples of active projects you can learn from!
+
+* [NR-RFC-AlertAuthoring - Python with FastAPI and Alembic](https://github.com/bcgov/nr-rfc-alertauthoring)
+* [QuickStart OpenShift Backends](https://github.com/bcgov/quickstart-openshift-backends)
 
 ## SchemaSpy
 
@@ -345,7 +393,6 @@ After a full workflow run and merge can been run, please do the following:
 This repository is provided by NRIDS Architecture and Forestry Digital Services, courtesy of the Government of British Columbia.
 
 * NRID's [Kickstarter Guide](https://bcgov.github.io/nr-architecture-patterns-library/docs/Agile%20Team%20Kickstarter) (via. Confluence, links may be internal)
-* [OpenShift Backends for Go, Java and Python](https://github.com/bcgov/quickstart-openshift-backends)
 
 # Contributing
 

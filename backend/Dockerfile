@@ -1,44 +1,37 @@
-# Build static files
-# Node Bullseye has npm
-FROM node:20.13.1-bullseye-slim AS buildWithDevDeps
+# Build
+FROM node:22.11.0-slim AS build
 
-# Install packages, build and keep only prod packages
+# Copy, build static files; see .dockerignore for exclusions
 WORKDIR /app
-COPY *.json ./
-COPY ./src ./src
-COPY ./prisma ./prisma
-RUN npm ci --ignore-scripts --no-update-notifier
-RUN npm run prisma-generate
-FROM node:20.13.1-bullseye-slim AS build
+COPY . ./
+ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
+RUN npm run deploy
 
-# Install packages, build and keep only prod packages
+# Dependencies
+FROM node:22.11.0-slim AS dependencies
+
+# Copy, build static files; see .dockerignore for exclusions
 WORKDIR /app
-COPY *.json ./
-COPY ./src ./src
-COPY ./prisma ./prisma
+COPY . ./
+ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
 RUN npm ci --ignore-scripts --no-update-notifier --omit=dev
 
-# COPY over few dependencies from buildWithDevDeps
-COPY --from=buildWithDevDeps /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=buildWithDevDeps /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=buildWithDevDeps /app/node_modules/prisma ./node_modules/prisma
+# Deploy using minimal Distroless image
+FROM gcr.io/distroless/nodejs22-debian12:nonroot
+ENV NODE_ENV=production
 
-RUN npm run build
-
-# Deploy container
-# Distroless has node, but not npm
-FROM gcr.io/distroless/nodejs20-debian11:nonroot
-ENV NODE_ENV production
-
-# Copy over app
+# Copy app and dependencies
 WORKDIR /app
-COPY --from=build /app/node_modules ./node_modules
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build /app/node_modules/prisma ./node_modules/prisma
 COPY --from=build /app/dist ./dist
 
-# Ports, health check and non-root user
+# Boilerplate, not used in OpenShift/Kubernetes
 EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost/:3000/api || exit 1
-USER nonroot
+HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3000/api
 
-# Start up command with 50MB of heap size, each application needs to determine what is the best value. DONT use default as it is 4GB.
+# Nonroot user, limit heap size to 50 MB
+USER nonroot
 CMD ["--max-old-space-size=50", "/app/dist/main"]

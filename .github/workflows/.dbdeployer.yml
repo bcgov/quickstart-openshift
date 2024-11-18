@@ -1,0 +1,144 @@
+name: .Database Deploy
+
+on:
+  workflow_call:
+    inputs: ### Required
+      directory:
+        description: Crunchy Chart directory
+        default: 'charts/crunchy'
+        required: false
+        type: string
+      oc_server:
+        default: https://api.silver.devops.gov.bc.ca:6443
+        description: 'OpenShift server'
+        required: false
+        type: string
+      environment:
+        description: Environment name; omit for PRs
+        required: false
+        type: string
+      s3_enabled:
+        description: Enable S3 backups
+        required: false
+        type: boolean
+      values:
+        description: 'Values file'
+        default: 'values.yaml'
+        required: false
+        type: string
+      enabled:
+        description: 'Enable the deployment of the crunchy database, easy switch to turn it on/off'
+        default: true
+        required: false
+        type: boolean
+
+    secrets:
+      oc_namespace:
+        description: OpenShift namespace
+        required: true
+      oc_token:
+        description: OpenShift token
+        required: true
+      s3_access_key:
+        description: S3 access key
+        required: false
+      s3_secret_key:
+        description: S3 secret key
+        required: false
+      s3_bucket:
+        description: S3 bucket
+        required: false
+      s3_endpoint:
+        description: S3 endpoint
+        required: false
+jobs:
+  deploy_db:
+    runs-on: ubuntu-24.04
+    if: ${{ inputs.enabled }}
+    name: Deploy Or Upgrade Crunchy DB
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install CLI tools from OpenShift Mirror
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: "4.14.37"
+      - name: Validate Inputs
+        shell: bash
+        run: |
+          if [ ${{ inputs.s3_enabled }} == true ]; then
+            echo "S3 ie enabled for backups, checking for mandatory secrets"
+            if [ ! "${{ secrets.s3_access_key }}" ]; then
+              echo "S3 access key not found"
+              exit 1
+            fi
+            if [ ! "${{ secrets.s3_secret_key }}" ]; then
+              echo "S3 secret key not found"
+              exit 1
+            fi
+            if [ ! "${{ secrets.s3_bucket }}" ]; then
+              echo "S3 bucket not found"
+              exit 1
+            fi
+            if [ ! "${{ secrets.s3_endpoint }}" ]; then
+              echo "S3 endpoint not found"
+              exit 1
+            fi
+          fi
+
+      - name: OC Login
+        shell: bash
+        run: |
+          # OC Login
+          OC_TEMP_TOKEN=$(curl -k -X POST ${{ inputs.oc_server }}/api/v1/namespaces/${{ secrets.oc_namespace }}/serviceaccounts/pipeline/token --header "Authorization: Bearer ${{ secrets.oc_token }}" -d '{"spec": {"expirationSeconds": 600}}' -H 'Content-Type: application/json; charset=utf-8' | jq -r '.status.token' )
+
+          oc login --token=$OC_TEMP_TOKEN --server=${{ inputs.oc_server }}
+          oc project ${{ secrets.oc_namespace }} # Safeguard!
+
+      - name: Deploy Database
+        working-directory: ${{ inputs.directory }}
+        shell: bash
+        run: |
+          echo 'Deploying crunchy helm chart'
+          if [ ${{ inputs.s3_enabled }} == true ]; then
+            helm upgrade --install --wait --set crunchy.pgBackRest.s3.enabled=true \
+             --set-string crunchy.pgBackRest.s3.accessKey=${{ secrets.s3_access_key }} \
+              --set-string crunchy.pgBackRest.s3.secretKey=${{ secrets.s3_secret_key }} \
+              --set-string crunchy.pgBackRest.s3.bucket=${{ secrets.s3_bucket }} \
+              --set-string crunchy.pgBackRest.s3.endpoint=${{ secrets.s3_endpoint }} \
+              --values ${{ inputs.values }} postgres  .
+          else
+            helm upgrade --install --wait --values ${{ inputs.values }} postgres .
+          fi
+
+      - name: Add PR specific user to Crunchy DB # only for PRs
+        shell: bash
+        if: github.event_name == 'pull_request'
+        run: |
+            echo 'Adding PR specific user to Crunchy DB'
+            NEW_USER='{"databases":["app-${{ github.event.number }}"],"name":"app-${{ github.event.number }}"}'
+            CURRENT_USERS=$(oc get PostgresCluster/postgres-crunchy -o json | jq '.spec.users')
+            echo "${CURRENT_USERS}"
+
+            # check if current_users already contains the new_user
+            if echo "${CURRENT_USERS}" | jq -e ".[] | select(.name == \"app-${{ github.event.number }}\")" > /dev/null; then
+              echo "User already exists"
+              exit 0
+            fi
+
+            UPDATED_USERS=$(echo "${CURRENT_USERS}" | jq --argjson NEW_USER "${NEW_USER}" '. + [$NEW_USER]')
+            PATCH_JSON=$(jq -n --argjson users "${UPDATED_USERS}" '{"spec": {"users": $users}}')
+            oc patch PostgresCluster/postgres-crunchy --type=merge -p "${PATCH_JSON}"
+
+            # wait for sometime as it takes time to create the user, query the secret and check if it is created, otherwise wait in a loop for 5 rounds
+            for i in {1..5}; do
+            if oc get secret postgres-crunchy-pguser-app-${{ github.event.number }} -o jsonpath='{.metadata.name}' > /dev/null; then
+                echo "Secret created"
+                break
+            else
+                echo "Secret not created, waiting for 60 seconds"
+                sleep 60
+            fi
+            done
+
+
