@@ -72,6 +72,16 @@ spec:
             requests:
               cpu: 30m
               memory: 50Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: config
+          emptyDir: {}
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
