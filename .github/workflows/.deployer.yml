@@ -194,7 +194,7 @@ jobs:
           oc delete po --field-selector=status.phase==Succeeded || true
 
   deployer-db:
-    name: Deploys Database
+    name: Database
     uses: ./.github/workflows/.deployer-db.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
