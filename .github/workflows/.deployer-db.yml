@@ -81,9 +81,6 @@ jobs:
         if: steps.triggers.outputs.triggered == 'true' && inputs.s3_enabled
         shell: bash
         run: |
-          echo "inputs.s3_enabled: ${{ inputs.s3_enabled }}"
-          echo "steps.triggers.outputs.triggered == 'true' && inputs.s3_enabled"
-          echo "=> ${{ steps.triggers.outputs.triggered == 'true' && inputs.s3_enabled }}"
           echo "S3 ie enabled for backups, checking for mandatory secrets"
           if [ ! "${{ secrets.s3_access_key }}" ]; then
             echo "S3 access key not found"

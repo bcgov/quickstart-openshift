@@ -60,6 +60,7 @@ jobs:
         --set global.autoscaling=true
         --set frontend.pdb.enabled=true
         --set backend.pdb.enabled=true
+
   promote:
     name: Promote Images
     needs: [deploy-prod, vars]
