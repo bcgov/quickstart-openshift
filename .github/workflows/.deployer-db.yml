@@ -19,8 +19,8 @@ on:
         type: string
       s3_enabled:
         description: Enable S3 backups
-        default: false
-        type: string
+        required: false
+        type: boolean
       values:
         description: 'Values file'
         default: 'values.yaml'
@@ -78,7 +78,7 @@ jobs:
           oc: "4.14.37"
 
       - name: Validate Inputs
-        if: steps.triggers.outputs.triggered == 'true' && ${{ inputs.s3_enabled }} != 'false'
+        if: steps.triggers.outputs.triggered == 'true' && ${{ inputs.s3_enabled }}
         shell: bash
         run: |
           echo "S3 ie enabled for backups, checking for mandatory secrets"
