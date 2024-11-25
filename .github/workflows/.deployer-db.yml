@@ -59,7 +59,7 @@ jobs:
   deploy_db:
     runs-on: ubuntu-24.04
     if: ${{ inputs.enabled }}
-    name: Deploy Or Upgrade Crunchy DB
+    name: Helm (Crunchy)
     environment: ${{ inputs.environment }}
     steps:
       # Check triggers (omitted or matched) for deployment
@@ -78,7 +78,7 @@ jobs:
           oc: "4.14.37"
 
       - name: Validate Inputs
-        if: steps.triggers.outputs.triggered == 'true' && ${{ inputs.s3_enabled }} != 'false'
+        if: steps.triggers.outputs.triggered == 'true' && ${{ inputs.s3_enabled }} != false
         shell: bash
         run: |
           echo "S3 ie enabled for backups, checking for mandatory secrets"
