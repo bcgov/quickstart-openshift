@@ -117,7 +117,7 @@ jobs:
           echo 'Deploying crunchy helm chart'
           if [ ${{ inputs.s3_enabled }} == true ]; then
             helm upgrade --install --wait --set crunchy.pgBackRest.s3.enabled=true \
-             --set-string crunchy.pgBackRest.s3.accessKey=${{ secrets.s3_access_key }} \
+              --set-string crunchy.pgBackRest.s3.accessKey=${{ secrets.s3_access_key }} \
               --set-string crunchy.pgBackRest.s3.secretKey=${{ secrets.s3_secret_key }} \
               --set-string crunchy.pgBackRest.s3.bucket=${{ secrets.s3_bucket }} \
               --set-string crunchy.pgBackRest.s3.endpoint=${{ secrets.s3_endpoint }} \
