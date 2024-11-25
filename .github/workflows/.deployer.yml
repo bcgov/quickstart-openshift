@@ -71,7 +71,7 @@ on:
 
 jobs:
   deployer:
-    name: Helm
+    name: Helm (stack)
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-24.04
     outputs:
@@ -194,21 +194,6 @@ jobs:
           oc delete po --field-selector=status.phase==Succeeded || true
 
   deployer-db:
-    name: Helm
-    environment: ${{ inputs.environment }}
-    runs-on: ubuntu-24.04
-    outputs:
-      triggered: ${{ steps.triggers.outputs.triggered }}
-    steps:
-      ### Triggers, tag and release
-
-      # Check triggers (omitted or matched) for deployment
-      - uses: bcgov-nr/action-diff-triggers@v0.2.0
-        id: triggers
-        with:
-          triggers: ${{ inputs.triggers }}
-
-  deploy_db:
     name: Deploys Database
     uses: ./.github/workflows/.deployer-db.yml
     secrets:

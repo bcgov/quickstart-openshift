@@ -78,7 +78,7 @@ jobs:
           oc: "4.14.37"
 
       - name: Validate Inputs
-        if: steps.triggers.outputs.triggered == 'true' && ${{ inputs.s3_enabled }}
+        if: steps.triggers.outputs.triggered == 'true' && ${{ inputs.s3_enabled }} != 'false'
         shell: bash
         run: |
           echo "S3 ie enabled for backups, checking for mandatory secrets"
