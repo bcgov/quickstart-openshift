@@ -71,7 +71,7 @@ on:
 
 jobs:
   deployer:
-    name: Helm
+    name: Helm (stack)
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-24.04
     outputs:
@@ -86,7 +86,7 @@ jobs:
           triggers: ${{ inputs.triggers }}
 
       # Variables
-      - if: ${{ steps.triggers.outputs.triggered == 'true' &&  inputs.tag  == '' }}
+      - if: ${{ steps.triggers.outputs.triggered == 'true' && inputs.tag  == '' }}
         id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
       - if: steps.triggers.outputs.triggered == 'true'
@@ -119,7 +119,6 @@ jobs:
         uses: redhat-actions/openshift-tools-installer@v1
         with:
           oc: "4"
-
 
       # OC login and acquire short lived token
       - if: steps.triggers.outputs.triggered == 'true'
@@ -193,3 +192,13 @@ jobs:
         run: |
           # Completed pod cleanup
           oc delete po --field-selector=status.phase==Succeeded || true
+
+  deployer-db:
+    name: Database
+    uses: ./.github/workflows/.deployer-db.yml
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+    with:
+      environment: ${{ inputs.environment }}
+      triggers: ${{ inputs.triggers }}

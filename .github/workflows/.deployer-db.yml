@@ -31,6 +31,10 @@ on:
         default: true
         required: false
         type: boolean
+      triggers:
+        description: Paths used to trigger a deployment; e.g. ('./backend/' './frontend/)
+        required: false
+        type: string
 
     secrets:
       oc_namespace:
@@ -55,38 +59,48 @@ jobs:
   deploy_db:
     runs-on: ubuntu-24.04
     if: ${{ inputs.enabled }}
-    name: Deploy Or Upgrade Crunchy DB
+    name: Helm (Crunchy)
     environment: ${{ inputs.environment }}
     steps:
+      # Check triggers (omitted or matched) for deployment
+      - uses: bcgov-nr/action-diff-triggers@v0.2.0
+        id: triggers
+        with:
+          triggers: ${{ inputs.triggers }}
+
       - uses: actions/checkout@v4
+        if: steps.triggers.outputs.triggered == 'true'
+
       - name: Install CLI tools from OpenShift Mirror
+        if: steps.triggers.outputs.triggered == 'true'
         uses: redhat-actions/openshift-tools-installer@v1
         with:
           oc: "4.14.37"
+
       - name: Validate Inputs
+        if: steps.triggers.outputs.triggered == 'true' && inputs.s3_enabled
         shell: bash
         run: |
-          if [ ${{ inputs.s3_enabled }} == true ]; then
-            echo "S3 ie enabled for backups, checking for mandatory secrets"
-            if [ ! "${{ secrets.s3_access_key }}" ]; then
-              echo "S3 access key not found"
-              exit 1
-            fi
-            if [ ! "${{ secrets.s3_secret_key }}" ]; then
-              echo "S3 secret key not found"
-              exit 1
-            fi
-            if [ ! "${{ secrets.s3_bucket }}" ]; then
-              echo "S3 bucket not found"
-              exit 1
-            fi
-            if [ ! "${{ secrets.s3_endpoint }}" ]; then
-              echo "S3 endpoint not found"
-              exit 1
-            fi
+          echo "S3 ie enabled for backups, checking for mandatory secrets"
+          if [ ! "${{ secrets.s3_access_key }}" ]; then
+            echo "S3 access key not found"
+            exit 1
+          fi
+          if [ ! "${{ secrets.s3_secret_key }}" ]; then
+            echo "S3 secret key not found"
+            exit 1
+          fi
+          if [ ! "${{ secrets.s3_bucket }}" ]; then
+            echo "S3 bucket not found"
+            exit 1
+          fi
+          if [ ! "${{ secrets.s3_endpoint }}" ]; then
+            echo "S3 endpoint not found"
+            exit 1
           fi
 
       - name: OC Login
+        if: steps.triggers.outputs.triggered == 'true'
         shell: bash
         run: |
           # OC Login
@@ -96,13 +110,14 @@ jobs:
           oc project ${{ secrets.oc_namespace }} # Safeguard!
 
       - name: Deploy Database
+        if: steps.triggers.outputs.triggered == 'true'
         working-directory: ${{ inputs.directory }}
         shell: bash
         run: |
           echo 'Deploying crunchy helm chart'
           if [ ${{ inputs.s3_enabled }} == true ]; then
             helm upgrade --install --wait --set crunchy.pgBackRest.s3.enabled=true \
-             --set-string crunchy.pgBackRest.s3.accessKey=${{ secrets.s3_access_key }} \
+              --set-string crunchy.pgBackRest.s3.accessKey=${{ secrets.s3_access_key }} \
               --set-string crunchy.pgBackRest.s3.secretKey=${{ secrets.s3_secret_key }} \
               --set-string crunchy.pgBackRest.s3.bucket=${{ secrets.s3_bucket }} \
               --set-string crunchy.pgBackRest.s3.endpoint=${{ secrets.s3_endpoint }} \
@@ -113,7 +128,7 @@ jobs:
 
       - name: Add PR specific user to Crunchy DB # only for PRs
         shell: bash
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && steps.triggers.outputs.triggered == 'true'
         run: |
             echo 'Adding PR specific user to Crunchy DB'
             NEW_USER='{"databases":["app-${{ github.event.number }}"],"name":"app-${{ github.event.number }}"}'
