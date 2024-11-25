@@ -210,7 +210,7 @@ jobs:
 
   deploy_db:
     name: Deploys Database
-    uses: ./.github/workflows/.dbdeployer.yml
+    uses: ./.github/workflows/.deployer-db.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
