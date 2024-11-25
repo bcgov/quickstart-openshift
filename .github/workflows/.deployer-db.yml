@@ -19,7 +19,7 @@ on:
         type: string
       s3_enabled:
         description: Enable S3 backups
-        required: false
+        default: false
         type: boolean
       values:
         description: 'Values file'
