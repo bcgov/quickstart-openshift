@@ -70,8 +70,19 @@ on:
         required: true
 
 jobs:
+  deployer-db:
+    name: Database
+    uses: ./.github/workflows/.deployer-db.yml
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+    with:
+      environment: ${{ inputs.environment }}
+      triggers: ${{ inputs.triggers }}
+
   deployer:
     name: Helm (stack)
+    needs: deployer-db
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-24.04
     outputs:
@@ -192,13 +203,3 @@ jobs:
         run: |
           # Completed pod cleanup
           oc delete po --field-selector=status.phase==Succeeded || true
-
-  deployer-db:
-    name: Database
-    uses: ./.github/workflows/.deployer-db.yml
-    secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_token: ${{ secrets.OC_TOKEN }}
-    with:
-      environment: ${{ inputs.environment }}
-      triggers: ${{ inputs.triggers }}
