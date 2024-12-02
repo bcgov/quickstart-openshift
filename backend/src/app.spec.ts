@@ -1,19 +1,18 @@
-import {NestExpressApplication} from '@nestjs/platform-express';
-import {bootstrap} from "./app";
-jest.mock('prom-client', () => ({
-  Registry: jest.fn().mockImplementation(() => ({
-  })),
-  collectDefaultMetrics: jest.fn().mockImplementation(() => ({
-  })),
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { bootstrap } from "./app";
+
+vi.mock("prom-client", () => ({
+  Registry: vi.fn().mockImplementation(() => ({})),
+  collectDefaultMetrics: vi.fn().mockImplementation(() => ({})),
 }));
-jest.mock('express-prom-bundle', () => ({
-  default: jest.fn().mockImplementation(() => ({
-  })),
+vi.mock("express-prom-bundle", () => ({
+  default: vi.fn().mockImplementation(() => ({})),
 }));
-jest.mock('./prom', () => ({
-  metricsMiddleware: jest.fn().mockImplementation((req, res, next) => next()),
+vi.mock("./prom", () => ({
+  metricsMiddleware: vi.fn().mockImplementation((_req, _res, next) => next()),
 }));
-describe('main', () => {
+
+describe("main", () => {
   let app: NestExpressApplication;
 
   beforeAll(async () => {
@@ -24,7 +23,7 @@ describe('main', () => {
     await app.close();
   });
 
-  it('should start the application', async () => {
+  it("should start the application", async () => {
     expect(app).toBeDefined();
   });
 });
