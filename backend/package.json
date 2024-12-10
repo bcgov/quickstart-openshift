@@ -21,20 +21,20 @@
     "test:e2e": "vitest --dir test"
   },
   "dependencies": {
-    "@nestjs/cli": "^10.4.7",
-    "@nestjs/common": "^10.4.7",
+    "@nestjs/cli": "^10.4.9",
+    "@nestjs/common": "^10.4.15",
     "@nestjs/config": "^3.3.0",
-    "@nestjs/core": "^10.4.7",
-    "@nestjs/platform-express": "^10.4.7",
+    "@nestjs/core": "^10.4.15",
+    "@nestjs/platform-express": "^10.4.15",
     "@nestjs/schematics": "^10.2.3",
-    "@nestjs/swagger": "^8.0.2",
+    "@nestjs/swagger": "^8.1.0",
     "@nestjs/terminus": "^10.2.3",
-    "@nestjs/testing": "^10.4.7",
+    "@nestjs/testing": "^10.4.15",
     "@prisma/client": "^5.7.0",
     "dotenv": "^16.0.1",
     "express-prom-bundle": "^8.0.0",
     "helmet": "^8.0.0",
-    "nest-winston": "^1.9.4",
+    "nest-winston": "^1.9.7",
     "nestjs-prisma": "^0.23.0",
     "pg": "^8.11.3",
     "prom-client": "^15.1.0",
@@ -42,7 +42,7 @@
     "rimraf": "^6.0.0",
     "rxjs": "^7.8.0",
     "swagger-ui-express": "^5.0.0",
-    "winston": "^3.11.0"
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@swc/cli": "^0.5.0",
