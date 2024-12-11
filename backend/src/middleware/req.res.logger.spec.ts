@@ -5,7 +5,6 @@ import { Logger } from "@nestjs/common";
 
 describe("HTTPLoggerMiddleware", () => {
   let middleware: HTTPLoggerMiddleware;
-  let logger: Logger;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
