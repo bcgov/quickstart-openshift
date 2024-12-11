@@ -1,6 +1,6 @@
 import { WinstonModule, utilities } from "nest-winston";
 import * as winston from "winston";
-import { LoggerService } from "@nestjs/common";
+import type { LoggerService } from "@nestjs/common";
 
 const globalLoggerFormat: winston.Logform.Format = winston.format.timestamp({
   format: "YYYY-MM-DD hh:mm:ss.SSS",
