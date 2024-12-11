@@ -1,5 +1,10 @@
 import "dotenv/config";
-import { Logger, MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
+import {
+  Logger,
+  MiddlewareConsumer,
+  Module,
+  RequestMethod,
+} from "@nestjs/common";
 import { HTTPLoggerMiddleware } from "./middleware/req.res.logger";
 import { loggingMiddleware, PrismaModule } from "nestjs-prisma";
 import { ConfigModule } from "@nestjs/config";
@@ -7,7 +12,7 @@ import { UsersModule } from "./users/users.module";
 import { AppService } from "./app.service";
 import { AppController } from "./app.controller";
 import { MetricsController } from "./metrics.controller";
-import { TerminusModule } from '@nestjs/terminus';
+import { TerminusModule } from "@nestjs/terminus";
 import { HealthController } from "./health.controller";
 
 const DB_HOST = process.env.POSTGRES_HOST || "localhost";
@@ -23,8 +28,8 @@ function getMiddlewares() {
       // configure your prisma middleware
       loggingMiddleware({
         logger: new Logger("PrismaMiddleware"),
-        logLevel: "debug"
-      })
+        logLevel: "debug",
+      }),
     ];
   }
   return [];
@@ -36,8 +41,8 @@ function getMiddlewares() {
     TerminusModule,
     PrismaModule.forRoot({
       isGlobal: true,
-      prismaServiceOptions:{
-        prismaOptions:{
+      prismaServiceOptions: {
+        prismaOptions: {
           log: ["error", "warn"],
           errorFormat: "pretty",
           datasourceUrl: `postgresql://${DB_USER}:${DB_PWD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=${DB_SCHEMA}&connection_limit=5`,
@@ -45,13 +50,20 @@ function getMiddlewares() {
         middlewares: getMiddlewares(),
       },
     }),
-    UsersModule
+    UsersModule,
   ],
-  controllers: [AppController,MetricsController, HealthController],
-  providers: [AppService]
+  controllers: [AppController, MetricsController, HealthController],
+  providers: [AppService],
 })
-export class AppModule { // let's add a middleware on all routes
+export class AppModule {
+  // let's add a middleware on all routes
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(HTTPLoggerMiddleware).exclude({ path: 'metrics', method: RequestMethod.ALL }, { path: 'health', method: RequestMethod.ALL }).forRoutes('*');
+    consumer
+      .apply(HTTPLoggerMiddleware)
+      .exclude(
+        { path: "metrics", method: RequestMethod.ALL },
+        { path: "health", method: RequestMethod.ALL },
+      )
+      .forRoutes("*");
   }
 }
