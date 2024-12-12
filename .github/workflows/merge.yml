@@ -37,7 +37,7 @@ jobs:
       - name: Set Tag
         id: tag
         run: |
-          if [ -z "${{ inputs.pr_no }}" ]; then
+          if ${{ github.event_name == 'pull_request' }}; then
             echo "tag=${{ steps.pr.outputs.pr }}" >> $GITHUB_ENV
           else
             echo "tag=${{ inputs.pr_no }}" >> $GITHUB_ENV
