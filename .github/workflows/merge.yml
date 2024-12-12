@@ -38,14 +38,14 @@ jobs:
         id: tag
         run: |
           if [ -z "${{ inputs.pr_no }}" ]; then
-            echo "tag=${{ steps.pr.outputs.pr }}" >> $GITHUB_ENV
+            echo "tag=${{ steps.pr.outputs.pr }}" >> $GITHUB_OUTPUT
           else
-            echo "tag=${{ inputs.tag }}" >> $GITHUB_ENV
+            echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
           fi
 
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploy-test:
-    name: Deploy (test)
+    name: Deploy (test, tag=${{ needs.vars.outputs.tag }})
     uses: ./.github/workflows/.deployer.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -56,7 +56,7 @@ jobs:
       tag: ${{ needs.vars.outputs.tag }}
 
   deploy-prod:
-    name: Deploy (prod)
+    name: Deploy (prod, tag=${{ needs.vars.outputs.tag }})
     needs: [deploy-test, vars]
     uses: ./.github/workflows/.deployer.yml
     secrets:
