@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag set to deploy; e.g. PR number, latest or prod (default)"
+        description: "Image tag set to deploy; e.g. PR number or prod"
         type: string
         default: 'prod'
 
@@ -36,16 +36,12 @@ jobs:
 
       - name: Set Tag
         id: tag
-        run: |
-          if [ -z "${{ inputs.pr_no }}" ]; then
-            echo "tag=${{ steps.pr.outputs.pr }}" >> $GITHUB_OUTPUT
-          else
-            echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
-          fi
+        run: echo "tag=${{ inputs.tag || steps.pr.outputs.pr }}" >> $GITHUB_OUTPUT
 
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploy-test:
     name: Deploy (test, tag=${{ needs.vars.outputs.tag }})
+    needs: [vars]
     uses: ./.github/workflows/.deployer.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
