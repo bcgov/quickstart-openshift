@@ -53,7 +53,7 @@ jobs:
     with:
       environment: test
       db_user: app
-      tag: ${{ needs.var.outputs.tag }}
+      tag: ${{ needs.vars.outputs.tag }}
 
   deploy-prod:
     name: Deploy (prod)
@@ -71,7 +71,7 @@ jobs:
         --set global.autoscaling=true
         --set frontend.pdb.enabled=true
         --set backend.pdb.enabled=true
-      tag: ${{ needs.var.outputs.tag }}
+      tag: ${{ needs.vars.outputs.tag }}
 
   promote:
     name: Promote Images
@@ -88,5 +88,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.var.outputs.tag }}
+          target: ${{ needs.vars.outputs.tag }}
           tags: prod
