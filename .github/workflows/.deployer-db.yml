@@ -59,7 +59,7 @@ jobs:
   deploy_db:
     runs-on: ubuntu-24.04
     if: ${{ inputs.enabled }}
-    name: Helm (Crunchy)
+    name: Crunchy (db)
     environment: ${{ inputs.environment }}
     steps:
       # Check triggers (omitted or matched) for deployment

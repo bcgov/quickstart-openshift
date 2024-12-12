@@ -81,7 +81,7 @@ jobs:
       triggers: ${{ inputs.triggers }}
 
   deployer:
-    name: Helm (stack)
+    name: Stack
     needs: deployer-db
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-24.04
