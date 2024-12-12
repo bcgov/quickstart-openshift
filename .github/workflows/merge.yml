@@ -10,7 +10,7 @@ on:
       - '!.github/workflows/**'
   workflow_dispatch:
     inputs:
-      pr_no:
+      tag:
         description: "Tag set to deploy; e.g. PR number, latest or prod (default)"
         type: string
         default: 'prod'
@@ -30,7 +30,7 @@ jobs:
     steps:
       # Get PR number for squash merges to main
       - name: PR Number
-        if: ${{ ! inputs.pr_no }}
+        if: ${{ ! inputs.tag }}
         id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
 
@@ -40,7 +40,7 @@ jobs:
           if ${{ github.event_name == 'pull_request' }}; then
             echo "tag=${{ steps.pr.outputs.pr }}" >> $GITHUB_ENV
           else
-            echo "tag=${{ inputs.pr_no }}" >> $GITHUB_ENV
+            echo "tag=${{ inputs.tag }}" >> $GITHUB_ENV
           fi
 
   # https://github.com/bcgov/quickstart-openshift-helpers
