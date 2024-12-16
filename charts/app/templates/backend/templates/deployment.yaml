@@ -42,8 +42,6 @@ spec:
               value: "USERS"
             - name: FLYWAY_CONNECT_RETRIES
               value: "10"
-            - name: FLYWAY_LOGGERS
-              value: "console"
           resources:
             limits:
               cpu: 200m
