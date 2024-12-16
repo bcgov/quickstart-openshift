@@ -1,4 +1,4 @@
-FROM flyway/flyway:10-alpine
+FROM flyway/flyway:11-alpine
 
 # Copy migrations
 COPY ./sql /flyway/sql
@@ -9,7 +9,5 @@ USER app
 
 # Health check and startup
 HEALTHCHECK CMD info
-# Add -X flag for debug output
-ENTRYPOINT ["flyway", "-X", "-color=always"]
 # Adding repair to see if it fixes migration issues.
-CMD ["info", "migrate", "repair", "info"] 
+CMD ["info", "migrate", "repair"] 
