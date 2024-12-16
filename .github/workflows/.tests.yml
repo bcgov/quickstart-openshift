@@ -91,10 +91,11 @@ jobs:
         name: [backend, frontend]
     steps:
       - uses: actions/checkout@v4
-      - uses: grafana/k6-action@v0.3.1
+      - uses: grafana/setup-k6-action@v1
+      - uses: grafana/run-k6-action@v1
         env:
           BACKEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api
           FRONTEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
         with:
-          filename: ./tests/load/${{ matrix.name }}-test.js
+          path: ./tests/load/${{ matrix.name }}-test.js
           flags: --vus 10 --duration 30s
