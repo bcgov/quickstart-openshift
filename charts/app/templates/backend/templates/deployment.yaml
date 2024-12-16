@@ -42,6 +42,8 @@ spec:
               value: "USERS"
             - name: FLYWAY_CONNECT_RETRIES
               value: "10"
+            - name: FLYWAY_GROUP
+              value: "true"
           resources:
             limits:
               cpu: 200m
