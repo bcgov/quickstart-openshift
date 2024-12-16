@@ -10,6 +10,6 @@ USER app
 # Health check and startup
 HEALTHCHECK CMD info
 # Add -X flag for debug output
-ENTRYPOINT ["flyway", "-X", "-color"]
+ENTRYPOINT ["flyway", "-X", "-color=always"]
 # Adding repair to see if it fixes migration issues.
 CMD ["info", "migrate", "repair", "info"] 
