@@ -43,7 +43,7 @@ spec:
             - name: FLYWAY_CONNECT_RETRIES
               value: "10"
             - name: FLYWAY_LOGGERS
-              value: "slf4j"
+              value: "console"
           resources:
             limits:
               cpu: 200m
