@@ -42,6 +42,8 @@ spec:
               value: "USERS"
             - name: FLYWAY_CONNECT_RETRIES
               value: "10"
+            - name: FLYWAY_LOGGERS
+              value: "log4j2"
           resources:
             limits:
               cpu: 200m
