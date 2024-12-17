@@ -26,5 +26,13 @@
       "~/*": ["node_modules/*"]
     }
   },
-  "include": ["src", "src/**/*", "src/**/*.tsx", "src/**/*.*", "src/**/*.ts", "**/*.ts", "src/users/users.service.ts"]
+  "include": [
+    "src",
+    "src/**/*",
+    "src/**/*.tsx",
+    "src/**/*.*",
+    "src/**/*.ts",
+    "**/*.ts",
+    "src/users/users.service.ts"
+  ]
 }
