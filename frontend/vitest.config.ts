@@ -13,7 +13,7 @@ export default defineConfig({
     // since parsing CSS is slow
     css: false,
     coverage: {
-      reporter: ['lcov', 'text-summary','text', 'json', 'html'],
+      reporter: ['lcov', 'text-summary', 'text', 'json', 'html'],
     },
   },
 })
