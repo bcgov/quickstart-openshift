@@ -57,6 +57,9 @@ on:
         type: string
 
     outputs:
+      tag:
+        description: 'Which tag was used for deployment?'
+        value: ${{ jobs.vars.outputs.tag }}
       triggered:
         description: 'Has a deployment has been triggered?'
         value: ${{ jobs.deployer.outputs.triggered }}
@@ -86,6 +89,7 @@ jobs:
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-24.04
     outputs:
+      tag: ${{ inputs.tag || steps.pr.outputs.pr }}
       triggered: ${{ steps.triggers.outputs.triggered }}
     steps:
       ### Triggers, tag and release
@@ -100,6 +104,7 @@ jobs:
       - if: ${{ steps.triggers.outputs.triggered == 'true' && inputs.tag  == '' }}
         id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
+
       - if: steps.triggers.outputs.triggered == 'true'
         id: vars
         run: |
