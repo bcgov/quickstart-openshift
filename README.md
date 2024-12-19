@@ -388,6 +388,15 @@ After a full workflow run and merge can been run, please do the following:
 
 ![img.png](.github/graphics/schemaspy.png)
 
+# Flyway, Prisma, Migrations
+1. [Flyway is used as Database Schema Migration tool](https://www.red-gate.com/products/flyway/community/)
+2. [Prisma is used as ORM layer](https://www.prisma.io/)
+3. The rationale behind using flyway to have schema first approach and let prisma generate ORM schema from the database, which would avoid pitfalls like , lazy loading, cascading et.. when defining entities in ORM manually.
+4. Run flyway in the docker compose to apply latest changes to postgres db.
+5. Run npx prisma db pull from backend folder to sync the prisma schema.
+6. Run npx prisma generate to generate the prisma client which will have all the entities populated based on fresh prisma schema.
+7. if using vscode be aware of [this issue](https://stackoverflow.com/questions/65663292/prisma-schema-not-updating-properly-after-adding-new-fields)
+
 # Resources
 
 This repository is provided by NRIDS Architecture and Forestry Digital Services, courtesy of the Government of British Columbia.
