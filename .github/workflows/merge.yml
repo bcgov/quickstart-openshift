@@ -21,35 +21,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  vars:
-    name: Set Variables
-    outputs:
-      tag: ${{ steps.tag.outputs.tag }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 1
-    steps:
-      # Get PR number for squash merges to main
-      - name: PR Number
-        if: ${{ ! inputs.tag }}
-        id: pr
-        uses: bcgov-nr/action-get-pr@v0.0.1
-
-      - name: Set Tag
-        id: tag
-        run: echo "tag=${{ inputs.tag || steps.pr.outputs.pr }}" >> $GITHUB_OUTPUT
-
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploy-test:
-    name: Deploy (test, tag=${{ needs.vars.outputs.tag }})
-    needs: [vars]
+    name: Deploy (TEST)
     uses: ./.github/workflows/.deployer.yml
-    secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_token: ${{ secrets.OC_TOKEN }}
+    secrets: inherit
     with:
       environment: test
       db_user: app
-      tag: ${{ needs.vars.outputs.tag }}
+      tag: ${{ inputs.tag }}
 
   tests:
     name: Tests
@@ -59,12 +39,10 @@ jobs:
       target: test
 
   deploy-prod:
-    name: Deploy (prod, tag=${{ needs.vars.outputs.tag }})
-    needs: [tests, vars]
+    name: Deploy (PROD)
+    needs: [tests]
     uses: ./.github/workflows/.deployer.yml
-    secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_token: ${{ secrets.OC_TOKEN }}
+    secrets: inherit
     with:
       environment: prod
       db_user: app
@@ -74,11 +52,12 @@ jobs:
         --set global.autoscaling=true
         --set frontend.pdb.enabled=true
         --set backend.pdb.enabled=true
-      tag: ${{ needs.vars.outputs.tag }}
+      promote: prod
+      tag: ${{ inputs.tag }}
 
   promote:
     name: Promote Images
-    needs: [deploy-prod, vars]
+    needs: [deploy-prod]
     runs-on: ubuntu-24.04
     permissions:
       packages: write
@@ -91,5 +70,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.vars.outputs.tag }}
+          target: ${{ needs.deploy-prod.outputs.tag }}
           tags: prod
