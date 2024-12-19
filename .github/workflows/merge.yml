@@ -51,9 +51,16 @@ jobs:
       db_user: app
       tag: ${{ needs.vars.outputs.tag }}
 
+  tests:
+    name: Tests
+    needs: [deploy-test]
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: test
+
   deploy-prod:
     name: Deploy (prod, tag=${{ needs.vars.outputs.tag }})
-    needs: [deploy-test, vars]
+    needs: [tests, vars]
     uses: ./.github/workflows/.deployer.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
