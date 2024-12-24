@@ -45,9 +45,6 @@ spec:
             - name: FLYWAY_GROUP
               value: "true"
           resources:
-            limits:
-              cpu: 200m
-              memory: 200Mi
             requests:
               cpu: 50m
               memory: 75Mi
@@ -90,9 +87,6 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 5
           resources: # this is optional
-            limits:
-              cpu: 150m
-              memory: 150Mi
             requests:
               cpu: 50m
               memory: 75Mi
