@@ -52,9 +52,6 @@ spec:
           requests:
             cpu: {{ .Values.crunchy.pgmonitor.exporter.requests.cpu }}
             memory: {{ .Values.crunchy.pgmonitor.exporter.requests.memory }}
-          limits:
-            cpu: {{ .Values.crunchy.pgmonitor.exporter.limits.cpu }}
-            memory: {{ .Values.crunchy.pgmonitor.exporter.limits.memory }}
 
   {{ end }}
 
@@ -69,9 +66,6 @@ spec:
         requests:
           cpu: {{ .Values.crunchy.instances.requests.cpu }}
           memory: {{ .Values.crunchy.instances.requests.memory }}
-        limits:
-          cpu: {{ .Values.crunchy.instances.limits.cpu }}
-          memory: {{ .Values.crunchy.instances.limits.memory }}
 
       sidecars:
         replicaCertCopy:
@@ -79,9 +73,6 @@ spec:
             requests:
               cpu: {{ .Values.crunchy.instances.replicaCertCopy.requests.cpu }}
               memory: {{ .Values.crunchy.instances.replicaCertCopy.requests.memory }}
-            limits:
-              cpu: {{ .Values.crunchy.instances.replicaCertCopy.limits.cpu }}
-              memory: {{ .Values.crunchy.instances.replicaCertCopy.limits.memory }}
       dataVolumeClaimSpec:
         accessModes:
           - "ReadWriteOnce"
@@ -179,9 +170,6 @@ spec:
           requests:
             cpu: {{ .Values.crunchy.pgBackRest.repoHost.requests.cpu }}
             memory: {{ .Values.crunchy.pgBackRest.repoHost.requests.memory }}
-          limits:
-            cpu: {{ .Values.crunchy.pgBackRest.repoHost.limits.cpu }}
-            memory: {{ .Values.crunchy.pgBackRest.repoHost.limits.memory }}
       sidecars:
         # this stuff is for the "pgbackrest" container in the "postgres-crunchy-ha" set of pods
         pgbackrest:
@@ -189,25 +177,16 @@ spec:
             requests:
               cpu: {{ .Values.crunchy.pgBackRest.sidecars.requests.cpu }}
               memory: {{ .Values.crunchy.pgBackRest.sidecars.requests.memory }}
-            limits:
-              cpu: {{ .Values.crunchy.pgBackRest.sidecars.limits.cpu }}
-              memory: {{ .Values.crunchy.pgBackRest.sidecars.limits.memory }}
         pgbackrestConfig:
           resources:
             requests:
               cpu: {{ .Values.crunchy.pgBackRest.sidecars.requests.cpu }}
               memory: {{ .Values.crunchy.pgBackRest.sidecars.requests.memory }}
-            limits:
-              cpu: {{ .Values.crunchy.pgBackRest.sidecars.limits.cpu }}
-              memory: {{ .Values.crunchy.pgBackRest.sidecars.limits.memory }}
       jobs:
         resources:
           requests:
             cpu: {{ .Values.crunchy.pgBackRest.jobs.requests.cpu }}
             memory: {{ .Values.crunchy.pgBackRest.jobs.requests.memory }}
-          limits:
-            cpu: {{ .Values.crunchy.pgBackRest.jobs.limits.cpu }}
-            memory: {{ .Values.crunchy.pgBackRest.jobs.limits.memory }}
   {{- end }}
   patroni:
     dynamicConfiguration:
@@ -240,9 +219,6 @@ spec:
         requests:
           cpu: {{ .Values.crunchy.proxy.pgBouncer.requests.cpu }}
           memory: {{ .Values.crunchy.proxy.pgBouncer.requests.memory }}
-        limits:
-          cpu: {{ .Values.crunchy.proxy.pgBouncer.limits.cpu }}
-          memory: {{ .Values.crunchy.proxy.pgBouncer.limits.memory }}
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:

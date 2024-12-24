@@ -39,16 +39,10 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
     requests:
       cpu: 50m
       memory: 128Mi
-    limits:
-      cpu: 150m
-      memory: 256Mi
     replicaCertCopy:
       requests:
         cpu: 1m
         memory: 32Mi
-      limits:
-        cpu: 50m
-        memory: 64Mi
 
   pgBackRest:
     enabled: true
@@ -81,30 +75,18 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
       requests:
         cpu: 5m
         memory: 32Mi
-      limits:
-        cpu: 20m
-        memory: 64Mi
     repoHost:
       requests:
         cpu: 20m
         memory: 128Mi
-      limits:
-        cpu: 50m
-        memory: 256Mi
     sidecars:
       requests:
         cpu: 5m
         memory: 16Mi
-      limits:
-        cpu: 20m
-        memory: 64Mi
     jobs:
       requests:
         cpu: 20m
         memory: 128Mi
-      limits:
-        cpu: 100m
-        memory: 256Mi
 
   patroni:
     postgresql:
@@ -129,9 +111,6 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
       requests:
         cpu: 5m
         memory: 32Mi
-      limits:
-        cpu: 20m
-        memory: 64Mi
       maxConnections: 10 # make sure less than postgres max connections
 
   # Postgres Cluster resource values:
@@ -142,6 +121,3 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
       requests:
         cpu: 1m
         memory: 16Mi
-      limits:
-        cpu: 35m
-        memory: 32Mi
