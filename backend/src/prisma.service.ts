@@ -35,6 +35,8 @@ class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, 'query'> im
   async onModuleInit() {
     await this.$connect();
     this.$on<any>('query', (e: Prisma.QueryEvent) => {
+      // dont print the health check queries
+      if(e?.query?.includes("SELECT 1")) return;
       this.logger.log(
         `Query: ${e.query} - Params: ${e.params} - Duration: ${e.duration}ms`,
       );
