@@ -69,6 +69,3 @@ jobs:
           oc exec "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- psql -c "DROP DATABASE \"app-${{ github.event.number }}\" --cascade"
           oc exec "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- psql -c "DROP ROLE \"app-${{ github.event.number }}\" --cascade"
           echo 'database and role deleted'
-          
-          exit 0
-        

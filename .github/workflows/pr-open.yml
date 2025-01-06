@@ -40,7 +40,7 @@ jobs:
       params: --set global.secrets.persist=false
 
   tests:
-    name: Tests (${{ github.event.number }})
+    name: Tests
     if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
     uses: ./.github/workflows/.tests.yml
