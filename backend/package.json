@@ -35,12 +35,10 @@
     "express-prom-bundle": "^8.0.0",
     "helmet": "^8.0.0",
     "nest-winston": "^1.9.7",
-    "nestjs-prisma": "^0.23.0",
     "pg": "^8.11.3",
     "prom-client": "^15.1.0",
     "reflect-metadata": "^0.2.0",
     "rimraf": "^6.0.0",
-    "rxjs": "^7.8.0",
     "swagger-ui-express": "^5.0.0",
     "winston": "^3.17.0"
   },
