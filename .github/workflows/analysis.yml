@@ -45,6 +45,7 @@ jobs:
           commands: |
             npm ci
             npm run test:cov
+            echo $?
           dir: ${{ matrix.dir }}
           node_version: "22"
           sonar_args: >
