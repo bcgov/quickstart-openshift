@@ -23,7 +23,7 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: default
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -45,7 +45,6 @@ jobs:
           commands: |
             npm ci
             npm run test:cov
-            echo $?
           dir: ${{ matrix.dir }}
           node_version: "22"
           sonar_args: >
