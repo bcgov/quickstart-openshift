@@ -5,7 +5,7 @@ import { customLogger } from './common/logger.config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import { VersioningType } from '@nestjs/common';
-import { metricsMiddleware } from "./prom";
+import { metricsMiddleware } from "src/middleware/prom";
 
 /**
  *
