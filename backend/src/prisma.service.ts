@@ -12,8 +12,11 @@ const dataSourceURL = `postgresql://${DB_USER}:${DB_PWD}@${DB_HOST}:${DB_PORT}/$
 @Injectable()
 class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, 'query'> implements OnModuleInit, OnModuleDestroy {
   private logger = new Logger("PRISMA");
-
+  private static instance: PrismaService;
   constructor() {
+    if (PrismaService.instance) {
+      return PrismaService.instance;
+    }
     super({
       errorFormat: 'pretty',
       datasources: {
@@ -28,7 +31,7 @@ class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, 'query'> im
         { emit: 'stdout', level: 'error' },
       ]
     });
-
+    PrismaService.instance = this;
   }
 
 
