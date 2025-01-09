@@ -7,9 +7,6 @@ metadata:
 spec:
   metadata:
     labels: {{ include "crunchy-postgres.labels" . | nindent 6 }}
-  {{ if .Values.crunchy.crunchyImage }}
-  image: {{ .Values.crunchy.crunchyImage }}
-  {{ end }}
   imagePullPolicy: {{.Values.crunchy.imagePullPolicy}}
   postgresVersion: {{ .Values.crunchy.postgresVersion }}
   {{ if .Values.crunchy.postGISVersion }}
@@ -115,9 +112,6 @@ spec:
     {{- if .Values.crunchy.pgBackRest.enabled }}
   backups:
     pgbackrest:
-      {{ if .Values.crunchy.pgBackRest.image }}
-      image: {{ .Values.crunchy.pgBackRest.image }}
-      {{ end }}
       {{- if .Values.crunchy.pgBackRest.s3.enabled}}
       configuration:
         - secret:

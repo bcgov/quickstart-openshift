@@ -3,8 +3,6 @@ global:
     dbName: app #test
 crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
   enabled: true
-  # it is recommended by platform team , not to use explicit images
-  #crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres-gis:ubi8-16.2-3.4-0
   postgresVersion: 16
   postGISVersion: '3.4'
   imagePullPolicy: IfNotPresent
@@ -49,8 +47,6 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
     enabled: true
     backupPath: /backups/test/cluster/version # change it for PROD, create values-prod.yaml
     clusterCounter: 1 # this is the number to identify what is the current counter for the cluster, each time it is cloned it should be incremented.
-    # it is recommended by platform team , not to use explicit images
-    # image: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-pgbackrest:ubi8-2.49-0
     # If retention-full-type set to 'count' then the oldest backups will expire when the number of backups reach the number defined in retention
     # If retention-full-type set to 'time' then the number defined in retention will take that many days worth of full backups before expiration
     retentionFullType: count
