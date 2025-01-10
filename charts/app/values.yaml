@@ -107,6 +107,11 @@ frontend:
   ingress:
     annotations:
       route.openshift.io/termination: "edge"
+      haproxy.router.openshift.io/rate-limit-connections: "true"
+      haproxy.router.openshift.io/rate-limit-connections.concurrent-tcp: "10"
+      haproxy.router.openshift.io/rate-limit-connections.rate-http: "20"
+      haproxy.router.openshift.io/rate-limit-connections.rate-tcp: "50"
+      haproxy.router.openshift.io/disable_cookies: "true"
   pdb:
     enabled: false # enable it in PRODUCTION for having pod disruption budget.
     minAvailable: 1 # the minimum number of pods that must be available during the disruption budget.
