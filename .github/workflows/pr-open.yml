@@ -36,11 +36,11 @@ jobs:
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
-      db_user: app-${{github.event.number}}
+      db_user: app-${{ github.event.number }}
       params: --set global.secrets.persist=false
 
   tests:
-    name: Tests (${{ github.event.number }})
+    name: Tests
     if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
     uses: ./.github/workflows/.tests.yml
