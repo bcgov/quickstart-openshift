@@ -58,7 +58,7 @@ on:
     outputs:
       tag:
         description: 'Which tag was used for deployment?'
-        value: ${{ jobs.vars.outputs.tag }}
+        value: ${{ jobs.deployer.outputs.tag }}
       triggered:
         description: 'Has a deployment has been triggered?'
         value: ${{ jobs.deployer.outputs.triggered }}
