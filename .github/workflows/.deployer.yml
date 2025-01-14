@@ -23,12 +23,11 @@ on:
         type: string
       oc_server:
         default: https://api.silver.devops.gov.bc.ca:6443
-        description: 'OpenShift server'
+        description: OpenShift server
         required: false
         type: string
       params:
-        description: 'Extra parameters to pass to helm upgrade'
-        default: ''
+        description: Extra parameters to pass to helm upgrade
         required: false
         type: string
       tag:
