@@ -40,6 +40,7 @@ jobs:
           oc project ${{ secrets.oc_namespace }} # Safeguard!
 
       - name: Remove PR user and database from crunchy
+        continue-on-error: true
         shell: bash
         run: |
           # check if postgres-crunchy exists or else exit
