@@ -52,7 +52,6 @@ jobs:
         --set global.autoscaling=true
         --set frontend.pdb.enabled=true
         --set backend.pdb.enabled=true
-      promote: prod
       tag: ${{ inputs.tag }}
 
   promote:
