@@ -91,21 +91,14 @@ jobs:
       tag: ${{ inputs.tag || steps.pr.outputs.pr }}
       triggered: ${{ steps.triggers.outputs.triggered }}
     steps:
-      ### Triggers, tag and release
-
-      # Check triggers (omitted or matched) for deployment
-      - uses: bcgov-nr/action-diff-triggers@v0.2.0
-        id: triggers
-        with:
-          triggers: ${{ inputs.triggers }}
+      - uses: actions/checkout@v4
 
       # Variables
-      - if: ${{ steps.triggers.outputs.triggered == 'true' && inputs.tag  == '' }}
+      - if: inputs.tag  == ''
         id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
 
-      - if: steps.triggers.outputs.triggered == 'true'
-        id: vars
+      - id: vars
         run: |
           # Vars: tag and release
 
@@ -129,79 +122,40 @@ jobs:
           echo "version=${version}" >> $GITHUB_OUTPUT
 
       ### Deploy
-      - name: Install CLI tools from OpenShift Mirror
-        if: steps.triggers.outputs.triggered == 'true'
-        uses: redhat-actions/openshift-tools-installer@v1
-        with:
-          oc: "4"
-
-      - name: Install OpenShift CLI (oc) and Login
-        if: steps.triggers.outputs.triggered == 'true'
+      - name: Stop pre-existing deployments on PRs (status = pending-upgrade)
         uses: bcgov/action-oc-runner@main
+        working-directory: ${{ inputs.directory }}
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
           oc_server: ${{ vars.oc_server }}
+          triggers: ${{ inputs.triggers }}
+          commands: |
+            # Interrupt any previous deployments (PR only)
+            PREVIOUS=$(helm status ${{ steps.vars.outputs.release }} -o json | jq .info.status || true)
+            if [[ ${PREVIOUS} =~ pending ]]; then
+              echo "Rollback triggered"
+              helm rollback ${{ steps.vars.outputs.release }} || \
+                helm uninstall ${{ steps.vars.outputs.release }}
+            fi
 
-      # Only stop pre-existing deployments on PRs (status = pending-upgrade)
-      - if: steps.triggers.outputs.triggered == 'true' && github.event_name == 'pull_request'
-        run: |
-          # Interrupt any previous deployments (PR only)
-          PREVIOUS=$(helm status ${{ steps.vars.outputs.release }} -o json | jq .info.status || true)
-          if [[ ${PREVIOUS} =~ pending ]]; then
-            echo "Rollback triggered"
-            helm rollback ${{ steps.vars.outputs.release }} || \
-              helm uninstall ${{ steps.vars.outputs.release }}
-          fi
+            # Helm package
+            sed -i 's/^name:.*/name: ${{ github.event.repository.name }}/' Chart.yaml
+            helm package -u . --app-version="tag-${{ steps.vars.outputs.tag }}_run-${{ github.run_number }}" --version=${{ steps.pr.outputs.pr || steps.vars.outputs.version }}
 
-      # Package Helm chart
-      - if: steps.triggers.outputs.triggered == 'true'
-        uses: actions/checkout@v4
-      - if: steps.triggers.outputs.triggered == 'true'
-        working-directory: ${{ inputs.directory }}
-        run: |
-          # Helm package
-          sed -i 's/^name:.*/name: ${{ github.event.repository.name }}/' Chart.yaml
-          helm package -u . --app-version="tag-${{ steps.vars.outputs.tag }}_run-${{ github.run_number }}" --version=${{ steps.pr.outputs.pr || steps.vars.outputs.version }}
+            # Helm upgrade/rollout
+            helm upgrade \
+              --set-string global.repository=${{ github.repository }} \
+              --set-string global.tag=${{ steps.vars.outputs.tag }} \
+              --set-string global.config.databaseUser=${{ inputs.db_user }} \
+              ${{ inputs.params }} \
+              --install --wait ${{ inputs.atomic && '--atomic' || '' }} ${{ steps.vars.outputs.release }} \
+              --timeout ${{ inputs.timeout-minutes }}m \
+              --values ${{ inputs.values }} \
+              ./${{ github.event.repository.name }}-${{ steps.pr.outputs.pr || steps.vars.outputs.version }}.tgz
 
-      # Deploy Helm chart as atomic, with timeout
-      - if: steps.triggers.outputs.triggered == 'true' && inputs.atomic != 'false'
-        working-directory: ${{ inputs.directory }}
-        run: |
-          # Helm upgrade/rollout - atomic, timeout
-          helm upgrade \
-            --set-string global.repository=${{ github.repository }} \
-            --set-string global.tag=${{ steps.vars.outputs.tag }} \
-            --set-string global.config.databaseUser=${{ inputs.db_user }} \
-            ${{ inputs.params }} \
-            --install --wait --atomic ${{ steps.vars.outputs.release }} \
-            --timeout ${{ inputs.timeout-minutes }}m \
-            --values ${{ inputs.values }} \
-            ./${{ github.event.repository.name }}-${{ steps.pr.outputs.pr || steps.vars.outputs.version }}.tgz
+            # Helm release history
+            helm history ${{ steps.vars.outputs.release }}
 
-      # Deploy Helm chart without atomic or timeout
-      - if: steps.triggers.outputs.triggered == 'true' && inputs.atomic == 'false'
-        working-directory: ${{ inputs.directory }}
-        run: |
-          # Helm upgrade/rollout - non-atomic, no timeout
-          helm upgrade \
-            --set-string global.repository=${{ github.repository }} \
-            --set-string global.tag=${{ steps.vars.outputs.tag }} \
-            ${{ inputs.params }} \
-            ${{ steps.vars.outputs.release }} \
-            --install --wait --values ${{ inputs.values }} \
-            ./${{ github.event.repository.name }}-${{ steps.pr.outputs.pr || steps.vars.outputs.version }}.tgz
-
-      # Helm release history
-      - if: steps.triggers.outputs.triggered == 'true'
-        run: |
-          # Helm release history
-          helm history ${{ steps.vars.outputs.release }}
-
-      ### Cleanup
-
-      # Completed pod cleanup
-      - if: steps.triggers.outputs.triggered == 'true'
-        run: |
-          # Completed pod cleanup
-          oc delete po --field-selector=status.phase==Succeeded || true
+            # Completed pod cleanup
+            oc delete po --field-selector=status.phase==Succeeded || true

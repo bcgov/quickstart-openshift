@@ -84,22 +84,13 @@ jobs:
             exit 1
           fi
 
-      # Check triggers (omitted or matched) for deployment
-      - uses: bcgov-nr/action-diff-triggers@v0.2.0
-        id: triggers
-        with:
-          triggers: ${{ inputs.triggers }}
-
-      - uses: actions/checkout@v4
-        if: steps.triggers.outputs.triggered == 'true'
-
       - name: Deploy Database
-        if: steps.triggers.outputs.triggered == 'true'
         uses: bcgov/action-oc-runner@main
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
           oc_server: ${{ vars.oc_server }}
+          triggers: ${{ inputs.triggers }}
           commands: |
             echo 'Deploying crunchy helm chart'
             cd ${{ inputs.directory }}
@@ -115,9 +106,14 @@ jobs:
             fi
 
       - name: Add PR specific user to Crunchy DB # only for PRs
-        shell: bash
-        if: github.event_name == 'pull_request' && steps.triggers.outputs.triggered == 'true'
-        run: |
+        if: github.event_name == 'pull_request'
+        uses: bcgov/action-oc-runner@main
+        with:
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
+          oc_server: ${{ vars.oc_server }}
+          triggers: ${{ inputs.triggers }}
+          commands: |
             echo 'Adding PR specific user to Crunchy DB'
             NEW_USER='{"databases":["app-${{ github.event.number }}"],"name":"app-${{ github.event.number }}"}'
             CURRENT_USERS=$(oc get PostgresCluster/postgres-crunchy -o json | jq '.spec.users')
