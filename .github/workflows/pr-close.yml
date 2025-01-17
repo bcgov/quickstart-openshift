@@ -31,7 +31,7 @@ jobs:
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
-          oc_server: ${{ secrets.oc_server }}
+          oc_server: ${{ vars.oc_server }}
 
       - name: Remove PR user and database from crunchy
         continue-on-error: true

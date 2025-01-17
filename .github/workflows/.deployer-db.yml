@@ -71,11 +71,13 @@ jobs:
       - uses: actions/checkout@v4
         if: steps.triggers.outputs.triggered == 'true'
 
-      - name: Install CLI tools from OpenShift Mirror
+      - name: Install OpenShift CLI (oc) and Login
         if: steps.triggers.outputs.triggered == 'true'
-        uses: redhat-actions/openshift-tools-installer@v1
+        uses: bcgov/action-oc-runner@main
         with:
-          oc: "4.14.37"
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
+          oc_server: ${{ vars.oc_server }}
 
       - name: Validate Inputs
         if: steps.triggers.outputs.triggered == 'true' && inputs.s3_enabled
@@ -105,7 +107,7 @@ jobs:
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
-          oc_server: ${{ secrets.oc_server }}
+          oc_server: ${{ vars.oc_server }}
 
       - name: Deploy Database
         if: steps.triggers.outputs.triggered == 'true'
