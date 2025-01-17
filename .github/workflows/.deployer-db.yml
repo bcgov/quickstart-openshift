@@ -62,21 +62,6 @@ jobs:
     name: Crunchy (db)
     environment: ${{ inputs.environment }}
     steps:
-      # Check triggers (omitted or matched) for deployment
-      - uses: bcgov-nr/action-diff-triggers@v0.2.0
-        id: triggers
-        with:
-          triggers: ${{ inputs.triggers }}
-
-      - uses: actions/checkout@v4
-        if: steps.triggers.outputs.triggered == 'true'
-
-      - name: Install CLI tools from OpenShift Mirror
-        if: steps.triggers.outputs.triggered == 'true'
-        uses: redhat-actions/openshift-tools-installer@v1
-        with:
-          oc: "4.14.37"
-
       - name: Validate Inputs
         if: steps.triggers.outputs.triggered == 'true' && inputs.s3_enabled
         shell: bash
@@ -99,37 +84,36 @@ jobs:
             exit 1
           fi
 
-      - name: OC Login
-        if: steps.triggers.outputs.triggered == 'true'
-        shell: bash
-        run: |
-          # OC Login
-          OC_TEMP_TOKEN=$(curl -k -X POST ${{ inputs.oc_server }}/api/v1/namespaces/${{ secrets.oc_namespace }}/serviceaccounts/pipeline/token --header "Authorization: Bearer ${{ secrets.oc_token }}" -d '{"spec": {"expirationSeconds": 600}}' -H 'Content-Type: application/json; charset=utf-8' | jq -r '.status.token' )
-
-          oc login --token=$OC_TEMP_TOKEN --server=${{ inputs.oc_server }}
-          oc project ${{ secrets.oc_namespace }} # Safeguard!
-
       - name: Deploy Database
-        if: steps.triggers.outputs.triggered == 'true'
-        working-directory: ${{ inputs.directory }}
-        shell: bash
-        run: |
-          echo 'Deploying crunchy helm chart'
-          if [ ${{ inputs.s3_enabled }} == true ]; then
-            helm upgrade --install --wait --set crunchy.pgBackRest.s3.enabled=true \
-              --set-string crunchy.pgBackRest.s3.accessKey=${{ secrets.s3_access_key }} \
-              --set-string crunchy.pgBackRest.s3.secretKey=${{ secrets.s3_secret_key }} \
-              --set-string crunchy.pgBackRest.s3.bucket=${{ secrets.s3_bucket }} \
-              --set-string crunchy.pgBackRest.s3.endpoint=${{ secrets.s3_endpoint }} \
-              --values ${{ inputs.values }} postgres  .
-          else
-            helm upgrade --install --wait --values ${{ inputs.values }} postgres .
-          fi
+        uses: bcgov/action-oc-runner@v0.1.0
+        with:
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
+          oc_server: ${{ vars.oc_server }}
+          triggers: ${{ inputs.triggers }}
+          commands: |
+            echo 'Deploying crunchy helm chart'
+            cd ${{ inputs.directory }}
+            if [ ${{ inputs.s3_enabled }} == true ]; then
+              helm upgrade --install --wait --set crunchy.pgBackRest.s3.enabled=true \
+                --set-string crunchy.pgBackRest.s3.accessKey=${{ secrets.s3_access_key }} \
+                --set-string crunchy.pgBackRest.s3.secretKey=${{ secrets.s3_secret_key }} \
+                --set-string crunchy.pgBackRest.s3.bucket=${{ secrets.s3_bucket }} \
+                --set-string crunchy.pgBackRest.s3.endpoint=${{ secrets.s3_endpoint }} \
+                --values ${{ inputs.values }} postgres  .
+            else
+              helm upgrade --install --wait --values ${{ inputs.values }} postgres .
+            fi
 
       - name: Add PR specific user to Crunchy DB # only for PRs
-        shell: bash
-        if: github.event_name == 'pull_request' && steps.triggers.outputs.triggered == 'true'
-        run: |
+        if: github.event_name == 'pull_request'
+        uses: bcgov/action-oc-runner@v0.1.0
+        with:
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
+          oc_server: ${{ vars.oc_server }}
+          triggers: ${{ inputs.triggers }}
+          commands: |
             echo 'Adding PR specific user to Crunchy DB'
             NEW_USER='{"databases":["app-${{ github.event.number }}"],"name":"app-${{ github.event.number }}"}'
             CURRENT_USERS=$(oc get PostgresCluster/postgres-crunchy -o json | jq '.spec.users')

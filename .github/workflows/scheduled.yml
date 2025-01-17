@@ -18,46 +18,40 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Install CLI tools from OpenShift Mirror
-        uses: redhat-actions/openshift-tools-installer@v1
-        with:
-          oc: "4.14.37"
-
       - name: Clean up Helm Releases
-        run: |
-          # OC Login
-          OC_TEMP_TOKEN=$(curl -k -X POST ${{ vars.oc_server }}/api/v1/namespaces/${{ secrets.oc_namespace }}/serviceaccounts/pipeline/token --header "Authorization: Bearer ${{ secrets.oc_token }}" -d '{"spec": {"expirationSeconds": 600}}' -H 'Content-Type: application/json; charset=utf-8' | jq -r '.status.token' )
+        uses: bcgov/action-oc-runner@v0.1.0
+        with:
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
+          oc_server: ${{ vars.oc_server }}
+          commands: |
+            # Catch errors, unset variables, and pipe failures (e.g. grep || true )
+            set -euo pipefail
 
-          oc login --token=$OC_TEMP_TOKEN --server=${{ vars.oc_server }}
-          oc project ${{ secrets.OC_NAMESPACE }} # Safeguard!
+            # Echos
+            echo "Delete stale Helm releases"
+            echo "Cutoff: ${{ env.CUTOFF }}"
 
-          # Catch errors, unset variables, and pipe failures (e.g. grep || true )
-          set -euo pipefail
+            # Before date, list of releases
+            BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
+            RELEASES=$(helm ls -aq | grep ${{ github.event.repository.name }} || :)
 
-          # Echos
-          echo "Delete stale Helm releases"
-          echo "Cutoff: ${{ env.CUTOFF }}"
+            # If releases, then iterate
+            [ -z "${RELEASES}" ]|| for r in ${RELEASES[@]}; do
 
-          # Before date, list of releases
-          BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
-          RELEASES=$(helm ls -aq | grep ${{ github.event.repository.name }} || :)
+              # Get last update and convert the date
+              UPDATED=$(date "+%s" -d <<< echo $(helm status $r -o json | jq -r .info.last_deployed))
 
-          # If releases, then iterate
-          [ -z "${RELEASES}" ]|| for r in ${RELEASES[@]}; do
-
-            # Get last update and convert the date
-            UPDATED=$(date "+%s" -d <<< echo $(helm status $r -o json | jq -r .info.last_deployed))
-
-            # Compare to cutoff and delete as necessary
-            if [[ ${UPDATED} < ${BEFORE} ]]; then
-              echo -e "\nOlder than cutoff: ${r}"
-              helm uninstall --no-hooks ${r}
-              oc delete pvc/${r}-bitnami-pg-0 || true
-            else
-              echo -e "\nNewer than cutoff: ${r}"
-              echo "No need to delete"
-            fi
-          done
+              # Compare to cutoff and delete as necessary
+              if [[ ${UPDATED} < ${BEFORE} ]]; then
+                echo -e "\nOlder than cutoff: ${r}"
+                helm uninstall --no-hooks ${r}
+                oc delete pvc/${r}-bitnami-pg-0 || true
+              else
+                echo -e "\nNewer than cutoff: ${r}"
+                echo "No need to delete"
+              fi
+            done
 
   # https://github.com/bcgov/quickstart-openshift-helpers
   schema-spy:
