@@ -123,8 +123,8 @@ jobs:
 
       ### Deploy
       - name: Stop pre-existing deployments on PRs (status = pending-upgrade)
+        if: github.event_name == 'pull_request'
         uses: bcgov/action-oc-runner@main
-        working-directory: ${{ inputs.directory }}
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
@@ -138,6 +138,19 @@ jobs:
               helm rollback ${{ steps.vars.outputs.release }} || \
                 helm uninstall ${{ steps.vars.outputs.release }}
             fi
+
+      - name: Helm Deploy
+        uses: bcgov/action-oc-runner@main
+        with:
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
+          oc_server: ${{ vars.oc_server }}
+          triggers: ${{ inputs.triggers }}
+          commands: |
+            # Deploy
+            
+            # If directory provided, cd to it
+            [ -z "${{ inputs.directory }}" ]|| cd ${{ inputs.directory }}
 
             # Helm package
             sed -i 's/^name:.*/name: ${{ github.event.repository.name }}/' Chart.yaml
