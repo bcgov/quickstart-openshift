@@ -62,23 +62,6 @@ jobs:
     name: Crunchy (db)
     environment: ${{ inputs.environment }}
     steps:
-      # Check triggers (omitted or matched) for deployment
-      - uses: bcgov-nr/action-diff-triggers@v0.2.0
-        id: triggers
-        with:
-          triggers: ${{ inputs.triggers }}
-
-      - uses: actions/checkout@v4
-        if: steps.triggers.outputs.triggered == 'true'
-
-      - name: Install OpenShift CLI (oc) and Login
-        if: steps.triggers.outputs.triggered == 'true'
-        uses: bcgov/action-oc-runner@main
-        with:
-          oc_namespace: ${{ secrets.oc_namespace }}
-          oc_token: ${{ secrets.oc_token }}
-          oc_server: ${{ vars.oc_server }}
-
       - name: Validate Inputs
         if: steps.triggers.outputs.triggered == 'true' && inputs.s3_enabled
         shell: bash
@@ -101,30 +84,35 @@ jobs:
             exit 1
           fi
 
-      - name: Install OpenShift CLI (oc) and Login
+      # Check triggers (omitted or matched) for deployment
+      - uses: bcgov-nr/action-diff-triggers@v0.2.0
+        id: triggers
+        with:
+          triggers: ${{ inputs.triggers }}
+
+      - uses: actions/checkout@v4
+        if: steps.triggers.outputs.triggered == 'true'
+
+      - name: Deploy Database
         if: steps.triggers.outputs.triggered == 'true'
         uses: bcgov/action-oc-runner@main
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
           oc_server: ${{ vars.oc_server }}
-
-      - name: Deploy Database
-        if: steps.triggers.outputs.triggered == 'true'
-        working-directory: ${{ inputs.directory }}
-        shell: bash
-        run: |
-          echo 'Deploying crunchy helm chart'
-          if [ ${{ inputs.s3_enabled }} == true ]; then
-            helm upgrade --install --wait --set crunchy.pgBackRest.s3.enabled=true \
-              --set-string crunchy.pgBackRest.s3.accessKey=${{ secrets.s3_access_key }} \
-              --set-string crunchy.pgBackRest.s3.secretKey=${{ secrets.s3_secret_key }} \
-              --set-string crunchy.pgBackRest.s3.bucket=${{ secrets.s3_bucket }} \
-              --set-string crunchy.pgBackRest.s3.endpoint=${{ secrets.s3_endpoint }} \
-              --values ${{ inputs.values }} postgres  .
-          else
-            helm upgrade --install --wait --values ${{ inputs.values }} postgres .
-          fi
+          commands: |
+            echo 'Deploying crunchy helm chart'
+            cd ${{ inputs.directory }}
+            if [ ${{ inputs.s3_enabled }} == true ]; then
+              helm upgrade --install --wait --set crunchy.pgBackRest.s3.enabled=true \
+                --set-string crunchy.pgBackRest.s3.accessKey=${{ secrets.s3_access_key }} \
+                --set-string crunchy.pgBackRest.s3.secretKey=${{ secrets.s3_secret_key }} \
+                --set-string crunchy.pgBackRest.s3.bucket=${{ secrets.s3_bucket }} \
+                --set-string crunchy.pgBackRest.s3.endpoint=${{ secrets.s3_endpoint }} \
+                --values ${{ inputs.values }} postgres  .
+            else
+              helm upgrade --install --wait --values ${{ inputs.values }} postgres .
+            fi
 
       - name: Add PR specific user to Crunchy DB # only for PRs
         shell: bash

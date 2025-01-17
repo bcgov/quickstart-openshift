@@ -26,41 +26,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install OpenShift CLI (oc) and Login
+      - name: Remove PR user and database from crunchy
+        continue-on-error: true
         uses: bcgov/action-oc-runner@main
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
           oc_server: ${{ vars.oc_server }}
+          commands: |
+            # check if postgres-crunchy exists or else exit
+            oc get PostgresCluster/postgres-crunchy || exit 0
 
-      - name: Remove PR user and database from crunchy
-        continue-on-error: true
-        shell: bash
-        run: |
-          # check if postgres-crunchy exists or else exit
-          oc get PostgresCluster/postgres-crunchy || exit 0
+            # Remove the user from the crunchy cluster yaml and apply the changes
+            USER_TO_REMOVE='{"databases":["app-${{ github.event.number }}"],"name":"app-${{ github.event.number }}"}'
+            
+            echo 'getting current users from crunchy'
+            CURRENT_USERS=$(oc get PostgresCluster/postgres-crunchy -o json | jq '.spec.users')
+            echo "${CURRENT_USERS}"
+            
+            # Remove the user from the list, 
+            UPDATED_USERS=$(echo "${CURRENT_USERS}" | jq --argjson user "${USER_TO_REMOVE}" 'map(select(. != $user))')
 
-          # Remove the user from the crunchy cluster yaml and apply the changes
-          USER_TO_REMOVE='{"databases":["app-${{ github.event.number }}"],"name":"app-${{ github.event.number }}"}'
-          
-          echo 'getting current users from crunchy'
-          CURRENT_USERS=$(oc get PostgresCluster/postgres-crunchy -o json | jq '.spec.users')
-          echo "${CURRENT_USERS}"
-          
-          # Remove the user from the list, 
-          UPDATED_USERS=$(echo "${CURRENT_USERS}" | jq --argjson user "${USER_TO_REMOVE}" 'map(select(. != $user))')
-
-          PATCH_JSON=$(jq -n --argjson users "${UPDATED_USERS}" '{"spec": {"users": $users}}')
-          oc patch PostgresCluster/postgres-crunchy --type=merge -p "${PATCH_JSON}"
-          
-          # get primary crunchy pod and remove the role and db
-          CRUNCHY_PG_PRIMARY_POD_NAME=$(oc get pods -l postgres-operator.crunchydata.com/role=master -o json | jq -r '.items[0].metadata.name')
-          
-          echo "${CRUNCHY_PG_PRIMARY_POD_NAME}"
-          # Terminate all connections to the database before trying terminate
-          oc exec "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'app-${{ github.event.number }}' AND pid <> pg_backend_pid();"
-          
-          # Drop the database and role
-          oc exec "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- psql -c "DROP DATABASE \"app-${{ github.event.number }}\" --cascade"
-          oc exec "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- psql -c "DROP ROLE \"app-${{ github.event.number }}\" --cascade"
-          echo 'database and role deleted'
+            PATCH_JSON=$(jq -n --argjson users "${UPDATED_USERS}" '{"spec": {"users": $users}}')
+            oc patch PostgresCluster/postgres-crunchy --type=merge -p "${PATCH_JSON}"
+            
+            # get primary crunchy pod and remove the role and db
+            CRUNCHY_PG_PRIMARY_POD_NAME=$(oc get pods -l postgres-operator.crunchydata.com/role=master -o json | jq -r '.items[0].metadata.name')
+            
+            echo "${CRUNCHY_PG_PRIMARY_POD_NAME}"
+            # Terminate all connections to the database before trying terminate
+            oc exec "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'app-${{ github.event.number }}' AND pid <> pg_backend_pid();"
+            
+            # Drop the database and role
+            oc exec "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- psql -c "DROP DATABASE \"app-${{ github.event.number }}\" --cascade"
+            oc exec "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- psql -c "DROP ROLE \"app-${{ github.event.number }}\" --cascade"
+            echo 'database and role deleted'
