@@ -25,17 +25,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Point DEMO URL to Existing Service
-        run: |
-          # Set Up Routing
-
-          # OC Login
-          OC_TEMP_TOKEN=$(curl -k -X POST ${{ vars.oc_server }}/api/v1/namespaces/${{ secrets.oc_namespace }}/serviceaccounts/pipeline/token --header "Authorization: Bearer ${{ secrets.oc_token }}" -d '{"spec": {"expirationSeconds": 600}}' -H 'Content-Type: application/json; charset=utf-8' | jq -r '.status.token' )
-
-          oc login --token=$OC_TEMP_TOKEN --server=${{ vars.oc_server }}
-          oc project ${{ secrets.oc_namespace }} #Safeguard!
-
-          # Delete and replace route
-          oc delete route/${{ env.REPO }}-${{ env.DEST }} --ignore-not-found=true
-          oc create route edge ${{ env.REPO }}-${{ env.DEST }} \
-            --hostname=${{ env.REPO }}-${{ env.DEST }}.${{ env.DOMAIN }} \
-            --service=${{ env.REPO }}-${{ github.event.number || inputs.target }}-frontend
+        uses: bcgov/action-oc-runner@main
+        with:
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
+          oc_server: ${{ secrets.oc_server }}
+          command: |
+            oc delete route/${{ env.REPO }}-${{ env.DEST }} --ignore-not-found=true
+            oc create route edge ${{ env.REPO }}-${{ env.DEST }} \
+              --hostname=${{ env.REPO }}-${{ env.DEST }}.${{ env.DOMAIN }} \
+              --service=${{ env.REPO }}-${{ github.event.number || inputs.target }}-frontend

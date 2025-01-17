@@ -25,19 +25,13 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Install CLI tools from OpenShift Mirror
-        uses: redhat-actions/openshift-tools-installer@v1
+
+      - name: Install OpenShift CLI (oc) and Login
+        uses: bcgov/action-oc-runner@main
         with:
-          oc: "4.14.37"
-
-      - name: OC Login
-        shell: bash
-        run: |
-          # OC Login
-          OC_TEMP_TOKEN=$(curl -k -X POST https://api.silver.devops.gov.bc.ca:6443/api/v1/namespaces/${{ secrets.oc_namespace }}/serviceaccounts/pipeline/token --header "Authorization: Bearer ${{ secrets.oc_token }}" -d '{"spec": {"expirationSeconds": 600}}' -H 'Content-Type: application/json; charset=utf-8' | jq -r '.status.token' )
-
-          oc login --token=$OC_TEMP_TOKEN --server=https://api.silver.devops.gov.bc.ca:6443
-          oc project ${{ secrets.oc_namespace }} # Safeguard!
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
+          oc_server: ${{ secrets.oc_server }}
 
       - name: Remove PR user and database from crunchy
         continue-on-error: true

@@ -99,15 +99,13 @@ jobs:
             exit 1
           fi
 
-      - name: OC Login
+      - name: Install OpenShift CLI (oc) and Login
         if: steps.triggers.outputs.triggered == 'true'
-        shell: bash
-        run: |
-          # OC Login
-          OC_TEMP_TOKEN=$(curl -k -X POST ${{ inputs.oc_server }}/api/v1/namespaces/${{ secrets.oc_namespace }}/serviceaccounts/pipeline/token --header "Authorization: Bearer ${{ secrets.oc_token }}" -d '{"spec": {"expirationSeconds": 600}}' -H 'Content-Type: application/json; charset=utf-8' | jq -r '.status.token' )
-
-          oc login --token=$OC_TEMP_TOKEN --server=${{ inputs.oc_server }}
-          oc project ${{ secrets.oc_namespace }} # Safeguard!
+        uses: bcgov/action-oc-runner@main
+        with:
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
+          oc_server: ${{ secrets.oc_server }}
 
       - name: Deploy Database
         if: steps.triggers.outputs.triggered == 'true'

@@ -18,19 +18,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Install CLI tools from OpenShift Mirror
-        uses: redhat-actions/openshift-tools-installer@v1
+      - name: Install OpenShift CLI (oc) and Login
+        uses: bcgov/action-oc-runner@main
         with:
-          oc: "4.14.37"
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
+          oc_server: ${{ secrets.oc_server }}
 
       - name: Clean up Helm Releases
         run: |
-          # OC Login
-          OC_TEMP_TOKEN=$(curl -k -X POST ${{ vars.oc_server }}/api/v1/namespaces/${{ secrets.oc_namespace }}/serviceaccounts/pipeline/token --header "Authorization: Bearer ${{ secrets.oc_token }}" -d '{"spec": {"expirationSeconds": 600}}' -H 'Content-Type: application/json; charset=utf-8' | jq -r '.status.token' )
-
-          oc login --token=$OC_TEMP_TOKEN --server=${{ vars.oc_server }}
-          oc project ${{ secrets.OC_NAMESPACE }} # Safeguard!
-
           # Catch errors, unset variables, and pipe failures (e.g. grep || true )
           set -euo pipefail
 
