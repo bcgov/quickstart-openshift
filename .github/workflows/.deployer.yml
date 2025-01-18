@@ -181,7 +181,7 @@ jobs:
   check:
     name: Check
     env:
-      needs: ${{ fromJSON(needs.deployer) }}
+      needs: ${{ toJSON(needs.deployer) }}
     needs: deployer
     runs-on: ubuntu-24.04
     steps:
