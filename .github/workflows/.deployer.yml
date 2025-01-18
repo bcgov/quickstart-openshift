@@ -89,7 +89,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       tag: ${{ inputs.tag || steps.pr.outputs.pr }}
-      triggered: ${{ steps.triggers.outputs.triggered }}
+      triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
       - uses: actions/checkout@v4
 
@@ -140,6 +140,7 @@ jobs:
             fi
 
       - name: Helm Deploy
+        id: deploy
         uses: bcgov/action-oc-runner@v0.1.0
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
