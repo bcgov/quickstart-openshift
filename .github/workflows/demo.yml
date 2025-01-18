@@ -22,7 +22,7 @@ jobs:
       DEST: demo
       DOMAIN: apps.silver.devops.gov.bc.ca
       REPO: ${{ github.event.repository.name }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Point DEMO URL to Existing Service
         uses: bcgov/action-oc-runner@v0.1.0
