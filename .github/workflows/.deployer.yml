@@ -175,8 +175,10 @@ jobs:
             # # Completed pod cleanup
             # oc delete po --field-selector=status.phase==Succeeded || true
 
-      - run: |
-          echo "triggered?: ${{ steps.deploy.outputs.triggered }}"
+      - env:
+          results: ${{ toJSON(steps.deploy)}}
+        run: |
+          echo "results?: ${{ env.results }}"
 
   check:
     name: Check
