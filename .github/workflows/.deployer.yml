@@ -173,3 +173,12 @@ jobs:
 
             # Completed pod cleanup
             oc delete po --field-selector=status.phase==Succeeded || true
+
+  check:
+    name: Check
+    needs: deployer
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "Deployment triggered? ${{ needs.deployer.outputs.triggered }}"
+      - run: |
+          echo ${{ toJSON(needs) }}
