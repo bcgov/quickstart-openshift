@@ -122,22 +122,22 @@ jobs:
           echo "version=${version}" >> $GITHUB_OUTPUT
 
       ### Deploy
-      - name: Stop pre-existing deployments on PRs (status = pending-upgrade)
-        if: github.event_name == 'pull_request'
-        uses: bcgov/action-oc-runner@v0.1.0
-        with:
-          oc_namespace: ${{ secrets.oc_namespace }}
-          oc_token: ${{ secrets.oc_token }}
-          oc_server: ${{ vars.oc_server }}
-          triggers: ${{ inputs.triggers }}
-          commands: |
-            # Interrupt any previous deployments (PR only)
-            PREVIOUS=$(helm status ${{ steps.vars.outputs.release }} -o json | jq .info.status || true)
-            if [[ ${PREVIOUS} =~ pending ]]; then
-              echo "Rollback triggered"
-              helm rollback ${{ steps.vars.outputs.release }} || \
-                helm uninstall ${{ steps.vars.outputs.release }}
-            fi
+      # - name: Stop pre-existing deployments on PRs (status = pending-upgrade)
+      #   if: github.event_name == 'pull_request'
+      #   uses: bcgov/action-oc-runner@v0.1.0
+      #   with:
+      #     oc_namespace: ${{ secrets.oc_namespace }}
+      #     oc_token: ${{ secrets.oc_token }}
+      #     oc_server: ${{ vars.oc_server }}
+      #     triggers: ${{ inputs.triggers }}
+      #     commands: |
+      #       # Interrupt any previous deployments (PR only)
+      #       PREVIOUS=$(helm status ${{ steps.vars.outputs.release }} -o json | jq .info.status || true)
+      #       if [[ ${PREVIOUS} =~ pending ]]; then
+      #         echo "Rollback triggered"
+      #         helm rollback ${{ steps.vars.outputs.release }} || \
+      #           helm uninstall ${{ steps.vars.outputs.release }}
+      #       fi
 
       - name: Helm Deploy
         id: deploy
@@ -148,37 +148,43 @@ jobs:
           oc_server: ${{ vars.oc_server }}
           triggers: ${{ inputs.triggers }}
           commands: |
-            # Deploy
+            oc whoami
+            # # Deploy
 
-            # If directory provided, cd to it
-            [ -z "${{ inputs.directory }}" ]|| cd ${{ inputs.directory }}
+            # # If directory provided, cd to it
+            # [ -z "${{ inputs.directory }}" ]|| cd ${{ inputs.directory }}
 
-            # Helm package
-            sed -i 's/^name:.*/name: ${{ github.event.repository.name }}/' Chart.yaml
-            helm package -u . --app-version="tag-${{ steps.vars.outputs.tag }}_run-${{ github.run_number }}" --version=${{ steps.pr.outputs.pr || steps.vars.outputs.version }}
+            # # Helm package
+            # sed -i 's/^name:.*/name: ${{ github.event.repository.name }}/' Chart.yaml
+            # helm package -u . --app-version="tag-${{ steps.vars.outputs.tag }}_run-${{ github.run_number }}" --version=${{ steps.pr.outputs.pr || steps.vars.outputs.version }}
 
-            # Helm upgrade/rollout
-            helm upgrade \
-              --set-string global.repository=${{ github.repository }} \
-              --set-string global.tag=${{ steps.vars.outputs.tag }} \
-              --set-string global.config.databaseUser=${{ inputs.db_user }} \
-              ${{ inputs.params }} \
-              --install --wait ${{ inputs.atomic && '--atomic' || '' }} ${{ steps.vars.outputs.release }} \
-              --timeout ${{ inputs.timeout-minutes }}m \
-              --values ${{ inputs.values }} \
-              ./${{ github.event.repository.name }}-${{ steps.pr.outputs.pr || steps.vars.outputs.version }}.tgz
+            # # Helm upgrade/rollout
+            # helm upgrade \
+            #   --set-string global.repository=${{ github.repository }} \
+            #   --set-string global.tag=${{ steps.vars.outputs.tag }} \
+            #   --set-string global.config.databaseUser=${{ inputs.db_user }} \
+            #   ${{ inputs.params }} \
+            #   --install --wait ${{ inputs.atomic && '--atomic' || '' }} ${{ steps.vars.outputs.release }} \
+            #   --timeout ${{ inputs.timeout-minutes }}m \
+            #   --values ${{ inputs.values }} \
+            #   ./${{ github.event.repository.name }}-${{ steps.pr.outputs.pr || steps.vars.outputs.version }}.tgz
 
-            # Helm release history
-            helm history ${{ steps.vars.outputs.release }}
+            # # Helm release history
+            # helm history ${{ steps.vars.outputs.release }}
 
-            # Completed pod cleanup
-            oc delete po --field-selector=status.phase==Succeeded || true
+            # # Completed pod cleanup
+            # oc delete po --field-selector=status.phase==Succeeded || true
+
+      - run: |
+          echo "triggered?: ${{ steps.deploy.outputs.triggered }}"
 
   check:
     name: Check
+    env:
+      needs: ${{ fromJSON(needs) }}
     needs: deployer
     runs-on: ubuntu-24.04
     steps:
       - run: echo "Deployment triggered? ${{ needs.deployer.outputs.triggered }}"
       - run: |
-          echo ${{ toJSON(needs) }}
+          echo ${{ env.needs }}
