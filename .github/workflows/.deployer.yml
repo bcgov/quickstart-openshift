@@ -58,10 +58,10 @@ on:
     outputs:
       tag:
         description: 'Which tag was used for deployment?'
-        value: ${{ jobs.deployer.outputs.tag }}
+        value: ${{ jobs.deploy.outputs.tag }}
       triggered:
         description: 'Has a deployment has been triggered?'
-        value: ${{ jobs.deployer.outputs.triggered }}
+        value: ${{ jobs.deploy.outputs.triggered }}
 
     secrets:
       oc_namespace:
