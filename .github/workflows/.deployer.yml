@@ -90,36 +90,37 @@ jobs:
     outputs:
       tag: ${{ inputs.tag || steps.pr.outputs.pr }}
       triggered: ${{ steps.deploy.outputs.triggered }}
+      blerf: "blorf"
     steps:
       - uses: actions/checkout@v4
 
       # Variables
-      - if: inputs.tag  == ''
-        id: pr
-        uses: bcgov/action-get-pr@v0.0.1
+      # - if: inputs.tag  == ''
+      #   id: pr
+      #   uses: bcgov/action-get-pr@v0.0.1
 
-      - id: vars
-        run: |
-          # Vars: tag and release
+      # - id: vars
+      #   run: |
+      #     # Vars: tag and release
 
-          # Tag defaults to PR number, but can be overridden by inputs.tag
-          tag=${{ inputs.tag || steps.pr.outputs.pr }}
+      #     # Tag defaults to PR number, but can be overridden by inputs.tag
+      #     tag=${{ inputs.tag || steps.pr.outputs.pr }}
 
-          # Release name includes run numbers to ensure uniqueness
-          release=${{ github.event.repository.name }}-${{ inputs.environment || steps.pr.outputs.pr || inputs.tag }}
+      #     # Release name includes run numbers to ensure uniqueness
+      #     release=${{ github.event.repository.name }}-${{ inputs.environment || steps.pr.outputs.pr || inputs.tag }}
           
-          # version, to support helm packaging for non-pr based releases (workflow_dispatch). default to 1.0.0+github run number
-          version=1.0.0+${{ github.run_number }}
+      #     # version, to support helm packaging for non-pr based releases (workflow_dispatch). default to 1.0.0+github run number
+      #     version=1.0.0+${{ github.run_number }}
           
-            # Summary
-          echo "tag=${tag}"
-          echo "release=${release}"
-          echo "version=${version}"
+      #       # Summary
+      #     echo "tag=${tag}"
+      #     echo "release=${release}"
+      #     echo "version=${version}"
 
-          # Output
-          echo "tag=${tag}" >> $GITHUB_OUTPUT
-          echo "release=${release}" >> $GITHUB_OUTPUT
-          echo "version=${version}" >> $GITHUB_OUTPUT
+      #     # Output
+      #     echo "tag=${tag}" >> $GITHUB_OUTPUT
+      #     echo "release=${release}" >> $GITHUB_OUTPUT
+      #     echo "version=${version}" >> $GITHUB_OUTPUT
 
       ### Deploy
       # - name: Stop pre-existing deployments on PRs (status = pending-upgrade)
@@ -187,7 +188,5 @@ jobs:
     needs: deployer
     runs-on: ubuntu-24.04
     steps:
-      - run: echo "Deployment triggered? ${{ needs.deployer.outputs.triggered }}"
-        continue-on-error: true
       - run: |
-          echo ${{ env.needs }}
+          echo "${{ env.needs }}"
