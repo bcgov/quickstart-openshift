@@ -177,21 +177,21 @@ jobs:
             # oc delete po --field-selector=status.phase==Succeeded || true
 
       - env:
-          outputs: ${{ toJSON(steps.deploy.outputs) }}
+          outputs: ${{ toJSON(steps.results) }}
         run: |
           # Verify outputs
-          echo "Outputs: ${{ env.outputs }}"
+          echo "Outputs: ${{ env.results }}"
           if [ "${{ steps.deploy.outputs.triggered }}" != "true" ]; then
             echo "Error!  Verify outputs."
             exit 1
           fi
 
-  check:
-    name: Check
-    env:
-      needs: ${{ toJSON(needs.deployer) }}
-    needs: deployer
-    runs-on: ubuntu-24.04
-    steps:
-      - run: |
-          echo "${{ env.needs }}"
+  # check:
+  #   name: Check
+  #   env:
+  #     needs: ${{ toJSON(needs.deployer) }}
+  #   needs: deployer
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - run: |
+  #         echo "${{ env.needs }}"
