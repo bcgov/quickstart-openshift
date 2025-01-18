@@ -181,8 +181,8 @@ jobs:
   check:
     name: Check
     env:
-      needs: ${{ fromJSON(needs) }}
-    needs: deploy
+      needs: ${{ fromJSON(needs.deployer) }}
+    needs: deployer
     runs-on: ubuntu-24.04
     steps:
       - run: echo "Deployment triggered? ${{ needs.deployer.outputs.triggered }}"
