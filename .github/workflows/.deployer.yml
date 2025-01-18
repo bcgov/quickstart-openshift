@@ -177,7 +177,7 @@ jobs:
             # oc delete po --field-selector=status.phase==Succeeded || true
 
       - env:
-          outputs: ${{ toJSON(steps.results) }}
+          results: ${{ toJSON(steps.deploy) }}
         run: |
           # Verify outputs
           echo "Outputs: ${{ env.results }}"
