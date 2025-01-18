@@ -185,6 +185,6 @@ jobs:
     needs: deployer
     runs-on: ubuntu-24.04
     steps:
-      - run: echo "Deployment triggered? ${{ needs.deployer.outputs.triggered }}"
+      - run: echo "Deployment output? ${{ needs.deployer }}"
       - run: |
           echo ${{ env.needs }}
