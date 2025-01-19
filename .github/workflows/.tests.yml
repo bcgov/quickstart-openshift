@@ -9,12 +9,6 @@ on:
         required: true
         type: string
 
-      ### Typical / recommended
-      triggers:
-        description: Bash array to diff for build triggering; omit to always fire
-        required: false
-        type: string
-
 env:
   DOMAIN: apps.silver.devops.gov.bc.ca
   PREFIX: ${{ github.event.repository.name }}-${{ inputs.target }}
@@ -38,7 +32,7 @@ jobs:
 
       - env:
           API_NAME: nest
-          BASE_URL: https://${{ env.PREFIX }}-${{ inputs.target }}-frontend.${{ env.DOMAIN }}
+          BASE_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
         run: |
           cd tests/integration
           npm ci
