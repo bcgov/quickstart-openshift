@@ -121,7 +121,6 @@ jobs:
           echo "release=${release}" >> $GITHUB_OUTPUT
           echo "version=${version}" >> $GITHUB_OUTPUT
 
-      ## Deploy
       - name: Stop pre-existing deployments on PRs (status = pending-upgrade)
         if: github.event_name == 'pull_request'
         uses: bcgov/action-oc-runner@v0.1.0
@@ -141,7 +140,7 @@ jobs:
 
       - name: Helm Deploy
         id: deploy
-        uses: bcgov/action-oc-runner@main
+        uses: bcgov/action-oc-runner@v0.1.0
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
@@ -173,13 +172,3 @@ jobs:
 
             # Completed pod cleanup
             oc delete po --field-selector=status.phase==Succeeded || true
-
-      - env:
-          results: ${{ toJSON(steps.deploy) }}
-        run: |
-          # Verify outputs
-          echo "Outputs: ${{ env.results }}"
-          if [ "${{ steps.deploy.outputs.triggered }}" != "true" ]; then
-            echo "Error!  Verify outputs."
-            exit 1
-          fi
