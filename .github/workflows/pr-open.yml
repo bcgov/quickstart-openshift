@@ -47,6 +47,21 @@ jobs:
     with:
       target: ${{ github.event.number }}
 
+  verify:
+    name: Verify Results
+    needs: [deploys]
+    runs-on: ubuntu-24.04
+    steps:
+      - env:
+          results: ${{ toJSON(needs) }}
+        run: |
+          # Verify outputs
+          echo "Outputs: ${{ env.results }}"
+          if [ "${{ needs.deploy.outputs.triggered }}" != "true" ]; then
+            echo "Error!  Verify outputs."
+            exit 1
+          fi
+
   # results:
   #   name: PR Results
   #   needs: [builds, deploys, tests]
