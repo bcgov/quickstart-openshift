@@ -6,7 +6,7 @@ on:
       ### Required
       target:
         description: PR number, test or prod
-        required: true
+        default: ${{ github.event.number }}
         type: string
 
 env:
