@@ -82,7 +82,7 @@ jobs:
   #     environment: ${{ inputs.environment }}
   #     triggers: ${{ inputs.triggers }}
 
-  deployer:
+  deploy:
     name: Stack
     # needs: deployer-db
     environment: ${{ inputs.environment }}
@@ -185,13 +185,3 @@ jobs:
             echo "Error!  Verify outputs."
             exit 1
           fi
-
-  # check:
-  #   name: Check
-  #   env:
-  #     needs: ${{ toJSON(needs.deployer) }}
-  #   needs: deployer
-  #   runs-on: ubuntu-24.04
-  #   steps:
-  #     - run: |
-  #         echo "${{ env.needs }}"
