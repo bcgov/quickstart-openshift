@@ -42,7 +42,7 @@ jobs:
   tests:
     name: Tests
     # if: needs.deploys.outputs.triggered == 'true'
-    needs: [deploys]
+    # needs: [deploys]
     uses: ./.github/workflows/.tests.yml
 
   results:
