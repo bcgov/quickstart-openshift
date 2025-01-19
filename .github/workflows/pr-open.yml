@@ -9,45 +9,45 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # # https://github.com/bcgov/action-builder-ghcr
-  # builds:
-  #   name: Builds
-  #   runs-on: ubuntu-24.04
-  #   strategy:
-  #     matrix:
-  #       package: [backend, frontend, migrations]
-  #   timeout-minutes: 10
-  #   steps:
-  #     - uses: bcgov/action-builder-ghcr@v2.3.0
-  #       with:
-  #         keep_versions: 50
-  #         package: ${{ matrix.package }}
-  #         tag: ${{ github.event.number }}
-  #         tag_fallback: latest
-  #         triggers: ('${{ matrix.package }}/')
+  # https://github.com/bcgov/action-builder-ghcr
+  builds:
+    name: Builds
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        package: [backend, frontend, migrations]
+    timeout-minutes: 10
+    steps:
+      - uses: bcgov/action-builder-ghcr@v2.3.0
+        with:
+          keep_versions: 50
+          package: ${{ matrix.package }}
+          tag: ${{ github.event.number }}
+          tag_fallback: latest
+          triggers: ('${{ matrix.package }}/')
 
-  # # https://github.com/bcgov/quickstart-openshift-helpers
-  # deploys:
-  #   name: Deploys (${{ github.event.number }})
-  #   needs: [builds]
-  #   uses: ./.github/workflows/.deployer.yml
-  #   secrets:
-  #     oc_namespace: ${{ secrets.OC_NAMESPACE }}
-  #     oc_token: ${{ secrets.OC_TOKEN }}
-  #   with:
-  #     db_user: app-${{ github.event.number }}
-  #     params: --set global.secrets.persist=false
-  #     triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+  # https://github.com/bcgov/quickstart-openshift-helpers
+  deploys:
+    name: Deploys (${{ github.event.number }})
+    needs: [builds]
+    uses: ./.github/workflows/.deployer.yml
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+    with:
+      db_user: app-${{ github.event.number }}
+      params: --set global.secrets.persist=false
+      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
 
   tests:
     name: Tests
-    # if: needs.deploys.outputs.triggered == 'true'
-    # needs: [deploys]
+    if: needs.deploys.outputs.triggered == 'true'
+    needs: [deploys]
     uses: ./.github/workflows/.tests.yml
 
   results:
     name: PR Results
-    # needs: [builds, deploys, tests]
+    needs: [builds, deploys, tests]
     if: always()
     runs-on: ubuntu-24.04
     steps:
