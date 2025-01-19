@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # https://github.com/bcgov-nr/action-builder-ghcr
+  # https://github.com/bcgov/action-builder-ghcr
   builds:
     name: Builds
     runs-on: ubuntu-24.04
@@ -35,17 +35,15 @@ jobs:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
-      # triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
       db_user: app-${{ github.event.number }}
       params: --set global.secrets.persist=false
+      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
 
   tests:
     name: Tests
     if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
     uses: ./.github/workflows/.tests.yml
-    with:
-      target: ${{ github.event.number }}
 
   results:
     name: PR Results

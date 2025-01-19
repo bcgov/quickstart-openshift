@@ -58,10 +58,10 @@ on:
     outputs:
       tag:
         description: 'Which tag was used for deployment?'
-        value: ${{ jobs.deployer.outputs.tag }}
+        value: ${{ jobs.deploy.outputs.tag }}
       triggered:
         description: 'Has a deployment has been triggered?'
-        value: ${{ jobs.deployer.outputs.triggered }}
+        value: ${{ jobs.deploy.outputs.triggered }}
 
     secrets:
       oc_namespace:
@@ -82,14 +82,14 @@ jobs:
       environment: ${{ inputs.environment }}
       triggers: ${{ inputs.triggers }}
 
-  deployer:
+  deploy:
     name: Stack
     needs: deployer-db
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-24.04
     outputs:
       tag: ${{ inputs.tag || steps.pr.outputs.pr }}
-      triggered: ${{ steps.triggers.outputs.triggered }}
+      triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
       - uses: actions/checkout@v4
 
@@ -121,10 +121,9 @@ jobs:
           echo "release=${release}" >> $GITHUB_OUTPUT
           echo "version=${version}" >> $GITHUB_OUTPUT
 
-      ### Deploy
       - name: Stop pre-existing deployments on PRs (status = pending-upgrade)
         if: github.event_name == 'pull_request'
-        uses: bcgov/action-oc-runner@v0.1.0
+        uses: bcgov/action-oc-runner@v0.2.0
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
@@ -140,7 +139,8 @@ jobs:
             fi
 
       - name: Helm Deploy
-        uses: bcgov/action-oc-runner@v0.1.0
+        id: deploy
+        uses: bcgov/action-oc-runner@v0.2.0
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}

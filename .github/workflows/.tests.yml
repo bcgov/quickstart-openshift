@@ -6,13 +6,7 @@ on:
       ### Required
       target:
         description: PR number, test or prod
-        required: true
-        type: string
-
-      ### Typical / recommended
-      triggers:
-        description: Bash array to diff for build triggering; omit to always fire
-        required: false
+        default: ${{ github.event.number }}
         type: string
 
 env:
@@ -38,7 +32,7 @@ jobs:
 
       - env:
           API_NAME: nest
-          BASE_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-frontend.${{ env.DOMAIN }}
+          BASE_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
         run: |
           cd tests/integration
           npm ci
