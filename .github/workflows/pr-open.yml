@@ -10,26 +10,26 @@ concurrency:
 
 jobs:
   # https://github.com/bcgov-nr/action-builder-ghcr
-  # builds:
-  #   name: Builds
-  #   runs-on: ubuntu-24.04
-  #   strategy:
-  #     matrix:
-  #       package: [backend, frontend, migrations]
-  #   timeout-minutes: 10
-  #   steps:
-  #     - uses: bcgov/action-builder-ghcr@v2.3.0
-  #       with:
-  #         keep_versions: 50
-  #         package: ${{ matrix.package }}
-  #         tag: ${{ github.event.number }}
-  #         tag_fallback: latest
-  #         triggers: ('${{ matrix.package }}/')
+  builds:
+    name: Builds
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        package: [backend, frontend, migrations]
+    timeout-minutes: 10
+    steps:
+      - uses: bcgov/action-builder-ghcr@v2.3.0
+        with:
+          keep_versions: 50
+          package: ${{ matrix.package }}
+          tag: ${{ github.event.number }}
+          tag_fallback: latest
+          triggers: ('${{ matrix.package }}/')
 
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploys:
     name: Deploys (${{ github.event.number }})
-    # needs: [builds]
+    needs: [builds]
     uses: ./.github/workflows/.deployer.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -47,27 +47,12 @@ jobs:
     with:
       target: ${{ github.event.number }}
 
-  verify:
-    name: Verify Results
-    needs: [deploys]
+  results:
+    name: PR Results
+    needs: [builds, deploys, tests]
+    if: always()
     runs-on: ubuntu-24.04
     steps:
-      - env:
-          results: ${{ toJSON(needs) }}
-        run: |
-          # Verify outputs
-          echo "Outputs: ${{ env.results }}"
-          if [ "${{ needs.deploy.outputs.triggered }}" != "true" ]; then
-            echo "Error!  Verify outputs."
-            exit 1
-          fi
-
-  # results:
-  #   name: PR Results
-  #   needs: [builds, deploys, tests]
-  #   if: always()
-  #   runs-on: ubuntu-24.04
-  #   steps:
-  #     - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
-  #       run: echo "At least one job has failed." && exit 1
-  #     - run: echo "Success!"
+      - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
+        run: echo "At least one job has failed." && exit 1
+      - run: echo "Success!"
