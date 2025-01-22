@@ -10,11 +10,8 @@ export default defineConfig({
     environment: "node",
     coverage: {
       provider: "v8",
-      reporter: ["text-summary", "text", "json", "html"],
+      reporter: ["lcov", "text-summary", "text", "json", "html"],
     },
-    reporters: process.env.GITHUB_ACTIONS
-      ? [["vitest-sonar-reporter", { outputFile: "test-report.xml" }]]
-      : [],
   },
   plugins: [swc.vite()],
 });
