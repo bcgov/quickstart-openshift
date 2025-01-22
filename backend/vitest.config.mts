@@ -8,13 +8,11 @@ export default defineConfig({
     exclude: ["**/node_modules/**"],
     globals: true,
     environment: "node",
+    setupFiles: "test/test-setup.ts",
     coverage: {
       provider: "v8",
-      reporter: ["text-summary", "text", "json", "html"],
+      reporter: ["lcov"],
     },
-    reporters: process.env.GITHUB_ACTIONS
-      ? [["vitest-sonar-reporter", { outputFile: "test-report.xml" }]]
-      : [],
   },
   plugins: [swc.vite()],
 });
