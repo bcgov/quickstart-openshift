@@ -8,10 +8,9 @@ export default defineConfig({
     exclude: ["**/node_modules/**"],
     globals: true,
     environment: "node",
-    setupFiles: "test/test-setup.ts",
     coverage: {
       provider: "v8",
-      reporter: ["lcov"],
+      reporter: ["lcov", "text-summary", "text", "json", "html"],
     },
   },
   plugins: [swc.vite()],
