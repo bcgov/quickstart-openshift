@@ -20,6 +20,8 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
+permissions: {}
+
 jobs:
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploy-test:
