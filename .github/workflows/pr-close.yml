@@ -9,10 +9,14 @@ concurrency:
   group: ${{ github.event.number }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   cleanup:
-    name: Cleanup and Images
+    name: Cleanup and Image Promotion
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-close.yml@v0.8.3
+    permissions:
+      packages: write
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
@@ -21,7 +25,7 @@ jobs:
       packages: backend frontend migrations
 
   cleanup_db: # TODO move it off to another action later.
-    name: Remove DB User from crunchy
+    name: Remove DB User from Crunchy
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
