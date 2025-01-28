@@ -28,7 +28,7 @@ jobs:
 
       - name: Remove PR user and database from crunchy
         continue-on-error: true
-        uses: bcgov/action-oc-runner@v0.2.0
+        uses: bcgov/action-oc-runner@v0.3.0
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
