@@ -17,11 +17,11 @@ jobs:
       - run: echo "${{ vars.MS_TEAMS_WEBHOOK_URI }}"
 
   notify-teams-pr:
-    if: ${{github.event.workflow_run.event == 'pull_request' && vars.MS_TEAMS_WEBHOOK_URI != null}}
+    if: github.event.workflow_run.event == 'pull_request' && vars.MS_TEAMS_WEBHOOK_URI != null
     runs-on: ubuntu-24.04
     steps:
       - uses: simbo/msteams-message-card-action@latest
-        if: ${{ vars.MS_TEAMS_WEBHOOK_URI != null}}
+        if: vars.MS_TEAMS_WEBHOOK_URI != null
         with:
           webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
           title: "${{github.event.workflow_run.head_commit.message}}" 
@@ -38,11 +38,11 @@ jobs:
                 image: ${{github.event.workflow_run.head_repository.owner.avatar_url}}
                 text: PR Opened
   notify-teams-merged:
-    if: ${{github.event.workflow_run.event == 'push' && vars.MS_TEAMS_WEBHOOK_URI != null}}
+    if: github.event.workflow_run.event == 'push' && vars.MS_TEAMS_WEBHOOK_URI != null
     runs-on: ubuntu-24.04
     steps:
       - name: PR Number
-        if: ${{ vars.MS_TEAMS_WEBHOOK_URI != null }}
+        if: vars.MS_TEAMS_WEBHOOK_URI != null
         id: pr
         shell: bash
         run: |
@@ -59,7 +59,7 @@ jobs:
           fi
           echo "pr=${pr}" >> $GITHUB_OUTPUT
       - uses: simbo/msteams-message-card-action@latest
-        if: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
+        if: vars.MS_TEAMS_WEBHOOK_URI
         with:
           webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI != null }}
           title: "${{github.event.workflow_run.head_commit.message}}" 

@@ -58,7 +58,7 @@ on:
 jobs:
   deploy_db:
     runs-on: ubuntu-24.04
-    if: ${{ inputs.enabled }}
+    if: inputs.enabled
     name: Crunchy (db)
     environment: ${{ inputs.environment }}
     steps:
