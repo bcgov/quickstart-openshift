@@ -63,6 +63,8 @@ jobs:
   trivy:
     name: Trivy Security Scan
     if: ${{ ! github.event.pull_request.draft }}
+    permissions:
+      security-events: write
     runs-on: ubuntu-24.04
     timeout-minutes: 1
     steps:
