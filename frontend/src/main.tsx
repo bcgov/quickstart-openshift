@@ -1,8 +1,8 @@
-import "@bcgov/bc-sans/css/BC_Sans.css";
+import '@bcgov/bc-sans/css/BC_Sans.css'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom/client'
 import { ThemeProvider } from '@emotion/react'
-import { CssBaseline } from '@mui/material'
+import CssBaseline from '@mui/material/CssBaseline'
 import theme from './theme'
 import App from './App'
 
