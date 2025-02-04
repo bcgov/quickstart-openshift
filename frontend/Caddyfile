@@ -31,14 +31,25 @@
 		header_up X-Forwarded-For {remote_host}
 	}
 	header {
+		-Server
 		X-Frame-Options "SAMEORIGIN"
 		X-XSS-Protection "1;mode=block"
 		Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
 		X-Content-Type-Options "nosniff"
 		Strict-Transport-Security "max-age=31536000"
-		Content-Security-Policy "default-src 'self' https://spt.apps.gov.bc.ca data:; script-src 'self' 'unsafe-eval' https://www2.gov.bc.ca ;style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://use.fontawesome.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://fonts.googleapis.com http://www.w3.org https://*.gov.bc.ca"
+		Content-Security-Policy "default-src 'self' https://*.gov.bc.ca;; 
+			script-src 'self'  https://*.gov.bc.ca ;
+			style-src 'self' https://fonts.googleapis.com https://use.fontawesome.com 'unsafe-inline'; 
+			font-src 'self' https://fonts.gstatic.com; 
+			img-src 'self' data: https://fonts.googleapis.com https://www.w3.org https://*.gov.bc.ca https://*.tile.openstreetmap.org;
+			frame-ancestors 'self'; 
+			form-action 'self';
+			block-all-mixed-content;
+			connect-src 'self' https://*.gov.bc.ca wss://*.gov.bc.ca;"
 		Referrer-Policy "same-origin"
-		Feature-Policy "fullscreen 'self'; camera 'none'; microphone 'none'"
+		Permissions-Policy "fullscreen=(self), camera=(), microphone=()"
+		Cross-Origin-Resource-Policy "cross-origin"
+		Cross-Origin-Opener-Policy "same-origin"
 	}
 }
 :3001 {
