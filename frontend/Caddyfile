@@ -48,8 +48,8 @@
 			connect-src 'self' https://*.gov.bc.ca wss://*.gov.bc.ca;"
 		Referrer-Policy "same-origin"
 		Permissions-Policy "fullscreen=(self), camera=(), microphone=()"
-    	Cross-Origin-Resource-Policy "cross-origin"
-    	Cross-Origin-Opener-Policy "same-origin"
+		Cross-Origin-Resource-Policy "cross-origin"
+		Cross-Origin-Opener-Policy "same-origin"
 	}
 }
 :3001 {
