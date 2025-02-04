@@ -1,8 +1,11 @@
 {
+	metrics
 	auto_https off
 	admin 0.0.0.0:3003
 	servers {
-		metrics
+		metrics {
+			per_host
+		}
 	}
 }
 :3000 {
