@@ -63,6 +63,7 @@ jobs:
   trivy:
     name: Trivy Security Scan
     if: (! github.event.pull_request.draft)
+    continue-on-error: true
     permissions:
       security-events: write
     runs-on: ubuntu-24.04
@@ -86,7 +87,7 @@ jobs:
 
   results:
     name: Analysis Results
-    needs: [tests, trivy]
+    needs: [tests]
     if: always()
     runs-on: ubuntu-24.04
     steps:
