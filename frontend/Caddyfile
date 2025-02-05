@@ -1,17 +1,12 @@
 {
+	metrics
 	auto_https off
 	admin 0.0.0.0:3003
-	servers {
-		metrics
-	}
 }
 :3000 {
 	log {
 		output stdout
-		format console {
-			time_format iso8601
-			level_format color
-		}
+		format console
 		level {$LOG_LEVEL}
 	}
 	root * /srv
@@ -28,7 +23,6 @@
 	reverse_proxy /api* {$BACKEND_URL} {
 		header_up Host {http.reverse_proxy.upstream.hostport}
 		header_up X-Real-IP {remote_host}
-		header_up X-Forwarded-For {remote_host}
 	}
 	header {
 		-Server
