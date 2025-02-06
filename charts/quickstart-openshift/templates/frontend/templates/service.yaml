@@ -1,0 +1,25 @@
+{{- if .Values.frontend.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "frontend.fullname" . }}
+  labels:
+    {{- include "frontend.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.frontend.service.type }}
+  ports:
+    - name: http
+      #-- the port for the service. the service will be accessible on this port within the namespace.
+      port: 80
+      #-- the container port where the application is listening on
+      targetPort: 3000
+      #-- the protocol for the port. it can be TCP or UDP. TCP is the default and is recommended.
+      protocol: TCP
+    - port: 3003
+      targetPort: 3003
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "frontend.selectorLabels" . | nindent 4 }}
+{{- end }}
