@@ -14,7 +14,7 @@ on:
         type: string
       directory:
         description: Chart directory
-        default:  'charts/app'
+        default:  'charts/${{.Chart.Name}}'
         required: false
         type: string
       environment:
