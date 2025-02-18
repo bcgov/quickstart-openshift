@@ -36,13 +36,10 @@ jobs:
     strategy:
       matrix:
         dir: [backend, frontend]
-        include:
-          - dir: backend
-            token: SONAR_TOKEN_BACKEND
-          - dir: frontend
-            token: SONAR_TOKEN_FRONTEND
     steps:
       - uses: bcgov/action-test-and-analyse@v1.2.1
+        env:
+          SONAR_TOKEN: ${{ matrix.dir == 'backend' && secrets.SONAR_TOKEN_BACKEND || secrets.SONAR_TOKEN_FRONTEND }}
         with:
           commands: |
             npm ci
@@ -56,7 +53,7 @@ jobs:
             -Dsonar.sources=src
             -Dsonar.tests.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
-          sonar_token: ${{ secrets[matrix.token] }}
+          sonar_token: ${{ env.SONAR_TOKEN }}
           triggers: ('${{ matrix.dir }}/')
 
   # https://github.com/marketplace/actions/aqua-security-trivy
