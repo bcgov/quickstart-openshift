@@ -55,6 +55,9 @@ on:
       s3_endpoint:
         description: S3 endpoint
         required: false
+
+permissions: {}
+
 jobs:
   deploy_db:
     runs-on: ubuntu-24.04
