@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Clean up Helm Releases
-        uses: bcgov/action-oc-runner@v0.4.0
+        uses: bcgov/action-oc-runner@v1.0.0
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
