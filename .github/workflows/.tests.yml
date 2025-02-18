@@ -13,6 +13,9 @@ env:
   DOMAIN: apps.silver.devops.gov.bc.ca
   PREFIX: ${{ github.event.repository.name }}-${{ inputs.target }}
 
+
+permissions: {}
+
 jobs:
   integration-tests:
     name: Integration

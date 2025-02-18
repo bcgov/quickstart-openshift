@@ -71,6 +71,8 @@ on:
         description: OpenShift token
         required: true
 
+permissions: {}
+
 jobs:
   deployer-db:
     name: Database
