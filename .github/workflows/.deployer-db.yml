@@ -88,7 +88,7 @@ jobs:
           fi
 
       - name: Deploy Database
-        uses: bcgov/action-oc-runner@v1.0.0
+        uses: bcgov/action-oc-runner@e9de6a6e54a8731bc9b478c5f6c98f6240f40c91
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
@@ -110,7 +110,7 @@ jobs:
 
       - name: Add PR specific user to Crunchy DB # only for PRs
         if: github.event_name == 'pull_request'
-        uses: bcgov/action-oc-runner@v1.0.0
+        uses: bcgov/action-oc-runner@e9de6a6e54a8731bc9b478c5f6c98f6240f40c91
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
