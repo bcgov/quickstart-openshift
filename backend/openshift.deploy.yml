@@ -50,22 +50,6 @@ parameters:
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "5"
 objects:
-  - apiVersion: v1
-    kind: ImageStream
-    metadata:
-      labels:
-        app: "${NAME}-${ZONE}"
-      name: "${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}"
-    spec:
-      lookupPolicy:
-        local: false
-      tags:
-        - name: "${IMAGE_TAG}"
-          from:
-            kind: DockerImage
-            name: image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT_DB_MIGRATION}:${TAG}
-          referencePolicy:
-            type: Local
   - apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -205,8 +189,8 @@ objects:
         apiVersion: apps/v1
         kind: Deployment
         name: "${NAME}-${ZONE}-${COMPONENT}"
-      minReplicas: "${{MIN_REPLICAS}}"
-      maxReplicas: "${{MAX_REPLICAS}}"
+      minReplicas: "${MIN_REPLICAS}"
+      maxReplicas: "${MAX_REPLICAS}"
       metrics:
         - type: Resource
           resource:
