@@ -183,10 +183,16 @@ jobs:
     timeout-minutes: 15
     strategy:
       matrix:
-        name: [frontend]
+        name: [backend, frontend]
         include:
           - name: frontend
             file: frontend/openshift.deploy.yml
+            overwrite: true
+            parameters:
+              -p MIN_REPLICAS=1
+              -p MAX_REPLICAS=1
+          - name: backend
+            file: backend/openshift.deploy.yml
             overwrite: true
             parameters:
               -p MIN_REPLICAS=1
