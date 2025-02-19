@@ -20,7 +20,7 @@ jobs:
     if: github.event.workflow_run.event == 'pull_request' && vars.MS_TEAMS_WEBHOOK_URI != null
     runs-on: ubuntu-24.04
     steps:
-      - uses: simbo/msteams-message-card-action@latest
+      - uses: simbo/msteams-message-card-action@d87ad6c3908b72f4fd94b55d937d05395c7300dc # v1.4.3
         if: vars.MS_TEAMS_WEBHOOK_URI != null
         with:
           webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
@@ -58,7 +58,7 @@ jobs:
             pr=""
           fi
           echo "pr=${pr}" >> $GITHUB_OUTPUT
-      - uses: simbo/msteams-message-card-action@latest
+      - uses: simbo/msteams-message-card-action@d87ad6c3908b72f4fd94b55d937d05395c7300dc # v1.4.3
         if: vars.MS_TEAMS_WEBHOOK_URI
         with:
           webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI != null }}
