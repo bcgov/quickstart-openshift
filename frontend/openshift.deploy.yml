@@ -55,34 +55,25 @@ objects:
             name: "${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${ZONE}"
           referencePolicy:
             type: Local
-  - apiVersion: v1
-    kind: DeploymentConfig
+  - apiVersion: apps/v1
+    kind: Deployment
     metadata:
       labels:
         app: "${NAME}-${ZONE}"
       name: "${NAME}-${ZONE}-${COMPONENT}"
     spec:
       replicas: 1
-      triggers:
-        - type: ConfigChange
-        - type: ImageChange
-          imageChangeParams:
-            automatic: true
-            containerNames:
-              - "${NAME}"
-            from:
-              kind: ImageStreamTag
-              name: "${NAME}-${ZONE}-${COMPONENT}:${TAG}"
       selector:
-        deploymentconfig: "${NAME}-${ZONE}-${COMPONENT}"
+        matchLabels:
+          deployment: "${NAME}-${ZONE}-${COMPONENT}"
       strategy:
-        type: Rolling
+        type: RollingUpdate
       template:
         metadata:
           labels:
             app: ${NAME}-${ZONE}
             component: ${COMPONENT}
-            deploymentconfig: "${NAME}-${ZONE}-${COMPONENT}"
+            deployment: "${NAME}-${ZONE}-${COMPONENT}"
         spec:
           containers:
             - image: "${NAME}-${ZONE}-${COMPONENT}:${TAG}"
