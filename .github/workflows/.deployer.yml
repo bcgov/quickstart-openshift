@@ -74,15 +74,15 @@ on:
 permissions: {}
 
 jobs:
-  deployer-db:
-    name: Database
-    uses: ./.github/workflows/.deployer-db.yml
-    secrets:
-      oc_namespace: ${{ secrets.oc_namespace }}
-      oc_token: ${{ secrets.oc_token }}
-    with:
-      environment: ${{ inputs.environment }}
-      triggers: ${{ inputs.triggers }}
+  # deployer-db:
+  #   name: Database
+  #   uses: ./.github/workflows/.deployer-db.yml
+  #   secrets:
+  #     oc_namespace: ${{ secrets.oc_namespace }}
+  #     oc_token: ${{ secrets.oc_token }}
+  #   with:
+  #     environment: ${{ inputs.environment }}
+  #     triggers: ${{ inputs.triggers }}
 
   # deploy:
   #   name: Stack
@@ -178,7 +178,7 @@ jobs:
   deploy-matrix:
     name: Deploy
     environment: ${{ inputs.environment }}
-    needs: deployer-db
+    # needs: deployer-db
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
