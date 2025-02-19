@@ -173,3 +173,18 @@ objects:
                   component: backend
       policyTypes:
         - Ingress
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+        component: ${COMPONENT}
+      name: ${NAME}-${ZONE}-${COMPONENT}
+    spec:
+      selector:
+        matchLabels:
+
+        app: ${NAME}-${ZONE}
+        component: ${COMPONENT}
+      minAvailable: "1"
