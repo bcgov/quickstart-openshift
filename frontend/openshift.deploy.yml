@@ -13,7 +13,7 @@ parameters:
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
-  - name: ORG_NAME
+  - name: ORG
     description: Organization name, e.g. bcgov
     value: bcgov
   - name: TAG
@@ -39,22 +39,6 @@ parameters:
     description: Caddy logging level DEBUG, INFO, WARN, ERROR, PANIC, and FATAL (https://github.com/caddyserver/caddy/blob/master/logging.go)
     value: "info"
 objects:
-  - apiVersion: v1
-    kind: ImageStream
-    metadata:
-      labels:
-        app: "${NAME}-${ZONE}"
-      name: "${NAME}-${ZONE}-${COMPONENT}"
-    spec:
-      lookupPolicy:
-        local: false
-      tags:
-        - name: "${TAG}"
-          from:
-            kind: DockerImage
-            name: "${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${ZONE}"
-          referencePolicy:
-            type: Local
   - apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -76,7 +60,7 @@ objects:
             deployment: "${NAME}-${ZONE}-${COMPONENT}"
         spec:
           containers:
-            - image: "${NAME}-${ZONE}-${COMPONENT}:${TAG}"
+            - image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
               securityContext:
                 capabilities:
                   add: ["NET_BIND_SERVICE"]
