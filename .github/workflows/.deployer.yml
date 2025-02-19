@@ -78,8 +78,8 @@ jobs:
     name: Database
     uses: ./.github/workflows/.deployer-db.yml
     secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_token: ${{ secrets.OC_TOKEN }}
+      oc_namespace: ${{ secrets.oc_namespace }}
+      oc_token: ${{ secrets.oc_token }}
     with:
       environment: ${{ inputs.environment }}
       triggers: ${{ inputs.triggers }}
@@ -174,3 +174,35 @@ jobs:
 
             # Completed pod cleanup
             oc delete po --field-selector=status.phase==Succeeded || true
+
+  deploy-matrix:
+    name: Deploy
+    environment: ${{ inputs.environment }}
+    needs: deployer-db
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        name: [frontend]
+        include:
+          - name: frontend
+            file: frontend/openshift.deploy.yml
+            overwrite: true
+            parameters:
+              -p MIN_REPLICAS=1
+              -p MAX_REPLICAS=1
+    steps:
+      - uses: bcgov/action-deployer-openshift@v3.1.0
+        id: deploys
+        with:
+          file: ${{ matrix.file }}
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          overwrite: ${{ matrix.overwrite }}
+          parameters:
+            -p NAME=${{ github.event.repository.name }}
+            -p ZONE=${{ github.event.number }} -p TAG=${{ inputs.tag }}
+            ${{ matrix.parameters }}
+          timeout: 15m
+          triggers: ${{ inputs.triggers }}
