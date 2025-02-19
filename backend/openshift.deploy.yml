@@ -55,22 +55,6 @@ objects:
     metadata:
       labels:
         app: "${NAME}-${ZONE}"
-      name: "${NAME}-${ZONE}-${COMPONENT}"
-    spec:
-      lookupPolicy:
-        local: false
-      tags:
-        - name: "${IMAGE_TAG}"
-          from:
-            kind: DockerImage
-            name: "${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${ZONE}"
-          referencePolicy:
-            type: Local
-  - apiVersion: v1
-    kind: ImageStream
-    metadata:
-      labels:
-        app: "${NAME}-${ZONE}"
       name: "${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}"
     spec:
       lookupPolicy:
@@ -79,7 +63,7 @@ objects:
         - name: "${IMAGE_TAG}"
           from:
             kind: DockerImage
-            name: "${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT_DB_MIGRATION}:${ZONE}"
+            name: image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT_DB_MIGRATION}:${TAG}
           referencePolicy:
             type: Local
   - apiVersion: apps/v1
@@ -156,7 +140,7 @@ objects:
                 timeoutSeconds: 5
           initContainers:
             - name: "${NAME}-${COMPONENT_DB_MIGRATION}"
-              image: "${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT_DB_MIGRATION}:${ZONE}"
+              image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT_DB_MIGRATION}:${TAG}
               env:
                 - name: FLYWAY_URL
                   value: "jdbc:postgresql://${NAME}-${ZONE}-database:5432/${NAME}"
