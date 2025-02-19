@@ -84,96 +84,96 @@ jobs:
       environment: ${{ inputs.environment }}
       triggers: ${{ inputs.triggers }}
 
-  deploy:
-    name: Stack
-    needs: deployer-db
-    environment: ${{ inputs.environment }}
-    runs-on: ubuntu-24.04
-    outputs:
-      tag: ${{ inputs.tag || steps.pr.outputs.pr }}
-      triggered: ${{ steps.deploy.outputs.triggered }}
-    steps:
-      - uses: actions/checkout@v4
+  # deploy:
+  #   name: Stack
+  #   needs: deployer-db
+  #   environment: ${{ inputs.environment }}
+  #   runs-on: ubuntu-24.04
+  #   outputs:
+  #     tag: ${{ inputs.tag || steps.pr.outputs.pr }}
+  #     triggered: ${{ steps.deploy.outputs.triggered }}
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      # Variables
-      - if: inputs.tag  == ''
-        id: pr
-        uses: bcgov/action-get-pr@21f9351425cd55a98e869ee28919a512aa30647d # v0.0.1
+  #     # Variables
+  #     - if: inputs.tag  == ''
+  #       id: pr
+  #       uses: bcgov/action-get-pr@21f9351425cd55a98e869ee28919a512aa30647d # v0.0.1
 
-      - id: vars
-        run: |
-          # Vars: tag and release
+  #     - id: vars
+  #       run: |
+  #         # Vars: tag and release
 
-          # Tag defaults to PR number, but can be overridden by inputs.tag
-          tag=${{ inputs.tag || steps.pr.outputs.pr }}
+  #         # Tag defaults to PR number, but can be overridden by inputs.tag
+  #         tag=${{ inputs.tag || steps.pr.outputs.pr }}
 
-          # Release name includes run numbers to ensure uniqueness
-          release=${{ github.event.repository.name }}-${{ inputs.environment || steps.pr.outputs.pr || inputs.tag }}
+  #         # Release name includes run numbers to ensure uniqueness
+  #         release=${{ github.event.repository.name }}-${{ inputs.environment || steps.pr.outputs.pr || inputs.tag }}
           
-          # version, to support helm packaging for non-pr based releases (workflow_dispatch). default to 1.0.0+github run number
-          version=1.0.0+${{ github.run_number }}
+  #         # version, to support helm packaging for non-pr based releases (workflow_dispatch). default to 1.0.0+github run number
+  #         version=1.0.0+${{ github.run_number }}
           
-            # Summary
-          echo "tag=${tag}"
-          echo "release=${release}"
-          echo "version=${version}"
+  #           # Summary
+  #         echo "tag=${tag}"
+  #         echo "release=${release}"
+  #         echo "version=${version}"
 
-          # Output
-          echo "tag=${tag}" >> $GITHUB_OUTPUT
-          echo "release=${release}" >> $GITHUB_OUTPUT
-          echo "version=${version}" >> $GITHUB_OUTPUT
+  #         # Output
+  #         echo "tag=${tag}" >> $GITHUB_OUTPUT
+  #         echo "release=${release}" >> $GITHUB_OUTPUT
+  #         echo "version=${version}" >> $GITHUB_OUTPUT
 
-      - name: Stop pre-existing deployments on PRs (status = pending-upgrade)
-        if: github.event_name == 'pull_request'
-        uses: bcgov/action-oc-runner@13d14b8f41df24226036385510472f683350850b # v1.0.0
-        with:
-          oc_namespace: ${{ secrets.oc_namespace }}
-          oc_token: ${{ secrets.oc_token }}
-          oc_server: ${{ vars.oc_server }}
-          triggers: ${{ inputs.triggers }}
-          commands: |
-            # Interrupt any previous deployments (PR only)
-            PREVIOUS=$(helm status ${{ steps.vars.outputs.release }} -o json | jq .info.status || true)
-            if [[ ${PREVIOUS} =~ pending ]]; then
-              echo "Rollback triggered"
-              helm rollback ${{ steps.vars.outputs.release }} || \
-                helm uninstall ${{ steps.vars.outputs.release }}
-            fi
+  #     - name: Stop pre-existing deployments on PRs (status = pending-upgrade)
+  #       if: github.event_name == 'pull_request'
+  #       uses: bcgov/action-oc-runner@13d14b8f41df24226036385510472f683350850b # v1.0.0
+  #       with:
+  #         oc_namespace: ${{ secrets.oc_namespace }}
+  #         oc_token: ${{ secrets.oc_token }}
+  #         oc_server: ${{ vars.oc_server }}
+  #         triggers: ${{ inputs.triggers }}
+  #         commands: |
+  #           # Interrupt any previous deployments (PR only)
+  #           PREVIOUS=$(helm status ${{ steps.vars.outputs.release }} -o json | jq .info.status || true)
+  #           if [[ ${PREVIOUS} =~ pending ]]; then
+  #             echo "Rollback triggered"
+  #             helm rollback ${{ steps.vars.outputs.release }} || \
+  #               helm uninstall ${{ steps.vars.outputs.release }}
+  #           fi
 
-      - name: Helm Deploy
-        id: deploy
-        uses: bcgov/action-oc-runner@13d14b8f41df24226036385510472f683350850b # v1.0.0
-        with:
-          oc_namespace: ${{ secrets.oc_namespace }}
-          oc_token: ${{ secrets.oc_token }}
-          oc_server: ${{ vars.oc_server }}
-          triggers: ${{ inputs.triggers }}
-          commands: |
-            # Deploy
+  #     - name: Helm Deploy
+  #       id: deploy
+  #       uses: bcgov/action-oc-runner@13d14b8f41df24226036385510472f683350850b # v1.0.0
+  #       with:
+  #         oc_namespace: ${{ secrets.oc_namespace }}
+  #         oc_token: ${{ secrets.oc_token }}
+  #         oc_server: ${{ vars.oc_server }}
+  #         triggers: ${{ inputs.triggers }}
+  #         commands: |
+  #           # Deploy
 
-            # If directory provided, cd to it
-            [ -z "${{ inputs.directory }}" ]|| cd ${{ inputs.directory }}
+  #           # If directory provided, cd to it
+  #           [ -z "${{ inputs.directory }}" ]|| cd ${{ inputs.directory }}
 
-            # Helm package
-            sed -i 's/^name:.*/name: ${{ github.event.repository.name }}/' Chart.yaml
-            helm package -u . --app-version="tag-${{ steps.vars.outputs.tag }}_run-${{ github.run_number }}" --version=${{ steps.pr.outputs.pr || steps.vars.outputs.version }}
+  #           # Helm package
+  #           sed -i 's/^name:.*/name: ${{ github.event.repository.name }}/' Chart.yaml
+  #           helm package -u . --app-version="tag-${{ steps.vars.outputs.tag }}_run-${{ github.run_number }}" --version=${{ steps.pr.outputs.pr || steps.vars.outputs.version }}
 
-            # Helm upgrade/rollout
-            helm upgrade \
-              --set-string global.repository=${{ github.repository }} \
-              --set-string global.tag=${{ steps.vars.outputs.tag }} \
-              --set-string global.config.databaseUser=${{ inputs.db_user }} \
-              ${{ inputs.params }} \
-              --install --wait ${{ inputs.atomic && '--atomic' || '' }} ${{ steps.vars.outputs.release }} \
-              --timeout ${{ inputs.timeout-minutes }}m \
-              --values ${{ inputs.values }} \
-              ./${{ github.event.repository.name }}-${{ steps.pr.outputs.pr || steps.vars.outputs.version }}.tgz
+  #           # Helm upgrade/rollout
+  #           helm upgrade \
+  #             --set-string global.repository=${{ github.repository }} \
+  #             --set-string global.tag=${{ steps.vars.outputs.tag }} \
+  #             --set-string global.config.databaseUser=${{ inputs.db_user }} \
+  #             ${{ inputs.params }} \
+  #             --install --wait ${{ inputs.atomic && '--atomic' || '' }} ${{ steps.vars.outputs.release }} \
+  #             --timeout ${{ inputs.timeout-minutes }}m \
+  #             --values ${{ inputs.values }} \
+  #             ./${{ github.event.repository.name }}-${{ steps.pr.outputs.pr || steps.vars.outputs.version }}.tgz
 
-            # Helm release history
-            helm history ${{ steps.vars.outputs.release }}
+  #           # Helm release history
+  #           helm history ${{ steps.vars.outputs.release }}
 
-            # Completed pod cleanup
-            oc delete po --field-selector=status.phase==Succeeded || true
+  #           # Completed pod cleanup
+  #           oc delete po --field-selector=status.phase==Succeeded || true
 
   deploy-matrix:
     name: Deploy
