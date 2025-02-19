@@ -13,9 +13,12 @@ parameters:
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
-  - name: ORG_NAME
+  - name: ORG
     description: Organization name, e.g. bcgov
     value: bcgov
+  - name: TAG
+    description: Image tag to use
+    value: latest
   - name: COMPONENT_DB_MIGRATION
     description: Component name for database migrations
     value: migrations
@@ -100,7 +103,7 @@ objects:
             deployment: "${NAME}-${ZONE}-${COMPONENT}"
         spec:
           containers:
-            - image: "${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${ZONE}"
+            - image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
               imagePullPolicy: Always
               name: "${NAME}"
               env:
