@@ -32,7 +32,7 @@ on:
         type: string
       tag:
         description: Specify a tag to deploy; defaults to PR number
-        required: false
+        default: ${{ github.event.number }}
         type: string
       triggers:
         description: Paths used to trigger a deployment; e.g. ('./backend/' './frontend/)
@@ -202,7 +202,7 @@ jobs:
           overwrite: ${{ matrix.overwrite }}
           parameters:
             -p NAME=${{ github.event.repository.name }}
-            -p ZONE=${{ github.event.number }} -p TAG=${{ inputs.tag }}
+            -p ZONE=${{ inputs.tag }} -p TAG=${{ inputs.tag }}
             ${{ matrix.parameters }}
           timeout: 15m
           triggers: ${{ inputs.triggers }}
