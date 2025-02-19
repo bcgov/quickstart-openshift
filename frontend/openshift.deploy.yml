@@ -185,4 +185,4 @@ objects:
         matchLabels:
           app: ${NAME}-${ZONE}
           component: ${COMPONENT}
-      minAvailable: "1"
+      minAvailable: 1
