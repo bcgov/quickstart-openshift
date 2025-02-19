@@ -1,43 +1,65 @@
 apiVersion: template.openshift.io/v1
 kind: Template
+metadata:
+  annotations:
+    openshift.io/display-name: "Frontend Deployment Template"
+    description: "Template for deploying the frontend component with proper networking, scaling, and security configurations."
+    tags: "frontend,nodejs,quickstart"
+    iconClass: "icon-nodejs"
+    openshift.io/documentation-url: "https://github.com/bcgov/quickstart-openshift"
+    openshift.io/provider-display-name: "BC Government"
 parameters:
   - name: NAME
-    description: Module name
+    description: "Application name, used to group and identify resources"
     required: true
+    value: quickstart
   - name: COMPONENT
-    description: Component name
+    description: "Component identifier within the application (frontend/backend)"
     value: frontend
   - name: ZONE
-    description: Deployment zone, e.g. pr-### or prod
+    description: "Deployment zone (e.g. dev, test, prod, pr-###). Used for resource isolation"
     required: true
+    pattern: "^(dev|test|prod|pr-[0-9]+)$"
   - name: REGISTRY
-    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
+    description: "Container registry URL. Use 'image-registry.openshift-image-registry.svc:5000' for internal registry"
     value: ghcr.io
   - name: ORG
-    description: Organization name, e.g. bcgov
+    description: "Organization or project name in the container registry"
     value: bcgov
   - name: TAG
-    description: Image tag to use
+    description: "Container image tag to deploy"
     value: latest
   - name: DOMAIN
+    description: "Base domain for route generation"
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
+    description: "Minimum CPU resources required (in millicores)"
     value: "25m"
+    pattern: "^[0-9]+[m]?$"
   - name: MEMORY_REQUEST
+    description: "Minimum memory resources required"
     value: "50Mi"
+    pattern: "^[0-9]+[KMGTPkmgtp]i?$"
   - name: CPU_LIMIT
+    description: "Maximum CPU resources allowed (in millicores)"
     value: "75m"
+    pattern: "^[0-9]+[m]?$"
   - name: MEMORY_LIMIT
+    description: "Maximum memory resources allowed"
     value: "150Mi"
+    pattern: "^[0-9]+[KMGTPkmgtp]i?$"
   - name: MIN_REPLICAS
-    description: The minimum amount of replicas for the horizontal pod autoscaler.
+    description: "Minimum number of pod replicas for high availability"
     value: "3"
+    pattern: "^[0-9]+$"
   - name: MAX_REPLICAS
-    description: The maximum amount of replicas for the horizontal pod autoscaler.
+    description: "Maximum number of pod replicas for scaling"
     value: "5"
+    pattern: "^[0-9]+$"
   - name: LOG_LEVEL
-    description: Caddy logging level DEBUG, INFO, WARN, ERROR, PANIC, and FATAL (https://github.com/caddyserver/caddy/blob/master/logging.go)
+    description: "Logging level (DEBUG, INFO, WARN, ERROR, PANIC, FATAL)"
     value: "info"
+    pattern: "^(debug|info|warn|error|panic|fatal)$"
 objects:
   - apiVersion: apps/v1
     kind: Deployment
