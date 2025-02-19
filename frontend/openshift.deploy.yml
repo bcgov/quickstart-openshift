@@ -55,8 +55,8 @@ objects:
       template:
         metadata:
           labels:
-            app: ${NAME}-${ZONE}
-            component: ${COMPONENT}
+            app: "${NAME}-${ZONE}"
+            component: "${COMPONENT}"
             deployment: "${NAME}-${ZONE}-${COMPONENT}"
         spec:
           containers:
@@ -144,8 +144,8 @@ objects:
         apiVersion: apps/v1
         kind: Deployment
         name: "${NAME}-${ZONE}-${COMPONENT}"
-      minReplicas: "${{MIN_REPLICAS}}"
-      maxReplicas: "${{MAX_REPLICAS}}"
+      minReplicas: ${{MIN_REPLICAS}}
+      maxReplicas: ${{MAX_REPLICAS}}
       metrics:
         - type: Resource
           resource:
@@ -158,27 +158,27 @@ objects:
     kind: PodDisruptionBudget
     metadata:
       labels:
-        app: ${NAME}-${ZONE}
-        component: ${COMPONENT}
-      name: ${NAME}-${ZONE}-${COMPONENT}
+        app: "${NAME}-${ZONE}"
+        component: "${COMPONENT}"
+      name: "${NAME}-${ZONE}-${COMPONENT}"
     spec:
       selector:
         matchLabels:
-          app: ${NAME}-${ZONE}
-          component: ${COMPONENT}
+          app: "${NAME}-${ZONE}"
+          component: "${COMPONENT}"
       minAvailable: 1
 
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
-      name: ${NAME}-${ZONE}-allow-frontend-to-backend
+      name: "${NAME}-${ZONE}-allow-frontend-to-backend"
       labels:
-        app: ${NAME}-${ZONE}
+        app: "${NAME}-${ZONE}"
     spec:
       podSelector:
         matchLabels:
-          app: ${NAME}-${ZONE}
-          component: ${COMPONENT}
+          app: "${NAME}-${ZONE}"
+          component: "${COMPONENT}"
       ingress:
         - ports:
             - protocol: TCP
@@ -186,7 +186,7 @@ objects:
           from:
             - podSelector:
                 matchLabels:
-                  app: ${NAME}-${ZONE}
+                  app: "${NAME}-${ZONE}"
                   component: backend
       policyTypes:
         - Ingress
@@ -194,14 +194,14 @@ objects:
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
-      name: ${NAME}-${ZONE}-openshift-ingress-to-frontend
+      name: "${NAME}-${ZONE}-openshift-ingress-to-frontend"
       labels:
-        app: ${NAME}-${ZONE}
+        app: "${NAME}-${ZONE}"
     spec:
       podSelector:
         matchLabels:
-          app: ${NAME}-${ZONE}
-          component: ${COMPONENT}
+          app: "${NAME}-${ZONE}"
+          component: "${COMPONENT}"
       ingress:
         - from:
             - namespaceSelector:
