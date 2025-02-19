@@ -67,7 +67,7 @@ jobs:
         package: [migrations, backend, frontend]
     timeout-minutes: 1
     steps:
-      - uses: shrink/actions-docker-registry-tag@v4
+      - uses: shrink/actions-docker-registry-tag@f04afd0559f66b288586792eb150f45136a927fa # v4
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
