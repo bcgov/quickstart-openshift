@@ -38,6 +38,7 @@ jobs:
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
+      postgres_password: ${{ secrets.DB_PASSWORD }}
     with:
       db_user: app-${{ github.event.number }}
       params: --set global.secrets.persist=false

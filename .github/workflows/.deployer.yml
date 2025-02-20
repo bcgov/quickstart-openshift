@@ -70,6 +70,9 @@ on:
       oc_token:
         description: OpenShift token
         required: true
+      postgres_password:
+        description: The database password
+        required: true
 
 permissions: {}
 
@@ -194,7 +197,7 @@ jobs:
             -p NAMESPACE=${{ secrets.oc_namespace }}
             -p POSTGRES_DATABASE=app-${{ github.event.number }}
             -p POSTGRES_HOST=postgres-crunchy-primary.${{ secrets.oc_namespace }}.svc
-            -p POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }}
+            -p POSTGRES_PASSWORD=${{ secrets.postgres_password }}
             -p POSTGRES_USER=app-${{ github.event.number }}
             -p ZONE=${{ inputs.tag }}
           triggers: ${{ inputs.triggers }}
