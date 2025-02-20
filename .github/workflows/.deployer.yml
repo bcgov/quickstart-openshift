@@ -181,7 +181,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 1
     steps:
-      - uses: bcgov/action-deployer-openshift@v3.1.0
+      - uses: bcgov/action-deployer-openshift@541a7b1ed72cdd919a56262665d98410e6d97cb6 # v3.1.0
         id: deploys
         with:
           file: common/openshift.init.yml
@@ -222,7 +222,7 @@ jobs:
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
     steps:
-      - uses: bcgov/action-deployer-openshift@v3.1.0
+      - uses: bcgov/action-deployer-openshift@541a7b1ed72cdd919a56262665d98410e6d97cb6 # v3.1.0
         id: deploys
         with:
           file: ${{ matrix.file }}
