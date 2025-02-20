@@ -104,23 +104,28 @@ objects:
               imagePullPolicy: Always
               name: "${NAME}-${ZONE}-${COMPONENT}"
               env:
-                - name: POSTGRES_HOST
-                  value: "${NAME}-${ZONE}-database"
-                - name: POSTGRES_DATABASE
-                  valueFrom:
-                    secretKeyRef:
-                      name: "${NAME}-${ZONE}-database"
-                      key: database-name
-                - name: POSTGRES_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: "${NAME}-${ZONE}-database"
-                      key: database-password
-                - name: POSTGRES_USER
-                  valueFrom:
-                    secretKeyRef:
-                      name: "${NAME}-${ZONE}-database"
-                      key: database-user
+                - name: LOG_LEVEL
+                  value: info
+                # - name: POSTGRES_HOST
+                #   value: "${NAME}-${ZONE}-database"
+                # - name: POSTGRES_DATABASE
+                #   valueFrom:
+                #     secretKeyRef:
+                #       name: "${NAME}-${ZONE}-database"
+                #       key: database-name
+                # - name: POSTGRES_PASSWORD
+                #   valueFrom:
+                #     secretKeyRef:
+                #       name: "${NAME}-${ZONE}-database"
+                #       key: database-password
+                # - name: POSTGRES_USER
+                #   valueFrom:
+                #     secretKeyRef:
+                #       name: "${NAME}-${ZONE}-database"
+                #       key: database-user
+              envFrom:
+                - secretRef:
+                    name: quickstart-openshift-2285-backend
               ports:
                 - containerPort: 3000
                   protocol: TCP
@@ -155,20 +160,28 @@ objects:
             - name: "${NAME}-${COMPONENT_DB_MIGRATION}"
               image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT_DB_MIGRATION}:${TAG}
               env:
-                - name: FLYWAY_USER
-                  valueFrom:
-                    secretKeyRef:
-                      name: "${NAME}-${ZONE}-database"
-                      key: database-user
-                - name: FLYWAY_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: "${NAME}-${ZONE}-database"
-                      key: database-password
                 - name: FLYWAY_BASELINE_ON_MIGRATE
-                  value: "true"
+                  value: 'true'
                 - name: FLYWAY_DEFAULT_SCHEMA
-                  value: "USERS"
+                  value: USERS
+                - name: FLYWAY_CONNECT_RETRIES
+                  value: '10'
+                - name: FLYWAY_GROUP
+                  value: 'true'
+                # - name: FLYWAY_USER
+                #   valueFrom:
+                #     secretKeyRef:
+                #       name: "${NAME}-${ZONE}-database"
+                #       key: database-user
+                # - name: FLYWAY_PASSWORD
+                #   valueFrom:
+                #     secretKeyRef:
+                #       name: "${NAME}-${ZONE}-database"
+                #       key: database-password
+                # - name: FLYWAY_BASELINE_ON_MIGRATE
+                #   value: "true"
+                # - name: FLYWAY_DEFAULT_SCHEMA
+                #   value: "USERS"
               resources:
                 requests:
                   cpu: "${CPU_REQUEST_INIT}"
