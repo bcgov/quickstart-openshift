@@ -81,6 +81,7 @@ objects:
     metadata:
       labels:
         app: "${NAME}-${ZONE}"
+        component: "${COMPONENT}"
       name: "${NAME}-${ZONE}-${COMPONENT}"
     spec:
       replicas: 1
@@ -94,6 +95,7 @@ objects:
         metadata:
           labels:
             app: "${NAME}-${ZONE}"
+            component: "${COMPONENT}"
             deployment: "${NAME}-${ZONE}-${COMPONENT}"
         spec:
           containers:
@@ -158,11 +160,13 @@ objects:
                 limits:
                   cpu: "${CPU_LIMIT_INIT}"
                   memory: "${MEMORY_LIMIT_INIT}"
+
   - apiVersion: v1
     kind: Service
     metadata:
       labels:
         app: "${NAME}-${ZONE}"
+        component: "${COMPONENT}"
       name: "${NAME}-${ZONE}-${COMPONENT}"
     spec:
       ports:
@@ -172,17 +176,22 @@ objects:
           targetPort: 3000
       selector:
         deployment: "${NAME}-${ZONE}-${COMPONENT}"
+        component: "${COMPONENT}"
+
   - apiVersion: autoscaling/v2
     kind: HorizontalPodAutoscaler
     metadata:
       name: "${NAME}-${ZONE}-${COMPONENT}"
+      labels:
+        app: "${NAME}-${ZONE}"
+        component: "${COMPONENT}"
     spec:
       scaleTargetRef:
         apiVersion: apps/v1
         kind: Deployment
         name: "${NAME}-${ZONE}-${COMPONENT}"
-      minReplicas: ${{MIN_REPLICAS}}
-      maxReplicas: ${{MAX_REPLICAS}}
+      minReplicas: ${MIN_REPLICAS}
+      maxReplicas: ${MAX_REPLICAS}
       metrics:
         - type: Resource
           resource:
@@ -190,3 +199,26 @@ objects:
             target:
               type: Utilization
               averageUtilization: 100
+
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: ${NAME}-${ZONE}-allow-backend-to-db
+      labels:
+        app: "${NAME}-${ZONE}"
+        component: "${COMPONENT}"
+    spec:
+      podSelector:
+        matchLabels:
+          postgres-operator.crunchydata.com/cluster: ${NAME}-${ZONE}-db
+      ingress:
+        - ports:
+            - protocol: TCP
+              port: 5432
+          from:
+            - podSelector:
+                matchLabels:
+                  app: "${NAME}-${ZONE}"
+                  component: "${COMPONENT}"
+      policyTypes:
+        - Ingress
