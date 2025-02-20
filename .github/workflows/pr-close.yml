@@ -58,10 +58,6 @@ jobs:
             CRUNCHY_PG_PRIMARY_POD_NAME=$(oc get pods -l postgres-operator.crunchydata.com/role=master -o json | jq -r '.items[0].metadata.name')
             
             echo "${CRUNCHY_PG_PRIMARY_POD_NAME}"
-            # Terminate all connections to the database before trying terminate
-            oc exec "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'app-${{ github.event.number }}' AND pid <> pg_backend_pid();"
-            
-            # Drop the database and role
-            oc exec "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- psql -c "DROP DATABASE \"app-${{ github.event.number }}\" --cascade"
-            oc exec "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- psql -c "DROP ROLE \"app-${{ github.event.number }}\" --cascade"
+            # Terminate all connections to the database before trying terminate and Drop the databse and role right after
+            oc exec -it "${CRUNCHY_PG_PRIMARY_POD_NAME}" -- bash -c "psql -U postgres -d postgres -c \"SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'app-${{ github.event.number }}' AND pid <> pg_backend_pid();\" && \psql -U postgres -d postgres -c \"DROP DATABASE \\\"app-${{ github.event.number }}\\\";\" && \psql -U postgres -d postgres -c \"DROP ROLE \\\"app-${{ github.event.number }}\\\";\""
             echo 'database and role deleted'
