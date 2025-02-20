@@ -175,10 +175,34 @@ jobs:
   #           # Completed pod cleanup
   #           oc delete po --field-selector=status.phase==Succeeded || true
 
+  deploy-init:
+    name: Init
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - uses: bcgov/action-deployer-openshift@v3.1.0
+        id: deploys
+        with:
+          file: common/openshift.init.yml
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          overwrite: false
+          parameters:
+            -p NAME=${{ github.event.repository.name }}
+            -p NAMESPACE=${{ secrets.oc_namespace }}
+            -p POSTGRES_DATABASE=app-${{ github.event.number }}
+            -p POSTGRES_HOST=postgres-crunchy-primary.${{ secrets.oc_namespace }}.svc
+            -p POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }}
+            -p POSTGRES_USER=app-${{ github.event.number }}
+            -p ZONE=${{ inputs.tag }}
+          triggers: ${{ inputs.triggers }}
+
   deploy-matrix:
     name: Deploy
     environment: ${{ inputs.environment }}
-    # needs: deployer-db
+    needs: init
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
