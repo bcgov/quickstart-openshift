@@ -175,7 +175,7 @@ jobs:
   #           # Completed pod cleanup
   #           oc delete po --field-selector=status.phase==Succeeded || true
 
-  deploy-init:
+  init:
     name: Init
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-24.04
