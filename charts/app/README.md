@@ -978,7 +978,7 @@ null
 			<td>backup.containers[0].env.fromGlobalSecret[0].name</td>
 			<td>string</td>
 			<td><pre lang="json">
-"DATABASE_PASSWORD"
+"POSTGRES_PASSWORD"
 </pre>
 </td>
 			<td></td>
@@ -3581,7 +3581,7 @@ null
 			<td>backup.containers[0].env.fromGlobalSecret[0].name</td>
 			<td>string</td>
 			<td><pre lang="json">
-"DATABASE_PASSWORD"
+"POSTGRES_PASSWORD"
 </pre>
 </td>
 			<td></td>
