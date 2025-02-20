@@ -1,0 +1,224 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  annotations:
+    openshift.io/display-name: "Backend Deployment Template"
+    description: "Template for deploying the backend component with database migrations, networking, scaling, and security configurations."
+    tags: "backend,nodejs,postgresql,flyway,quickstart"
+    iconClass: "icon-nodejs"
+    openshift.io/documentation-url: "https://github.com/bcgov/quickstart-openshift"
+    openshift.io/provider-display-name: "BC Government"
+parameters:
+  - name: NAME
+    description: "Application name, used to group and identify resources"
+    required: true
+    value: quickstart
+  - name: COMPONENT
+    description: "Component identifier within the application (backend)"
+    value: "backend"
+  - name: ZONE
+    description: "Deployment zone (e.g. dev, test, prod, pr-###). Used for resource isolation"
+    required: true
+    pattern: "^(dev|test|prod|pr-[0-9]+)$"
+  - name: REGISTRY
+    description: "Container registry URL. Use 'image-registry.openshift-image-registry.svc:5000' for internal registry"
+    value: "ghcr.io"
+  - name: ORG
+    description: "Organization or project name in the container registry"
+    value: "bcgov"
+  - name: TAG
+    description: "Container image tag to deploy"
+    value: "latest"
+  - name: COMPONENT_DB_MIGRATION
+    description: "Component name for Flyway database migrations"
+    value: "migrations"
+  - name: IMAGE_TAG
+    description: "Image tag for database migrations (defaults to latest)"
+    value: "latest"
+  - name: CPU_REQUEST
+    description: "Minimum CPU resources required for backend (in millicores)"
+    value: "25m"
+    pattern: "^[0-9]+[m]?$"
+  - name: MEMORY_REQUEST
+    description: "Minimum memory resources required for backend"
+    value: "50Mi"
+    pattern: "^[0-9]+[KMGTPkmgtp]i?$"
+  - name: CPU_LIMIT
+    description: "Maximum CPU resources allowed for backend (in millicores)"
+    value: "75m"
+    pattern: "^[0-9]+[m]?$"
+  - name: MEMORY_LIMIT
+    description: "Maximum memory resources allowed for backend"
+    value: "150Mi"
+    pattern: "^[0-9]+[KMGTPkmgtp]i?$"
+  - name: CPU_REQUEST_INIT
+    description: "Minimum CPU resources required for database migrations (in millicores)"
+    value: "125m"
+    pattern: "^[0-9]+[m]?$"
+  - name: MEMORY_REQUEST_INIT
+    description: "Minimum memory resources required for database migrations"
+    value: "100Mi"
+    pattern: "^[0-9]+[KMGTPkmgtp]i?$"
+  - name: CPU_LIMIT_INIT
+    description: "Maximum CPU resources allowed for database migrations (in millicores)"
+    value: "250m"
+    pattern: "^[0-9]+[m]?$"
+  - name: MEMORY_LIMIT_INIT
+    description: "Maximum memory resources allowed for database migrations"
+    value: "250Mi"
+    pattern: "^[0-9]+[KMGTPkmgtp]i?$"
+  - name: MIN_REPLICAS
+    description: "Minimum number of pod replicas for high availability"
+    value: "3"
+    pattern: "^[0-9]+$"
+  - name: MAX_REPLICAS
+    description: "Maximum number of pod replicas for scaling"
+    value: "5"
+    pattern: "^[0-9]+$"
+objects:
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        app: "${NAME}-${ZONE}"
+        component: "${COMPONENT}"
+      name: "${NAME}-${ZONE}-${COMPONENT}"
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: "${NAME}-${ZONE}"
+          deployment: "${NAME}-${ZONE}-${COMPONENT}"
+      strategy:
+        type: RollingUpdate
+      template:
+        metadata:
+          labels:
+            app: "${NAME}-${ZONE}"
+            component: "${COMPONENT}"
+            deployment: "${NAME}-${ZONE}-${COMPONENT}"
+        spec:
+          containers:
+            - image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
+              imagePullPolicy: Always
+              name: "${NAME}-${ZONE}-${COMPONENT}"
+              env:
+                - name: LOG_LEVEL
+                  value: info
+              envFrom:
+                - secretRef:
+                    name: ${NAME}-${ZONE}-${COMPONENT}
+              ports:
+                - containerPort: 3000
+                  protocol: TCP
+              resources:
+                requests:
+                  cpu: "${CPU_REQUEST}"
+                  memory: "${MEMORY_REQUEST}"
+                limits:
+                  cpu: "${CPU_LIMIT}"
+                  memory: "${MEMORY_LIMIT}"
+              readinessProbe:
+                httpGet:
+                  path: /api
+                  port: 3000
+                  scheme: HTTP
+                initialDelaySeconds: 5
+                periodSeconds: 2
+                timeoutSeconds: 2
+                successThreshold: 1
+                failureThreshold: 30
+              livenessProbe:
+                successThreshold: 1
+                failureThreshold: 3
+                httpGet:
+                  path: /api
+                  port: 3000
+                  scheme: HTTP
+                initialDelaySeconds: 60
+                periodSeconds: 30
+                timeoutSeconds: 5
+          initContainers:
+            - name: "${NAME}-${ZONE}-${COMPONENT_DB_MIGRATION}"
+              image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT_DB_MIGRATION}:${TAG}
+              env:
+                - name: FLYWAY_BASELINE_ON_MIGRATE
+                  value: 'true'
+                - name: FLYWAY_DEFAULT_SCHEMA
+                  value: USERS
+                - name: FLYWAY_CONNECT_RETRIES
+                  value: '10'
+                - name: FLYWAY_GROUP
+                  value: 'true'
+              envFrom:
+                - secretRef:
+                    name: ${NAME}-${ZONE}-flyway
+              resources:
+                requests:
+                  cpu: "${CPU_REQUEST_INIT}"
+                  memory: "${MEMORY_REQUEST_INIT}"
+                limits:
+                  cpu: "${CPU_LIMIT_INIT}"
+                  memory: "${MEMORY_LIMIT_INIT}"
+
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: "${NAME}-${ZONE}"
+        component: "${COMPONENT}"
+      name: "${NAME}-${ZONE}-${COMPONENT}"
+    spec:
+      ports:
+        - name: 3000-tcp
+          protocol: TCP
+          port: 80
+          targetPort: 3000
+      selector:
+        deployment: "${NAME}-${ZONE}-${COMPONENT}"
+        component: "${COMPONENT}"
+
+  - apiVersion: autoscaling/v2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: "${NAME}-${ZONE}-${COMPONENT}"
+      labels:
+        app: "${NAME}-${ZONE}"
+        component: "${COMPONENT}"
+    spec:
+      scaleTargetRef:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: "${NAME}-${ZONE}-${COMPONENT}"
+      minReplicas: ${{MIN_REPLICAS}}
+      maxReplicas: ${{MAX_REPLICAS}}
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 100
+
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: ${NAME}-${ZONE}-allow-backend-to-db
+      labels:
+        app: "${NAME}-${ZONE}"
+        component: "${COMPONENT}"
+    spec:
+      podSelector:
+        matchLabels:
+          postgres-operator.crunchydata.com/cluster: ${NAME}-${ZONE}-db
+      ingress:
+        - ports:
+            - protocol: TCP
+              port: 5432
+          from:
+            - podSelector:
+                matchLabels:
+                  app: "${NAME}-${ZONE}"
+                  component: "${COMPONENT}"
+      policyTypes:
+        - Ingress
