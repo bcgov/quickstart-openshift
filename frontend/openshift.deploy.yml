@@ -101,6 +101,7 @@ objects:
                     operator: In
                     values:
                     - ${NAME}-${ZONE}
+                topologyKey: kubernetes.io/hostname
           containers:
             - image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
               securityContext:
