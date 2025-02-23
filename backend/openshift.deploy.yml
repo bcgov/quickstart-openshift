@@ -16,7 +16,7 @@ parameters:
   - name: COMPONENT
     description: "Component identifier within the application (backend)"
     value: "backend"
-  - name: COMPONENT_DATBASE
+  - name: COMPONENT_DATABASE
     description: "Component identifier for the database (crunchy postgres)"
     value: "postgres-crunchy"
   - name: ZONE
