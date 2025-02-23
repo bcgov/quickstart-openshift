@@ -93,11 +93,7 @@ objects:
               requiredDuringSchedulingIgnoredDuringExecution:
               - labelSelector:
                   matchExpressions:
-                  - key: "${NAME}-${ZONE}-${COMPONENT}"
-                    operator: In
-                    values:
-                    - ${NAME}-${ZONE}-${COMPONENT}
-                  - key: "${NAME}-${ZONE}-${COMPONENT}"
+                  - key: "app"
                     operator: In
                     values:
                     - ${NAME}-${ZONE}
