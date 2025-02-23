@@ -93,10 +93,10 @@ objects:
               requiredDuringSchedulingIgnoredDuringExecution:
               - labelSelector:
                   matchExpressions:
-                  - key: "app"
+                  - key: "deployment"
                     operator: In
                     values:
-                    - ${NAME}-${ZONE}
+                    - ${NAME}-${ZONE}-${COMPONENT}
                 topologyKey: kubernetes.io/hostname
           containers:
             - image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}

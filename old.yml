@@ -97,23 +97,3 @@ spec:
         name: data
       - emptyDir: {}
         name: config
-status:
-  availableReplicas: 1
-  conditions:
-  - lastTransitionTime: "2025-02-19T01:34:41Z"
-    lastUpdateTime: "2025-02-19T01:34:41Z"
-    message: Deployment has minimum availability.
-    reason: MinimumReplicasAvailable
-    status: "True"
-    type: Available
-  - lastTransitionTime: "2025-02-19T01:34:33Z"
-    lastUpdateTime: "2025-02-19T01:34:41Z"
-    message: ReplicaSet "quickstart-openshift-2285-frontend-b77778958" has successfully
-      progressed.
-    reason: NewReplicaSetAvailable
-    status: "True"
-    type: Progressing
-  observedGeneration: 1
-  readyReplicas: 1
-  replicas: 1
-  updatedReplicas: 1
