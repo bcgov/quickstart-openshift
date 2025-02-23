@@ -83,6 +83,24 @@ objects:
             component: "${COMPONENT}"
             deployment: "${NAME}-${ZONE}-${COMPONENT}"
         spec:
+          volumes:
+          - emptyDir: {}
+            name: data
+          - emptyDir: {}
+            name: config
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: "${NAME}-${ZONE}-${COMPONENT}"
+                    operator: In
+                    values:
+                    - ${NAME}-${ZONE}-${COMPONENT}
+                  - key: "${NAME}-${ZONE}-${COMPONENT}"
+                    operator: In
+                    values:
+                    - ${NAME}-${ZONE}
           containers:
             - image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
               securityContext:
@@ -125,6 +143,11 @@ objects:
                 initialDelaySeconds: 15
                 periodSeconds: 30
                 timeoutSeconds: 5
+              volumeMounts:
+              - mountPath: /data
+                name: data
+              - mountPath: /config
+                name: config
 
   - apiVersion: v1
     kind: Service
