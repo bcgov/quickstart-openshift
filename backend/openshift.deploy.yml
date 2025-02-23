@@ -16,6 +16,9 @@ parameters:
   - name: COMPONENT
     description: "Component identifier within the application (backend)"
     value: "backend"
+  - name: COMPONENT_DATBASE
+    description: "Component identifier for the database (crunchy postgres)"
+    value: "postgres-crunchy"
   - name: ZONE
     description: "Deployment zone (e.g. dev, test, prod, pr-###). Used for resource isolation"
     required: true
@@ -222,10 +225,12 @@ objects:
       labels:
         app: "${NAME}-${ZONE}"
         component: "${COMPONENT}"
+        app.kubernetes.io/instance: "${NAME}-${ZONE}"
+        app.kubernetes.io/name: "${NAME}-${ZONE}"
     spec:
       podSelector:
         matchLabels:
-          postgres-operator.crunchydata.com/cluster: ${NAME}-${ZONE}-db
+          postgres-operator.crunchydata.com/cluster: ${COMPONENT_DATABASE}
       ingress:
         - ports:
             - protocol: TCP
