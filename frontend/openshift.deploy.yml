@@ -107,7 +107,7 @@ objects:
               name: "${NAME}-${ZONE}-${COMPONENT}"
               env:
                 - name: BACKEND_URL
-                  value: "https://${NAME}-${ZONE}-backend.${DOMAIN}:443"
+                  value: http://${NAME}-${ZONE}-backend
                 - name: LOG_LEVEL
                   value: "${LOG_LEVEL}"
               ports:
