@@ -218,6 +218,20 @@ objects:
               type: Utilization
               averageUtilization: 100
 
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      labels:
+        app: "${NAME}-${ZONE}"
+        component: "${COMPONENT}"
+      name: "${NAME}-${ZONE}-${COMPONENT}"
+    spec:
+      selector:
+        matchLabels:
+          app: "${NAME}-${ZONE}"
+          component: "${COMPONENT}"
+      minAvailable: 1
+
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
