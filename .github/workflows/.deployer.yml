@@ -86,11 +86,13 @@ jobs:
   init:
     name: Init
     environment: ${{ inputs.environment }}
+    outputs:
+      triggered: ${{ steps.init.outputs.triggered }}
     runs-on: ubuntu-24.04
     timeout-minutes: 1
     steps:
       - uses: bcgov/action-deployer-openshift@541a7b1ed72cdd919a56262665d98410e6d97cb6 # v3.1.0
-        id: deploys
+        id: init
         with:
           file: common/openshift.init.yml
           oc_namespace: ${{ secrets.oc_namespace }}
