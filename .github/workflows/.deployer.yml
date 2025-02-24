@@ -54,10 +54,10 @@ on:
     outputs:
       tag:
         description: 'Which tag was used for deployment?'
-        value: ${{ jobs.deploy.outputs.tag }}
+        value: ${{ jobs.init.outputs.tag }}
       triggered:
         description: 'Has a deployment has been triggered?'
-        value: ${{ jobs.deploy.outputs.triggered }}
+        value: ${{ jobs.init.outputs.triggered }}
 
     secrets:
       oc_namespace:
@@ -87,6 +87,7 @@ jobs:
     name: Init
     environment: ${{ inputs.environment }}
     outputs:
+      tag: ${{ steps.init.outputs.tag }}
       triggered: ${{ steps.init.outputs.triggered }}
     runs-on: ubuntu-24.04
     timeout-minutes: 1
