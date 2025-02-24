@@ -41,7 +41,6 @@ jobs:
       postgres_password: ${{ secrets.DB_PASSWORD }}
     with:
       db_user: app-${{ github.event.number }}
-      params: --set global.secrets.persist=false
       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
 
   tests:
