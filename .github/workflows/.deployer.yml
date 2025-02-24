@@ -114,7 +114,7 @@ jobs:
   deploy:
     name: Deploy
     environment: ${{ inputs.environment }}
-    needs: database, init
+    needs: [database, init]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
