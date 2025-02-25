@@ -1,4 +1,4 @@
-name: .Helm Deployer
+name: .Deployer
 
 on:
   workflow_call:
@@ -7,16 +7,6 @@ on:
       # Only secrets!
 
       ### Typical / recommended
-      atomic:
-        description: Atomic deployment?  That means fail all or nothing
-        default: true
-        required: false
-        type: string
-      directory:
-        description: Chart directory
-        default:  'charts/app'
-        required: false
-        type: string
       environment:
         description: Environment name; omit for PRs
         required: false
@@ -45,11 +35,6 @@ on:
         default: 10
         required: false
         type: number
-      values:
-        description: 'Values file'
-        default: 'values.yaml'
-        required: false
-        type: string
 
     outputs:
       tag:
@@ -115,7 +100,7 @@ jobs:
     environment: ${{ inputs.environment }}
     needs: [database, init]
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: ${{ inputs.timeout-minutes }}
     strategy:
       matrix:
         name: [backend, frontend]
