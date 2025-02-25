@@ -64,24 +64,3 @@ objects:
     FLYWAY_URL: ${FLYWAY_BASE_URL}/${POSTGRES_DATABASE}
     FLYWAY_USER: ${POSTGRES_USER}
     FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
-
-- apiVersion: v1
-  kind: Secret
-  metadata:
-    name: ${NAME}-${ZONE}-database
-    labels:
-        app: "${NAME}-${ZONE}"
-        component: "${COMPONENT}"
-  data:
-    dbname: ${POSTGRES_DATABASE}
-    host: postgres-crunchy-primary.${NAMESPACE}.svc
-    jdbc-uri: "jdbc:postgresql://postgres-crunchy-primary.${NAMESPACE}.svc:5432/${POSTGRES_DATABASE}?password=c1J5_%3D20LG-ABt%5Bd28%3BmM2Ba&user=${POSTGRES_DATABASE}"
-    password: ${POSTGRES_PASSWORD}
-    port: 5432
-    user: ${POSTGRES_USER}
-    uri: "postgresql://${POSTGRES_DATABASE}:c1J5_=20LG-ABt%5Bd28;mM2Ba@postgres-crunchy-primary.${NAMESPACE}.svc:5432/${POSTGRES_DATABASE}"
-    pgbouncer-host: "postgres-crunchy-pgbouncer.${NAMESPACE}.svc"
-    pgbouncer-jdbc-uri: "postgresql://${POSTGRES_DATABASE}:c1J5_=20LG-ABt%5Bd28;mM2Ba@postgres-crunchy-pgbouncer.${NAMESPACE}.svc:5432/${POSTGRES_DATABASE}"
-    pgbouncer-port: 5432
-    pgbouncer-uri: "jdbc:postgresql://postgres-crunchy-primary.${NAMESPACE}.svc:5432/${POSTGRES_DATABASE}?password=c1J5_%3D20LG-ABt%5Bd28%3BmM2Ba&user=${POSTGRES_DATABASE}"
-    verifier: SCRAM-SHA-256$4096:LCaagN42kqMM0vV3nY+UkQ==$T3zTbTWcriWu6DHXPR71UteTUv07SJ3mzNCYZPXe0yM=:CalCQWvL+6aayivhNIYoFWlI8LiuUtd26duut/wXOsQ=
