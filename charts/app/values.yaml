@@ -106,6 +106,7 @@ frontend:
         name: metrics
   ingress:
     annotations:
+      haproxy.router.openshift.io/balance: "roundrobin"
       route.openshift.io/termination: "edge"
       haproxy.router.openshift.io/rate-limit-connections: "true"
       haproxy.router.openshift.io/rate-limit-connections.concurrent-tcp: "10"
