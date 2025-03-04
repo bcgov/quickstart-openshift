@@ -17,7 +17,6 @@ parserOptions:
     jsx: true
   ecmaVersion: 12
   sourceType: module
-  project: './frontend/tsconfig.json'
 
 plugins:
   - 'react'
@@ -38,18 +37,20 @@ rules:
   'no-empty': ['error', { allowEmptyCatch: true }]
   'no-undef': 'off'
   'no-use-before-define': 'off'
-  'no-restricted-imports': [
-    'error',
-    {
-      paths: [
-        {
-          name: 'react',
-          importNames: ['default'],
-          message: "Please import from 'react/jsx-runtime' instead.",
-        },
-      ],
-    },
-  ]
+  'no-restricted-imports':
+    [
+      'error',
+      {
+        paths:
+          [
+            {
+              name: 'react',
+              importNames: ['default'],
+              message: "Please import from 'react/jsx-runtime' instead.",
+            },
+          ],
+      },
+    ]
 
   # React rules
   'react/jsx-uses-react': 'off'
@@ -69,7 +70,5 @@ rules:
   '@typescript-eslint/no-use-before-define': ['error', { functions: false }]
   '@typescript-eslint/no-var-requires': 'off'
   '@typescript-eslint/explicit-function-return-type': 'off'
-  '@typescript-eslint/consistent-type-imports': [
-    'error',
-    { prefer: 'type-imports' },
-  ]
+  '@typescript-eslint/consistent-type-imports':
+    ['error', { prefer: 'type-imports' }]

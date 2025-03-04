@@ -365,3 +365,6 @@ pyrightconfig.json
 *.key
 *.pem
 *.pub
+
+# IDE
+.codebuddy
