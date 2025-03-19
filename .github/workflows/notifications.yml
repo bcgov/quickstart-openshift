@@ -61,7 +61,7 @@ jobs:
       - uses: simbo/msteams-message-card-action@d87ad6c3908b72f4fd94b55d937d05395c7300dc # v1.4.3
         if: vars.MS_TEAMS_WEBHOOK_URI
         with:
-          webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI != null }}
+          webhook: ${{ vars.MS_TEAMS_WEBHOOK_URI }}
           title: "${{github.event.workflow_run.head_commit.message}}" 
           message: "${{github.event.workflow_run.head_commit.message}}" 
           color: 'dark orange'
