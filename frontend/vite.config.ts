@@ -50,20 +50,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           // Split external library from transpiled code.
-          react: [
-            'react',
-            'react-dom',
-            'react-router-dom',
-            'react-router',
-            '@emotion/react',
-            '@emotion/styled',
-          ],
-          mui: [
-            '@mui/material',
-            '@mui/icons-material',
-            '@mui/system',
-            '@mui/x-data-grid',
-          ],
+          react: ['react', 'react-dom'],
           axios: ['axios'],
         },
       },
