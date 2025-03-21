@@ -1,27 +1,7 @@
 import type { FC } from 'react'
 import { Footer, Header } from '@bcgov/design-system-react-components'
-//import { Container, Row, Col } from 'react-bootstrap'
 import { Link } from '@tanstack/react-router'
 import { Button } from 'react-bootstrap'
-
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: '100vh',
-  },
-  content: {
-    flexGrow: 1,
-    marginTop: '5em',
-    marginRight: '1em',
-    marginLeft: '1em',
-    marginBottom: '5em',
-    height: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-}
 
 type Props = {
   children: React.ReactNode
@@ -29,16 +9,18 @@ type Props = {
 
 const Layout: FC<Props> = ({ children }) => {
   return (
-    <div>
+    <div className="d-flex flex-column min-vh-100">
       <Header title={'QuickStart OpenShift'}>
         {' '}
         <Link to="/">
-          <Button variant="primary" size="sm">
-            Home
+          <Button variant="light" size="lg">
+            <i className="bi bi-house-door-fill" />
           </Button>
         </Link>
       </Header>
-      <div>{children}</div>
+      <div className="d-flex flex-grow-1 align-items-start justify-content-center mt-5 mb-5 ml-1 mr-1">
+        {children}
+      </div>
       <Footer />
     </div>
   )

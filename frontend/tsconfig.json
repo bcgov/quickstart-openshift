@@ -18,10 +18,7 @@
     "jsx": "react-jsx",
     "types": [
       "vitest/globals",
-      "cypress",
       "node",
-      "cypress-file-upload",
-      "@testing-library/cypress"
     ],
     "baseUrl": "./",
     "paths": {
