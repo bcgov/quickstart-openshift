@@ -1,12 +1,10 @@
-import { Routes, Route } from 'react-router-dom'
-import NotFound from '@/components/NotFound'
+import { createFileRoute } from '@tanstack/react-router'
 import Dashboard from '@/components/Dashboard'
 
-export default function AppRoutes() {
-  return (
-    <Routes>
-      <Route path="/" element={<Dashboard />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  )
+export const Route = createFileRoute('/')({
+  component: Index,
+})
+
+function Index() {
+  return <Dashboard />
 }

@@ -1,10 +1,17 @@
 import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 import react from '@vitejs/plugin-react'
+import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    TanStackRouterVite({
+      target: 'react',
+      autoCodeSplitting: true,
+    }),
+    react(),
+  ],
   server: {
     port: parseInt(process.env.PORT),
     fs: {
@@ -14,7 +21,7 @@ export default defineConfig({
     proxy: {
       // Proxy API requests to the backend
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:3001',
         changeOrigin: true,
       },
     },
@@ -24,6 +31,9 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
       '~': fileURLToPath(new URL('./node_modules', import.meta.url)),
+      '~bootstrap': fileURLToPath(
+        new URL('./node_modules/bootstrap', import.meta.url),
+      ),
     },
     extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue'],
   },
@@ -40,22 +50,23 @@ export default defineConfig({
       output: {
         manualChunks: {
           // Split external library from transpiled code.
-          react: [
-            'react',
-            'react-dom',
-            'react-router-dom',
-            'react-router',
-            '@emotion/react',
-            '@emotion/styled',
-          ],
-          mui: [
-            '@mui/material',
-            '@mui/icons-material',
-            '@mui/system',
-            '@mui/x-data-grid',
-          ],
+          react: ['react', 'react-dom'],
           axios: ['axios'],
         },
+      },
+    },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // Silence deprecation warnings caused by Bootstrap SCSS
+        // which is out of our control.
+        silenceDeprecations: [
+          'mixed-decls',
+          'color-functions',
+          'global-builtin',
+          'import',
+        ],
       },
     },
   },

@@ -1,37 +1,28 @@
-import { Box, Button, Container, Typography } from '@mui/material'
-import Grid from '@mui/material/Grid'
-import { useNavigate } from 'react-router'
+import type { FC } from 'react'
+import { Button } from 'react-bootstrap'
+import { useNavigate } from '@tanstack/react-router'
 
-export default function NotFound() {
+const NotFound: FC = () => {
   const navigate = useNavigate()
   const buttonClicked = () => {
-    navigate('/', { state: { data: undefined } }) // reset the state
+    navigate({
+      to: '/',
+    })
   }
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-      }}
-    >
-      <Container maxWidth="md">
-        <Grid>
-          <Typography variant="h1">404</Typography>
-          <Typography variant="h6">
-            The page you’re looking for does not exist.
-          </Typography>
-          <Button
-            name="homeBtn"
-            id="homeBtn"
-            onClick={() => buttonClicked()}
-            variant="contained"
-          >
-            Back Home
-          </Button>
-        </Grid>
-      </Container>
-    </Box>
+    <div className="d-flex flex-column justify-content-center align-items-center">
+      <h1>404</h1>
+      <h6>The page you’re looking for does not exist.</h6>
+      <Button
+        name="homeBtn"
+        id="homeBtn"
+        onClick={() => buttonClicked()}
+        variant="contained"
+      >
+        Back Home
+      </Button>
+    </div>
   )
 }
+
+export default NotFound

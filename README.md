@@ -347,7 +347,7 @@ Please note that the label must be manually created using GitHub's web interface
 
 ## Starter
 
-The starter stack includes a frontend (React, MUI, Vite, Caddy), backend (Nest/Node) and postgres or postgis database.  See subfolder for source, including Dockerfiles and OpenShift templates.  Alternative backends are available.
+The starter stack includes a frontend (React, Bootstrap, Vite, Caddy), backend (Nest/Node) and postgres or postgis database.  See subfolder for source, including Dockerfiles and OpenShift templates.  Alternative backends are available.
 
 Features:
 * [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
