@@ -20,5 +20,5 @@ export const dashboard_page = async (page: Page) => {
   await expect(page.getByRole('link', { name: 'Accessibility' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Copyright' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Contact us' })).toBeVisible()
-  await expect(page.getByText('John')).toBeVisible()
+  await expect(page.getByText('John.ipsum@test.com')).toBeVisible()
 }
