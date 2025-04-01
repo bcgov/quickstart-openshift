@@ -113,9 +113,9 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
 
   # Postgres Cluster resource values:
   pgmonitor:
-    enabled: false
+    enabled: true
     exporter:
       image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
       requests:
-        cpu: 1m
-        memory: 16Mi
+        cpu: 10m
+        memory: 32Mi
