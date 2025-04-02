@@ -1,58 +1,50 @@
-import apiService from '@/service/api-service'
-import Button from '@mui/material/Button'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogTitle from '@mui/material/DialogTitle'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableRow from '@mui/material/TableRow'
-import { DataGrid, GridToolbar } from '@mui/x-data-grid'
-import { useEffect, useState } from 'react'
+import type { FC } from 'react'
 import type { AxiosResponse } from '~/axios'
+import type UserDto from '@/interfaces/UserDto'
+import { useEffect, useState } from 'react'
+import { Table, Modal, Button } from 'react-bootstrap'
+import apiService from '@/service/api-service'
 
-const columns = [
-  {
-    field: 'id',
-    headerName: 'Employee ID',
-    sortable: true,
-    filterable: true,
-    flex: 1,
-    renderHeader: (params: any) => (
-      <div id={`${params.field}`}>Employee ID</div>
-    ),
-  },
-  {
-    field: 'name',
-    headerName: 'Employee Name',
-    sortable: true,
-    filterable: true,
-    flex: 1,
-    renderHeader: (params: any) => (
-      <div id={`${params.field}`}>Employee Name</div>
-    ),
-  },
-  {
-    field: 'email',
-    headerName: 'Employee Email',
-    sortable: true,
-    filterable: true,
-    flex: 1,
-    renderHeader: (params: any) => (
-      <div id={`${params.field}`}>Employee Email</div>
-    ),
-  },
-]
-export default function Dashboard() {
+type ModalProps = {
+  show: boolean
+  onHide: () => void
+  user?: UserDto
+}
+
+const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
+  return (
+    <Modal
+      show={show}
+      onHide={onHide}
+      size="lg"
+      aria-labelledby="contained-modal-title-vcenter"
+      centered
+    >
+      <Modal.Header closeButton>
+        <Modal.Title id="contained-modal-title-vcenter">
+          Row Details
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>{JSON.stringify(user)}</Modal.Body>
+      <Modal.Footer>
+        <Button onClick={onHide}>Close</Button>
+      </Modal.Footer>
+    </Modal>
+  )
+}
+
+const Dashboard: FC = () => {
   const [data, setData] = useState<any>([])
+  const [selectedUser, setSelectedUser] = useState<UserDto | undefined>(
+    undefined,
+  )
 
   useEffect(() => {
     apiService
       .getAxiosInstance()
       .get('/v1/users')
       .then((response: AxiosResponse) => {
-        const users = []
+        const users: UserDto[] = []
         for (const user of response.data) {
           const userDto = {
             id: user.id,
@@ -67,56 +59,48 @@ export default function Dashboard() {
         console.error(error)
       })
   }, [])
-  const [selectedRow, setSelectedRow] = useState(null)
 
   const handleClose = () => {
-    setSelectedRow(null)
+    setSelectedUser(undefined)
   }
+
   return (
-    <div
-      style={{
-        minHeight: '45em',
-        maxHeight: '45em',
-        width: '100%',
-        marginLeft: '4em',
-      }}
-    >
-      <DataGrid
-        slots={{ toolbar: GridToolbar }}
-        slotProps={{
-          toolbar: {
-            showQuickFilter: true,
-          },
-        }}
-        experimentalFeatures={{ ariaV7: true }}
-        checkboxSelection={false}
-        rows={data}
-        columns={columns}
-        pageSizeOptions={[5, 10, 20, 50, 100]}
-        getRowId={(row) => row['id']}
-        onRowClick={(params) => setSelectedRow(params.row)}
+    <div className="min-vh-45 mh-45 mw-50 ml-4">
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Employee Name</th>
+            <th>Employee Email</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((user: UserDto) => (
+            <tr key={user.id}>
+              <td>{user.id}</td>
+              <td>{user.name}</td>
+              <td>{user.email}</td>
+              <td className="text-center">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setSelectedUser(user)}
+                >
+                  View Details
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+      <ModalComponent
+        show={!!selectedUser}
+        onHide={handleClose}
+        user={selectedUser}
       />
-      <Dialog open={!!selectedRow} onClose={handleClose}>
-        <DialogTitle>Row Details</DialogTitle>
-        <DialogContent>
-          <Table>
-            <TableBody>
-              {selectedRow &&
-                Object.entries(selectedRow).map(([key, value]) => (
-                  <TableRow key={key}>
-                    <TableCell>{key}</TableCell>
-                    <TableCell>{value}</TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="contained" color="secondary" onClick={handleClose}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
     </div>
   )
 }
+
+export default Dashboard

@@ -20,7 +20,5 @@ export const dashboard_page = async (page: Page) => {
   await expect(page.getByRole('link', { name: 'Accessibility' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Copyright' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Contact us' })).toBeVisible()
-  await page.getByPlaceholder('Search…').click()
-  await page.getByPlaceholder('Search…').fill('john')
-  await expect(page.locator('#root')).toContainText('1–1 of 1')
+  await expect(page.getByText('John.ipsum@test.com')).toBeVisible()
 }
