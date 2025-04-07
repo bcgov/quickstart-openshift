@@ -63,18 +63,15 @@ jobs:
   # Run sequentially to reduce chances of rate limiting
   zap_scan:
     name: ZAP Scans
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}-test
     runs-on: ubuntu-24.04
     strategy:
       matrix:
         name: [backend, frontend]
+        url: https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca
         include:
           - name: backend
-            target: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api
+            path: api
           - name: frontend
-            target: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
     steps:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@75ee1686750ab1511a73b26b77a2aedd295053ed # v0.12.0
@@ -83,4 +80,4 @@ jobs:
           artifact_name: ${{ matrix.name }}
           cmd_options: "-a"
           issue_title: "ZAP: ${{ matrix.name }}"
-          target: ${{ matrix.target }}
+          target: ${{ matrix.url }}/${{ matrix.path }}
