@@ -63,6 +63,8 @@ jobs:
   # Run sequentially to reduce chances of rate limiting
   zap_scan:
     name: ZAP Scans
+    permissions:
+      issues: write
     runs-on: ubuntu-24.04
     strategy:
       matrix:
