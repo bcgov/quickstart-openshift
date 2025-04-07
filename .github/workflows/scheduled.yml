@@ -67,12 +67,13 @@ jobs:
     strategy:
       matrix:
         name: [backend, frontend]
-        url: "https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca"
         include:
           - name: backend
             path: "api"
+            url: "https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca"
           - name: frontend
             path: ""
+            url: "https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca"
     steps:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@75ee1686750ab1511a73b26b77a2aedd295053ed # v0.12.0
