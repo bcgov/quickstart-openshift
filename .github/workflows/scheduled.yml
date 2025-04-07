@@ -1,9 +1,9 @@
 name: Scheduled
 
-on: [pull_request]
-  # schedule: [cron: "0 11 * * 6"] # 3 AM PST = 12 PM UDT, Saturdays
-  # workflow_dispatch:
-  # workflow_call:
+on:
+  schedule: [cron: "0 11 * * 6"] # 3 AM PST = 12 PM UDT, Saturdays
+  workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,53 +12,53 @@ concurrency:
 permissions: {}
 
 jobs:
-  # ageOutPRs:
-  #   name: PR Deployment Purge
-  #   env:
-  #     # https://tecadmin.net/getting-yesterdays-date-in-bash/
-  #     CUTOFF: "1 week ago"
-  #   runs-on: ubuntu-24.04
-  #   timeout-minutes: 10
-  #   steps:
-  #     - name: Clean up Helm Releases
-  #       uses: bcgov/action-oc-runner@13d14b8f41df24226036385510472f683350850b # v1.0.0
-  #       with:
-  #         oc_namespace: ${{ secrets.oc_namespace }}
-  #         oc_token: ${{ secrets.oc_token }}
-  #         oc_server: ${{ vars.oc_server }}
-  #         commands: |
-  #           # Catch errors, unset variables, and pipe failures (e.g. grep || true )
-  #           set -euo pipefail
+  ageOutPRs:
+    name: PR Deployment Purge
+    env:
+      # https://tecadmin.net/getting-yesterdays-date-in-bash/
+      CUTOFF: "1 week ago"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Clean up Helm Releases
+        uses: bcgov/action-oc-runner@13d14b8f41df24226036385510472f683350850b # v1.0.0
+        with:
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
+          oc_server: ${{ vars.oc_server }}
+          commands: |
+            # Catch errors, unset variables, and pipe failures (e.g. grep || true )
+            set -euo pipefail
 
-  #           # Echos
-  #           echo "Delete stale Helm releases"
-  #           echo "Cutoff: ${{ env.CUTOFF }}"
+            # Echos
+            echo "Delete stale Helm releases"
+            echo "Cutoff: ${{ env.CUTOFF }}"
 
-  #           # Before date, list of releases
-  #           BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
-  #           RELEASES=$(helm ls -aq | grep ${{ github.event.repository.name }} || :)
+            # Before date, list of releases
+            BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
+            RELEASES=$(helm ls -aq | grep ${{ github.event.repository.name }} || :)
 
-  #           # If releases, then iterate
-  #           [ -z "${RELEASES}" ]|| for r in ${RELEASES[@]}; do
+            # If releases, then iterate
+            [ -z "${RELEASES}" ]|| for r in ${RELEASES[@]}; do
 
-  #             # Get last update and convert the date
-  #             UPDATED=$(date "+%s" -d <<< echo $(helm status $r -o json | jq -r .info.last_deployed))
+              # Get last update and convert the date
+              UPDATED=$(date "+%s" -d <<< echo $(helm status $r -o json | jq -r .info.last_deployed))
 
-  #             # Compare to cutoff and delete as necessary
-  #             if [[ ${UPDATED} < ${BEFORE} ]]; then
-  #               echo -e "\nOlder than cutoff: ${r}"
-  #               helm uninstall --no-hooks ${r}
-  #               oc delete pvc/${r}-bitnami-pg-0 || true
-  #             else
-  #               echo -e "\nNewer than cutoff: ${r}"
-  #               echo "No need to delete"
-  #             fi
-  #           done
+              # Compare to cutoff and delete as necessary
+              if [[ ${UPDATED} < ${BEFORE} ]]; then
+                echo -e "\nOlder than cutoff: ${r}"
+                helm uninstall --no-hooks ${r}
+                oc delete pvc/${r}-bitnami-pg-0 || true
+              else
+                echo -e "\nNewer than cutoff: ${r}"
+                echo "No need to delete"
+              fi
+            done
 
-  # # https://github.com/bcgov/quickstart-openshift-helpers
-  # schema-spy:
-  #   name: SchemaSpy
-  #   uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@v0.9.0
+  # https://github.com/bcgov/quickstart-openshift-helpers
+  schema-spy:
+    name: SchemaSpy
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@v0.9.0
 
   # Run sequentially to reduce chances of rate limiting
   zap_scan:
