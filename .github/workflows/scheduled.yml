@@ -1,9 +1,9 @@
 name: Scheduled
 
-on: [pull_request]
-  # schedule: [cron: "0 11 * * 6"] # 3 AM PST = 12 PM UDT, Saturdays
-  # workflow_dispatch:
-  # workflow_call:
+on:
+  schedule: [cron: "0 11 * * 6"] # 3 AM PST = 12 PM UDT, Saturdays
+  workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -60,11 +60,10 @@ jobs:
     name: SchemaSpy
     permissions:
       contents: write
-      pages: write
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@v0.9.0
 
   # Run sequentially to reduce chances of rate limiting
-  zap_scan:
+  zap:
     name: ZAP Scans
     permissions:
       issues: write
