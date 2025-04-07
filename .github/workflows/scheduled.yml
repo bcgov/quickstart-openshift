@@ -1,9 +1,9 @@
 name: Scheduled
 
-on:
-  schedule: [cron: "0 11 * * 6"] # 3 AM PST = 12 PM UDT, Saturdays
-  workflow_dispatch:
-  workflow_call:
+on: [pull_request]
+  # schedule: [cron: "0 11 * * 6"] # 3 AM PST = 12 PM UDT, Saturdays
+  # workflow_dispatch:
+  # workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
