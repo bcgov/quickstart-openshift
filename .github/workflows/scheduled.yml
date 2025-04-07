@@ -79,4 +79,4 @@ jobs:
           artifact_name: ${{ matrix.name }}
           cmd_options: "-a"
           issue_title: "ZAP: ${{ matrix.name }}"
-          target: https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca}/${{ matrix.path }}
+          target: https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca/${{ matrix.path }}
