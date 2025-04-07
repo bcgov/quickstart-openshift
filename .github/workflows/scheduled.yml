@@ -59,6 +59,7 @@ jobs:
   schema-spy:
     name: SchemaSpy
     permissions:
+      contents: write
       pages: write
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@v0.9.0
 
