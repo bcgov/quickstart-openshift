@@ -403,6 +403,8 @@ This repository is provided by NRIDS Architecture and Forestry Digital Services,
 
 * NRID's [Kickstarter Guide](https://bcgov.github.io/nr-architecture-patterns-library/docs/Agile%20Team%20Kickstarter) (via. Confluence, links may be internal)
 
+## Architecture
+![Architecture](./.diagrams/architecture/arch.drawio.svg)
 # Contributing
 
 Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.
