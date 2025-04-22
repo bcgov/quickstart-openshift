@@ -82,5 +82,6 @@ jobs:
           allow_issue_writing: true
           artifact_name: ${{ matrix.name }}
           cmd_options: "-a"
-          issue_title: "ZAP: ${{ matrix.name }}"
+          issue_title: "ZAP Security Report: ${{ matrix.name }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
           target: https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca/${{ matrix.path }}
