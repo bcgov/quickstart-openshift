@@ -69,7 +69,7 @@ The following are required:
 * BC Government IDIR accounts for anyone submitting requests
 * [GitHub accounts](https://github.com/signup) for all participating team members
 * Membership in the BCGov GitHub organization
-    * Join by [following these instructions](https://developer.gov.bc.ca/docs/default/component/bc-developer-guide/use-github-in-bcgov/bc-government-organizations-in-github/#directions-to-sign-up-and-link-your-account-for-bcgov).
+    * Join the bcgov organization using [these instructions](https://developer.gov.bc.ca/docs/default/component/bc-developer-guide/use-github-in-bcgov/bc-government-organizations-in-github/#directions-to-sign-up-and-link-your-account-for-bcgov).
 * OpenShift project namespaces:
     * [BCGov signup](https://registry.developer.gov.bc.ca)
 
