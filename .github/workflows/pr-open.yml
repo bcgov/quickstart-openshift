@@ -28,7 +28,7 @@ jobs:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
           tag_fallback: latest
-          triggers: ('${{ matrix.package }}/')
+          # triggers: ('${{ matrix.package }}/')
 
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploys:
@@ -41,7 +41,7 @@ jobs:
     with:
       db_user: app-${{ github.event.number }}
       params: --set global.secrets.persist=false
-      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+      # triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
 
   tests:
     name: Tests
