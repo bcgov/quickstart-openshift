@@ -82,7 +82,7 @@ jobs:
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       environment: ${{ inputs.environment }}
-      triggers: ${{ inputs.triggers }}
+      # triggers: ${{ inputs.triggers }}
 
   deploy:
     name: Stack
