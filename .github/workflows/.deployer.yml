@@ -81,7 +81,7 @@ jobs:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
-      # environment: ${{ inputs.environment }}
+      environment: ${{ inputs.environment }}
       # triggers: ${{ inputs.triggers }}
 
   deploy:
