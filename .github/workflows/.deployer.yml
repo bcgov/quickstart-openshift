@@ -76,7 +76,7 @@ permissions: {}
 jobs:
   deployer-db:
     name: Database
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer-db.yml@chore/crunchyWorkflow
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer-db.yml@v0.10.0
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
