@@ -14,7 +14,7 @@ permissions: {}
 jobs:
   cleanup:
     name: Cleanup and Image Promotion
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-close.yml@v0.9.0
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-close.yml@v0.10.0
     permissions:
       packages: write
     secrets:
@@ -32,7 +32,7 @@ jobs:
 
       - name: Remove PR user and database from crunchy
         continue-on-error: true
-        uses: bcgov/action-oc-runner@5882b707c20135424f62202f80d56c1d243fd96c # v1.1.0
+        uses: bcgov/action-oc-runner@8e5c7737c90e5854c8378555aa933a8eb119ad83 # v1.2.0
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
