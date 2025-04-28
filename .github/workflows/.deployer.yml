@@ -9,9 +9,9 @@ on:
       ### Typical / recommended
       atomic:
         description: Atomic deployment?  That means fail all or nothing
-        default: true
+        default: false
         required: false
-        type: string
+        type: boolean
       directory:
         description: Chart directory
         default:  'charts/app'
