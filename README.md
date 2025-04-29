@@ -68,9 +68,9 @@ Note: Dependabot, which we don't recommend as highly as Renovate, requires its o
 
 > Click Settings > Secrets and Variables > Actions > Secrets > New repository secret
 
-**OC_TOKEN**
+**`OC_TOKEN`**
 
-OpenShift token, different for every project/namespace.  This guide assumes your OpenShift platform team has provisioned a pipeline account.
+OpenShift's service account token, different for every namespace.  This guide assumes your OpenShift platform team has provisioned a pipeline account.
 
 * Consume: `{{ secrets.OC_TOKEN }}`
 
@@ -83,14 +83,14 @@ Locate an OpenShift pipeline token:
 5. Under Data, copy `token`
 6. Paste into the GitHub Secret `OC_TOKEN`
 
-**OC_NAMESPACE**
+**`OC_NAMESPACE`**
 
-OpenShift project/namespace.  Provided by your OpenShift platform team.
+OpenShift project/namespace, different for every namespace.  Provided by your OpenShift platform team.
 
 * Consume: `{{ secrets.OC_NAMESPACE }}`
-* Value: format `abc123-dev | test | prod`
+* E.g. set: `abc123-dev, abc123-test, abc123-prod` (entered separately!)
 
-**SONAR_TOKEN(s)**
+**`SONAR_TOKEN(s)`**
 
 If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, while monorepos use similar names.
 
@@ -104,13 +104,13 @@ BC Government employees can request SonarCloud projects by creating an [issue](h
 
 > Click Settings > Secrets and Variables > Actions > Variables > New repository variable
 
-**OC_SERVER**
+**`OC_SERVER`**
 
 OpenShift server address.
 * Consume: `{{ vars.OC_SERVER }}`
 * Value: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 
-**MS_TEAMS_WEBHOOK_URI**
+**`MS_TEAMS_WEBHOOK_URI`**
 * Consume: `{{ vars.MS_TEAMS_WEBHOOK_URI }}`
 * Value: ![https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif](https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif)
 * Reference: 'https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet' & 'https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference'
