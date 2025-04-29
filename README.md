@@ -259,13 +259,13 @@ These workflows and actions enforce a pull request based flow.
 
 ```mermaid
 flowchart LR
-    A[Pull Request 1] -->|tests| F(Merge)
-    B[Pull Request 2] -->|tests| F(Merge)
-    C[Pull Request 3] -->|tests| F(Merge)
-    D[...] --> F(Merge)
-    E[Pull Request n] -->|tests| F(Merge)
-    F --> G(TEST Env)
-    G -->|tests| H(PROD Env)
+flowchart LR
+    A[PR Env 1] -->|tests| F
+    B[PR Env 2] -->|tests| F
+    C[PR Env 3] -->|tests| F
+    D[...] -->|tests| F(Merge)
+    E[PR Env n] -->|tests| F
+    F(TEST Env) -->|tests| G(PROD Env)
 ```
 
 Here's a more detailed view.
