@@ -346,15 +346,15 @@ Backend (JavaScript/TypeScript)
 
 ## Starter
 
-The starter stack includes a frontend (React, Bootstrap, Vite, Caddy), backend (Nest/Node) and postgres or postgis database.  See subfolder for source, including Dockerfiles and OpenShift templates.  Alternative backends are available.
+The starter stack includes a frontend (React, Bootstrap, Vite, Caddy), backend (Nest/Node) and Postgres or PostGIS database.  See subfolder for source, including Dockerfiles and OpenShift templates.  Alternative backends are available.
 
 Features:
 * [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
 * [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
 * [Flyway](https://flywaydb.org/) database migrations
-* [Crunchy](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes) Postgres/Postgis Database
+* [Crunchy](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes) Postgres/PostGIS Database
 
-Postgis is default.  Switch to Postgres by removing the image names in [crunchy helm chart values](./charts/crunchy/values.yaml)
+PostGIS is default.  Switch to Postgres by removing the image names in [crunchy helm chart values](./charts/crunchy/values.yaml)
 
 ## Crunchy
 
@@ -391,7 +391,7 @@ After a full workflow run and merge can been run, please do the following:
 1. [Flyway is used as Database Schema Migration tool](https://www.red-gate.com/products/flyway/community/)
 2. [Prisma is used as ORM layer](https://www.prisma.io/)
 3. The rationale behind using flyway to have schema first approach and let prisma generate ORM schema from the database, which would avoid pitfalls like lazy loading, cascading, etc. when defining entities in ORM manually.
-4. Run flyway in the docker compose to apply latest changes to postgres db.
+4. Run flyway in the docker compose to apply latest changes to Postgres database.
 5. Run npx prisma db pull from backend folder to sync the prisma schema.
 6. Run npx prisma generate to generate the prisma client which will have all the entities populated based on fresh prisma schema.
 7. If using VS Code, be aware of [this issue](https://stackoverflow.com/questions/65663292/prisma-schema-not-updating-properly-after-adding-new-fields)
