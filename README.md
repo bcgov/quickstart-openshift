@@ -33,7 +33,7 @@ Backend (JavaScript/TypeScript)
 
 ## Pull Request-Based Workflows with Sample Stack
 
-The is a fully functional set of [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions) workflows and a starter application stack intended to help Agile teams hit the ground running.
+This is a fully functional set of [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions) workflows and a starter application stack intended to help Agile teams hit the ground running.
 
 Features:
 * Pull Request-based pipeline
@@ -50,7 +50,7 @@ Features:
 * Rolling updates with zero downtime in PROD
 * Database Migrations with Flyway
 * Pod disruption budgets for high availability
-* Self-healing through with probes/checks (startup, readiness, liveness)
+* Self-healing through probes/checks (startup, readiness, liveness)
 * Point the long-lived DEMO route to PRs by using the `demo` label
 * Sample application stack:
     * Database: Crunchy(Postgres, PostGIS), backups, Flyway
@@ -85,7 +85,7 @@ Create a new repository using this repository as a template.
 
 Variables and secrets are consumed by workflows.  Environments provide their own values, overriding default sets.
 
-Secrets are hidden from logs and outputs, while variables are visible.  Using secrets exclusively can make troubeshooting more difficult.
+Secrets are hidden from logs and outputs, while variables are visible.  Using secrets exclusively can make troubleshooting more difficult.
 
 Note: Dependabot, which we don't recommend as highly as Renovate, requires its own set of variables.
 
@@ -138,7 +138,7 @@ OpenShift server address.
 **MS_TEAMS_WEBHOOK_URI**
 * Consume: `{{ vars.MS_TEAMS_WEBHOOK_URI }}`
 * Value: ![https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif](https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif)
-* Refrence: 'https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet' & 'https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference'
+* Reference: 'https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet' & 'https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference'
 
 ## Environments
 
@@ -359,7 +359,7 @@ Postgis is default.  Switch to Postgres by removing the image names in [crunchy 
 
 ## Crunchy
 
-Crunchy is the default choice for HA postgres/postgis DB in BCGov. provided chart is to get up and going fast, it is upto teams to fine tune resource allocation and patroni parameters of crunchy DB to get the best out of database.
+Crunchy is the default choice for high availability (HA) Postgres/Postgis databases in BC Government. The provided chart is to get up and going fast, but it is up to the userto teams to fine tune resource allocation and Patroni parameters to get the best out of their database.
 
 * For specifying different resources for different envs, just add values-test.yml and values-prod.yml , then provide them to the [DB Deployer in GHA](.github/workflows/.deployer-db.yml#L24).
 * For enabling S3 backups/recovery, please enable in [values file](./charts/crunchy/values.yaml#L62),  and in the [DB Deployer in GHA](.github/workflows/.deployer-db.yml#L20), then provide necessary secret values which are prefixed with `s3` [DB Deployer in GHA](.github/workflows/.deployer-db.yml#L36)
@@ -391,11 +391,11 @@ After a full workflow run and merge can been run, please do the following:
 # Flyway, Prisma, Migrations
 1. [Flyway is used as Database Schema Migration tool](https://www.red-gate.com/products/flyway/community/)
 2. [Prisma is used as ORM layer](https://www.prisma.io/)
-3. The rationale behind using flyway to have schema first approach and let prisma generate ORM schema from the database, which would avoid pitfalls like , lazy loading, cascading et.. when defining entities in ORM manually.
+3. The rationale behind using flyway to have schema first approach and let prisma generate ORM schema from the database, which would avoid pitfalls like lazy loading, cascading, etc. when defining entities in ORM manually.
 4. Run flyway in the docker compose to apply latest changes to postgres db.
 5. Run npx prisma db pull from backend folder to sync the prisma schema.
 6. Run npx prisma generate to generate the prisma client which will have all the entities populated based on fresh prisma schema.
-7. if using vscode be aware of [this issue](https://stackoverflow.com/questions/65663292/prisma-schema-not-updating-properly-after-adding-new-fields)
+7. If using VS Code, be aware of [this issue](https://stackoverflow.com/questions/65663292/prisma-schema-not-updating-properly-after-adding-new-fields)
 
 # Resources
 
@@ -404,6 +404,9 @@ This repository is provided by NRIDS Architecture and Forestry Digital Services,
 * NRID's [Kickstarter Guide](https://bcgov.github.io/nr-architecture-patterns-library/docs/Agile%20Team%20Kickstarter) (via. Confluence, links may be internal)
 
 ## Architecture
+
+The architecture diagram provides an overview of the system's components, their interactions, and the deployment structure. It illustrates the relationships between the frontend, backend, database, and other infrastructure elements within the OpenShift environment.
+
 ![Architecture](./.diagrams/architecture/arch.drawio.svg)
 # Contributing
 
