@@ -359,7 +359,7 @@ Postgis is default.  Switch to Postgres by removing the image names in [crunchy 
 
 ## Crunchy
 
-Crunchy is the default choice for high availability (HA) Postgres/Postgis databases in BC Government. The provided chart is to get up and going fast, but it is up to the userto teams to fine tune resource allocation and Patroni parameters to get the best out of their database.
+Crunchy is the default choice for high availability (HA) Postgres/Postgis databases in BC Government. It is recommended that teams still fine tune resource allocation and Patroni parameters to get the most out of their database.
 
 * For specifying different resources for different envs, just add values-test.yml and values-prod.yml , then provide them to the [DB Deployer in GHA](.github/workflows/.deployer-db.yml#L24).
 * For enabling S3 backups/recovery, please enable in [values file](./charts/crunchy/values.yaml#L62),  and in the [DB Deployer in GHA](.github/workflows/.deployer-db.yml#L20), then provide necessary secret values which are prefixed with `s3` [DB Deployer in GHA](.github/workflows/.deployer-db.yml#L36)
