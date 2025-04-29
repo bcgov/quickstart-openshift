@@ -127,7 +127,7 @@ OpenShift server address.
 
 **`MSTEAMS_WEBHOOK`**
 * Consume: `{{ vars.MSTEAMS_WEBHOOK }}`
-* Reference: 'https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet' & 'https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference'
+* Value: See MS Teams documentation for [webhooks](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet) and [message cards](https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference)
 
 ![https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif](https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif)
 
