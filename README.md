@@ -267,7 +267,7 @@ flowchart LR
     F(TEST Env) -->|tests| G(PROD Env)
 ```
 
-Here's a more detailed view.
+Here's a more detailed view showing a single pull request.
 
 ```mermaid
 flowchart TD
