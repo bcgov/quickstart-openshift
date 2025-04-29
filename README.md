@@ -10,7 +10,7 @@
 
 This repository provides a template to rapidly deploy a modern web application stack to the BC Government's OpenShift platform using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability.  By hitting the ground running we can save weeks-to-months of development time plus receive regular updates and features.
 
-Features:
+Includes:
 * Pull Request-based pipeline
 * Sandboxed development environments
 * Gated/controlled production deployments (optional)
@@ -41,12 +41,12 @@ Initial setup is intended to take an hour or less.  This depends greatly on inte
 
 The following are required:
 
-* BC Government IDIR accounts for anyone submitting requests
-* [GitHub accounts](https://github.com/signup) for all participating team members
-* Membership in the BCGov GitHub organization
-    * Join the bcgov organization using [these instructions](https://developer.gov.bc.ca/docs/default/component/bc-developer-guide/use-github-in-bcgov/bc-government-organizations-in-github/#directions-to-sign-up-and-link-your-account-for-bcgov).
-* OpenShift project namespaces:
-    * [BCGov signup](https://registry.developer.gov.bc.ca)
+- [ ] BC Government IDIR accounts for anyone submitting requests
+- [ ] [GitHub accounts](https://github.com/signup) for all participating team members
+- [ ] Membership in the BCGov GitHub organization
+    - Join the bcgov organization using [these instructions](https://developer.gov.bc.ca/docs/default/component/bc-developer-guide/use-github-in-bcgov/bc-government-organizations-in-github/#directions-to-sign-up-and-link-your-account-for-bcgov).
+- [ ] OpenShift project namespaces:
+    - [BCGov signup](https://registry.developer.gov.bc.ca)
 
 ## Using this Template
 
