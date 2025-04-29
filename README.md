@@ -255,6 +255,19 @@ Don't forget to add your team members!
 
 # Workflows
 
+These workflows and actions enforce a pull request based flow.
+
+```mermaid
+flowchart LR
+    A[Pull Request 1] -->|tests| F(Merge)
+    B[Pull Request 2] -->|tests| F(Merge)
+    C[Pull Request 3] -->|tests| F(Merge)
+    D[...] --> F(Merge)
+    E[Pull Request n] -->|tests| F(Merge)
+    F --> G(TEST Env)
+    G -->|tests| H(PROD Env)
+```
+
 ## Pull Request
 
 Runs on pull request submission.
