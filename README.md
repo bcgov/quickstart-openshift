@@ -268,6 +268,48 @@ flowchart LR
     G -->|tests| H(PROD Env)
 ```
 
+Here's a more detailed view.
+
+```mermaid
+flowchart TD
+    A(Developer)
+    B[Pull Request]
+    Ba([
+        Build Images,
+        Deploy Images,
+        E2E Tests
+    ])
+    Bb([
+        Unit Tests,
+        Security Analysis,
+        Vulnerability Analysis
+    ])
+    Bc([
+        Validate PR Title,
+        Provide User Feedback
+    ])
+    Bd([Code Review])
+    F([Verify Results])
+    G[Merge]
+    L([Deploy Images to TEST])
+    M([
+        E2E Tests,
+        Load Tests,
+        Analysis
+    ])
+    N([Deploy Images to PROD])
+    O([Tag Images as PROD])
+    A --> B
+    B --> Ba --> F
+    B --> Bb --> F
+    B --> Bc --> F
+    B --> Bd --> F
+    F -->|fail| A
+    F -->|pass| G --> L
+    L --> M -->|fail| A
+    M -->|pass| N --> O
+```
+
 ## Pull Request
 
 Runs on pull request submission.
