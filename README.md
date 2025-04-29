@@ -234,6 +234,8 @@ This is required to prevent direct pushes and merges to the default branch.  The
             * `Trivy`
     * Click `Create`
 
+Note: Required status checks will only be available to select after the relevant workflows have run at least once on a pull request.
+
 #### Status checks example
 ![](./.github/graphics/branch-protection.png)
 
