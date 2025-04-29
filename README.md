@@ -58,15 +58,15 @@ Create a new repository using this repository as a template.
 
 ## Secrets and Variables
 
-Variables and secrets are consumed by workflows.  Environments provide their own values, overriding default sets.
+Variables and secrets are consumed by workflows.  Variables are visible in workflows and logs, while secrets are hidden/redacted.
 
-Secrets are hidden from logs and outputs, while variables are visible.  Using secrets exclusively can make troubleshooting more difficult.
+Common values live independently from environments, which store additional/override values.  We recommend using common values instead of explicit or unnecessary environments (e.g. DEV), because of duplication and excess noise generated in pull requests.
 
 Note: Dependabot, which we don't recommend as highly as Renovate, requires its own set of variables.
 
 ### Example
 
-The following table illustrates how variables and secrets can be organized across different environments:
+This table illustrates how variables and secrets can be organized.
 
 | Environment | Name                   | Description           |
 |-------------|------------------------|-----------------------|
@@ -125,8 +125,8 @@ OpenShift server address.
 * Consume: `{{ vars.OC_SERVER }}`
 * Value: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 
-**`MSTEAM_WEBHOOK`**
-* Consume: `{{ vars.MSTEAM_WEBHOOK }}`
+**`MSTEAMS_WEBHOOK`**
+* Consume: `{{ vars.MSTEAMS_WEBHOOK }}`
 * Reference: 'https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet' & 'https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference'
 
 ![https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif](https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif)
