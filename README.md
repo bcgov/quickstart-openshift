@@ -68,16 +68,16 @@ Note: Dependabot, which we don't recommend as highly as Renovate, requires its o
 
 The following table illustrates how variables and secrets can be organized across different environments:
 
-| Environment | Name                        | Description           | Example Value      |
-|-------------|-----------------------------|-----------------------|--------------------|
-| \<none\>    | `vars.OC_SERVER`            | Common server address | `https://...:6443` |
-| \<none\>    | `vars.MS_TEAMS_WEBHOOK_URI` | Common alert webhook  | `https://...`      |
-| \<none\>    | `secrets.OC_NAMESPACE`      | DEV namespace         | `abc123-dev`       |
-| \<none\>    | `secrets.OC_TOKEN`          | DEV service token     | `***`              |
-| TEST        | `secrets.OC_NAMESPACE`      | TEST namespace        | `abc123-test`      |
-| TEST        | `secrets.OC_TOKEN`          | TEST service token    | `***`              |
-| PROD        | `secrets.OC_NAMESPACE`      | PROD namespace        | `abc123-prod`      |
-| PROD        | `secrets.OC_TOKEN`          | PROD service token    | `***`              |
+| Environment | Name                   | Description           |
+|-------------|------------------------|-----------------------|
+| \<none\>    | `vars.OC_SERVER`       | Common server address |
+| \<none\>    | `vars.MSTEAMS_WEBHOOK` | Common alert webhook  |
+| \<none\>    | `secrets.OC_NAMESPACE` | DEV namespace         |
+| \<none\>    | `secrets.OC_TOKEN`     | DEV service token     |
+| TEST        | `secrets.OC_NAMESPACE` | TEST namespace        |
+| TEST        | `secrets.OC_TOKEN`     | TEST service token    |
+| PROD        | `secrets.OC_NAMESPACE` | PROD namespace        |
+| PROD        | `secrets.OC_TOKEN`     | PROD service token    |
 
 ### Secrets Values
 
@@ -125,8 +125,8 @@ OpenShift server address.
 * Consume: `{{ vars.OC_SERVER }}`
 * Value: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 
-**`MS_TEAMS_WEBHOOK_URI`**
-* Consume: `{{ vars.MS_TEAMS_WEBHOOK_URI }}`
+**`MSTEAM_WEBHOOK`**
+* Consume: `{{ vars.MSTEAM_WEBHOOK }}`
 * Reference: 'https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet' & 'https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference'
 
 ![https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif](https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif)
