@@ -68,16 +68,16 @@ Note: Dependabot, which we don't recommend as highly as Renovate, requires its o
 
 The following table illustrates how variables and secrets can be organized across different environments:
 
-| Environment | Variable/Secret Name        | Description                          | Example Value                              |
-|-------------|-----------------------------|--------------------------------------|--------------------------------------------|
-| \<none\>    | `secrets.OC_NAMESPACE`      | OpenShift namespace for development  | `abc123-dev`                               |
-| \<none\>    | `secrets.OC_TOKEN`          | OpenShift service account token      | `***`                                      |
-| \<none\>    | `vars.OC_SERVER`            | OpenShift server address             | `https://api.silver.devops.gov.bc.ca:6443` |
-| \<none\>    | `vars.MS_TEAMS_WEBHOOK_URI` | Microsoft Teams webhook for alerts   | `https://outlook.office.com/...`           |
-| TEST        | `secrets.OC_NAMESPACE`      | OpenShift namespace for testing      | `abc123-test`                              |
-| TEST        | `secrets.OC_TOKEN`          | OpenShift service account token      | `***`                                      |
-| PROD        | `secrets.OC_NAMESPACE`      | OpenShift namespace for production   | `abc123-prod`                              |
-| PROD        | `secrets.OC_TOKEN`          | OpenShift service account token      | `***`                                      |
+| Environment | Name                        | Description           | Example Value      |
+|-------------|-----------------------------|-----------------------|--------------------|
+| \<none\>    | `vars.OC_SERVER`            | Common server address | `https://...:6443` |
+| \<none\>    | `vars.MS_TEAMS_WEBHOOK_URI` | Common alert webhook  | `https://...`      |
+| \<none\>    | `secrets.OC_NAMESPACE`      | DEV namespace         | `abc123-dev`       |
+| \<none\>    | `secrets.OC_TOKEN`          | DEV service token     | `***`              |
+| TEST        | `secrets.OC_NAMESPACE`      | TEST namespace        | `abc123-test`      |
+| TEST        | `secrets.OC_TOKEN`          | TEST service token    | `***`              |
+| PROD        | `secrets.OC_NAMESPACE`      | PROD namespace        | `abc123-prod`      |
+| PROD        | `secrets.OC_TOKEN`          | PROD service token    | `***`              |
 
 ### Secrets Values
 
