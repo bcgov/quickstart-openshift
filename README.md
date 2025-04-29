@@ -18,7 +18,7 @@ Includes:
 * Security, vulnerability, infrastructure, and container scan tools
 * Automatic dependency patching available from [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
 * Enforced code reviews and workflow jobs (pass|fail)
-* Helm Package Manager for atomic deployments (optional)
+* Helm Package Manager
 * Prometheus Metrics export from Backend/Frontend
 * Resource Tuning with Horizontal Pod Autoscaler (TEST/PROD only)
 * Affinity and anti-affinity for Scheduling on different worker nodes
