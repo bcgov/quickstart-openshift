@@ -33,17 +33,17 @@ Backend (JavaScript/TypeScript)
 
 ## Pull Request-Based Workflows with Sample Stack
 
-This is a fully functional set of [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions) workflows and a starter application stack intended to help Agile teams hit the ground running.
+This repository provides a template to rapidly deploy a modern web application stack to the BC Government's OpenShift platform using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability.  By hitting the ground running we can save weeks-to-months of development time plus receive regular updates and features.
 
 Features:
 * Pull Request-based pipeline
 * Sandboxed development environments
-* Gateable production deployments
+* Gated/controlled production deployments (optional)
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure, and container scan tools
 * Automatic dependency patching available from [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
 * Enforced code reviews and workflow jobs (pass|fail)
-* Helm Package Manager for atomic deployments
+* Helm Package Manager for atomic deployments (optional)
 * Prometheus Metrics export from Backend/Frontend
 * Resource Tuning with Horizontal Pod Autoscaler (TEST/PROD only)
 * Affinity and anti-affinity for Scheduling on different worker nodes
@@ -53,7 +53,7 @@ Features:
 * Self-healing through probes/checks (startup, readiness, liveness)
 * Point the long-lived DEMO route to PRs by using the `demo` label
 * Sample application stack:
-    * Database: Crunchy(Postgres, PostGIS), backups, Flyway
+    * Database: Crunchy (Postgres, PostGIS), backups, Flyway
     * Frontend: TypeScript, Caddy Server
     * Backend: TypeScript, Nest.js
     * Alternative backend examples - see [Alternative Backends](#alternative-backends)
