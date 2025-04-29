@@ -56,17 +56,35 @@ Create a new repository using this repository as a template.
 
 ![](./.github/graphics/template.png)
 
-## Secrets and Variables
+## Secrets, Variables and Environments
+
+### Secrets and Variables
 
 Variables and secrets are consumed by workflows.  Variables are visible in workflows and logs, while secrets are hidden/redacted.
 
-Common values live independently from environments, which store additional/override values.  We recommend using common values instead of explicit or unnecessary environments (e.g. DEV), because of duplication and excess noise generated in pull requests.
+To create new secrets from GitHub.com click:
 
-Note: Dependabot, which we don't recommend as highly as Renovate, requires its own set of variables.
+* `Settings > Secrets and Variables > Actions > Secrets > New repository secret`
+
+Note: Dependabot, which we don't recommend as highly as Renovate, requires its own set of values.
+
+### Environments
+
+Environments are groups of secrets and variables with optional access controls.  This includes limiting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values add to or override any common (environment-free) values.
+
+To create new environments from GitHub.com click:
+
+* `Settings > Environments > New environment`
+
+Environments provide a [number of features](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment), including:
+
+* Required reviewers
+* Wait timer
+* Limit TEST/PROD values to post-merge workflows
 
 ### Example
 
-This table illustrates how variables and secrets can be organized.
+Here is the arrangement of secrets, variables and environments for this repository.
 
 | Environment | Name                   | Description           |
 |-------------|------------------------|-----------------------|
@@ -79,9 +97,7 @@ This table illustrates how variables and secrets can be organized.
 | PROD        | `secrets.OC_NAMESPACE` | PROD namespace        |
 | PROD        | `secrets.OC_TOKEN`     | PROD service token    |
 
-### Secrets Values
-
-> Click Settings > Secrets and Variables > Actions > Secrets > New repository secret
+### Secret Values
 
 **`OC_TOKEN`**
 
@@ -130,20 +146,6 @@ OpenShift server address.
 * Value: See MS Teams documentation for [webhooks](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet) and [message cards](https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference)
 
 ![https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif](https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif)
-
-## Environments
-
-Environments are groups of secrets and variables that can be gatekept.  This includes limiting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values override any default values.
-
-For pull requests and development surrounding lower-level, sandboxed environments it is best not to use an environment at all.  Higher level environments, like TEST and PROD, will override those values as necessary.
-
-> Click Settings > Environments > New environment
-
-Environments provide a [number of features](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment), including:
-
-* Required reviewers
-* Wait timer
-* Deployment branches
 
 ## Updating Dependencies
 
