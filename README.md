@@ -259,7 +259,6 @@ These workflows and actions enforce a pull request based flow.
 
 ```mermaid
 flowchart LR
-flowchart LR
     A[PR Env 1] -->|tests| F
     B[PR Env 2] -->|tests| F
     C[PR Env 3] -->|tests| F
