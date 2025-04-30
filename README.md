@@ -258,55 +258,55 @@ Don't forget to add your team members!
 These workflows and actions enforce a pull request based flow.
 
 ```mermaid
-flowchart LR
-    A[PR Env 1] -->|tests| F
-    B[PR Env 2] -->|tests| F
-    C[PR Env 3] -->|tests| F
-    D[...] -->|tests| F(Merge)
-    E[PR Env n] -->|tests| F
-    F(TEST Env) -->|tests| G(PROD Env)
+flowchart TD
+    A1[PR Env 1] -->|tests| B
+    A2[PR Env 2] -->|tests| B
+    A3[PR Env 3] -->|tests| B
+    Ad[...]
+    An[PR Env n] -->|tests| B
+    B(TEST Env) -->|tests| C(PROD Env)
 ```
 
 Here's a more detailed view showing a single pull request.
 
 ```mermaid
 flowchart TD
-    A(Developer)
-    B[Pull Request]
-    Ba([
+    A@{ shape: circle, label: "Developer" }
+    B[(Pull Request)]
+    Ba(
         Build Images,
         Deploy Images,
         E2E Tests
-    ])
-    Bb([
+    )
+    Bb(
         Unit Tests,
         Security Analysis,
         Vulnerability Analysis
-    ])
-    Bc([
+    )
+    Bc(
         Validate PR Title,
         Provide User Feedback
-    ])
-    Bd([Code Review])
-    F([Verify Results])
-    G[Merge]
-    L([Deploy Images to TEST])
-    M([
-        E2E Tests,
-        Load Tests,
+    )
+    Bd(Code Review)
+    C@{ shape: diamond, label: "Verify Results" }
+    D[(Merge)]
+    E(Deploy Images to TEST)
+    F@{ shape: diamond, label: "E2E Tests, 
+        Load Tests, 
         Analysis
-    ])
-    N([Deploy Images to PROD])
-    O([Tag Images as PROD])
+    "}
+    G(Deploy Images to PROD)
+    H(Tag Images as PROD)
+    
     A --> B
-    B --> Ba --> F
-    B --> Bb --> F
-    B --> Bc --> F
-    B --> Bd --> F
+    B --> Ba --> C
+    B --> Bb --> C
+    B --> Bc --> C
+    B --> Bd --> C
+    C -->|fail| A
+    C -->|pass| D --> E --> F
     F -->|fail| A
-    F -->|pass| G --> L
-    L --> M -->|fail| A
-    M -->|pass| N --> O
+    F -->|pass| G --> H
 ```
 
 ## Pull Request
