@@ -1,59 +1,34 @@
 [![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
-
 [![Merge](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/merge.yml)
 [![Analysis](https://github.com/bcgov/quickstart-openshift/actions/workflows/analysis.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/analysis.yml)
 [![Scheduled](https://github.com/bcgov/quickstart-openshift/actions/workflows/scheduled.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/scheduled.yml)
-
-Frontend (JavaScript/TypeScript)
-
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Duplicated Lines](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
-
-Backend (JavaScript/TypeScript)
-
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Duplicated Lines](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
 
 # QuickStart for OpenShift
 
 ## Pull Request-Based Workflows with Sample Stack
 
-The is a fully functional set of [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions) workflows and a starter application stack intended to help Agile teams hit the ground running.
+This repository provides a template to rapidly deploy a modern web application stack to the BC Government's OpenShift platform using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability.  By hitting the ground running we can save weeks-to-months of development time plus receive regular updates and features.
 
-Features:
+Includes:
 * Pull Request-based pipeline
 * Sandboxed development environments
-* Gateable production deployments
+* Gated/controlled production deployments (optional)
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure, and container scan tools
 * Automatic dependency patching available from [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
 * Enforced code reviews and workflow jobs (pass|fail)
-* Helm Package Manager for atomic deployments
+* Helm Package Manager
 * Prometheus Metrics export from Backend/Frontend
 * Resource Tuning with Horizontal Pod Autoscaler (TEST/PROD only)
 * Affinity and anti-affinity for Scheduling on different worker nodes
 * Rolling updates with zero downtime in PROD
 * Database Migrations with Flyway
 * Pod disruption budgets for high availability
-* Self-healing through with probes/checks (startup, readiness, liveness)
+* Self-healing through probes/checks (startup, readiness, liveness)
 * Point the long-lived DEMO route to PRs by using the `demo` label
 * Sample application stack:
-    * Database: Crunchy(Postgres, PostGIS), backups, Flyway
+    * Database: Crunchy (Postgres, PostGIS), backups, Flyway
     * Frontend: TypeScript, Caddy Server
     * Backend: TypeScript, Nest.js
     * Alternative backend examples - see [Alternative Backends](#alternative-backends)
@@ -66,12 +41,12 @@ Initial setup is intended to take an hour or less.  This depends greatly on inte
 
 The following are required:
 
-* BC Government IDIR accounts for anyone submitting requests
-* [GitHub accounts](https://github.com/signup) for all participating team members
-* Membership in the BCGov GitHub organization
-    * Join the bcgov organization using [these instructions](https://developer.gov.bc.ca/docs/default/component/bc-developer-guide/use-github-in-bcgov/bc-government-organizations-in-github/#directions-to-sign-up-and-link-your-account-for-bcgov).
-* OpenShift project namespaces:
-    * [BCGov signup](https://registry.developer.gov.bc.ca)
+- [ ] BC Government IDIR accounts for anyone submitting requests
+- [ ] [GitHub accounts](https://github.com/signup) for all participating team members
+- [ ] Membership in the BCGov GitHub organization
+    - Join the bcgov organization using [these instructions](https://developer.gov.bc.ca/docs/default/component/bc-developer-guide/use-github-in-bcgov/bc-government-organizations-in-github/#directions-to-sign-up-and-link-your-account-for-bcgov).
+- [ ] OpenShift project namespaces:
+    - [BCGov signup](https://registry.developer.gov.bc.ca)
 
 ## Using this Template
 
@@ -81,21 +56,52 @@ Create a new repository using this repository as a template.
 
 ![](./.github/graphics/template.png)
 
-## Secrets and Variables
+## Secrets, Variables and Environments
 
-Variables and secrets are consumed by workflows.  Environments provide their own values, overriding default sets.
+### Secrets and Variables
 
-Secrets are hidden from logs and outputs, while variables are visible.  Using secrets exclusively can make troubeshooting more difficult.
+Variables and secrets are consumed by workflows.  Variables are visible in workflows and logs, while secrets are hidden/redacted.
 
-Note: Dependabot, which we don't recommend as highly as Renovate, requires its own set of variables.
+To create new secrets from GitHub.com click:
 
-### Secrets Values
+* `Settings > Secrets and Variables > Actions > Secrets > New repository secret`
 
-> Click Settings > Secrets and Variables > Actions > Secrets > New repository secret
+Note: Dependabot, which we don't recommend as highly as Renovate, requires its own set of values.
 
-**OC_TOKEN**
+### Environments
 
-OpenShift token, different for every project/namespace.  This guide assumes your OpenShift platform team has provisioned a pipeline account.
+Environments are groups of secrets and variables with optional access controls.  This includes limiting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values add to or override any common (environment-free) values.
+
+To create new environments from GitHub.com click:
+
+* `Settings > Environments > New environment`
+
+Environments provide a [number of features](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment), including:
+
+* Required reviewers
+* Wait timer
+* Limit TEST/PROD values to post-merge workflows
+
+### Example
+
+Here is the arrangement of secrets, variables and environments for this repository.
+
+| Environment | Name                   | Description           |
+|-------------|------------------------|-----------------------|
+| \<none\>    | `vars.OC_SERVER`       | Common server address |
+| \<none\>    | `vars.MSTEAMS_WEBHOOK` | Common alert webhook  |
+| \<none\>    | `secrets.OC_NAMESPACE` | DEV namespace         |
+| \<none\>    | `secrets.OC_TOKEN`     | DEV service token     |
+| TEST        | `secrets.OC_NAMESPACE` | TEST namespace        |
+| TEST        | `secrets.OC_TOKEN`     | TEST service token    |
+| PROD        | `secrets.OC_NAMESPACE` | PROD namespace        |
+| PROD        | `secrets.OC_TOKEN`     | PROD service token    |
+
+### Secret Values
+
+**`OC_TOKEN`**
+
+OpenShift's service account token, different for every namespace.  This guide assumes your OpenShift platform team has provisioned a pipeline account.
 
 * Consume: `{{ secrets.OC_TOKEN }}`
 
@@ -108,14 +114,14 @@ Locate an OpenShift pipeline token:
 5. Under Data, copy `token`
 6. Paste into the GitHub Secret `OC_TOKEN`
 
-**OC_NAMESPACE**
+**`OC_NAMESPACE`**
 
-OpenShift project/namespace.  Provided by your OpenShift platform team.
+Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and PROD.  TOOLS namespaces (e.g. Jenkins, shared Oracle resources) are not used here.  Provided by your OpenShift platform team.
 
 * Consume: `{{ secrets.OC_NAMESPACE }}`
-* Value: format `abc123-dev | test | prod`
+* E.g.: `abc123-dev`
 
-**SONAR_TOKEN(s)**
+**`SONAR_TOKEN(s)`**
 
 If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, while monorepos use similar names.
 
@@ -129,30 +135,17 @@ BC Government employees can request SonarCloud projects by creating an [issue](h
 
 > Click Settings > Secrets and Variables > Actions > Variables > New repository variable
 
-**OC_SERVER**
+**`OC_SERVER`**
 
 OpenShift server address.
 * Consume: `{{ vars.OC_SERVER }}`
 * Value: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 
-**MS_TEAMS_WEBHOOK_URI**
-* Consume: `{{ vars.MS_TEAMS_WEBHOOK_URI }}`
-* Value: ![https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif](https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif)
-* Refrence: 'https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet' & 'https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference'
+**`MSTEAMS_WEBHOOK`**
+* Consume: `{{ vars.MSTEAMS_WEBHOOK }}`
+* Value: See MS Teams documentation for [webhooks](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet) and [message cards](https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference)
 
-## Environments
-
-Environments are groups of secrets and variables that can be gatekept.  This includes limting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values override any default values.
-
-For pull requests and development surrounding lower-level, sandboxed environments it is best not to use an environment at all.  Higher level environments, like TEST and PROD, will override those values as necessary.
-
-> Click Settings > Environments > New environment
-
-Environments provide a [number of features](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment), including:
-
-* Required reviewers
-* Wait timer
-* Deployment branches
+![https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif](https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif)
 
 ## Updating Dependencies
 
@@ -241,6 +234,8 @@ This is required to prevent direct pushes and merges to the default branch.  The
             * `Trivy`
     * Click `Create`
 
+Note: Required status checks will only be available to select after the relevant workflows have run at least once on a pull request.
+
 #### Status checks example
 ![](./.github/graphics/branch-protection.png)
 
@@ -259,6 +254,60 @@ Don't forget to add your team members!
 5. Click Add
 
 # Workflows
+
+These workflows and actions enforce a pull request based flow.
+
+```mermaid
+flowchart TD
+    A1(PR Env 1) -->|tests| B
+    A2(PR Env 2) -->|tests| B
+    A3(PR Env 3) -->|tests| B
+    Ad@{ shape: text, label: "..." }
+    An(PR Env n) -->|tests| B
+    B(TEST Env) -->|tests| C(PROD Env)
+```
+
+Here's a more detailed view showing a single pull request.
+
+```mermaid
+flowchart TD
+    A@{ shape: circle, label: "Developer" }
+    B[(Pull Request)]
+    Ba(
+        Build Images,
+        Deploy Images,
+        E2E Tests
+    )
+    Bb(
+        Unit Tests,
+        Security Analysis,
+        Vulnerability Analysis
+    )
+    Bc(
+        Validate PR Title,
+        Provide User Feedback
+    )
+    Bd(Code Review)
+    C@{ shape: diamond, label: "Verify Results" }
+    D[(Merge)]
+    E(Deploy Images to TEST)
+    F@{ shape: diamond, label: "E2E Tests, 
+        Load Tests, 
+        Analysis
+    "}
+    G(Deploy Images to PROD)
+    H(Tag Images as PROD)
+    
+    A --> B
+    B --> Ba --> C
+    B --> Bb --> C
+    B --> Bc --> C
+    B --> Bd --> C
+    C -->|fail| A
+    C -->|pass| D --> E --> F
+    F -->|fail| A
+    F -->|pass| G --> H
+```
 
 ## Pull Request
 
@@ -345,28 +394,52 @@ Please note that the label must be manually created using GitHub's web interface
 
 # App Stack
 
+Frontend (JavaScript/TypeScript)
+
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Duplicated Lines](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
+
+Backend (JavaScript/TypeScript)
+
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Duplicated Lines](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
+
 ## Starter
 
-The starter stack includes a frontend (React, Bootstrap, Vite, Caddy), backend (Nest/Node) and postgres or postgis database.  See subfolder for source, including Dockerfiles and OpenShift templates.  Alternative backends are available.
+The starter stack includes a frontend (React, Bootstrap, Vite, Caddy), backend (Nest/Node) and Postgres or PostGIS database.  See subfolder for source, including Dockerfiles and OpenShift templates.  Alternative backends are available.
 
 Features:
 * [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
 * [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
 * [Flyway](https://flywaydb.org/) database migrations
-* [Crunchy](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes) Postgres/Postgis Database
+* [Crunchy](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes) Postgres/PostGIS Database
 
-Postgis is default.  Switch to Postgres by removing the image names in [crunchy helm chart values](./charts/crunchy/values.yaml)
+PostGIS is default.  Switch to Postgres by removing the image names in [crunchy helm chart values](./charts/crunchy/values.yaml)
 
 ## Crunchy
 
-Crunchy is the default choice for HA postgres/postgis DB in BCGov. provided chart is to get up and going fast, it is upto teams to fine tune resource allocation and patroni parameters of crunchy DB to get the best out of database.
+Crunchy is the default choice for high availability (HA) Postgres/PostGIS databases in BC Government. It is recommended that teams still fine tune resource allocation and Patroni parameters to get the most out of their database.
 
 * For specifying different resources for different envs, just add values-test.yml and values-prod.yml , then provide them to the [DB Deployer in GHA](.github/workflows/.deployer-db.yml#L24).
 * For enabling S3 backups/recovery, please enable in [values file](./charts/crunchy/values.yaml#L62),  and in the [DB Deployer in GHA](.github/workflows/.deployer-db.yml#L20), then provide necessary secret values which are prefixed with `s3` [DB Deployer in GHA](.github/workflows/.deployer-db.yml#L36)
 * To disable crunchy deployment, make the following changes
-  * make crunchy enabled to false in [values.yaml](./charts/app/values.yaml#L117)
-  * make bitnami postgis enabled to true in [values.yaml](./charts/app/values.yaml#L120)
-  * make the db-deployer false in gha workflow [.deployer-db.yaml](./.github/workflows/.deployer-db.yml#L31)
+  * set `Crunchy enabled` to false in [values.yaml](./charts/app/values.yaml#L117)
+  * set `Bitnami PostGIS enabled` to true in [values.yaml](./charts/app/values.yaml#L120)
+  * set `db-deployer` to false in gha workflow [.deployer-db.yaml](./.github/workflows/.deployer-db.yml#L31)
 
 ## Alternative Backends
 
@@ -391,11 +464,11 @@ After a full workflow run and merge can been run, please do the following:
 # Flyway, Prisma, Migrations
 1. [Flyway is used as Database Schema Migration tool](https://www.red-gate.com/products/flyway/community/)
 2. [Prisma is used as ORM layer](https://www.prisma.io/)
-3. The rationale behind using flyway to have schema first approach and let prisma generate ORM schema from the database, which would avoid pitfalls like , lazy loading, cascading et.. when defining entities in ORM manually.
-4. Run flyway in the docker compose to apply latest changes to postgres db.
+3. The rationale behind using flyway to have schema first approach and let prisma generate ORM schema from the database, which would avoid pitfalls like lazy loading, cascading, etc. when defining entities in ORM manually.
+4. Run flyway in the docker compose to apply latest changes to Postgres database.
 5. Run npx prisma db pull from backend folder to sync the prisma schema.
 6. Run npx prisma generate to generate the prisma client which will have all the entities populated based on fresh prisma schema.
-7. if using vscode be aware of [this issue](https://stackoverflow.com/questions/65663292/prisma-schema-not-updating-properly-after-adding-new-fields)
+7. If using VS Code, be aware of [this issue](https://stackoverflow.com/questions/65663292/prisma-schema-not-updating-properly-after-adding-new-fields)
 
 # Resources
 
@@ -404,6 +477,9 @@ This repository is provided by NRIDS Architecture and Forestry Digital Services,
 * NRID's [Kickstarter Guide](https://bcgov.github.io/nr-architecture-patterns-library/docs/Agile%20Team%20Kickstarter) (via. Confluence, links may be internal)
 
 ## Architecture
+
+The architecture diagram provides an overview of the system's components, their interactions, and the deployment structure. It illustrates the relationships between the frontend, backend, database, and other infrastructure elements within the OpenShift environment.
+
 ![Architecture](./.diagrams/architecture/arch.drawio.svg)
 # Contributing
 
