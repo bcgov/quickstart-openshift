@@ -262,7 +262,7 @@ flowchart TD
     A1(PR Env 1) -->|tests| B
     A2(PR Env 2) -->|tests| B
     A3(PR Env 3) -->|tests| B
-    Ad(...)
+    Ad@{ shape: text, label: "..." }
     An(PR Env n) -->|tests| B
     B(TEST Env) -->|tests| C(PROD Env)
 ```
