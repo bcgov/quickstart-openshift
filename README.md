@@ -256,57 +256,79 @@ Don't forget to add your team members!
 # Workflows
 
 These workflows and actions enforce a pull request based flow.
-
 ```mermaid
 flowchart TD
-    A1(PR Env 1) -->|tests| B
-    A2(PR Env 2) -->|tests| B
-    A3(PR Env 3) -->|tests| B
+    A1(PR_Env_1) -->|tests| B
+    A2(PR_Env_2) -->|tests| B
+    A3(PR_Env_3) -->|tests| B
     Ad@{ shape: text, label: "..." }
     An(PR Env n) -->|tests| B
-    B(TEST Env) -->|tests| C(PROD Env)
+    B(TEST_Env) -->|tests| C(PROD_Env)
+
+    %% Define styles with good contrast for light/dark modes
+    %% PR Environments (using distinct, reasonably bright colors)
+    style A1 fill:#ffeadb,stroke:#ff8c42,stroke-width:2px,color:#5c3d1e  %% Light Orange/Orange
+    style A2 fill:#dbeaff,stroke:#4285f4,stroke-width:2px,color:#1a3f7a  %% Light Blue/Blue
+    style A3 fill:#dfffea,stroke:#34a853,stroke-width:2px,color:#154b24  %% Light Green/Green
+    style An fill:#fce8ff,stroke:#a142f4,stroke-width:2px,color:#4d1e7a  %% Light Purple/Purple
+    %% TEST Environment
+    style B fill:#e6f4ea,stroke:#34a853,stroke-width:3px,color:#154b24  %% Lighter Green/Green
+    %% PROD Environment
+    style C fill:#fff4d8,stroke:#fbbc05,stroke-width:3px,color:#7a5f01  %% Light Gold/Gold
+
+    %% Link style
+    linkStyle default stroke:#757575,stroke-width:1px
 ```
 
 Here's a more detailed view showing a single pull request.
 
 ```mermaid
 flowchart TD
-    A@{ shape: circle, label: "Developer" }
-    B[(Pull Request)]
-    Ba(
-        Build Images,
-        Deploy Images,
-        E2E Tests
-    )
-    Bb(
-        Unit Tests,
-        Security Analysis,
-        Vulnerability Analysis
-    )
-    Bc(
-        Validate PR Title,
-        Provide User Feedback
-    )
+    A(Developer)
+    B(Pull Request)
+    Ba(Build Images,<br/>Deploy Images,<br/>E2E Tests)
+    Bb(Unit Tests,<br/>Security Analysis,<br/>Vulnerability Analysis)
+    Bc(Validate PR Title,<br/>Provide User Feedback)
     Bd(Code Review)
-    C@{ shape: diamond, label: "Verify Results" }
-    D[(Merge)]
+    C{Verify Results}
+    D(Merge)
     E(Deploy Images to TEST)
-    F@{ shape: diamond, label: "E2E Tests, 
-        Load Tests, 
-        Analysis
-    "}
+    F{E2E Tests,<br/>Load Tests,<br/>Analysis}
     G(Deploy Images to PROD)
     H(Tag Images as PROD)
-    
+
     A --> B
     B --> Ba --> C
     B --> Bb --> C
     B --> Bc --> C
     B --> Bd --> C
-    C -->|fail| A
-    C -->|pass| D --> E --> F
-    F -->|fail| A
-    F -->|pass| G --> H
+    C -- fail --> A
+    C -- pass --> D --> E --> F
+    F -- fail --> A
+    F -- pass --> G --> H
+
+    %% Define styles with good contrast for light/dark modes
+    %% Developer & PR Actions (Blue)
+    style A fill:#dbeaff,stroke:#4285f4,stroke-width:2px,color:#1a3f7a
+    style B fill:#dbeaff,stroke:#4285f4,stroke-width:2px,color:#1a3f7a
+    %% PR Checks & Validation (Light Green)
+    style Ba fill:#e6f4ea,stroke:#34a853,stroke-width:2px,color:#154b24
+    style Bb fill:#e6f4ea,stroke:#34a853,stroke-width:2px,color:#154b24
+    style Bc fill:#e6f4ea,stroke:#34a853,stroke-width:2px,color:#154b24
+    %% Code Review (Light Gold - requires attention)
+    style Bd fill:#fff4d8,stroke:#fbbc05,stroke-width:2px,color:#7a5f01
+    %% Decision Points (Purple)
+    style C fill:#fce8ff,stroke:#a142f4,stroke-width:2px,color:#4d1e7a
+    style F fill:#fce8ff,stroke:#a142f4,stroke-width:2px,color:#4d1e7a
+    %% Merge & TEST Deployment (Green)
+    style D fill:#dfffea,stroke:#34a853,stroke-width:2px,color:#154b24
+    style E fill:#e6f4ea,stroke:#34a853,stroke-width:3px,color:#154b24
+    %% PROD Deployment & Tagging (Gold)
+    style G fill:#fff4d8,stroke:#fbbc05,stroke-width:3px,color:#7a5f01
+    style H fill:#fff4d8,stroke:#fbbc05,stroke-width:3px,color:#7a5f01
+
+    %% Link style
+    linkStyle default stroke:#757575,stroke-width:1px
 ```
 
 ## Pull Request
