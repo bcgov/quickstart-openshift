@@ -27,7 +27,7 @@ global:
 #-- the components of the application, backend.
 backend:
   #-- enable or disable backend
-  enabled: true
+  enabled: false
   #-- the deployment strategy, can be "Recreate" or "RollingUpdate"
   deploymentStrategy: Recreate
   #-- autoscaling for the component. it is optional and is an object.
@@ -71,7 +71,7 @@ backend:
 
 frontend:
   # -- enable or disable a component deployment.
-  enabled: true
+  enabled: false
   # -- the deployment strategy, can be "Recreate" or "RollingUpdate"
   deploymentStrategy: Recreate
 
