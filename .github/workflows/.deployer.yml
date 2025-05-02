@@ -153,7 +153,8 @@ jobs:
             # Helm package
             sed -i 's/^name:.*/name: ${{ github.event.repository.name }}/' Chart.yaml
             helm package -u . --app-version="tag-${{ steps.vars.outputs.tag }}_run-${{ github.run_number }}" --version=${{ steps.pr.outputs.pr || steps.vars.outputs.version }}
-
+            # print the values.yaml file to see the values being used
+            cat values.yaml
             # Helm upgrade/rollout
             helm upgrade \
               --set-string global.repository=${{ github.repository }} \
