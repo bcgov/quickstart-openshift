@@ -144,6 +144,7 @@ jobs:
           oc_token: ${{ secrets.oc_token }}
           oc_server: ${{ vars.oc_server }}
           triggers: ${{ inputs.triggers }}
+          ref: ${{ github.ref }}
           commands: |
             # Deploy
 
