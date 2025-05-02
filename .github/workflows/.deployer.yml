@@ -87,7 +87,7 @@ jobs:
         id: crunchy_release_name
         shell: bash
         run: |
-          NAME=$(echo -n "${{github.event.repository.name}}" | md5sum | cut -c 1-8)-postgres
+          NAME=pg-$(echo -n "${{github.event.repository.name}}" | md5sum | cut -c 1-8)
           echo "NAME=${NAME}" >> $GITHUB_OUTPUT
           echo "Release name: ${NAME}"
       - uses: bcgov/quickstart-openshift-helpers/actions/crunchy@feat/release-name
