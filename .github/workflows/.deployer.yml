@@ -158,6 +158,7 @@ jobs:
               --set-string global.repository=${{ github.repository }} \
               --set-string global.tag=${{ steps.vars.outputs.tag }} \
               --set-string global.config.databaseUser=${{ inputs.db_user }} \
+              --set-sting global.databaseAlias=${{ github.event.repository.name }}-crunchy \
               ${{ inputs.params }} \
               --install --wait ${{ inputs.atomic && '--atomic' || '' }} ${{ steps.vars.outputs.release }} \
               --timeout ${{ inputs.timeout-minutes }}m \
