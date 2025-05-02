@@ -83,7 +83,7 @@ jobs:
       tag: ${{ inputs.tag || steps.pr.outputs.pr }}
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
-      - uses: bcgov/quickstart-openshift-helpers/actions/crunchy@crunchy
+      - uses: bcgov/quickstart-openshift-helpers/actions/crunchy@main
         with:
           oc_namespace: ${{ secrets.OC_NAMESPACE }}
           oc_token: ${{ secrets.OC_TOKEN }}
