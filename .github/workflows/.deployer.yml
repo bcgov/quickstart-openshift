@@ -74,26 +74,20 @@ on:
 permissions: {}
 
 jobs:
-  deployer-db:
-    name: Database
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.deployer-db.yml@main
-    secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_token: ${{ secrets.OC_TOKEN }}
-    with:
-      environment: ${{ inputs.environment }}
-      # triggers: ${{ inputs.triggers }}
-
   deploy:
     name: Stack
-    needs: deployer-db
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-24.04
     outputs:
       tag: ${{ inputs.tag || steps.pr.outputs.pr }}
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: bcgov/quickstart-openshift-helpers/actions/crunchy@crunchy
+        with:
+          oc_namespace: ${{ secrets.OC_NAMESPACE }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          environment: ${{ inputs.environment }}
+          # triggers: ${{ inputs.triggers }}
 
       # Variables
       - if: inputs.tag  == ''
@@ -140,6 +134,7 @@ jobs:
                 helm uninstall ${{ steps.vars.outputs.release }}
             fi
 
+      - uses: actions/checkout@v4
       - name: Helm Deploy
         id: deploy
         uses: bcgov/action-oc-runner@8e5c7737c90e5854c8378555aa933a8eb119ad83 # v1.2.0
