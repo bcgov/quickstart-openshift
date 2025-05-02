@@ -83,11 +83,20 @@ jobs:
       tag: ${{ inputs.tag || steps.pr.outputs.pr }}
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
-      - uses: bcgov/quickstart-openshift-helpers/actions/crunchy@main
+      - name: Crunchy Release Name
+        id: crunchy_release_name
+        shell: bash
+        run: |
+          NAME=$(echo -n "${{github.event.repository.name}}" | md5sum | cut -c 1-8)-postgres
+          echo "NAME=${NAME}" >> $GITHUB_OUTPUT
+          echo "Release name: ${NAME}"
+      - uses: bcgov/quickstart-openshift-helpers/actions/crunchy@feat/release-name
         with:
           oc_namespace: ${{ secrets.OC_NAMESPACE }}
           oc_token: ${{ secrets.OC_TOKEN }}
           environment: ${{ inputs.environment }}
+          postgres_version: 16
+          postgis_version: 3.4
           # triggers: ${{ inputs.triggers }}
 
       # Variables
@@ -161,7 +170,7 @@ jobs:
               --set-string global.repository=${{ github.repository }} \
               --set-string global.tag="${{ steps.vars.outputs.tag }}" \
               --set-string global.config.databaseUser="${{ inputs.db_user }}" \
-              --set-string global.databaseAlias="${{ github.event.repository.name }}-crunchy" \
+              --set-string global.databaseAlias="${{ steps.crunchy_release_name.outputs.name }}-crunchy" \
               ${{ inputs.params }} \
               --install --wait ${{ inputs.atomic && '--atomic' || '' }} ${{ steps.vars.outputs.release }} \
               --timeout ${{ inputs.timeout-minutes }}m \
