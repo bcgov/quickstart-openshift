@@ -41,6 +41,7 @@ on:
       db_user:
         description: The database user
         required: false
+        default: 'app'
         type: string
 
       ### Usually a bad idea / not recommended
