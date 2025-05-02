@@ -41,7 +41,6 @@ jobs:
     with:
       db_user: app-${{ github.event.number }}
       params: --set global.secrets.persist=false
-      atomic: true
       # triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
 
   tests:
