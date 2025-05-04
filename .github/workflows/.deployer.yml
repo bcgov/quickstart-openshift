@@ -90,13 +90,14 @@ jobs:
           NAME=pg-$(echo -n "${{github.event.repository.name}}" | md5sum | cut -c 1-8)
           echo "NAME=${NAME}" >> $GITHUB_OUTPUT
           echo "Release name: ${NAME}"
-      - uses: bcgov/quickstart-openshift-helpers/actions/crunchy@feat/release-name
+      - uses: bcgov/quickstart-openshift-helpers/actions/crunchy@feat/passValues
         with:
           oc_namespace: ${{ secrets.OC_NAMESPACE }}
           oc_token: ${{ secrets.OC_TOKEN }}
           environment: ${{ inputs.environment }}
           postgres_version: 16
           postgis_version: 3.4
+          values: charts/crunchy/values.yaml
           # triggers: ${{ inputs.triggers }}
 
       # Variables
