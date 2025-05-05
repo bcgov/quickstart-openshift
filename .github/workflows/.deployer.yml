@@ -90,6 +90,7 @@ jobs:
           NAME=pg-$(echo -n "${{github.event.repository.name}}" | md5sum | cut -c 1-8)
           echo "NAME=${NAME}" >> $GITHUB_OUTPUT
           echo "Release name: ${NAME}"
+
       - uses: bcgov/quickstart-openshift-helpers/actions/crunchy@feat/passValues
         with:
           oc_namespace: ${{ secrets.OC_NAMESPACE }}
