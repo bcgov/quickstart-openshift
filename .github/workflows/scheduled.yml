@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Clean up Helm Releases
-        uses: bcgov/action-oc-runner@8e5c7737c90e5854c8378555aa933a8eb119ad83 # v1.2.0
+        uses: bcgov/action-oc-runner@5882b707c20135424f62202f80d56c1d243fd96c # v1.1.0
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
@@ -60,7 +60,7 @@ jobs:
     name: SchemaSpy
     permissions:
       contents: write
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@v0.10.0
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@v0.9.0
 
   # Run sequentially to reduce chances of rate limiting
   zap:
