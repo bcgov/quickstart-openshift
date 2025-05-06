@@ -1,3 +1,4 @@
+# Values from bcgov/quickstart-openshift
 global:
   config:
     dbName: app #test
