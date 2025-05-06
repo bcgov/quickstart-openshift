@@ -98,7 +98,7 @@ jobs:
           environment: ${{ inputs.environment }}
           postgres_version: 16
           postgis_version: 3.4
-          values: charts/crunchy/values.yaml
+          values: charts/crunchy/values.yml
           # triggers: ${{ inputs.triggers }}
 
       # Variables
