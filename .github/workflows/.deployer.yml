@@ -98,7 +98,7 @@ jobs:
           environment: ${{ inputs.environment }}
           postgres_version: 16
           postgis_version: 3.4
-          values: charts/crunchy/values.yml
+          values: ${{ github.workspace }}/charts/crunchy/values.yml
           # triggers: ${{ inputs.triggers }}
 
       # Variables
@@ -147,6 +147,8 @@ jobs:
             fi
 
       - uses: actions/checkout@v4
+      - name: Debug Values File
+        run: ls -l charts/crunchy/values.yml
       - name: Helm Deploy
         id: deploy
         uses: bcgov/action-oc-runner@8e5c7737c90e5854c8378555aa933a8eb119ad83 # v1.2.0
