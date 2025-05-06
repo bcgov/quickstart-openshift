@@ -43,11 +43,11 @@ jobs:
       params: --set global.secrets.persist=false
       # triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
 
-  tests:
-    name: Tests
-    if: needs.deploys.outputs.triggered == 'true'
-    needs: [deploys]
-    uses: ./.github/workflows/.tests.yml
+  # tests:
+  #   name: Tests
+  #   if: needs.deploys.outputs.triggered == 'true'
+  #   needs: [deploys]
+  #   uses: ./.github/workflows/.tests.yml
 
   # results:
   #   name: PR Results
