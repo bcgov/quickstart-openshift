@@ -91,14 +91,14 @@ jobs:
           echo "NAME=${NAME}" >> $GITHUB_OUTPUT
           echo "Release name: ${NAME}"
 
-      - uses: bcgov/quickstart-openshift-helpers/actions/crunchy@feat/passValues
+      - uses: bcgov/action-crunchy@main
+        name: Deploy Crunchy
+        id: deploy_crunchy
         with:
           oc_namespace: ${{ secrets.OC_NAMESPACE }}
           oc_token: ${{ secrets.OC_TOKEN }}
           environment: ${{ inputs.environment }}
-          postgres_version: 16
-          postgis_version: 3.4
-          values: charts/crunchy/values.yml
+          values_file: charts/crunchy/values.yml
           # triggers: ${{ inputs.triggers }}
 
       # Variables
