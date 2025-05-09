@@ -31,7 +31,6 @@ jobs:
       - uses: bcgov/action-crunchy@fix/checkout
         name: Remove PR Specific User
         with:
-          oc_namespace: ${{ secrets.OC_NAMESPACE }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          values_file: charts/crunchy/values.yml
-          # triggers: ${{ inputs.triggers }}
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
+          oc_server: ${{ vars.oc_server }}
