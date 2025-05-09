@@ -83,14 +83,6 @@ jobs:
       tag: ${{ inputs.tag || steps.pr.outputs.pr }}
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
-      - name: Crunchy Release Name
-        id: crunchy_release_name
-        shell: bash
-        run: |
-          NAME=pg-$(echo -n "${{github.event.repository.name}}" | md5sum | cut -c 1-8)
-          echo "NAME=${NAME}" >> $GITHUB_OUTPUT
-          echo "Release name: ${NAME}"
-
       - uses: bcgov/action-crunchy@v1.0.0
         name: Deploy Crunchy
         id: deploy_crunchy
@@ -99,7 +91,7 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           environment: ${{ inputs.environment }}
           values_file: charts/crunchy/values.yml
-          # triggers: ${{ inputs.triggers }}
+          triggers: ${{ inputs.triggers }}
 
       # Variables
       - if: inputs.tag  == ''
@@ -173,7 +165,7 @@ jobs:
               --set-string global.repository=${{ github.repository }} \
               --set-string global.tag="${{ steps.vars.outputs.tag }}" \
               --set-string global.config.databaseUser="${{ inputs.db_user }}" \
-              --set-string global.databaseAlias="${{ steps.crunchy_release_name.outputs.name }}-crunchy" \
+              --set-string global.databaseAlias="${{ steps.deploy_crunchy.outputs.release }}-crunchy" \
               ${{ inputs.params }} \
               --install --wait ${{ inputs.atomic && '--atomic' || '' }} ${{ steps.vars.outputs.release }} \
               --timeout ${{ inputs.timeout-minutes }}m \
