@@ -91,7 +91,7 @@ jobs:
           echo "NAME=${NAME}" >> $GITHUB_OUTPUT
           echo "Release name: ${NAME}"
 
-      - uses: bcgov/action-crunchy@fix/checkout
+      - uses: bcgov/action-crunchy@main
         name: Deploy Crunchy
         id: deploy_crunchy
         with:
