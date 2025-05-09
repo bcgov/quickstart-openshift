@@ -100,7 +100,6 @@ jobs:
           environment: ${{ inputs.environment }}
           values_file: charts/crunchy/values.yml
           # triggers: ${{ inputs.triggers }}
-          force_cleanup: true
 
       # Variables
       - if: inputs.tag  == ''
