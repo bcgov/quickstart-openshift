@@ -33,7 +33,7 @@ jobs:
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploys:
     name: Deploys (${{ github.event.number }})
-    # needs: [builds]
+    needs: [builds]
     uses: ./.github/workflows/.deployer.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -41,7 +41,7 @@ jobs:
     with:
       db_user: app-${{ github.event.number }}
       params: --set global.secrets.persist=false
-      # triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
+      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/')
 
   tests:
      name: Tests
