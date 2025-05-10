@@ -41,7 +41,13 @@ on:
       db_user:
         description: The database user
         required: false
+        default: 'app'
         type: string
+      debug:
+        description: Debug mode
+        default: false
+        required: false
+        type: boolean
 
       ### Usually a bad idea / not recommended
       timeout-minutes:
@@ -74,26 +80,23 @@ on:
 permissions: {}
 
 jobs:
-  deployer-db:
-    name: Database
-    uses: ./.github/workflows/.deployer-db.yml
-    secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_token: ${{ secrets.OC_TOKEN }}
-    with:
-      environment: ${{ inputs.environment }}
-      triggers: ${{ inputs.triggers }}
-
   deploy:
     name: Stack
-    needs: deployer-db
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-24.04
     outputs:
       tag: ${{ inputs.tag || steps.pr.outputs.pr }}
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: bcgov/action-crunchy@v1.0.0
+        name: Deploy Crunchy
+        id: deploy_crunchy
+        with:
+          oc_namespace: ${{ secrets.OC_NAMESPACE }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          environment: ${{ inputs.environment }}
+          values_file: charts/crunchy/values.yml
+          triggers: ${{ inputs.triggers }}
 
       # Variables
       - if: inputs.tag  == ''
@@ -140,6 +143,11 @@ jobs:
                 helm uninstall ${{ steps.vars.outputs.release }}
             fi
 
+      - uses: actions/checkout@v4
+      - name: Debug Values File
+        if: inputs.debug == 'true'
+        run: ls -l charts/crunchy/values.yml
+
       - name: Helm Deploy
         id: deploy
         uses: bcgov/action-oc-runner@8e5c7737c90e5854c8378555aa933a8eb119ad83 # v1.2.0
@@ -148,6 +156,7 @@ jobs:
           oc_token: ${{ secrets.oc_token }}
           oc_server: ${{ vars.oc_server }}
           triggers: ${{ inputs.triggers }}
+          ref: ${{ github.ref }}
           commands: |
             # Deploy
 
@@ -157,12 +166,13 @@ jobs:
             # Helm package
             sed -i 's/^name:.*/name: ${{ github.event.repository.name }}/' Chart.yaml
             helm package -u . --app-version="tag-${{ steps.vars.outputs.tag }}_run-${{ github.run_number }}" --version=${{ steps.pr.outputs.pr || steps.vars.outputs.version }}
-
+            # print the values.yaml file to see the values being used
             # Helm upgrade/rollout
             helm upgrade \
               --set-string global.repository=${{ github.repository }} \
-              --set-string global.tag=${{ steps.vars.outputs.tag }} \
-              --set-string global.config.databaseUser=${{ inputs.db_user }} \
+              --set-string global.tag="${{ steps.vars.outputs.tag }}" \
+              --set-string global.config.databaseUser="${{ inputs.db_user }}" \
+              --set-string global.databaseAlias="${{ steps.deploy_crunchy.outputs.release }}-crunchy" \
               ${{ inputs.params }} \
               --install --wait ${{ inputs.atomic && '--atomic' || '' }} ${{ steps.vars.outputs.release }} \
               --timeout ${{ inputs.timeout-minutes }}m \

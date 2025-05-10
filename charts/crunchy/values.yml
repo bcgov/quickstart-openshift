@@ -1,10 +1,11 @@
+# Values from bcgov/quickstart-openshift
 global:
   config:
     dbName: app #test
 crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single postgres
   enabled: true
-  postgresVersion: 16
-  postGISVersion: '3.4'
+  postgresVersion: 17
+  postGISVersion: 3.4
   imagePullPolicy: IfNotPresent
   # enable below to start a new crunchy cluster after disaster from a backed-up location, crunchy will choose the best place to recover from.
   # follow https://access.crunchydata.com/documentation/postgres-operator/5.2.0/tutorial/disaster-recovery/
@@ -31,7 +32,7 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
         prometheus.io/scrape: 'true'
         prometheus.io/port: '9187'
     dataVolumeClaimSpec:
-      storage: 200Mi
+      storage: 220Mi
       storageClassName: netapp-block-standard
       walStorage: 255Mi
 
