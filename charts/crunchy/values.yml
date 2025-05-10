@@ -32,9 +32,9 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
         prometheus.io/scrape: 'true'
         prometheus.io/port: '9187'
     dataVolumeClaimSpec:
-      storage: 220Mi
+      storage: 150Mi
       storageClassName: netapp-block-standard
-      walStorage: 255Mi
+      walStorage: 300Mi
 
     requests:
       cpu: 50m
@@ -46,7 +46,7 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
 
   pgBackRest:
     enabled: true
-    backupPath: /backups/test/cluster/version # change it for PROD, create values-prod.yaml
+    backupPath: /backups/test/cluster/version # change it for PROD, create values-prod.yaml # this is only used in s3 backups context.
     clusterCounter: 1 # this is the number to identify what is the current counter for the cluster, each time it is cloned it should be incremented.
     # If retention-full-type set to 'count' then the oldest backups will expire when the number of backups reach the number defined in retention
     # If retention-full-type set to 'time' then the number defined in retention will take that many days worth of full backups before expiration
@@ -64,7 +64,7 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
       retention: 1 # one day hot active backup in pvc
       retentionFullType: count
       fullBackupSchedule: 0 8 * * *
-      incrementalBackupSchedule: 0 0,12 * * * # every 12 hour incremental
+      incrementalBackupSchedule: 0 0-7,9-23 * * * # every hour incremental
       volume:
         accessModes: "ReadWriteOnce"
         storage: 100Mi
