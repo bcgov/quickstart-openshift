@@ -450,7 +450,12 @@ Features:
 * [Flyway](https://flywaydb.org/) database migrations
 * [Crunchy](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes) Postgres/PostGIS Database
 
-PostGIS is default.  Switch to Postgres by removing the image names in [crunchy helm chart values](./charts/crunchy/values.yaml)
+PostGIS is enabled by default for geospatial data support when postGISVersion value is provided. To switch to standard PostgreSQL, update the `postGISVersion` field in the [Crunchy Helm chart values](./charts/crunchy/values.yml) to `~`. This disables PostGIS extensions, making it a plain PostgreSQL setup.
+
+```yaml
+# Example: Switching to PostgreSQL
+postGISVersion: ~
+```
 
 ## Crunchy Database
 
