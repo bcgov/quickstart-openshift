@@ -452,16 +452,38 @@ Features:
 
 PostGIS is default.  Switch to Postgres by removing the image names in [crunchy helm chart values](./charts/crunchy/values.yaml)
 
-## Crunchy
+## Crunchy Database
 
-Crunchy is the default choice for high availability (HA) Postgres/PostGIS databases in BC Government. It is recommended that teams still fine tune resource allocation and Patroni parameters to get the most out of their database.
+Crunchy is the default choice for high availability (HA) Postgres/PostGIS databases in BC Government.
 
-* For specifying different resources for different envs, just add values-test.yml and values-prod.yml , then provide them to the [DB Deployer in GHA](.github/workflows/.deployer-db.yml#L24).
-* For enabling S3 backups/recovery, please enable in [values file](./charts/crunchy/values.yaml#L62),  and in the [DB Deployer in GHA](.github/workflows/.deployer-db.yml#L20), then provide necessary secret values which are prefixed with `s3` [DB Deployer in GHA](.github/workflows/.deployer-db.yml#L36)
-* To disable crunchy deployment, make the following changes
-  * set `Crunchy enabled` to false in [values.yaml](./charts/app/values.yaml#L117)
-  * set `Bitnami PostGIS enabled` to true in [values.yaml](./charts/app/values.yaml#L120)
-  * set `db-deployer` to false in gha workflow [.deployer-db.yaml](./.github/workflows/.deployer-db.yml#L31)
+### Key Features
+- Automatic failover with Patroni
+- Scheduled backups
+- Monitoring
+- Self-healing capabilities
+- Horizontal scaling options (Read Replicas)
+
+### Setup Tips
+1. **Resource Allocation**: Adjust the resources in [crunchy helm chart values](charts/crunchy/values.yml) based on your application needs
+2. **Environment Configuration**: Create environment-specific configs from base values.yml as  `values-test.yml` and `values-prod.yml`
+
+### Enabling S3 Backups
+To enable S3 backups/recovery, provide these parameters to the GitHub Action:
+- `s3_access_key`
+- `s3_secret_key` 
+- `s3_bucket`
+- `s3_endpoint`
+
+> **Important**: Never reuse the same s3/objetc store, bucket path across different Crunchy deployments or instances (dev, test, prod)
+
+For advanced configuration, see the [re-usable GitHub Action](https://github.com/bcgov/action-crunchy) that manages PR deployments and helm template upgrades.
+
+### Troubleshooting and Support
+
+If you encounter issues, check out the [Troubleshooting Guide](https://github.com/bcgov/crunchy-postgres/blob/main/Troubleshoot.md) for quick solutions.
+
+Need more help? Join the discussion in the [CrunchyDB Rocket.Chat Channel](https://chat.developer.gov.bc.ca/channel/crunchydb) to get support from the community and experts.
+
 
 ## Alternative Backends
 
