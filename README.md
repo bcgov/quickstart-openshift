@@ -474,7 +474,7 @@ To enable S3 backups/recovery, provide these parameters to the GitHub Action:
 - `s3_bucket`
 - `s3_endpoint`
 
-> **Important**: Never reuse the same s3/objetc store, bucket path across different Crunchy deployments or instances (dev, test, prod)
+> **Important**: Never reuse the same s3/object store, bucket path across different Crunchy deployments or instances (dev, test, prod)
 
 For advanced configuration, see the [re-usable GitHub Action](https://github.com/bcgov/action-crunchy) that manages PR deployments and helm template upgrades.
 
