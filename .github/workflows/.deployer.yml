@@ -88,7 +88,7 @@ jobs:
       tag: ${{ inputs.tag || steps.pr.outputs.pr }}
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
-      - uses: bcgov/action-crunchy@v1.1.0
+      - uses: bcgov/action-crunchy@575ffdddb2614c76856f1f6876ca81474e4274a0 # v1.1.0
         name: Deploy Crunchy
         id: deploy_crunchy
         with:
@@ -143,7 +143,7 @@ jobs:
                 helm uninstall ${{ steps.vars.outputs.release }}
             fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Debug Values File
         if: inputs.debug == 'true'
         run: ls -l charts/crunchy/values.yml
