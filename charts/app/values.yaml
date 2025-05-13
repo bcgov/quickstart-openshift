@@ -20,9 +20,7 @@ global:
     databaseUser: ~
   #-- domain of the application, it is required, apps.silver.devops.gov.bc.ca for silver cluster and apps.devops.gov.bc.ca for gold cluster
   domain: "apps.silver.devops.gov.bc.ca" # it is apps.gold.devops.gov.bc.ca for gold cluster
-  #-- the database Alias gives a nice way to switch to different databases, crunchy, patroni ... etc.
-  #databaseAlias: bitnamipg #uncomment when using bitnami pg and comment below.
-  databaseAlias: postgres-crunchy #uncomment when using crunchy and comment above.
+  databaseAlias: ~ # set using github action workflow during helm deploy.
 
 #-- the components of the application, backend.
 backend:
@@ -116,48 +114,3 @@ frontend:
   pdb:
     enabled: false # enable it in PRODUCTION for having pod disruption budget.
     minAvailable: 1 # the minimum number of pods that must be available during the disruption budget.
-
-crunchy:
-  enabled: true # make this false and bitnami-pg true to switch from crunchy to bitnami single postgis.
-
-bitnamipg:
-  enabled: false
-  image:
-    registry: ghcr.io
-    repository: bcgov/nr-containers/bitnami/postgresql
-    tag: 15.10.0@sha256:708df150b32fddb3d4b8afb8ba2377b667beac2679b3a30ee855b4d2181f87d2
-  auth:
-    existingSecret: '{{ .Release.Name }}-database'
-    username: 'quickstart' # make sure this is aligned with secret.yaml
-    database: quickstart # make sure this is aligned with secret.yaml
-  shmVolume:
-    enabled: false
-  backup:
-    enabled: false
-    cronjob:
-      containerSecurityContext: { }
-      podSecurityContext:
-        enabled: false
-      storage:
-        size: 200Mi
-  primary:
-    persistence:
-      enabled: true
-      storageClass: netapp-block-standard
-      accessModes:
-        - ReadWriteOnce
-      size: 100Mi
-    containerSecurityContext:
-      enabled: false
-    podSecurityContext:
-      enabled: false
-    initdb:
-      scripts: # remove the below script, if POSTGIS is not required.
-        postgis.sh: |
-          #!/bin/sh
-          PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -d quickstart -c "CREATE EXTENSION postgis;"
-    resources:
-      requests:
-        cpu: 50m
-        memory: 150Mi
-
