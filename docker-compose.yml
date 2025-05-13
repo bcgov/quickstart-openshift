@@ -16,7 +16,7 @@ x-postgres-vars: &postgres-vars
 
 services:
   database:
-    image: postgis/postgis:16-3.4 # if using crunchy , make sure to align with crunchy version, currently it is at 16 and postgis 3.3
+    image: postgis/postgis:16-3.4@sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5 # if using crunchy , make sure to align with crunchy version, currently it is at 16 and postgis 3.3
     container_name: database
     environment:
       <<: *postgres-vars
@@ -25,7 +25,7 @@ services:
     ports: ["5432:5432"]
 
   migrations:
-    image: flyway/flyway:10-alpine
+    image: flyway/flyway:10-alpine@sha256:94a81ca7db9a9f24fd8acd7463fa4560cb8f66aae2aa64485c27eb296f5851cf
     container_name: migrations
     command: info migrate info
     volumes: ["./migrations/sql:/flyway/sql:ro"]
@@ -40,7 +40,7 @@ services:
         condition: service_healthy
 
   schemaspy:
-    image: schemaspy/schemaspy:6.2.4
+    image: schemaspy/schemaspy:6.2.4@sha256:08290ff34c0fa4c1b28af555fbedf755159e42d02651a987e6077cb40a06f1ff
     profiles: ["schemaspy"]
     container_name: schemaspy
     command: -t pgsql11 -db postgres -host database -port 5432 -u postgres -p default -schemas users
@@ -58,7 +58,7 @@ services:
     environment:
       <<: *postgres-vars
       NODE_ENV: development
-    image: node:22
+    image: node:22@sha256:a1f1274dadd49738bcd4cf552af43354bb781a7e9e3bc984cfeedc55aba2ddd8
     ports: ["3001:3000"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api"]
@@ -72,7 +72,7 @@ services:
       BACKEND_URL: http://backend:3000
       PORT: 3000
       NODE_ENV: development
-    image: node:22
+    image: node:22@sha256:a1f1274dadd49738bcd4cf552af43354bb781a7e9e3bc984cfeedc55aba2ddd8
     ports: ["3000:3000"]
     volumes: ["./frontend:/app", "/app/node_modules"]
     healthcheck:

@@ -125,7 +125,7 @@ bitnamipg:
   image:
     registry: ghcr.io
     repository: bcgov/nr-containers/bitnami/postgresql
-    tag: 15.10.0
+    tag: 15.10.0@sha256:708df150b32fddb3d4b8afb8ba2377b667beac2679b3a30ee855b4d2181f87d2
   auth:
     existingSecret: '{{ .Release.Name }}-database'
     username: 'quickstart' # make sure this is aligned with secret.yaml
