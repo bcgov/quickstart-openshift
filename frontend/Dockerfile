@@ -1,5 +1,5 @@
 # Build
-FROM node:22-slim@sha256:557e52a0fcb928ee113df7e1fb5d4f60c1341dbda53f55e3d815ca10807efdce AS build
+FROM node:22-slim@sha256:cda14f94d705cba9ab769206a4f94819c19da4b43523ca5833f4ebf57407614b AS build
 
 # Copy, build static files; see .dockerignore for exclusions
 WORKDIR /app
