@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Point DEMO URL to Existing Service
-        uses: bcgov/action-oc-runner@8ae8e22ccc644c73041a3b3ca3f2e6afdddad845 # v1.2.1
+        uses: bcgov/action-oc-runner@12997e908fba505079d1aab6f694a17fe15e9b28 # v1.2.2
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
