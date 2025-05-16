@@ -61,7 +61,7 @@
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-promise": "^6.1.1",
     "istanbul-badges-readme": "^1.9.0",
-    "lint-staged": "^15.4.1",
+    "lint-staged": "^16.0.0",
     "prettier": "^3.4.2",
 
     "source-map-support": "^0.5.21",
