@@ -1,5 +1,5 @@
 # Build
-FROM node:22.15.0-slim@sha256:557e52a0fcb928ee113df7e1fb5d4f60c1341dbda53f55e3d815ca10807efdce AS build
+FROM node:22.15.1-slim@sha256:ec318fe0dc46b56bcc1ca42a202738aeb4f3e347a7b4dd9f9f1df12ea7aa385a AS build
 
 # Copy, build static files; see .dockerignore for exclusions
 WORKDIR /app
@@ -8,7 +8,7 @@ ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
 RUN npm run deploy
 
 # Dependencies
-FROM node:22.15.0-slim@sha256:557e52a0fcb928ee113df7e1fb5d4f60c1341dbda53f55e3d815ca10807efdce AS dependencies
+FROM node:22.15.1-slim@sha256:ec318fe0dc46b56bcc1ca42a202738aeb4f3e347a7b4dd9f9f1df12ea7aa385a AS dependencies
 
 # Copy, build static files; see .dockerignore for exclusions
 WORKDIR /app
