@@ -22,7 +22,7 @@ jobs:
         package: [backend, frontend, migrations]
     timeout-minutes: 10
     steps:
-      - uses: bcgov/action-builder-ghcr@ace71f7a527ca6fc43c15c7806314be5a4579d2c # v2.3.0
+      - uses: bcgov/action-builder-ghcr@v3.0.0-rc
         with:
           keep_versions: 50
           package: ${{ matrix.package }}
