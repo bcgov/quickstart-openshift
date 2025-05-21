@@ -1,5 +1,5 @@
 # Build
-FROM node:22.15.1-slim@sha256:ec318fe0dc46b56bcc1ca42a202738aeb4f3e347a7b4dd9f9f1df12ea7aa385a AS build
+FROM node:22.15.1-slim AS build
 
 # Copy, build static files; see .dockerignore for exclusions
 WORKDIR /app
@@ -8,7 +8,7 @@ ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
 RUN npm run deploy
 
 # Dependencies
-FROM node:22.15.1-slim@sha256:ec318fe0dc46b56bcc1ca42a202738aeb4f3e347a7b4dd9f9f1df12ea7aa385a AS dependencies
+FROM node:22.15.1-slim AS dependencies
 
 # Copy, build static files; see .dockerignore for exclusions
 WORKDIR /app
@@ -17,7 +17,7 @@ ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
 RUN npm ci --ignore-scripts --no-update-notifier --omit=dev
 
 # Deploy using minimal Distroless image
-FROM gcr.io/distroless/nodejs22-debian12:nonroot@sha256:595dcd85af33b16450868993ec48992c82d90a692fb0d5c6f435bca16edb85d6
+FROM gcr.io/distroless/nodejs22-debian12:nonroot
 ENV NODE_ENV=production
 
 # Copy app and dependencies
