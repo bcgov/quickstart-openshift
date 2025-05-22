@@ -58,7 +58,7 @@ services:
     environment:
       <<: *postgres-vars
       NODE_ENV: development
-    image: node:22@sha256:74066d050011dd18c56390523cb255b38bce09b332221a4ec15ab0d8e1ac61fe
+    image: node:22@sha256:f466376b5f5ca8327da5914fddbcb5eee21c1c8482bed548a5ee84750d0b1b69
     ports: ["3001:3000"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api"]
@@ -72,7 +72,7 @@ services:
       BACKEND_URL: http://backend:3000
       PORT: 3000
       NODE_ENV: development
-    image: node:22@sha256:74066d050011dd18c56390523cb255b38bce09b332221a4ec15ab0d8e1ac61fe
+    image: node:22@sha256:f466376b5f5ca8327da5914fddbcb5eee21c1c8482bed548a5ee84750d0b1b69
     ports: ["3000:3000"]
     volumes: ["./frontend:/app", "/app/node_modules"]
     healthcheck:
