@@ -58,7 +58,7 @@ services:
     environment:
       <<: *postgres-vars
       NODE_ENV: development
-    image: node:22
+    image: *node-image
     ports: ["3001:3000"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api"]
