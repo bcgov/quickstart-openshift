@@ -6,6 +6,8 @@ x-var:
     default
   - &POSTGRES_DATABASE
     postgres
+  - &node-image
+    node:22
 
 # Reusable envars for postgres
 x-postgres-vars: &postgres-vars
@@ -72,7 +74,7 @@ services:
       BACKEND_URL: http://backend:3000
       PORT: 3000
       NODE_ENV: development
-    image: node:22
+    image: *node-image
     ports: ["3000:3000"]
     volumes: ["./frontend:/app", "/app/node_modules"]
     healthcheck:
