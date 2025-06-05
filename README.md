@@ -525,6 +525,7 @@ This repository is provided by NRIDS Architecture and Forestry Digital Services,
 
 * NRID's [Kickstarter Guide](https://bcgov.github.io/nr-architecture-patterns-library/docs/Agile%20Team%20Kickstarter) (via. Confluence, links may be internal)
 
+# [How Tos](./HOWTO.md)
 ## Architecture
 
 The architecture diagram provides an overview of the system's components, their interactions, and the deployment structure. It illustrates the relationships between the frontend, backend, database, and other infrastructure elements within the OpenShift environment.
