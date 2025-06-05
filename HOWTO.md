@@ -4,7 +4,7 @@
 ### How To Pass Configuration as Env vars to the SPA frontend loaded in browser.
 1. create a `env.ts` file in the source code, sample file [here](https://github.com/bcgov/nr-epd-organics-info/blob/main/frontend/src/env.ts)
 2. Update vite.config.ts and add the following, [sample](https://github.com/bcgov/nr-epd-organics-info/blob/main/frontend/vite.config.ts#L18-L35)
-```html
+```javascript
       {
         name: 'build-html',
         apply: 'build',
