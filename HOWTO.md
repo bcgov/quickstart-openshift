@@ -1,4 +1,4 @@
-# This file contains different how to questions and answers
+# This document contains various how-to guides.
 - [How To Pass Configuration as Env vars to the SPA frontend loaded in browser](#how-to-pass-configuration-as-env-vars-to-the-spa-frontend-loaded-in-browser)
 
 ### How To Pass Configuration as Env vars to the SPA frontend loaded in browser.
