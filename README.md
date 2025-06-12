@@ -469,8 +469,9 @@ Crunchy is the default choice for high availability (HA) Postgres/PostGIS databa
 - Horizontal scaling options (Read Replicas)
 
 ### Setup Tips
-1. **Resource Allocation**: Adjust the resources in [crunchy helm chart values](charts/crunchy/values.yml) based on your application needs
-2. **Environment Configuration**: Create environment-specific configs from base values.yml as  `values-test.yml` and `values-prod.yml`
+1. **Resource Allocation**: Adjust the resources in [crunchy helm chart values](charts/crunchy/values.yml) based on your application needs, since the **defaults are just minimal**.
+2. **Environment Configuration**: Create environment-specific configs from base values.yml as  `values-test.yml` and `values-prod.yml`, Make sure there are **at least 3 replicas in PRODUCTION**.
+3. **DR Testing**: Disaster Recovery Testing is **`MANDATORY`** before go live.
 
 ### Enabling S3 Backups
 To enable S3 backups/recovery, provide these parameters to the GitHub Action:
