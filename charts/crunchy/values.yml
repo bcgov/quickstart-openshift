@@ -6,6 +6,7 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
   enabled: true
   postgresVersion: 17
   postGISVersion: 3.4
+  openshift: true
   imagePullPolicy: IfNotPresent
   # enable below to start a new crunchy cluster after disaster from a backed-up location, crunchy will choose the best place to recover from.
   # follow https://access.crunchydata.com/documentation/postgres-operator/5.2.0/tutorial/disaster-recovery/
