@@ -101,6 +101,7 @@ jobs:
           environment: ${{ inputs.environment }}
           values_file: charts/crunchy/values.yml
           triggers: ${{ inputs.db_triggers }}
+          ref: fix/remove-add-user-trigger
 
       # Variables
       - if: inputs.tag  == ''
