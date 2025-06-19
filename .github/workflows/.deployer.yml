@@ -48,6 +48,10 @@ on:
         default: false
         required: false
         type: boolean
+      db_triggers:
+        description: Paths used to trigger a database deployment; e.g. ('charts/crunchy/')
+        required: false
+        type: string
 
       ### Usually a bad idea / not recommended
       timeout-minutes:
@@ -96,7 +100,7 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           environment: ${{ inputs.environment }}
           values_file: charts/crunchy/values.yml
-          triggers: ${{ inputs.triggers }}
+          triggers: ${{ inputs.db_triggers }}
 
       # Variables
       - if: inputs.tag  == ''
