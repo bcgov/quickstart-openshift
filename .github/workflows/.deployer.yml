@@ -92,7 +92,7 @@ jobs:
       tag: ${{ inputs.tag || steps.pr.outputs.pr }}
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
-      - uses: bcgov/action-crunchy@fix/remove-add-user-trigger # v1.2.1
+      - uses: bcgov/action-crunchy@v1.2.2
         name: Deploy Crunchy
         id: deploy_crunchy
         with:
@@ -101,7 +101,7 @@ jobs:
           environment: ${{ inputs.environment }}
           values_file: charts/crunchy/values.yml
           triggers: ${{ inputs.db_triggers }}
-          ref: fix/remove-add-user-trigger
+
 
       # Variables
       - if: inputs.tag  == ''
