@@ -8,11 +8,13 @@ This document outlines our team's guidelines for using GitHub Copilot in the qui
 1. **DRY** - Don't Repeat Yourself
    - Let Copilot suggest, but verify the logic
    - Reuse existing patterns in the codebase
+   - Preserve valuable domain knowledge in comments
 
 2. **Clean Code**
    - Follow existing formatting (2 spaces)
    - Use meaningful variable names
    - Break down complex functions
+   - Maintain or improve existing documentation
 
 ## ⚡ Best Practices
 
@@ -43,6 +45,9 @@ This document outlines our team's guidelines for using GitHub Copilot in the qui
 - Add conflicting dependencies
 - Bypass security checks
 - Generate non-compliant code
+- Remove existing documentation or comments
+- Discard domain-specific logic without review
+- Override carefully crafted error handling
 
 ## ⚙️ Configuration
 
@@ -83,6 +88,10 @@ interface user_dto {
 - BC Government design system
 - React component structures
 - API service patterns
+- Legacy code considerations
+- Domain-specific business rules
+- Existing error handling patterns
+- Historical workarounds (tagged with // WORKAROUND comments)
 
 ## � Language-Specific Guidelines
 
