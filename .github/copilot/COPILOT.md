@@ -212,6 +212,3 @@ Help evolve these guidelines by:
 4. Documenting the reasoning behind changes
 
 Remember: The best guidelines come from shared experiences! 🚀
-
----
-Last updated: June 23, 2025
