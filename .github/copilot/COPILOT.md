@@ -22,6 +22,7 @@ This document outlines guidelines for using GitHub Copilot in the quickstart-ope
    - Always review Copilot-generated code for correctness
    - Verify security implications of suggested code
    - Check for BC Government compliance and standards
+   - Review suggestions carefully before accepting
 
 2. **Security**
    - Never accept credentials or secrets from Copilot suggestions
@@ -48,6 +49,11 @@ This document outlines guidelines for using GitHub Copilot in the quickstart-ope
    - Verify documentation renders correctly before committing
    - Use `git diff --color --unified=3` for better doc change review
    - Preserve existing documentation structure and tone
+
+6. **General Usage**
+   - Share successful prompt patterns with the team
+   - Document when Copilot helps solve complex problems
+   - Review context-specific suggestions thoroughly
 
 ## 🚫 Never Allow Copilot To
 - Generate sensitive data or secrets
@@ -91,7 +97,7 @@ interface user_dto {
 }
 ```
 
-## 🔄 Workflow Tips & Learning Together
+## 🔄 Workflow Tips & Knowledge Sharing
 1. **Getting Better Suggestions**
    - Type slowly for better context-aware suggestions
    - Start with `// Test for...` to get test suggestions
@@ -103,11 +109,6 @@ interface user_dto {
    - Tag commits with `[copilot]` when AI-assisted
    - Create knowledge-sharing sessions for successful patterns
 
-3. **Best Practices**
-   - Review suggestions carefully before accepting
-   - Share successful prompt patterns with the team
-   - Document when Copilot helps solve complex problems
-
 ## 🔍 Project-Specific Contexts
 - OpenShift deployment patterns
 - BC Government design system
@@ -118,7 +119,7 @@ interface user_dto {
 - Existing error handling patterns
 - Historical workarounds (tagged with // WORKAROUND comments)
 
-## � Language-Specific Guidelines
+## 🔧 Language-Specific Guidelines
 
 ### TypeScript/JavaScript
 - Verify type safety in generated code
@@ -149,17 +150,6 @@ SELECT * FROM users WHERE id = $1;
 SELECT * FROM users WHERE id = ' + userId + ';
 ```
 
-## 🔄 Workflow Tips
-1. Start with `// Test for...` to get test suggestions
-2. Use `// Interface for...` for TypeScript definitions
-3. Type slowly for better context-aware suggestions
-
-## 🎓 Learning Together
-- Share useful Copilot prompts in PR comments
-- Document new patterns in this guide
-- Tag commits with `[copilot]` when AI-assisted
-- Create knowledge-sharing sessions for successful patterns
-
 ## � Contributing to These Guidelines
 
 Help evolve these guidelines by:
@@ -171,4 +161,4 @@ Help evolve these guidelines by:
 Remember: The best guidelines come from shared experiences! 🚀
 
 ---
-Last updated: June 22, 2025
+Last updated: June 23, 2025
