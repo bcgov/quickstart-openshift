@@ -203,7 +203,7 @@ SELECT * FROM users WHERE id = ' + userId + ';
    - Initial seed data
    - Schema migrations
 
-## � Contributing to These Guidelines
+## 🤝 Contributing to These Guidelines
 
 Help evolve these guidelines by:
 1. Opening a PR with your proposed updates
