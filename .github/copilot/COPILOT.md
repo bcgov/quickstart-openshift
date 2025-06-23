@@ -2,9 +2,7 @@
 
 ## 📋 Overview
 
-This document outlines our team's guidelines for using G## 💻 Language-Specific Guide```
-
-## 📝 Contributing to These Guidelineslot in the quickstart-openshift project. These directives help ensure consistent and secure code generation across the team.
+This document outlines guidelines for using GitHub Copilot in the quickstart-openshift project. These directives help ensure consistent and secure code generation across the team.
 
 ## 🎯 Core Principles
 1. **DRY** - Don't Repeat Yourself
@@ -39,6 +37,17 @@ This document outlines our team's guidelines for using G## 💻 Language-Specifi
    - Write tests for Copilot-generated code
    - Verify test coverage meets project standards
    - Ensure e2e tests pass after additions
+
+5. **Documentation Quality**
+   - Double-check Markdown formatting after Copilot suggestions
+   - Watch for common issues:
+     - Corrupted headers from merged text
+     - Broken emoji characters
+     - Unintended duplicated sections
+     - Inconsistent list formatting
+   - Verify documentation renders correctly before committing
+   - Use `git diff --color --unified=3` for better doc change review
+   - Preserve existing documentation structure and tone
 
 ## 🚫 Never Allow Copilot To
 - Generate sensitive data or secrets
