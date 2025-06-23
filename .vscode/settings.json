@@ -1,0 +1,26 @@
+{
+  "cSpell.words": [
+    "bcgov",
+    "caddy",
+    "kubernetes",
+    "nestjs",
+    "openshift",
+    "postgres",
+    "postgresql",
+    "prisma",
+    "quickstart",
+    "vite"
+  ],
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "*.log": false,
+    "*.dat": false,
+    "*.csv": false
+  },
+  "github.copilot.advanced": {
+    "inlineSuggestCount": 3,
+    "listCount": 10,
+    "indentationMode": "keep"
+  }
+}
