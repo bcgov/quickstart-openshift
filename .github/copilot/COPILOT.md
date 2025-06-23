@@ -2,9 +2,9 @@
 
 ## 📋 Overview
 
-This document outlines our team's guidelines for using Git## 💻 Language-Specific Guidelinesub Copilot in the quicksta```
+This document outlines our team's guidelines for using G## 💻 Language-Specific Guide```
 
-## 📝 Contributing to These Guidelinesroject. These directives help ensure consistent and secure code generation across the team.
+## 📝 Contributing to These Guidelineslot in the quickstart-openshift project. These directives help ensure consistent and secure code generation across the team.
 
 ## 🎯 Core Principles
 1. **DRY** - Don't Repeat Yourself
