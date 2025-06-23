@@ -1,13 +1,14 @@
 <!--
-# 🤖 GitHub Copilot Team Guidelines
+# 🤖 GitHub Copilot Team Guidelines (Upstream)
 
-⚠️ NOTE: These guidelines will be migrated to bcgov/vscode-settings
-📝 Future updates will be managed through automated workflows
+⚠️ NOTE: This is the upstream version managed by bcgov/vscode-settings
+📝 For team-specific guidelines, create a COPILOT.md file
 🔗 Source: https://github.com/bcgov/vscode-settings
+🔄 This file will be automatically updated - DO NOT EDIT
 
 -->
 
-# 🤖 GitHub Copilot Team Guidelines
+# 🤖 GitHub Copilot Team Guidelines (Upstream)
 
 ## 📋 Overview
 
