@@ -2,7 +2,9 @@
 
 ## 📋 Overview
 
-This document outlines our team's guidelines for using GitHub Copilot in the quickstart## 📝 Contributing to These Guidelinesroject. These directives help ensure consistent and secure code generation across the team.
+This document outlines our team's guidelines for using Git## 💻 Language-Specific Guidelinesub Copilot in the quicksta```
+
+## 📝 Contributing to These Guidelinesroject. These directives help ensure consistent and secure code generation across the team.
 
 ## 🎯 Core Principles
 1. **DRY** - Don't Repeat Yourself
