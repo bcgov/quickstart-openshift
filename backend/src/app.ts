@@ -8,6 +8,9 @@ import { VersioningType } from '@nestjs/common';
 import { metricsMiddleware } from "src/middleware/prom";
 
 /**
+ * Main application bootstrap
+ * @see /.github/copilot/COPILOT.md for AI-assistance guidelines
+ */
  *
  */
 export async function bootstrap() {

@@ -1,3 +1,8 @@
+/**
+ * Main frontend application entry point
+ * @see /.github/copilot/COPILOT.md for AI-assistance guidelines
+ */
+
 import '@bcgov/bc-sans/css/BC_Sans.css'
 import { StrictMode } from 'react'
 import * as ReactDOM from 'react-dom/client'

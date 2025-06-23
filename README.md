@@ -56,6 +56,14 @@ Create a new repository using this repository as a template.
 
 ![](./.github/graphics/template.png)
 
+## Development
+
+This project uses GitHub Copilot to enhance development productivity. To ensure consistent code quality and maintainability:
+
+1. Review our [Copilot Guidelines](.github/copilot/COPILOT.md) before contributing
+2. Use the shared settings in `.vscode/settings.json`
+3. Follow the project's code style and documentation patterns
+
 ## Secrets, Variables and Environments
 
 ### Secrets and Variables
