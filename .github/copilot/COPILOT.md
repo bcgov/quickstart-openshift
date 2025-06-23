@@ -142,13 +142,51 @@ interface DashboardProps {
 - Review all generated queries for security
 - Follow our migration patterns in migrations/
 - Test queries with sample data
+
+#### Flyway Migrations
+- DDL (Data Definition Language) statements are safe to use directly:
 ```sql
--- Good: Parameterized query
+-- Good: Direct SQL for schema changes
+CREATE SCHEMA IF NOT EXISTS USERS;
+CREATE SEQUENCE IF NOT EXISTS USERS."USER_SEQ"
+    START WITH 1
+    INCREMENT BY 1;
+
+-- Good: Direct SQL for initial data
+INSERT INTO USERS.USERS (NAME, EMAIL)
+VALUES ('John', 'john@example.com');
+```
+
+#### Application Queries
+- Always use parameterized queries for dynamic values:
+```sql
+-- Good: Parameterized query (prevents SQL injection)
 SELECT * FROM users WHERE id = $1;
 
--- Bad: Never allow string concatenation
+-- Bad: Never allow string concatenation (vulnerable to SQL injection)
+-- For example, if userId = "1; DROP TABLE users;"
 SELECT * FROM users WHERE id = ' + userId + ';
 ```
+
+- Parameters are sanitized by the database driver:
+  - Special characters are escaped automatically
+  - Data types are strictly enforced
+  - Prevents malicious code execution
+  - Handles quotation marks safely
+  - Maintains proper query structure
+
+#### When to Use Parameters
+1. **Use Parameters For:**
+   - User input
+   - Dynamic values
+   - API parameters
+   - Environment-specific data
+
+2. **Direct SQL is OK For:**
+   - Schema definitions (CREATE, ALTER)
+   - Fixed lookup data
+   - Initial seed data
+   - Schema migrations
 
 ## � Contributing to These Guidelines
 
