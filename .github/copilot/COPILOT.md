@@ -53,10 +53,17 @@ This document outlines our team's guidelines for using GitHub Copilot in the qui
 
 We maintain standardized VS Code settings in `.vscode/settings.json`. This ensures consistent behavior across the team:
 
-- Enabled for all code files
-- Disabled for plaintext and markdown to prevent accidental data leaks
+- Enabled for all code and documentation files
+- Disabled for plaintext log files and raw data files to prevent accidental data leaks
 - Using standard VS Code Copilot integration
 - Configured for optimal suggestion relevance
+
+Note: Copilot is especially helpful for maintaining consistent documentation in:
+- README.md files
+- API documentation
+- Deployment guides
+- Contributing guidelines
+- Architectural decision records (ADRs)
 
 ## 🎨 Style Guide Integration
 ```typescript
