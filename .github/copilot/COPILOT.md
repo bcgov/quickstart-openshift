@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-This document outlines our team's guidelines for using GitHub Copilot in the quickstart-openshift project. These directives help ensure consistent and secure code generation across the team.
+This document outlines our team's guidelines for using GitHub Copilot in the quickstart## 📝 Contributing to These Guidelinesroject. These directives help ensure consistent and secure code generation across the team.
 
 ## 🎯 Core Principles
 1. **DRY** - Don't Repeat Yourself
@@ -80,15 +80,22 @@ interface user_dto {
 }
 ```
 
-## 🔄 Workflow Tips
-1. Start with `// Test for...` to get test suggestions
-2. Use `// Interface for...` for TypeScript definitions
-3. Type slowly for better context-aware suggestions
+## 🔄 Workflow Tips & Learning Together
+1. **Getting Better Suggestions**
+   - Type slowly for better context-aware suggestions
+   - Start with `// Test for...` to get test suggestions
+   - Use `// Interface for...` for TypeScript definitions
 
-## 🎓 Learning Together
-- Share useful Copilot prompts in PR comments
-- Document new patterns in this guide
-- Tag commits with `[copilot]` when AI-assisted
+2. **Knowledge Sharing**
+   - Share useful Copilot prompts in PR comments
+   - Document new patterns in this guide
+   - Tag commits with `[copilot]` when AI-assisted
+   - Create knowledge-sharing sessions for successful patterns
+
+3. **Best Practices**
+   - Review suggestions carefully before accepting
+   - Share successful prompt patterns with the team
+   - Document when Copilot helps solve complex problems
 
 ## 🔍 Project-Specific Contexts
 - OpenShift deployment patterns
