@@ -1,3 +1,12 @@
+<!--
+# 🤖 GitHub Copilot Team Guidelines
+
+⚠️ NOTE: These guidelines will be migrated to bcgov/vscode-settings
+📝 Future updates will be managed through automated workflows
+🔗 Source: https://github.com/bcgov/vscode-settings
+
+-->
+
 # 🤖 GitHub Copilot Team Guidelines
 
 ## 📋 Overview
@@ -210,5 +219,3 @@ Help evolve these guidelines by:
 2. Including real examples of successful patterns
 3. Getting team review and discussion
 4. Documenting the reasoning behind changes
-
-Remember: The best guidelines come from shared experiences! 🚀
