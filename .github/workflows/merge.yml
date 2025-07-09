@@ -30,7 +30,7 @@ jobs:
     secrets: inherit
     with:
       environment: test
-      db_user: app
+      db_user: appproxy # appproxy is the user which works with pgbouncer.
       tag: ${{ inputs.tag }}
 
   tests:
@@ -47,7 +47,7 @@ jobs:
     secrets: inherit
     with:
       environment: prod
-      db_user: app
+      db_user: appproxy # appproxy is the user which works with pgbouncer.
       params:
         --set backend.deploymentStrategy=RollingUpdate
         --set frontend.deploymentStrategy=RollingUpdate
