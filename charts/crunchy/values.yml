@@ -107,11 +107,12 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
     enabled: true
     pgBouncer:
       image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
-      replicas: 1
+      replicas: 2
       requests:
         cpu: 5m
         memory: 32Mi
-      maxConnections: 10 # make sure less than postgres max connections
+      maxConnections: 100 # make sure less than postgres max connections
+      poolMode: 'transaction'
 
   # Postgres Cluster resource values:
   pgmonitor:
