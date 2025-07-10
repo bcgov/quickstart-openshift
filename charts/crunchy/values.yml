@@ -91,7 +91,7 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
   patroni:
     postgresql:
       pg_hba:
-        - "host all all 0.0.0.0/0 md5"
+        - "host all all 0.0.0.0/0 scram-sha-256"
         - "host all all ::1/128 scram-sha-256"
       parameters:
         shared_buffers: 16MB # default is 128MB; a good tuned default for shared_buffers is 25% of the memory allocated to the pod
