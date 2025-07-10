@@ -41,11 +41,9 @@ class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, 'query'> im
     this.$on<any>('query', (e: Prisma.QueryEvent) => {
       // dont print the health check queries, which contains SELECT 1 or COMMIT , BEGIN, DEALLOCATE ALL
       // this is to avoid logging health check queries which are executed by the framework.
-      if(e?.query?.includes("COMMIT")
-        || e?.query?.includes("BEGIN")
-        || e?.query?.includes("SELECT 1")
-        || e?.query?.includes("DEALLOCATE ALL")) {
-         return;
+      const excludedPatterns = ["COMMIT", "BEGIN", "SELECT 1", "DEALLOCATE ALL"];
+      if (excludedPatterns.some(pattern => e?.query?.toUpperCase().includes(pattern))) {
+        return;
       }
       this.logger.log(
         `Query: ${e.query} - Params: ${e.params} - Duration: ${e.duration}ms`,
