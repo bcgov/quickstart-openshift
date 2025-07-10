@@ -60,7 +60,7 @@ jobs:
     name: SchemaSpy
     permissions:
       contents: write
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@0b8121a528aaa05ef8def2f79be9081691dfe98a # v0.9.0
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@d9b3d32fb3f03c4699c2dce83ddfff042cd31a1f # v1.0.0
 
   # Run sequentially to reduce chances of rate limiting
   zap:
