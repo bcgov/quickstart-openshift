@@ -40,7 +40,7 @@ spec:
             - name: FLYWAY_BASELINE_ON_MIGRATE
               value: "true"
             - name: FLYWAY_DEFAULT_SCHEMA
-              value: "USERS"
+              value: "users"
             - name: FLYWAY_CONNECT_RETRIES
               value: "10"
             - name: FLYWAY_GROUP
