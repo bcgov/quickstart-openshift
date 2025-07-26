@@ -520,11 +520,7 @@ After a full workflow run and merge can been run, please do the following:
 6. ⚙️ Run npx prisma generate to generate the prisma client which will have all the entities populated based on fresh prisma schema.
 7. 💻 If using VS Code, be aware of [this issue](https://stackoverflow.com/questions/65663292/prisma-schema-not-updating-properly-after-adding-new-fields)
 
-**Built with ❤️ by the NRIDS Team**
 
-This repository is provided by NRIDS Architecture and Forestry Digital Services, courtesy of the Government of British Columbia.
-
-* 🚀 NRID's [Kickstarter Guide](https://bcgov.github.io/nr-architecture-patterns-library/docs/Agile%20Team%20Kickstarter) (via. Confluence, links may be internal)
 
 # 📖 [How Tos](./HOWTO.md)
 ## 🏗️ Architecture
@@ -538,3 +534,8 @@ The architecture diagram provides an overview of the system's components, their 
 We welcome contributions to improve this template! 
 Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.
 
+**Built with ❤️ by the NRIDS Team**
+
+This repository is provided by NRIDS Architecture and Forestry Digital Services, courtesy of the Government of British Columbia.
+
+* 🚀 NRID's [Kickstarter Guide](https://bcgov.github.io/nr-architecture-patterns-library/docs/Agile%20Team%20Kickstarter) (via. Confluence, links may be internal)
