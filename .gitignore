@@ -368,3 +368,6 @@ pyrightconfig.json
 
 # IDE
 .codebuddy
+
+# Java context file
+**/META-INF/context.xml
