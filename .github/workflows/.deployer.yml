@@ -148,7 +148,7 @@ jobs:
                 helm uninstall ${{ steps.vars.outputs.release }}
             fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Debug Values File
         if: inputs.debug == 'true'
         run: ls -l charts/crunchy/values.yml
