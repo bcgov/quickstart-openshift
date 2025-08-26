@@ -3,5 +3,5 @@
   "description": "Presets from https://github.com/bcgov/renovate-config",
   "extends": [
     "github>bcgov/renovate-config#v1"
-  ],
+  ]
 }
