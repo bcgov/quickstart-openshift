@@ -67,6 +67,16 @@ spec:
             - name: http
               containerPort: {{ .Values.backend.service.targetPort }}
               protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /api/health
