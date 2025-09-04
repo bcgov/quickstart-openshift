@@ -18,7 +18,7 @@ x-postgres-vars: &postgres-vars
 
 services:
   database:
-    image: postgis/postgis:16-3.4 # if using crunchy , make sure to align with crunchy version, currently it is at 16 and postgis 3.3
+    image: postgis/postgis:16-3.4@sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5 # if using crunchy , make sure to align with crunchy version, currently it is at 16 and postgis 3.3
     container_name: database
     environment:
       <<: *postgres-vars
@@ -27,7 +27,7 @@ services:
     ports: ["5432:5432"]
 
   migrations:
-    image: flyway/flyway:11-alpine
+    image: flyway/flyway:11-alpine@sha256:e7f6f7866e73adf993d1f11f023527a4b0926cc6ad2c431c8fcaa03f2db2ce81
     container_name: migrations
     command: info migrate info
     volumes: ["./migrations/sql:/flyway/sql:ro"]
@@ -42,7 +42,7 @@ services:
         condition: service_healthy
 
   schemaspy:
-    image: schemaspy/schemaspy:6.2.4
+    image: schemaspy/schemaspy:6.2.4@sha256:08290ff34c0fa4c1b28af555fbedf755159e42d02651a987e6077cb40a06f1ff
     profiles: ["schemaspy"]
     container_name: schemaspy
     command: -t pgsql11 -db postgres -host database -port 5432 -u postgres -p default -schemas users
