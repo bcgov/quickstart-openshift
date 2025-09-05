@@ -90,7 +90,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@f9424c10c36e288d5fa79bd3dfd1aeb2d6eae808 # 0.33.0
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           format: "sarif"
           output: "trivy-results.sarif"
