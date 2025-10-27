@@ -133,7 +133,7 @@ jobs:
 
       - name: Stop pre-existing deployments on PRs (status = pending-upgrade)
         if: github.event_name == 'pull_request'
-        uses: bcgov/action-oc-runner@10033668ef4374d9bb78149faa73e4ccda0e93dd # v1.2.3
+        uses: bcgov/action-oc-runner@f900830adadd4d9eef3ca6ff80103e839ba8b7c0 # v1.3.0
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
@@ -155,7 +155,7 @@ jobs:
 
       - name: Helm Deploy
         id: deploy
-        uses: bcgov/action-oc-runner@10033668ef4374d9bb78149faa73e4ccda0e93dd # v1.2.3
+        uses: bcgov/action-oc-runner@f900830adadd4d9eef3ca6ff80103e839ba8b7c0 # v1.3.0
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
