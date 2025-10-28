@@ -14,6 +14,7 @@ export default tseslint.config(
   ...tseslint.configs.stylistic,
   {
     files: ['**/*.ts', '**/*.tsx'],
+    ignores: ['src/routeTree.gen.ts'],
     plugins: {
       react,
       'react-hooks': reactHooks,
