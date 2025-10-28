@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { Table, Modal, Button } from 'react-bootstrap'
 import apiService from '@/service/api-service'
 
-type ModalProps = {
+interface ModalProps {
   show: boolean
   onHide: () => void
   user?: UserDto
@@ -34,7 +34,7 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
 }
 
 const Dashboard: FC = () => {
-  const [data, setData] = useState<any>([])
+  const [data, setData] = useState<UserDto[]>([])
   const [selectedUser, setSelectedUser] = useState<UserDto | undefined>(
     undefined,
   )

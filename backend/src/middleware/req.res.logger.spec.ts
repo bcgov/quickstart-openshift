@@ -5,7 +5,6 @@ import { Logger } from "@nestjs/common";
 
 describe("HTTPLoggerMiddleware", () => {
   let middleware: HTTPLoggerMiddleware;
-  let logger: Logger;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -13,7 +12,6 @@ describe("HTTPLoggerMiddleware", () => {
     }).compile();
 
     middleware = module.get<HTTPLoggerMiddleware>(HTTPLoggerMiddleware);
-    logger = module.get<Logger>(Logger);
   });
   it("should log the correct information", () => {
     const request: Request = {
@@ -34,7 +32,9 @@ describe("HTTPLoggerMiddleware", () => {
 
     const loggerSpy = vi.spyOn(middleware["logger"], "log");
 
-    middleware.use(request, response, () => {});
+    middleware.use(request, response, () => {
+      // Empty callback for testing
+    });
 
     expect(loggerSpy).toHaveBeenCalledWith(
       `GET /test 200 100 - Test User Agent`,

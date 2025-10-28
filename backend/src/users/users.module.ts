@@ -6,7 +6,7 @@ import { PrismaModule } from "src/prisma.module";
 @Module({
   controllers: [UsersController],
   providers: [UsersService],
-  imports: [PrismaModule]
+  imports: [PrismaModule],
 })
-export class UsersModule {
-}
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
+export class UsersModule {}

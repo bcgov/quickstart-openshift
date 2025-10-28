@@ -3,7 +3,7 @@ import { Footer, Header } from '@bcgov/design-system-react-components'
 import { Link } from '@tanstack/react-router'
 import { Button } from 'react-bootstrap'
 
-type Props = {
+interface Props {
   children: React.ReactNode
 }
 

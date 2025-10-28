@@ -8,33 +8,30 @@ import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private prisma: PrismaService
-  ) {
-  }
+  constructor(private prisma: PrismaService) {}
 
   async create(user: CreateUserDto): Promise<UserDto> {
     const savedUser = await this.prisma.users.create({
       data: {
         name: user.name,
-        email: user.email
-      }
+        email: user.email,
+      },
     });
 
     return {
       id: savedUser.id.toNumber(),
       name: savedUser.name,
-      email: savedUser.email
+      email: savedUser.email,
     };
   }
 
   async findAll(): Promise<UserDto[]> {
     const users = await this.prisma.users.findMany();
-    return users.flatMap(user => {
+    return users.flatMap((user) => {
       const userDto: UserDto = {
         id: user.id.toNumber(),
         name: user.name,
-        email: user.email
+        email: user.email,
       };
       return userDto;
     });
@@ -43,30 +40,30 @@ export class UsersService {
   async findOne(id: number): Promise<UserDto> {
     const user = await this.prisma.users.findUnique({
       where: {
-        id: new Prisma.Decimal(id)
-      }
+        id: new Prisma.Decimal(id),
+      },
     });
     return {
       id: user.id.toNumber(),
       name: user.name,
-      email: user.email
+      email: user.email,
     };
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserDto> {
     const user = await this.prisma.users.update({
       where: {
-        id: new Prisma.Decimal(id)
+        id: new Prisma.Decimal(id),
       },
       data: {
         name: updateUserDto.name,
-        email: updateUserDto.email
-      }
+        email: updateUserDto.email,
+      },
     });
     return {
       id: user.id.toNumber(),
       name: user.name,
-      email: user.email
+      email: user.email,
     };
   }
 
@@ -74,8 +71,8 @@ export class UsersService {
     try {
       await this.prisma.users.delete({
         where: {
-          id: new Prisma.Decimal(id)
-        }
+          id: new Prisma.Decimal(id),
+        },
       });
       return { deleted: true };
     } catch (err) {
@@ -83,35 +80,41 @@ export class UsersService {
     }
   }
 
-  async searchUsers(page: number,
-                    limit: number,
-                    sort: string, // JSON string to store sort key and sort value, ex: [{"name":"desc"},{"email":"asc"}]
-                    filter: string // JSON array for key, operation and value, ex: [{"key": "name", "operation": "like", "value": "Jo"}]
-  ): Promise<any> {
-
+  async searchUsers(
+    page: number,
+    limit: number,
+    sort: string, // JSON string to store sort key and sort value, ex: [{"name":"desc"},{"email":"asc"}]
+    filter: string, // JSON array for key, operation and value, ex: [{"key": "name", "operation": "like", "value": "Jo"}]
+  ): Promise<{
+    users: unknown[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
     page = page || 1;
     if (!limit || limit > 200) {
       limit = 10;
     }
 
-    let sortObj=[];
+    let sortObj = [];
     let filterObj = {};
     try {
       sortObj = JSON.parse(sort);
       filterObj = JSON.parse(filter);
-    } catch (e) {
+    } catch {
       throw new Error("Invalid query parameters");
     }
     const users = await this.prisma.users.findMany({
       skip: (page - 1) * limit,
       take: parseInt(String(limit)),
       orderBy: sortObj,
-      where: this.convertFiltersToPrismaFormat(filterObj)
+      where: this.convertFiltersToPrismaFormat(filterObj),
     });
 
     const count = await this.prisma.users.count({
       orderBy: sortObj,
-      where: this.convertFiltersToPrismaFormat(filterObj)
+      where: this.convertFiltersToPrismaFormat(filterObj),
     });
 
     return {
@@ -119,36 +122,55 @@ export class UsersService {
       page,
       limit,
       total: count,
-      totalPages: Math.ceil(count / limit)
+      totalPages: Math.ceil(count / limit),
     };
   }
 
-  public convertFiltersToPrismaFormat(filterObj): any {
+  public convertFiltersToPrismaFormat(
+    filterObj: unknown,
+  ): Record<string, unknown> {
+    const prismaFilterObj: Record<string, unknown> = {};
 
-    let prismaFilterObj = {};
+    if (!Array.isArray(filterObj)) {
+      return prismaFilterObj;
+    }
 
     for (const item of filterObj) {
-
-      if (item.operation === "like") {
-        prismaFilterObj[item.key] = { contains: item.value };
-      } else if (item.operation === "eq") {
-        prismaFilterObj[item.key] = { equals: item.value };
-      } else if (item.operation === "neq") {
-        prismaFilterObj[item.key] = { not: { equals: item.value } };
-      } else if (item.operation === "gt") {
-        prismaFilterObj[item.key] = { gt: item.value };
-      } else if (item.operation === "gte") {
-        prismaFilterObj[item.key] = { gte: item.value };
-      } else if (item.operation === "lt") {
-        prismaFilterObj[item.key] = { lt: item.value };
-      } else if (item.operation === "lte") {
-        prismaFilterObj[item.key] = { lte: item.value };
-      } else if (item.operation === "in") {
-        prismaFilterObj[item.key] = { in: item.value };
-      } else if (item.operation === "notin") {
-        prismaFilterObj[item.key] = { not: { in: item.value } };
-      } else if (item.operation === "isnull") {
-        prismaFilterObj[item.key] = { equals: null };
+      if (
+        typeof item === "object" &&
+        item !== null &&
+        "operation" in item &&
+        "key" in item &&
+        "value" in item
+      ) {
+        const filterItem = item as {
+          operation: string;
+          key: string;
+          value: unknown;
+        };
+        if (filterItem.operation === "like") {
+          prismaFilterObj[filterItem.key] = { contains: filterItem.value };
+        } else if (filterItem.operation === "eq") {
+          prismaFilterObj[filterItem.key] = { equals: filterItem.value };
+        } else if (filterItem.operation === "neq") {
+          prismaFilterObj[filterItem.key] = {
+            not: { equals: filterItem.value },
+          };
+        } else if (filterItem.operation === "gt") {
+          prismaFilterObj[filterItem.key] = { gt: filterItem.value };
+        } else if (filterItem.operation === "gte") {
+          prismaFilterObj[filterItem.key] = { gte: filterItem.value };
+        } else if (filterItem.operation === "lt") {
+          prismaFilterObj[filterItem.key] = { lt: filterItem.value };
+        } else if (filterItem.operation === "lte") {
+          prismaFilterObj[filterItem.key] = { lte: filterItem.value };
+        } else if (filterItem.operation === "in") {
+          prismaFilterObj[filterItem.key] = { in: filterItem.value };
+        } else if (filterItem.operation === "notin") {
+          prismaFilterObj[filterItem.key] = { not: { in: filterItem.value } };
+        } else if (filterItem.operation === "isnull") {
+          prismaFilterObj[filterItem.key] = { equals: null };
+        }
       }
     }
     return prismaFilterObj;

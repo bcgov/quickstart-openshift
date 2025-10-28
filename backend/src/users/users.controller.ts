@@ -5,19 +5,20 @@ import {
   Body,
   Put,
   Param,
-  Delete, Query, HttpException,
+  Delete,
+  Query,
+  HttpException,
 } from "@nestjs/common";
-import {ApiTags} from "@nestjs/swagger";
-import {UsersService} from "./users.service";
-import {CreateUserDto} from "./dto/create-user.dto";
-import {UpdateUserDto} from "./dto/update-user.dto";
+import { ApiTags } from "@nestjs/swagger";
+import { UsersService } from "./users.service";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
 import { UserDto } from "./dto/user.dto";
 
 @ApiTags("users")
-@Controller({path: "users", version: "1"})
+@Controller({ path: "users", version: "1" })
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {
-  }
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -25,7 +26,7 @@ export class UsersController {
   }
 
   @Get()
-  findAll() : Promise<UserDto[]> {
+  findAll(): Promise<UserDto[]> {
     return this.usersService.findAll();
   }
 
@@ -34,7 +35,7 @@ export class UsersController {
     @Query("page") page: number,
     @Query("limit") limit: number,
     @Query("sort") sort: string, // JSON string to store sort key and sort value, ex: {name: "ASC"}
-    @Query("filter") filter: string // JSON array for key, operation and value, ex: [{key: "name", operation: "like", value: "Peter"}]
+    @Query("filter") filter: string, // JSON array for key, operation and value, ex: [{key: "name", operation: "like", value: "Peter"}]
   ) {
     if (isNaN(page) || isNaN(limit)) {
       throw new HttpException("Invalid query parameters", 400);
@@ -60,6 +61,4 @@ export class UsersController {
   remove(@Param("id") id: string) {
     return this.usersService.remove(+id);
   }
-
-
 }
