@@ -523,11 +523,27 @@ After a full workflow run and merge can been run, please do the following:
 
 
 # 📖 [How Tos](./HOWTO.md)
+
+# 📋 Specifications
+
+This repository uses **spec-driven development** to ensure clear requirements and consistent implementation. All specifications are organized in the [`specs/`](./specs/) directory.
+
 ## 🏗️ Architecture
 
 The architecture diagram provides an overview of the system's components, their interactions, and the deployment structure. It illustrates the relationships between the frontend, backend, database, and other infrastructure elements within the OpenShift environment.
 
 ![Architecture](./.diagrams/architecture/arch.drawio.svg)
+
+## 📝 Spec-Driven Development
+
+- **[Specifications Directory](./specs/)** - All project specifications and requirements
+- **[Workflow Guide](./specs/workflow-guide.md)** - How to use spec-driven development
+- **[Templates](./specs/templates/)** - Specification templates for consistency
+
+### Quick Start
+1. Review existing specifications in [`specs/`](./specs/)
+2. Use `/spec`, `/plan`, and `/tasks` commands for new features
+3. Follow the [workflow guide](./specs/workflow-guide.md) for implementation
 
 ## 🤝 Contributing
 
