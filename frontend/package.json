@@ -13,7 +13,8 @@
     "test:unit": "vitest --mode test",
     "test:cov": "vitest run --mode test --coverage",
     "build": "vite build",
-    "lint": "eslint \"src/**/*.{ts,tsx}\" --fix"
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
     "@bcgov/bc-sans": "^2.1.0",

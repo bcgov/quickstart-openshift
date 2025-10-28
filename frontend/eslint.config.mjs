@@ -13,8 +13,8 @@ export default tseslint.config(
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
   {
-    files: ['**/*.ts', '**/*.tsx'],
-    ignores: ['src/routeTree.gen.ts'],
+    files: [ '**/*.ts', '**/*.tsx' ],
+    ignores: [ 'src/routeTree.gen.ts' ],
     plugins: {
       react,
       'react-hooks': reactHooks,
@@ -42,14 +42,14 @@ export default tseslint.config(
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       'react/display-name': 'off',
-      
+
       // TypeScript rules
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [ 'error', { argsIgnorePattern: '^_' } ],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
-      
+      '@typescript-eslint/consistent-type-imports': [ 'error', { prefer: 'type-imports' } ],
+
       // General rules
       'no-console': 'off',
       'no-debugger': 'warn',
@@ -59,18 +59,18 @@ export default tseslint.config(
           paths: [
             {
               name: 'react',
-              importNames: ['default'],
+              importNames: [ 'default' ],
               message: "Please import from 'react/jsx-runtime' instead.",
             },
           ],
         },
       ],
-      
+
       'prettier/prettier': 'error',
     },
   },
   {
-    files: ['**/*.spec.ts', '**/*.test.ts', '**/*.spec.tsx', '**/*.test.tsx'],
+    files: [ '**/*.spec.ts', '**/*.test.ts', '**/*.spec.tsx', '**/*.test.tsx' ],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
     },

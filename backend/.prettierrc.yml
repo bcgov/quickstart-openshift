@@ -1,0 +1,22 @@
+# .prettierrc.yml
+
+# Use single quotes instead of double quotes
+singleQuote: true
+
+# Use 2 spaces for indentation
+tabWidth: 2
+
+# Use spaces instead of tabs
+useTabs: false
+
+# Add a trailing comma to the last item in an object or array
+trailingComma: 'all'
+
+# Print semicolons at the ends of statements
+semi: false
+
+# Wrap prose-like comments as-is
+proseWrap: 'always'
+
+# Format files with Unix-style line endings
+endOfLine: 'lf'
