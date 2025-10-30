@@ -368,3 +368,8 @@ pyrightconfig.json
 
 # IDE
 .codebuddy
+
+# Specs directory (symlinked to external location, excluded from main branch)
+# The symlink points to ~/Documents/4-Specs/quickstart-openshift
+# See specs/README.md for setup instructions if needed
+specs
