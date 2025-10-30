@@ -14,7 +14,7 @@ on:
         type: boolean
       directory:
         description: Chart directory
-        default:  'charts/app'
+        default: "charts/app"
         required: false
         type: string
       environment:
@@ -41,7 +41,7 @@ on:
       db_user:
         description: The database user
         required: false
-        default: 'app'
+        default: "app"
         type: string
       debug:
         description: Debug mode
@@ -55,22 +55,22 @@ on:
 
       ### Usually a bad idea / not recommended
       timeout-minutes:
-        description: 'Timeout minutes'
+        description: "Timeout minutes"
         default: 10
         required: false
         type: number
       values:
-        description: 'Values file'
-        default: 'values.yaml'
+        description: "Values file"
+        default: "values.yaml"
         required: false
         type: string
 
     outputs:
       tag:
-        description: 'Which tag was used for deployment?'
+        description: "Which tag was used for deployment?"
         value: ${{ jobs.deploy.outputs.tag }}
       triggered:
-        description: 'Has a deployment has been triggered?'
+        description: "Has a deployment has been triggered?"
         value: ${{ jobs.deploy.outputs.triggered }}
 
     secrets:
@@ -102,7 +102,6 @@ jobs:
           values_file: charts/crunchy/values.yml
           triggers: ${{ inputs.db_triggers }}
 
-
       # Variables
       - if: inputs.tag  == ''
         id: pr
@@ -117,10 +116,10 @@ jobs:
 
           # Release name includes run numbers to ensure uniqueness
           release=${{ github.event.repository.name }}-${{ inputs.environment || steps.pr.outputs.pr || inputs.tag }}
-          
+
           # version, to support helm packaging for non-pr based releases (workflow_dispatch). default to 1.0.0+github run number
           version=1.0.0+${{ github.run_number }}
-          
+
             # Summary
           echo "tag=${tag}"
           echo "release=${release}"
@@ -148,7 +147,7 @@ jobs:
                 helm uninstall ${{ steps.vars.outputs.release }}
             fi
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@v5
       - name: Debug Values File
         if: inputs.debug == 'true'
         run: ls -l charts/crunchy/values.yml
