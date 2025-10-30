@@ -1,4 +1,6 @@
 /* eslint-disable */
+/* c8 ignore file */
+/* istanbul ignore file */
 
 // @ts-nocheck
 
