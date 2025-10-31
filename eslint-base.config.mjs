@@ -42,6 +42,8 @@ export const baseRules = {
   '@typescript-eslint/no-empty-interface': 'off',
   '@typescript-eslint/ban-types': 'off',
   '@typescript-eslint/explicit-function-return-type': 'off',
-  '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+  // Note: consistent-type-imports is NOT in base config
+  // - Frontend: Uses it explicitly (safe for React/TypeScript)
+  // - Backend: Does NOT use it (NestJS DI requires runtime class references)
 };
 

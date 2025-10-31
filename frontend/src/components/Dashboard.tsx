@@ -21,9 +21,7 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
       centered
     >
       <Modal.Header closeButton>
-        <Modal.Title id="contained-modal-title-vcenter">
-          Row Details
-        </Modal.Title>
+        <Modal.Title id="contained-modal-title-vcenter">Row Details</Modal.Title>
       </Modal.Header>
       <Modal.Body>{JSON.stringify(user)}</Modal.Body>
       <Modal.Footer>
@@ -35,9 +33,7 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
 
 const Dashboard: FC = () => {
   const [data, setData] = useState<any>([])
-  const [selectedUser, setSelectedUser] = useState<UserDto | undefined>(
-    undefined,
-  )
+  const [selectedUser, setSelectedUser] = useState<UserDto | undefined>(undefined)
 
   useEffect(() => {
     apiService
@@ -82,11 +78,7 @@ const Dashboard: FC = () => {
               <td>{user.name}</td>
               <td>{user.email}</td>
               <td className="text-center">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setSelectedUser(user)}
-                >
+                <Button variant="secondary" size="sm" onClick={() => setSelectedUser(user)}>
                   View Details
                 </Button>
               </td>
@@ -94,11 +86,7 @@ const Dashboard: FC = () => {
           ))}
         </tbody>
       </Table>
-      <ModalComponent
-        show={!!selectedUser}
-        onHide={handleClose}
-        user={selectedUser}
-      />
+      <ModalComponent show={!!selectedUser} onHide={handleClose} user={selectedUser} />
     </div>
   )
 }
