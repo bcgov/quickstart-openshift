@@ -8,30 +8,33 @@ import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService
+  ) {
+  }
 
   async create(user: CreateUserDto): Promise<UserDto> {
     const savedUser = await this.prisma.users.create({
       data: {
         name: user.name,
-        email: user.email,
-      },
+        email: user.email
+      }
     });
 
     return {
       id: savedUser.id.toNumber(),
       name: savedUser.name,
-      email: savedUser.email,
+      email: savedUser.email
     };
   }
 
   async findAll(): Promise<UserDto[]> {
     const users = await this.prisma.users.findMany();
-    return users.flatMap((user) => {
+    return users.flatMap(user => {
       const userDto: UserDto = {
         id: user.id.toNumber(),
         name: user.name,
-        email: user.email,
+        email: user.email
       };
       return userDto;
     });
@@ -40,30 +43,30 @@ export class UsersService {
   async findOne(id: number): Promise<UserDto> {
     const user = await this.prisma.users.findUnique({
       where: {
-        id: new Prisma.Decimal(id),
-      },
+        id: new Prisma.Decimal(id)
+      }
     });
     return {
       id: user.id.toNumber(),
       name: user.name,
-      email: user.email,
+      email: user.email
     };
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserDto> {
     const user = await this.prisma.users.update({
       where: {
-        id: new Prisma.Decimal(id),
+        id: new Prisma.Decimal(id)
       },
       data: {
         name: updateUserDto.name,
-        email: updateUserDto.email,
-      },
+        email: updateUserDto.email
+      }
     });
     return {
       id: user.id.toNumber(),
       name: user.name,
-      email: user.email,
+      email: user.email
     };
   }
 
@@ -71,8 +74,8 @@ export class UsersService {
     try {
       await this.prisma.users.delete({
         where: {
-          id: new Prisma.Decimal(id),
-        },
+          id: new Prisma.Decimal(id)
+        }
       });
       return { deleted: true };
     } catch (err) {
@@ -80,18 +83,18 @@ export class UsersService {
     }
   }
 
-  async searchUsers(
-    page: number,
-    limit: number,
-    sort: string, // JSON string to store sort key and sort value, ex: [{"name":"desc"},{"email":"asc"}]
-    filter: string, // JSON array for key, operation and value, ex: [{"key": "name", "operation": "like", "value": "Jo"}]
+  async searchUsers(page: number,
+                    limit: number,
+                    sort: string, // JSON string to store sort key and sort value, ex: [{"name":"desc"},{"email":"asc"}]
+                    filter: string // JSON array for key, operation and value, ex: [{"key": "name", "operation": "like", "value": "Jo"}]
   ): Promise<any> {
+
     page = page || 1;
     if (!limit || limit > 200) {
       limit = 10;
     }
 
-    let sortObj = [];
+    let sortObj=[];
     let filterObj = {};
     try {
       sortObj = JSON.parse(sort);
@@ -103,12 +106,12 @@ export class UsersService {
       skip: (page - 1) * limit,
       take: parseInt(String(limit)),
       orderBy: sortObj,
-      where: this.convertFiltersToPrismaFormat(filterObj),
+      where: this.convertFiltersToPrismaFormat(filterObj)
     });
 
     const count = await this.prisma.users.count({
       orderBy: sortObj,
-      where: this.convertFiltersToPrismaFormat(filterObj),
+      where: this.convertFiltersToPrismaFormat(filterObj)
     });
 
     return {
@@ -116,14 +119,16 @@ export class UsersService {
       page,
       limit,
       total: count,
-      totalPages: Math.ceil(count / limit),
+      totalPages: Math.ceil(count / limit)
     };
   }
 
   public convertFiltersToPrismaFormat(filterObj): any {
-    const prismaFilterObj = {};
+
+    let prismaFilterObj = {};
 
     for (const item of filterObj) {
+
       if (item.operation === "like") {
         prismaFilterObj[item.key] = { contains: item.value };
       } else if (item.operation === "eq") {
