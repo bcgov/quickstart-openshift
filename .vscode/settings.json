@@ -1,0 +1,15 @@
+{
+  // Minimal settings to prevent conflicts - uses VS Code defaults where possible
+  
+  // Enable format on save (applies to all languages by default)
+  "editor.formatOnSave": true,
+  
+  // Auto-fix ESLint issues on save
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  
+  // Only critical setting: tell ESLint to use flat config
+  "eslint.useFlatConfig": true
+}
+

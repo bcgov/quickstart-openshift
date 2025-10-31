@@ -174,7 +174,11 @@ dist
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
-.vscode/
+
+# VSCode/Cursor workspace settings (allow settings.json and extensions.json for team consistency)
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 
 # yarn v2
 .yarn/cache
@@ -368,3 +372,8 @@ pyrightconfig.json
 
 # IDE
 .codebuddy
+
+# Specs directory (symlinked to external location, excluded from main branch)
+# The symlink points to ~/Documents/4-Specs/quickstart-openshift
+# See specs/README.md for setup instructions if needed
+specs

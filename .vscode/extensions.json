@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",      // Required for format on save
+    "dbaeumer.vscode-eslint",      // Required for ESLint auto-fix
+    "editorconfig.editorconfig"    // Reads .editorconfig file
+  ]
+}
+

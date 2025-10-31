@@ -14,6 +14,18 @@ export default defineConfig({
     css: false,
     coverage: {
       reporter: ['lcov', 'text-summary', 'text', 'json', 'html'],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/coverage/**',
+        '**/*.config.*',
+        'src/routeTree.gen.ts', // Auto-generated file
+        'src/**/*.test.ts',
+        'src/**/*.spec.ts',
+        'src/**/*.test.tsx',
+        'src/**/*.spec.tsx',
+        'src/__tests__/**',
+      ],
     },
   },
 })

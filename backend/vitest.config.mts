@@ -11,6 +11,14 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["lcov", "text-summary", "text", "json", "html"],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/coverage/**',
+        '**/*.config.*',
+        '**/*.spec.ts',
+        '**/*.e2e-spec.ts',
+      ],
     },
   },
   plugins: [swc.vite()],
