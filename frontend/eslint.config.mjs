@@ -33,6 +33,9 @@ export default tseslint.config(
       'no-use-before-define': 'off',
       '@typescript-eslint/no-use-before-define': ['error', { functions: false }],
       '@typescript-eslint/no-var-requires': 'off',
+      
+      // Type-only imports are safe in frontend (no runtime DI like NestJS)
+      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
 
       // React rules (preserved from .eslintrc.yml)
       ...react.configs.recommended.rules,

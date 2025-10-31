@@ -1,7 +1,7 @@
 import { Controller, Get, Res } from '@nestjs/common'
 import type { Response } from 'express'
 import { register } from 'src/middleware/prom'
-import type { PrismaService } from 'src/prisma.service'
+import { PrismaService } from 'src/prisma.service'
 @Controller('metrics')
 export class MetricsController {
   constructor(private prisma: PrismaService) {}
