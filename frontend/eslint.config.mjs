@@ -4,6 +4,7 @@ import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import prettier from 'eslint-plugin-prettier';
 import prettierConfig from 'eslint-config-prettier';
+import { baseRules, baseIgnores } from '../eslint-base.config.mjs';
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -12,10 +13,7 @@ export default tseslint.config(
   {
     files: ['**/*.ts', '**/*.tsx'],
     ignores: [
-      '**/*.config.*',
-      '**/dist/**',
-      '**/node_modules/**',
-      '**/coverage/**',
+      ...baseIgnores,
       '**/public/**',
       'src/routeTree.gen.ts', // Auto-generated file
     ],
@@ -30,14 +28,11 @@ export default tseslint.config(
       },
     },
     rules: {
-      // Prettier integration
-      'prettier/prettier': 'error',
-
-      // General ESLint rules (preserved from .eslintrc.yml)
-      'no-console': 'off',
-      'no-debugger': 'warn',
-      'no-empty': ['error', { allowEmptyCatch: true }],
+      ...baseRules,
+      // Additional frontend-specific rules
       'no-use-before-define': 'off',
+      '@typescript-eslint/no-use-before-define': ['error', { functions: false }],
+      '@typescript-eslint/no-var-requires': 'off',
 
       // React rules (preserved from .eslintrc.yml)
       ...react.configs.recommended.rules,
@@ -48,18 +43,6 @@ export default tseslint.config(
       'react/display-name': 'off',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-
-      // TypeScript rules (preserved from .eslintrc.yml)
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-empty-interface': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/ban-types': 'off',
-      '@typescript-eslint/no-use-before-define': ['error', { functions: false }],
-      '@typescript-eslint/no-var-requires': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
     },
   },
 );
