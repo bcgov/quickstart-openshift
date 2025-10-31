@@ -92,11 +92,13 @@ export class UsersService {
       limit = 10
     }
 
-    let sortObj = []
-    let filterObj = {}
+    let sortObj: unknown[] = []
+    let filterObj: Array<{ key: string; operation: string; value: unknown }> = []
     try {
       sortObj = JSON.parse(sort)
-      filterObj = JSON.parse(filter)
+      const parsedFilter = JSON.parse(filter)
+      // Ensure filterObj is an array
+      filterObj = Array.isArray(parsedFilter) ? parsedFilter : []
     } catch {
       throw new Error('Invalid query parameters')
     }
