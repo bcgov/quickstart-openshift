@@ -5,61 +5,60 @@ import {
   Body,
   Put,
   Param,
-  Delete, Query, HttpException,
-} from "@nestjs/common";
-import {ApiTags} from "@nestjs/swagger";
-import {UsersService} from "./users.service";
-import {CreateUserDto} from "./dto/create-user.dto";
-import {UpdateUserDto} from "./dto/update-user.dto";
-import { UserDto } from "./dto/user.dto";
+  Delete,
+  Query,
+  HttpException,
+} from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
+import type { UsersService } from './users.service'
+import type { CreateUserDto } from './dto/create-user.dto'
+import type { UpdateUserDto } from './dto/update-user.dto'
+import type { UserDto } from './dto/user.dto'
 
-@ApiTags("users")
-@Controller({path: "users", version: "1"})
+@ApiTags('users')
+@Controller({ path: 'users', version: '1' })
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {
-  }
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+    return this.usersService.create(createUserDto)
   }
 
   @Get()
-  findAll() : Promise<UserDto[]> {
-    return this.usersService.findAll();
+  findAll(): Promise<UserDto[]> {
+    return this.usersService.findAll()
   }
 
-  @Get("search") // it must be ahead of the below Get(":id") to avoid conflict
+  @Get('search') // it must be ahead of the below Get(":id") to avoid conflict
   async searchUsers(
-    @Query("page") page: number,
-    @Query("limit") limit: number,
-    @Query("sort") sort: string, // JSON string to store sort key and sort value, ex: {name: "ASC"}
-    @Query("filter") filter: string // JSON array for key, operation and value, ex: [{key: "name", operation: "like", value: "Peter"}]
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('sort') sort: string, // JSON string to store sort key and sort value, ex: {name: "ASC"}
+    @Query('filter') filter: string, // JSON array for key, operation and value, ex: [{key: "name", operation: "like", value: "Peter"}]
   ) {
     if (isNaN(page) || isNaN(limit)) {
-      throw new HttpException("Invalid query parameters", 400);
+      throw new HttpException('Invalid query parameters', 400)
     }
-    return this.usersService.searchUsers(page, limit, sort, filter);
+    return this.usersService.searchUsers(page, limit, sort, filter)
   }
 
-  @Get(":id")
-  async findOne(@Param("id") id: string) {
-    const user = await this.usersService.findOne(+id);
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const user = await this.usersService.findOne(+id)
     if (!user) {
-      throw new HttpException("User not found.", 404);
+      throw new HttpException('User not found.', 404)
     }
-    return user;
+    return user
   }
 
-  @Put(":id")
-  update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @Put(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(+id, updateUserDto)
   }
 
-  @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.usersService.remove(+id);
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(+id)
   }
-
-
 }
