@@ -1,4 +1,5 @@
-# .prettierrc.yml
+# Shared Prettier configuration for entire repository
+# This ensures consistent formatting between frontend, backend, and IDE
 
 # Use single quotes instead of double quotes
 singleQuote: true
@@ -20,3 +21,10 @@ proseWrap: 'always'
 
 # Format files with Unix-style line endings
 endOfLine: 'lf'
+
+# Print width for formatting
+printWidth: 100
+
+# Arrow function parentheses
+arrowParens: 'always'
+
