@@ -76,7 +76,8 @@ export class UsersService {
       })
       return { deleted: true }
     } catch (err) {
-      return { deleted: false, message: err.message }
+      const message = err instanceof Error ? err.message : String(err)
+      return { deleted: false, message }
     }
   }
 
