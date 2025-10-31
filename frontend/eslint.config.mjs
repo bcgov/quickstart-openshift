@@ -29,15 +29,6 @@ export default tseslint.config(
         version: 'detect',
       },
     },
-    languageOptions: {
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-    },
     rules: {
       // Prettier integration
       'prettier/prettier': 'error',
