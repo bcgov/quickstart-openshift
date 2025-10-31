@@ -9,7 +9,12 @@
  * Shared ignore patterns
  */
 export const baseIgnores = [
-  '**/*.config.*',
+  // Build tool configs (vite, vitest, playwright, tsconfig)
+  '**/vite.config.*',
+  '**/vitest.config.*',
+  '**/playwright.config.*',
+  '**/tsconfig*.json',
+  // Dist, dependencies, and coverage
   '**/dist/**',
   '**/node_modules/**',
   '**/coverage/**',
