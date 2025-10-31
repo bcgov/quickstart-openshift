@@ -120,8 +120,10 @@ export class UsersService {
     }
   }
 
-  public convertFiltersToPrismaFormat(filterObj): any {
-    const prismaFilterObj = {}
+  public convertFiltersToPrismaFormat(
+    filterObj: Array<{ key: string; operation: string; value: unknown }>,
+  ): Record<string, unknown> {
+    const prismaFilterObj: Record<string, unknown> = {}
 
     for (const item of filterObj) {
       if (item.operation === 'like') {
