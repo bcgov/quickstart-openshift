@@ -13,7 +13,7 @@ export const baseIgnores = [
   '**/dist/**',
   '**/node_modules/**',
   '**/coverage/**',
-];
+]
 
 /**
  * Shared ESLint rules
