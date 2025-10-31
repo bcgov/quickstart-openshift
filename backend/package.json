@@ -50,7 +50,7 @@
     "@types/node": "^22.12.0",
     "@types/supertest": "^6.0.2",
     "@eslint/js": "^9.38.0",
-    "@vitest/coverage-v8": "^3.0.2",
+    "@vitest/coverage-v8": "^4.0.0",
     "eslint": "^9.38.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.2.3",
@@ -64,7 +64,7 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.2.2",
     "unplugin-swc": "^1.5.1",
-    "vitest": "^3.0.2"
+    "vitest": "^4.0.0"
   },
   "overrides": {
     "minimist@<1.2.6": "1.2.6",
