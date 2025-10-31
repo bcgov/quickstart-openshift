@@ -14,7 +14,6 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "lint:staged": "./node_modules/.bin/lint-staged",
     "make-badges": "istanbul-badges-readme --logo=vitest --exitCode=1",
     "make-badges:ci": "npm run make-badges -- --ci",
     "test": "vitest --dir src",
@@ -57,7 +56,6 @@
     "eslint-plugin-prettier": "^5.2.3",
     "typescript-eslint": "^8.46.2",
     "istanbul-badges-readme": "^1.9.0",
-    "lint-staged": "^16.0.0",
     "prettier": "^3.5.3",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
@@ -67,9 +65,6 @@
     "typescript": "^5.2.2",
     "unplugin-swc": "^1.5.1",
     "vitest": "^3.0.2"
-  },
-  "lint-staged": {
-    "*.{js,ts}": "./node_modules/.bin/eslint --cache --fix"
   },
   "overrides": {
     "minimist@<1.2.6": "1.2.6",
