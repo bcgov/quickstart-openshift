@@ -7,6 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
+import { baseRules, baseIgnores } from './eslint-base.config.mjs';
 
 // React plugins (only needed for frontend)
 import react from 'eslint-plugin-react';
@@ -24,16 +25,7 @@ const compat = new FlatCompat({
 export default [
   {
     ignores: [
-      '**/.git/',
-      '**/.github/',
-      '**/migrations/',
-      '**/node_modules/',
-      '**/dist/**',
-      '**/coverage/**',
-      '**/vite.config.*',
-      '**/vitest.config.*',
-      '**/playwright.config.*',
-      '**/tsconfig*.json',
+      ...baseIgnores,
       'frontend/src/routeTree.gen.ts', // Auto-generated file
       'frontend/public/**',
     ],
@@ -62,52 +54,8 @@ export default [
       },
     },
     rules: {
-      'no-console': 'off',
-      'no-debugger': 'warn',
-      'no-unused-vars': 'off',
-      'no-empty': [
-        'error',
-        {
-          allowEmptyCatch: true,
-        },
-      ],
-      'no-undef': 'off',
-      'no-use-before-define': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-        },
-      ],
-      'prettier/prettier': [
-        'error',
-        {
-          endOfLine: 'auto',
-        },
-        { usePrettierrc: true },
-      ],
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-empty-interface': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/ban-types': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off',
-      '@typescript-eslint/no-use-before-define': [
-        'error',
-        {
-          functions: false,
-        },
-      ],
-      '@typescript-eslint/no-var-requires': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      // Consistent-type-imports OFF to match quickstart-aws-sql
-      // Backend also doesn't need it due to NestJS DI requiring runtime class references
-      '@typescript-eslint/consistent-type-imports': [
-        'off',
-        {
-          prefer: 'type-imports',
-        },
-      ],
+      ...baseRules,
+      // Additional backend-specific rules can be added here
     },
   },
   // Frontend configuration (React)
@@ -140,51 +88,7 @@ export default [
       },
     },
     rules: {
-      'no-console': 'off',
-      'no-debugger': 'warn',
-      'no-unused-vars': 'off',
-      'no-empty': [
-        'error',
-        {
-          allowEmptyCatch: true,
-        },
-      ],
-      'no-undef': 'off',
-      'no-use-before-define': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-        },
-      ],
-      'prettier/prettier': [
-        'error',
-        {
-          endOfLine: 'auto',
-        },
-        { usePrettierrc: true },
-      ],
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-empty-interface': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/ban-types': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off',
-      '@typescript-eslint/no-use-before-define': [
-        'error',
-        {
-          functions: false,
-        },
-      ],
-      '@typescript-eslint/no-var-requires': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      // Consistent-type-imports OFF to match quickstart-aws-sql
-      '@typescript-eslint/consistent-type-imports': [
-        'off',
-        {
-          prefer: 'type-imports',
-        },
-      ],
+      ...baseRules,
       // React rules
       ...react.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
