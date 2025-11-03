@@ -7,9 +7,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
-import { baseRules, baseIgnores } from './eslint-base.config.mjs';
+import { baseRules, baseIgnores } from '../eslint-base.config.mjs';
 
-// React plugins (only needed for frontend)
+// React plugins
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 
@@ -26,8 +26,10 @@ export default [
   {
     ignores: [
       ...baseIgnores,
-      'frontend/src/routeTree.gen.ts', // Auto-generated file
-      'frontend/public/**',
+      '**/dist/**',
+      '**/coverage/**',
+      'src/routeTree.gen.ts', // Auto-generated file
+      'public/**',
     ],
   },
   ...compat.extends(
@@ -35,32 +37,9 @@ export default [
     'plugin:@typescript-eslint/recommended',
     'prettier',
   ),
-  // Backend configuration (NestJS)
-  {
-    files: ['backend/**/*.ts'],
-    plugins: {
-      '@typescript-eslint': typescriptEslint,
-      prettier,
-    },
-    languageOptions: {
-      globals: {
-        ...globals.node,
-      },
-      parser: tsParser,
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      parserOptions: {
-        project: [path.join(__dirname, 'backend/tsconfig.json')],
-      },
-    },
-    rules: {
-      ...baseRules,
-      // Additional backend-specific rules can be added here
-    },
-  },
   // Frontend configuration (React)
   {
-    files: ['frontend/**/*.ts', 'frontend/**/*.tsx'],
+    files: ['**/*.ts', '**/*.tsx'],
     plugins: {
       '@typescript-eslint': typescriptEslint,
       prettier,
@@ -79,7 +58,7 @@ export default [
         ecmaFeatures: {
           jsx: true,
         },
-        project: [path.join(__dirname, 'frontend/tsconfig.json')],
+        project: [path.join(__dirname, 'tsconfig.json')],
       },
     },
     settings: {
