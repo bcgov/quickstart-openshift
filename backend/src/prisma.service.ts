@@ -1,6 +1,7 @@
 import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { Injectable, Logger } from '@nestjs/common'
 import { Prisma, PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
 
 const DB_HOST = process.env.POSTGRES_HOST || 'localhost'
 const DB_USER = process.env.POSTGRES_USER || 'postgres'
@@ -24,13 +25,10 @@ class PrismaService
     if (PrismaService.instance) {
       return PrismaService.instance
     }
+    const adapter = new PrismaPg({ connectionString: dataSourceURL })
     super({
+      adapter,
       errorFormat: 'pretty',
-      datasources: {
-        db: {
-          url: dataSourceURL,
-        },
-      },
       log: [
         { emit: 'event', level: 'query' },
         { emit: 'stdout', level: 'info' },
