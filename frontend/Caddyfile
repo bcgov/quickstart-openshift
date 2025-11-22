@@ -31,8 +31,8 @@
 		Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
 		X-Content-Type-Options "nosniff"
 		Strict-Transport-Security "max-age=31536000"
-		Content-Security-Policy "default-src 'self' https://*.gov.bc.ca;; 
-			script-src 'self'  https://*.gov.bc.ca ;
+		Content-Security-Policy "default-src 'self' https://*.gov.bc.ca; 
+			script-src 'self'  https://*.gov.bc.ca;
 			style-src 'self' https://fonts.googleapis.com https://use.fontawesome.com; 
 			font-src 'self' https://fonts.gstatic.com; 
 			img-src 'self' data: https://fonts.googleapis.com https://www.w3.org https://*.gov.bc.ca https://*.tile.openstreetmap.org;
