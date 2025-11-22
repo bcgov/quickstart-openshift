@@ -18,7 +18,7 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: {{ template  "backend.name"}}
+              app.kubernetes.io/name: {{ template "backend.name" . }}
               app.kubernetes.io/instance: {{ .Release.Name }}
       ports:
         - protocol: TCP
@@ -50,7 +50,7 @@ spec:
       from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: {{ template  "backend.name"}}
+              app.kubernetes.io/name: {{ template "backend.name" . }}
               app.kubernetes.io/instance: {{ .Release.Name }}
   egress: []
   policyTypes:
@@ -65,7 +65,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: {{ template  "backend.name"}}
+      app.kubernetes.io/name: {{ template "backend.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   ingress:
     - ports:
@@ -74,7 +74,7 @@ spec:
       from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: {{ template  "frontend.name"}}
+              app.kubernetes.io/name: {{ template "frontend.name" . }}
               app.kubernetes.io/instance: {{ .Release.Name }}
   egress:
     - to:
