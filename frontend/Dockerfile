@@ -25,8 +25,8 @@ COPY --from=build /app/dist /srv
 COPY Caddyfile /etc/caddy/Caddyfile
 COPY coraza.conf /etc/caddy/coraza.conf
 
-# Create directories for Coraza WAF
-RUN mkdir -p /tmp/coraza && chmod 755 /tmp/coraza
+# Create directories for Coraza WAF with restricted permissions
+RUN mkdir -p /tmp/coraza && chmod 700 /tmp/coraza
 
 RUN caddy fmt /etc/caddy/Caddyfile
 
