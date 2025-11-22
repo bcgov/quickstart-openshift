@@ -29,7 +29,7 @@ This repository provides a template to rapidly deploy a modern web application s
 * 🎯 Point the long-lived DEMO route to PRs by using the `demo` label
 * **Sample application stack:**
     * 🗄️ Database: Crunchy (Postgres, PostGIS), backups, Flyway
-    * 🎨 Frontend: TypeScript, Caddy Server
+    * 🎨 Frontend: TypeScript, Caddy Server with Coraza WAF
     * ⚙️ Backend: TypeScript, Nest.js
     * 🔄 Alternative backend examples - see [Alternative Backends](#alternative-backends)
 
@@ -449,6 +449,7 @@ The starter stack includes a frontend (React, Bootstrap, Vite, Caddy), backend (
 * 🏗️ [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
 * 🔄 [Flyway](https://flywaydb.org/) database migrations
 * 🐘 [Crunchy](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes) Postgres/PostGIS Database
+* 🛡️ [Coraza WAF](https://github.com/corazawaf/coraza-caddy) Web Application Firewall integrated with Caddy
 
 PostGIS is enabled by default for geospatial data support when postGISVersion value is provided. To switch to standard PostgreSQL, update the `postGISVersion` field in the [Crunchy Helm chart values](./charts/crunchy/values.yml) to `~`. This disables PostGIS extensions, making it a plain PostgreSQL setup.
 
