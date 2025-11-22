@@ -23,9 +23,31 @@ concurrency:
 permissions: {}
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        component: [backend, frontend]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ matrix.component }}/package-lock.json
+      - name: Install dependencies
+        working-directory: ${{ matrix.component }}
+        run: npm ci
+      - name: Run linting
+        working-directory: ${{ matrix.component }}
+        run: npm run lint
+
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploy-test:
     name: Deploy (TEST)
+    needs: [lint]
     uses: ./.github/workflows/.deployer.yml
     secrets: inherit
     with:
