@@ -24,6 +24,10 @@ COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 COPY --from=build /app/dist /srv
 COPY Caddyfile /etc/caddy/Caddyfile
 COPY coraza.conf /etc/caddy/coraza.conf
+
+# Create directories for Coraza WAF
+RUN mkdir -p /tmp/coraza && chmod 755 /tmp/coraza
+
 RUN caddy fmt /etc/caddy/Caddyfile
 
 # Boilerplate, not used in OpenShift/Kubernetes
