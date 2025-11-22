@@ -14,8 +14,25 @@ spec:
         - namespaceSelector:
             matchLabels:
               network.openshift.io/policy-group: ingress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ template "backend.name" . }}
+              app.kubernetes.io/instance: {{ .Release.Name }}
+      ports:
+        - protocol: TCP
+          port: 3000
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openshift-dns
+      ports:
+        - protocol: UDP
+          port: 5353
   policyTypes:
     - Ingress
+    - Egress
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -33,10 +50,12 @@ spec:
       from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: {{ template  "backend.name"}}
+              app.kubernetes.io/name: {{ template "backend.name" . }}
               app.kubernetes.io/instance: {{ .Release.Name }}
+  egress: []
   policyTypes:
     - Ingress
+    - Egress
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -46,7 +65,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: {{ template  "backend.name"}}
+      app.kubernetes.io/name: {{ template "backend.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   ingress:
     - ports:
@@ -55,7 +74,23 @@ spec:
       from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: {{ template  "frontend.name"}}
+              app.kubernetes.io/name: {{ template "frontend.name" . }}
               app.kubernetes.io/instance: {{ .Release.Name }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              postgres-operator.crunchydata.com/cluster: {{ .Values.global.databaseAlias}}
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openshift-dns
+      ports:
+        - protocol: UDP
+          port: 5353
   policyTypes:
     - Ingress
+    - Egress
