@@ -34,7 +34,7 @@ jobs:
 
       - env:
           API_NAME: nest
-          BASE_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
+          BASE_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}
         run: |
           cd tests/integration
           npm ci
@@ -66,7 +66,7 @@ jobs:
 
       - name: Run Tests
         env:
-          E2E_BASE_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-frontend.${{ env.DOMAIN }}/
+          E2E_BASE_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}.${{ env.DOMAIN }}/
           CI: "true"
         run: |
           npx playwright test --project="${{ matrix.project }}" --reporter=html
@@ -90,8 +90,8 @@ jobs:
       - uses: grafana/setup-k6-action@ffe7d7290dfa715e48c2ccc924d068444c94bde2 # v1.1.0
       - uses: grafana/run-k6-action@a15e2072ede004e8d46141e33d7f7dad8ad08d9d # v1.3.1
         env:
-          BACKEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/api
-          FRONTEND_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
+          BACKEND_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}/api
+          FRONTEND_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}
         with:
           path: ./tests/load/${{ matrix.name }}-test.js
           flags: --vus 100 --duration 300s

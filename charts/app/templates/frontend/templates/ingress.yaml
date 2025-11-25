@@ -14,7 +14,7 @@ metadata:
 spec:
   ingressClassName: openshift-default
   rules:
-    - host: {{ include "frontend.fullname" . }}.{{ .Values.global.domain }}
+    - host: {{ .Release.Name }}.{{ .Values.global.domain }}
       http:
         paths:
           - path: /
