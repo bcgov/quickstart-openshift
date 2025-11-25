@@ -34,7 +34,7 @@ jobs:
 
       - env:
           API_NAME: nest
-          BASE_URL: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
+          BASE_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}
         run: |
           cd tests/integration
           npm ci
