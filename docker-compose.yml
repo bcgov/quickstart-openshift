@@ -1,13 +1,9 @@
 # Reusable vars
 x-var:
-  - &POSTGRES_USER
-    postgres
-  - &POSTGRES_PASSWORD
-    default
-  - &POSTGRES_DATABASE
-    postgres
-  - &node-image
-    node:22
+  - &POSTGRES_USER postgres
+  - &POSTGRES_PASSWORD default
+  - &POSTGRES_DATABASE postgres
+  - &node-image node:22
 
 # Reusable envars for postgres
 x-postgres-vars: &postgres-vars
@@ -69,7 +65,7 @@ services:
 
   frontend:
     container_name: frontend
-    entrypoint: sh -c "npm ci && npm run dev"
+    entrypoint: sh -c "npm ci --ignore-scripts && npm run dev"
     environment:
       BACKEND_URL: http://backend:3000
       PORT: 3000
