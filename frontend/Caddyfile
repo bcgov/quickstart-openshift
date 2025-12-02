@@ -9,6 +9,14 @@
 		format console
 		level {$LOG_LEVEL}
 	}
+	
+	# Enable Coraza WAF
+	coraza_waf {
+		directives `
+			Include /etc/caddy/coraza.conf
+		`
+	}
+	
 	root * /srv
 	encode zstd gzip
 	file_server
