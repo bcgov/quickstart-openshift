@@ -14,7 +14,7 @@ x-postgres-vars: &postgres-vars
 
 services:
   database:
-    image: postgis/postgis:16-3.4 # if using crunchy , make sure to align with crunchy version, currently it is at 16 and postgis 3.3
+    image: postgis/postgis:17-3.4 # if using crunchy , make sure to align with crunchy version, currently it is at 16 and postgis 3.3
     container_name: database
     environment:
       <<: *postgres-vars
@@ -38,7 +38,7 @@ services:
         condition: service_healthy
 
   schemaspy:
-    image: schemaspy/schemaspy:6.2.4
+    image: schemaspy/schemaspy:7.0.2
     profiles: ["schemaspy"]
     container_name: schemaspy
     command: -t pgsql11 -db postgres -host database -port 5432 -u postgres -p default -schemas users
