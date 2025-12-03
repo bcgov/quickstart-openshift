@@ -15,6 +15,8 @@ jobs:
   builds:
     name: Builds
     permissions:
+      attestations: write
+      id-token: write
       packages: write
     runs-on: ubuntu-24.04
     strategy:
@@ -44,10 +46,10 @@ jobs:
       db_triggers: ('charts/crunchy/')
 
   tests:
-     name: Tests
-     if: needs.deploys.outputs.triggered == 'true'
-     needs: [deploys]
-     uses: ./.github/workflows/.tests.yml
+    name: Tests
+    if: needs.deploys.outputs.triggered == 'true'
+    needs: [deploys]
+    uses: ./.github/workflows/.tests.yml
 
   results:
     name: PR Results
