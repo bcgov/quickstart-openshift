@@ -6,16 +6,8 @@ import { RouterProvider, createRouter } from '@tanstack/react-router'
 // Import bootstrap styles
 import '@/scss/styles.scss'
 
-// Import comprehensive style blocker - MUST be imported before React renders
-import { blockAllInlineStyles } from '@/utils/react-style-interceptor'
-
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
-
-// Block all inline styles BEFORE React renders to prevent CSP violations
-// This aggressively prevents inline styles from React Bootstrap, BCGov components, etc.
-// Our CSS classes handle all necessary styling
-blockAllInlineStyles()
 
 // Create a new router instance
 const router = createRouter({ routeTree })
