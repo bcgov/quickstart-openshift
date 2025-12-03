@@ -2,7 +2,8 @@ import type { FC } from 'react'
 import type { AxiosResponse } from '~/axios'
 import type UserDto from '@/interfaces/UserDto'
 import { useEffect, useState } from 'react'
-import { Table, Modal, Button } from 'react-bootstrap'
+import { Table, Button } from 'react-bootstrap'
+import CSPCompliantModal, { ModalHeader, ModalBody, ModalFooter, ModalTitle } from './CSPCompliantModal'
 import apiService from '@/service/api-service'
 
 type ModalProps = {
@@ -13,21 +14,20 @@ type ModalProps = {
 
 const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
   return (
-    <Modal
+    <CSPCompliantModal
       show={show}
       onHide={onHide}
       size="lg"
-      aria-labelledby="contained-modal-title-vcenter"
       centered
     >
-      <Modal.Header closeButton>
-        <Modal.Title id="contained-modal-title-vcenter">Row Details</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>{JSON.stringify(user)}</Modal.Body>
-      <Modal.Footer>
+      <ModalHeader closeButton onHide={onHide}>
+        <ModalTitle id="contained-modal-title-vcenter">Row Details</ModalTitle>
+      </ModalHeader>
+      <ModalBody>{JSON.stringify(user)}</ModalBody>
+      <ModalFooter>
         <Button onClick={onHide}>Close</Button>
-      </Modal.Footer>
-    </Modal>
+      </ModalFooter>
+    </CSPCompliantModal>
   )
 }
 
