@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: bcgov/action-test-and-analyse@51b50be3bb2522e480ed8eab72735612deff7f15 # v1.4.0
+      - uses: bcgov/action-test-and-analyse@c20d16c26d9b7e6e486f01702880053ed4ebdc91 # v1.5.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
         with:
@@ -79,6 +79,7 @@ jobs:
             -Dsonar.tests.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_token: ${{ env.SONAR_TOKEN }}
+          supply_scan: true
           triggers: ('frontend/')
 
   # https://github.com/marketplace/actions/aqua-security-trivy
