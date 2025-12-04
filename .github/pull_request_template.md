@@ -50,3 +50,10 @@ Fixes # (issue)
 ## Further comments
 
 <!-- If this is a relatively large or complex change, kick off the discussion by explaining why you chose the solution you did and what alternatives you considered, etc... -->
+
+### Known Limitations
+
+BCGov Header and Footer components (`@bcgov/design-system-react-components@0.5.2`) use inline styles that are blocked by strict CSP. This causes CSP violations in the browser console but does not break functionality. We've filed issue #574 with the BCGov design system team to request CSP-compliant components:
+https://github.com/bcgov/design-system/issues/574
+
+All other components (React Bootstrap Modal, Table, Button) have been replaced with CSP-compliant versions.
