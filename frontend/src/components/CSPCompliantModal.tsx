@@ -129,4 +129,3 @@ CSPCompliantModal.Footer = ModalFooter
 CSPCompliantModal.Title = ModalTitle
 
 export default CSPCompliantModal
-

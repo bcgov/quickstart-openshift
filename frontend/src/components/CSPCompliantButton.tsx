@@ -41,4 +41,3 @@ const CSPCompliantButton: FC<ButtonProps> = ({
 }
 
 export default CSPCompliantButton
-

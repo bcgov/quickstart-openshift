@@ -36,4 +36,3 @@ const CSPCompliantTable: FC<TableProps> = ({
 }
 
 export default CSPCompliantTable
-
