@@ -43,20 +43,33 @@ describe('CSPCompliantButton', () => {
   })
 
   test('passes through additional props', () => {
-    render(<CSPCompliantButton type="submit" disabled data-testid="test-button">Button</CSPCompliantButton>)
+    render(
+      <CSPCompliantButton type="submit" disabled data-testid="test-button">
+        Button
+      </CSPCompliantButton>,
+    )
     const button = screen.getByTestId('test-button')
     expect(button).toHaveAttribute('type', 'submit')
     expect(button).toBeDisabled()
   })
 
   test('supports all variant types', () => {
-    const variants = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark', 'link']
+    const variants = [
+      'primary',
+      'secondary',
+      'success',
+      'danger',
+      'warning',
+      'info',
+      'light',
+      'dark',
+      'link',
+    ]
     variants.forEach((variant) => {
       const { container } = render(
-        <CSPCompliantButton variant={variant as any}>Button</CSPCompliantButton>
+        <CSPCompliantButton variant={variant as any}>Button</CSPCompliantButton>,
       )
       expect(container.firstChild).toHaveClass(`btn-${variant}`)
     })
   })
 })
-

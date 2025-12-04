@@ -21,7 +21,7 @@ describe('CSPCompliantModal', () => {
     const { container } = render(
       <CSPCompliantModal show={false} onHide={vi.fn()}>
         <div>Modal Content</div>
-      </CSPCompliantModal>
+      </CSPCompliantModal>,
     )
     expect(container.firstChild).toBeNull()
   })
@@ -30,7 +30,7 @@ describe('CSPCompliantModal', () => {
     render(
       <CSPCompliantModal show={true} onHide={vi.fn()}>
         <div>Modal Content</div>
-      </CSPCompliantModal>
+      </CSPCompliantModal>,
     )
     expect(screen.getByText('Modal Content')).toBeInTheDocument()
   })
@@ -39,7 +39,7 @@ describe('CSPCompliantModal', () => {
     render(
       <CSPCompliantModal show={true} onHide={vi.fn()}>
         <div>Content</div>
-      </CSPCompliantModal>
+      </CSPCompliantModal>,
     )
     expect(document.body).toHaveClass('modal-open')
   })
@@ -48,13 +48,13 @@ describe('CSPCompliantModal', () => {
     const { rerender } = render(
       <CSPCompliantModal show={true} onHide={vi.fn()}>
         <div>Content</div>
-      </CSPCompliantModal>
+      </CSPCompliantModal>,
     )
     expect(document.body).toHaveClass('modal-open')
     rerender(
       <CSPCompliantModal show={false} onHide={vi.fn()}>
         <div>Content</div>
-      </CSPCompliantModal>
+      </CSPCompliantModal>,
     )
     expect(document.body).not.toHaveClass('modal-open')
   })
@@ -65,7 +65,7 @@ describe('CSPCompliantModal', () => {
     render(
       <CSPCompliantModal show={true} onHide={handleHide}>
         <div>Content</div>
-      </CSPCompliantModal>
+      </CSPCompliantModal>,
     )
     const backdrop = document.querySelector('.modal-backdrop')
     if (backdrop) {
@@ -78,7 +78,7 @@ describe('CSPCompliantModal', () => {
     const { container } = render(
       <CSPCompliantModal show={true} onHide={vi.fn()} size="sm">
         <div>Content</div>
-      </CSPCompliantModal>
+      </CSPCompliantModal>,
     )
     const dialog = container.querySelector('.modal-dialog')
     expect(dialog).toHaveClass('modal-sm')
@@ -88,7 +88,7 @@ describe('CSPCompliantModal', () => {
     const { container } = render(
       <CSPCompliantModal show={true} onHide={vi.fn()} centered>
         <div>Content</div>
-      </CSPCompliantModal>
+      </CSPCompliantModal>,
     )
     const dialog = container.querySelector('.modal-dialog')
     expect(dialog).toHaveClass('modal-dialog-centered')
@@ -98,7 +98,7 @@ describe('CSPCompliantModal', () => {
     const { unmount } = render(
       <CSPCompliantModal show={true} onHide={vi.fn()}>
         <div>Content</div>
-      </CSPCompliantModal>
+      </CSPCompliantModal>,
     )
     expect(document.body).toHaveClass('modal-open')
     unmount()
@@ -111,7 +111,7 @@ describe('ModalHeader', () => {
     render(
       <ModalHeader>
         <div>Header Content</div>
-      </ModalHeader>
+      </ModalHeader>,
     )
     expect(screen.getByText('Header Content')).toBeInTheDocument()
   })
@@ -120,7 +120,7 @@ describe('ModalHeader', () => {
     render(
       <ModalHeader closeButton onHide={vi.fn()}>
         <div>Header</div>
-      </ModalHeader>
+      </ModalHeader>,
     )
     expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument()
   })
@@ -131,7 +131,7 @@ describe('ModalHeader', () => {
     render(
       <ModalHeader closeButton onHide={handleHide}>
         <div>Header</div>
-      </ModalHeader>
+      </ModalHeader>,
     )
     const closeButton = screen.getByRole('button', { name: /close/i })
     await user.click(closeButton)
@@ -142,7 +142,7 @@ describe('ModalHeader', () => {
     render(
       <ModalHeader closeButton={false} onHide={vi.fn()}>
         <div>Header</div>
-      </ModalHeader>
+      </ModalHeader>,
     )
     expect(screen.queryByRole('button', { name: /close/i })).not.toBeInTheDocument()
   })
@@ -153,7 +153,7 @@ describe('ModalBody', () => {
     render(
       <ModalBody>
         <div>Body Content</div>
-      </ModalBody>
+      </ModalBody>,
     )
     expect(screen.getByText('Body Content')).toBeInTheDocument()
   })
@@ -164,7 +164,7 @@ describe('ModalFooter', () => {
     render(
       <ModalFooter>
         <button>Save</button>
-      </ModalFooter>
+      </ModalFooter>,
     )
     expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument()
   })
@@ -189,4 +189,3 @@ describe('ModalTitle', () => {
     expect(title).toHaveClass('modal-title')
   })
 })
-

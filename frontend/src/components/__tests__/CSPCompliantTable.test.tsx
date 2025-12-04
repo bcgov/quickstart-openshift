@@ -11,7 +11,7 @@ describe('CSPCompliantTable', () => {
             <td>Test</td>
           </tr>
         </tbody>
-      </CSPCompliantTable>
+      </CSPCompliantTable>,
     )
     expect(screen.getByText('Test')).toBeInTheDocument()
   })
@@ -20,7 +20,7 @@ describe('CSPCompliantTable', () => {
     const { container } = render(
       <CSPCompliantTable>
         <tbody />
-      </CSPCompliantTable>
+      </CSPCompliantTable>,
     )
     const table = container.querySelector('table')
     expect(table).toHaveClass('table')
@@ -30,7 +30,7 @@ describe('CSPCompliantTable', () => {
     const { container } = render(
       <CSPCompliantTable striped>
         <tbody />
-      </CSPCompliantTable>
+      </CSPCompliantTable>,
     )
     const table = container.querySelector('table')
     expect(table).toHaveClass('table-striped')
@@ -40,7 +40,7 @@ describe('CSPCompliantTable', () => {
     const { container } = render(
       <CSPCompliantTable bordered>
         <tbody />
-      </CSPCompliantTable>
+      </CSPCompliantTable>,
     )
     const table = container.querySelector('table')
     expect(table).toHaveClass('table-bordered')
@@ -50,7 +50,7 @@ describe('CSPCompliantTable', () => {
     const { container } = render(
       <CSPCompliantTable hover>
         <tbody />
-      </CSPCompliantTable>
+      </CSPCompliantTable>,
     )
     const table = container.querySelector('table')
     expect(table).toHaveClass('table-hover')
@@ -60,7 +60,7 @@ describe('CSPCompliantTable', () => {
     const { container } = render(
       <CSPCompliantTable striped bordered hover>
         <tbody />
-      </CSPCompliantTable>
+      </CSPCompliantTable>,
     )
     const table = container.querySelector('table')
     expect(table).toHaveClass('table', 'table-striped', 'table-bordered', 'table-hover')
@@ -70,7 +70,7 @@ describe('CSPCompliantTable', () => {
     const { container } = render(
       <CSPCompliantTable className="custom-table">
         <tbody />
-      </CSPCompliantTable>
+      </CSPCompliantTable>,
     )
     const table = container.querySelector('table')
     expect(table).toHaveClass('custom-table')
@@ -80,11 +80,10 @@ describe('CSPCompliantTable', () => {
     const { container } = render(
       <CSPCompliantTable striped={false} bordered={false} hover={false}>
         <tbody />
-      </CSPCompliantTable>
+      </CSPCompliantTable>,
     )
     const table = container.querySelector('table')
     expect(table).toHaveClass('table')
     expect(table).not.toHaveClass('table-striped', 'table-bordered', 'table-hover')
   })
 })
-
