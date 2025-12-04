@@ -76,6 +76,7 @@ const CSPCompliantModal: FC<ModalProps> = ({
         className={`modal show ${centered ? 'modal-centered' : ''}`}
         role="dialog"
         aria-modal="true"
+        tabIndex={-1}
         onClick={(e) => {
           // Close when clicking outside modal content
           if (e.target === e.currentTarget) {

@@ -147,6 +147,38 @@ describe('CSPCompliantModal', () => {
     expect(handleHide).not.toHaveBeenCalled()
   })
 
+  test('calls onHide when modal container receives Enter key', async () => {
+    const handleHide = vi.fn()
+    const user = userEvent.setup()
+    const { container } = render(
+      <CSPCompliantModal show={true} onHide={handleHide}>
+        <div>Content</div>
+      </CSPCompliantModal>,
+    )
+    const modal = container.querySelector('.modal')
+    if (modal) {
+      ;(modal as HTMLElement).focus()
+      await user.keyboard('{Enter}')
+      expect(handleHide).toHaveBeenCalledTimes(1)
+    }
+  })
+
+  test('calls onHide when modal container receives Space key', async () => {
+    const handleHide = vi.fn()
+    const user = userEvent.setup()
+    const { container } = render(
+      <CSPCompliantModal show={true} onHide={handleHide}>
+        <div>Content</div>
+      </CSPCompliantModal>,
+    )
+    const modal = container.querySelector('.modal')
+    if (modal) {
+      ;(modal as HTMLElement).focus()
+      await user.keyboard(' ')
+      expect(handleHide).toHaveBeenCalledTimes(1)
+    }
+  })
+
   test('applies sm size class', () => {
     const { container } = render(
       <CSPCompliantModal show={true} onHide={vi.fn()} size="sm">
