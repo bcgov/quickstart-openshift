@@ -1,6 +1,6 @@
 /**
  * CSP-Compliant Table Component
- * 
+ *
  * A replacement for React Bootstrap's Table that doesn't use inline styles,
  * making it compatible with strict Content Security Policy.
  */
@@ -15,27 +15,24 @@ type TableProps = {
   className?: string
 }
 
-const CSPCompliantTable: FC<TableProps> = ({ 
-  striped = false, 
-  bordered = false, 
+const CSPCompliantTable: FC<TableProps> = ({
+  striped = false,
+  bordered = false,
   hover = false,
   children,
-  className = ''
+  className = '',
 }) => {
   const classes = [
     'table',
     striped && 'table-striped',
     bordered && 'table-bordered',
     hover && 'table-hover',
-    className
-  ].filter(Boolean).join(' ')
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
-  return (
-    <table className={classes}>
-      {children}
-    </table>
-  )
+  return <table className={classes}>{children}</table>
 }
 
 export default CSPCompliantTable
-

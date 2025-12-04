@@ -1,16 +1,15 @@
 /**
  * CSP-Compliant Modal Component
- * 
+ *
  * A replacement for React Bootstrap's Modal that doesn't use inline styles,
  * making it compatible with strict Content Security Policy.
- * 
+ *
  * This component uses CSS classes instead of inline styles for all positioning
  * and styling, allowing it to work with CSP that doesn't allow 'unsafe-inline'.
  */
 
 import type { FC, ReactNode } from 'react'
 import { useEffect } from 'react'
-import { Button } from 'react-bootstrap'
 
 type ModalProps = {
   show: boolean
@@ -20,7 +19,13 @@ type ModalProps = {
   children: ReactNode
 }
 
-const CSPCompliantModal: FC<ModalProps> = ({ show, onHide, size = 'lg', centered = false, children }) => {
+const CSPCompliantModal: FC<ModalProps> = ({
+  show,
+  onHide,
+  size = 'lg',
+  centered = false,
+  children,
+}) => {
   useEffect(() => {
     // Prevent body scroll when modal is open using CSS class instead of inline style
     if (show) {
@@ -28,7 +33,7 @@ const CSPCompliantModal: FC<ModalProps> = ({ show, onHide, size = 'lg', centered
     } else {
       document.body.classList.remove('modal-open')
     }
-    
+
     return () => {
       document.body.classList.remove('modal-open')
     }
@@ -43,16 +48,16 @@ const CSPCompliantModal: FC<ModalProps> = ({ show, onHide, size = 'lg', centered
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="modal-backdrop show"
         onClick={onHide}
         role="button"
         tabIndex={-1}
         aria-label="Close modal"
       />
-      
+
       {/* Modal */}
-      <div 
+      <div
         className={`modal show ${centered ? 'modal-centered' : ''}`}
         role="dialog"
         aria-modal="true"
@@ -64,9 +69,7 @@ const CSPCompliantModal: FC<ModalProps> = ({ show, onHide, size = 'lg', centered
         }}
       >
         <div className={`modal-dialog ${centered ? 'modal-dialog-centered' : ''} ${sizeClass}`}>
-          <div className="modal-content">
-            {children}
-          </div>
+          <div className="modal-content">{children}</div>
         </div>
       </div>
     </>
@@ -79,14 +82,18 @@ type ModalHeaderProps = {
   children: ReactNode
 }
 
-export const ModalHeader: FC<ModalHeaderProps> = ({ closeButton = false, onHide, children }) => {
+export const ModalHeader: FC<ModalHeaderProps> = ({
+  closeButton = false,
+  onHide,
+  children,
+}) => {
   return (
     <div className="modal-header">
       {children}
       {closeButton && onHide && (
-        <button 
-          type="button" 
-          className="btn-close" 
+        <button
+          type="button"
+          className="btn-close"
           onClick={onHide}
           aria-label="Close"
         />
@@ -117,7 +124,11 @@ type ModalTitleProps = {
 }
 
 export const ModalTitle: FC<ModalTitleProps> = ({ id, children }) => {
-  return <h5 className="modal-title" id={id}>{children}</h5>
+  return (
+    <h5 className="modal-title" id={id}>
+      {children}
+    </h5>
+  )
 }
 
 // Export the modal and its subcomponents
@@ -127,4 +138,3 @@ CSPCompliantModal.Footer = ModalFooter
 CSPCompliantModal.Title = ModalTitle
 
 export default CSPCompliantModal
-

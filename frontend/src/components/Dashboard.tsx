@@ -2,7 +2,12 @@ import type { FC } from 'react'
 import type { AxiosResponse } from '~/axios'
 import type UserDto from '@/interfaces/UserDto'
 import { useEffect, useState } from 'react'
-import CSPCompliantModal, { ModalHeader, ModalBody, ModalFooter, ModalTitle } from './CSPCompliantModal'
+import CSPCompliantModal, {
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalTitle,
+} from './CSPCompliantModal'
 import CSPCompliantTable from './CSPCompliantTable'
 import CSPCompliantButton from './CSPCompliantButton'
 import apiService from '@/service/api-service'
@@ -15,12 +20,7 @@ type ModalProps = {
 
 const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
   return (
-    <CSPCompliantModal
-      show={show}
-      onHide={onHide}
-      size="lg"
-      centered
-    >
+    <CSPCompliantModal show={show} onHide={onHide} size="lg" centered>
       <ModalHeader closeButton onHide={onHide}>
         <ModalTitle id="contained-modal-title-vcenter">Row Details</ModalTitle>
       </ModalHeader>
@@ -79,7 +79,11 @@ const Dashboard: FC = () => {
               <td>{user.name}</td>
               <td>{user.email}</td>
               <td className="text-center">
-                <CSPCompliantButton variant="secondary" size="sm" onClick={() => setSelectedUser(user)}>
+                <CSPCompliantButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setSelectedUser(user)}
+                >
                   View Details
                 </CSPCompliantButton>
               </td>
