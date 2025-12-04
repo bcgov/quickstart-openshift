@@ -74,7 +74,80 @@ describe('CSPCompliantModal', () => {
     }
   })
 
-  test('applies size class', () => {
+  test('calls onHide when backdrop receives Enter key', async () => {
+    const handleHide = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <CSPCompliantModal show={true} onHide={handleHide}>
+        <div>Content</div>
+      </CSPCompliantModal>,
+    )
+    const backdrop = document.querySelector('.modal-backdrop')
+    if (backdrop) {
+      backdrop.focus()
+      await user.keyboard('{Enter}')
+      expect(handleHide).toHaveBeenCalledTimes(1)
+    }
+  })
+
+  test('calls onHide when backdrop receives Space key', async () => {
+    const handleHide = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <CSPCompliantModal show={true} onHide={handleHide}>
+        <div>Content</div>
+      </CSPCompliantModal>,
+    )
+    const backdrop = document.querySelector('.modal-backdrop')
+    if (backdrop) {
+      backdrop.focus()
+      await user.keyboard(' ')
+      expect(handleHide).toHaveBeenCalledTimes(1)
+    }
+  })
+
+  test('calls onHide when Escape key is pressed', async () => {
+    const handleHide = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <CSPCompliantModal show={true} onHide={handleHide}>
+        <div>Content</div>
+      </CSPCompliantModal>,
+    )
+    // Escape key is handled at document level via useEffect
+    await user.keyboard('{Escape}')
+    expect(handleHide).toHaveBeenCalledTimes(1)
+  })
+
+  test('calls onHide when clicking outside modal content', async () => {
+    const handleHide = vi.fn()
+    const user = userEvent.setup()
+    const { container } = render(
+      <CSPCompliantModal show={true} onHide={handleHide}>
+        <div>Content</div>
+      </CSPCompliantModal>,
+    )
+    const modal = container.querySelector('.modal')
+    if (modal) {
+      await user.click(modal as HTMLElement)
+      expect(handleHide).toHaveBeenCalledTimes(1)
+    }
+  })
+
+  test('does not call onHide when clicking inside modal content', async () => {
+    const handleHide = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <CSPCompliantModal show={true} onHide={handleHide}>
+        <div data-testid="modal-content">Content</div>
+      </CSPCompliantModal>,
+    )
+    const content = screen.getByTestId('modal-content')
+    await user.click(content)
+    expect(handleHide).not.toHaveBeenCalled()
+  })
+
+  test('applies sm size class', () => {
     const { container } = render(
       <CSPCompliantModal show={true} onHide={vi.fn()} size="sm">
         <div>Content</div>
@@ -82,6 +155,26 @@ describe('CSPCompliantModal', () => {
     )
     const dialog = container.querySelector('.modal-dialog')
     expect(dialog).toHaveClass('modal-sm')
+  })
+
+  test('applies xl size class', () => {
+    const { container } = render(
+      <CSPCompliantModal show={true} onHide={vi.fn()} size="xl">
+        <div>Content</div>
+      </CSPCompliantModal>,
+    )
+    const dialog = container.querySelector('.modal-dialog')
+    expect(dialog).toHaveClass('modal-xl')
+  })
+
+  test('applies default lg size (no size class)', () => {
+    const { container } = render(
+      <CSPCompliantModal show={true} onHide={vi.fn()} size="lg">
+        <div>Content</div>
+      </CSPCompliantModal>,
+    )
+    const dialog = container.querySelector('.modal-dialog')
+    expect(dialog).not.toHaveClass('modal-sm', 'modal-xl')
   })
 
   test('applies centered class', () => {

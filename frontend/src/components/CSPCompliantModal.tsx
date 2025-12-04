@@ -30,14 +30,23 @@ const CSPCompliantModal: FC<ModalProps> = ({
     // Prevent body scroll when modal is open using CSS class instead of inline style
     if (show) {
       document.body.classList.add('modal-open')
+
+      // Handle Escape key to close modal (accessibility requirement)
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          onHide()
+        }
+      }
+      document.addEventListener('keydown', handleEscape)
+
+      return () => {
+        document.body.classList.remove('modal-open')
+        document.removeEventListener('keydown', handleEscape)
+      }
     } else {
       document.body.classList.remove('modal-open')
     }
-
-    return () => {
-      document.body.classList.remove('modal-open')
-    }
-  }, [show])
+  }, [show, onHide])
 
   if (!show) {
     return null
@@ -51,6 +60,12 @@ const CSPCompliantModal: FC<ModalProps> = ({
       <div
         className="modal-backdrop show"
         onClick={onHide}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onHide()
+          }
+        }}
         role="button"
         tabIndex={-1}
         aria-label="Close modal"
@@ -64,6 +79,13 @@ const CSPCompliantModal: FC<ModalProps> = ({
         onClick={(e) => {
           // Close when clicking outside modal content
           if (e.target === e.currentTarget) {
+            onHide()
+          }
+        }}
+        onKeyDown={(e) => {
+          // Close when pressing Enter/Space outside modal content
+          if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) {
+            e.preventDefault()
             onHide()
           }
         }}
