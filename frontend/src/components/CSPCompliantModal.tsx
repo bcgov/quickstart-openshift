@@ -82,21 +82,12 @@ type ModalHeaderProps = {
   children: ReactNode
 }
 
-export const ModalHeader: FC<ModalHeaderProps> = ({
-  closeButton = false,
-  onHide,
-  children,
-}) => {
+export const ModalHeader: FC<ModalHeaderProps> = ({ closeButton = false, onHide, children }) => {
   return (
     <div className="modal-header">
       {children}
       {closeButton && onHide && (
-        <button
-          type="button"
-          className="btn-close"
-          onClick={onHide}
-          aria-label="Close"
-        />
+        <button type="button" className="btn-close" onClick={onHide} aria-label="Close" />
       )}
     </div>
   )
@@ -138,3 +129,4 @@ CSPCompliantModal.Footer = ModalFooter
 CSPCompliantModal.Title = ModalTitle
 
 export default CSPCompliantModal
+
