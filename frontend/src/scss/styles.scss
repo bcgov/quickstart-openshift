@@ -89,3 +89,74 @@ body.modal-open {
   max-width: 1140px !important;
 }
 
+// CSP-compliant overrides for BCGov design system components
+// These rules handle all styling that BCGov components might try to set via inline styles
+// Since CSP blocks inline styles, we provide CSS alternatives with !important to ensure they apply
+
+// Override common inline style patterns that CSP blocks
+// These rules use !important to override any inline styles that might slip through
+* {
+  // Common positioning properties that are often set inline
+  &[style*="position"] {
+    position: inherit !important;
+  }
+  
+  &[style*="display"] {
+    display: inherit !important;
+  }
+  
+  &[style*="visibility"] {
+    visibility: inherit !important;
+  }
+  
+  &[style*="opacity"] {
+    opacity: inherit !important;
+  }
+}
+
+// BCGov Header component styling - ensure it renders correctly without inline styles
+// These styles ensure the header displays properly even when inline styles are blocked
+header,
+[role="banner"],
+.bcgov-header,
+header[class*="header"] {
+  position: relative !important;
+  width: 100% !important;
+  display: block !important;
+  z-index: auto !important;
+  
+  * {
+    position: relative !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+  }
+}
+
+// BCGov Footer component styling
+footer,
+[role="contentinfo"],
+.bcgov-footer,
+footer[class*="footer"] {
+  position: relative !important;
+  width: 100% !important;
+  display: block !important;
+  z-index: auto !important;
+  
+  * {
+    position: relative !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+  }
+}
+
+// Note: BCGov Header/Footer components use inline styles that are blocked by strict CSP.
+// These CSS rules attempt to provide alternative styling, but CSP blocks inline styles
+// at the browser security level before they can be set or overridden.
+// 
+// Options to resolve this:
+// 1. Contact BCGov design system team to request CSP-compliant components
+// 2. Add all inline style hashes to CSP (56+ hashes, impractical)
+// 3. Use 'unsafe-inline' for style-src (defeats CSP security benefits)
+//
+// This CSS provides fallback styling but may not fully replace blocked inline styles.
+
