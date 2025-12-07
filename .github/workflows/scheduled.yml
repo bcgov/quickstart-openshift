@@ -83,4 +83,4 @@ jobs:
           artifact_name: ${{ matrix.name }}
           issue_title: "ZAP Security Report: ${{ matrix.name }}"
           token: ${{ secrets.GITHUB_TOKEN }}
-          target: https://${{ github.event.repository.name }}-test-frontend.apps.silver.devops.gov.bc.ca/${{ matrix.path }}
+          target: https://${{ github.event.repository.name }}-test.apps.silver.devops.gov.bc.ca/${{ matrix.path }}
