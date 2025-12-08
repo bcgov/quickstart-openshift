@@ -13,8 +13,11 @@ RUN npm ci --ignore-scripts --no-update-notifier && npm run rollup
 
 # Build our application
 WORKDIR /app
+COPY package*.json ./
+# Remove package-lock.json to regenerate with correct file path
+RUN rm -f package-lock.json
 COPY . ./
-# Use npm install instead of npm ci because we have a local file dependency
+# Use npm install to resolve the local file dependency
 RUN npm install --ignore-scripts --no-update-notifier --omit=dev && npm run build
 
 # Deploy using Caddy to host static files
