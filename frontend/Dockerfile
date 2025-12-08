@@ -1,7 +1,17 @@
 # Build
 FROM node:24-slim AS build
 
-# Copy, build static files; see .dockerignore for exclusions
+# Install git (needed to clone BCGov repo)
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+# Clone and build BCGov design system CSP fix branch
+WORKDIR /tmp
+RUN git clone --depth 1 --branch 574-feat-replace-inline-styles-csp-compliance \
+    https://github.com/bcgov/design-system.git bcgov-design-system
+WORKDIR /tmp/bcgov-design-system/packages/react-components
+RUN npm ci --ignore-scripts --no-update-notifier && npm run rollup
+
+# Build our application
 WORKDIR /app
 COPY . ./
 RUN npm run deploy

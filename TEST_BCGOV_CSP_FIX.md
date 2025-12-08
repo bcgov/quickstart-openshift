@@ -1,10 +1,15 @@
 # Testing BCGov CSP Fix Branch
 
-This PR is prepared to test the BCGov design system CSP fix from branch `574-feat-replace-inline-styles-csp-compliance`.
+This PR tests the BCGov design system CSP fix from branch `574-feat-replace-inline-styles-csp-compliance`.
 
-## Manual Installation Required
+## CI/CD Integration
 
-Since `@bcgov/design-system-react-components` is in a monorepo subdirectory (`packages/react-components`), npm cannot install it directly from a git branch. Manual steps are required:
+The Dockerfile has been modified to automatically clone and build the BCGov CSP fix branch during the Docker build process. This means:
+- ✅ Works in OpenShift CI/CD pipelines
+- ✅ PR deployments will automatically use the CSP fix branch
+- ✅ No manual installation required for deployed environments
+
+## Local Development Setup
 
 ### Option 1: Local Build and Link (Recommended)
 
@@ -32,12 +37,9 @@ Since `@bcgov/design-system-react-components` is in a monorepo subdirectory (`pa
 
 Request the BCGov team to publish a pre-release version (e.g., `0.5.3-beta.1`) that can be installed via npm.
 
-### Option 3: Temporary Package.json Override
+### Option 3: Use Docker Build (Same as CI/CD)
 
-Temporarily modify `frontend/package.json`:
-```json
-"@bcgov/design-system-react-components": "file:/path/to/bcgov-design-system/packages/react-components"
-```
+The Dockerfile automatically handles building the BCGov package, so local Docker builds will use the CSP fix branch automatically.
 
 ## Testing Checklist
 
