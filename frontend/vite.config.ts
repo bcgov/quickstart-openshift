@@ -39,6 +39,12 @@ export default defineConfig({
     // Dedupe React to ensure single instance (fixes React error #525)
     dedupe: ['react', 'react-dom'],
   },
+  optimizeDeps: {
+    // Force React to be pre-bundled and deduplicated
+    include: ['react', 'react-dom'],
+    // Exclude BCGov package from optimization (it should use peer deps)
+    exclude: ['@bcgov/design-system-react-components'],
+  },
   build: {
     // Build Target
     // https://vitejs.dev/config/build-options.html#build-target
@@ -55,6 +61,16 @@ export default defineConfig({
           react: ['react', 'react-dom'],
           axios: ['axios'],
         },
+      },
+      // Explicitly externalize React to prevent bundling
+      external: (id) => {
+        // Don't externalize our own code
+        if (id.startsWith('.') || id.startsWith('/')) return false
+        // Externalize React - it should come from node_modules
+        if (id === 'react' || id === 'react-dom' || id.startsWith('react/') || id.startsWith('react-dom/')) {
+          return false // Let Vite handle React bundling
+        }
+        return false
       },
     },
   },
