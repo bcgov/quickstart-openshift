@@ -36,6 +36,8 @@ export default defineConfig({
       ),
     },
     extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue'],
+    // Dedupe React to ensure single instance (fixes React error #525)
+    dedupe: ['react', 'react-dom'],
   },
   build: {
     // Build Target
