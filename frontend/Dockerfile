@@ -14,7 +14,8 @@ RUN npm ci --ignore-scripts --no-update-notifier && npm run rollup
 # Build our application
 WORKDIR /app
 COPY . ./
-RUN npm run deploy
+# Use npm install instead of npm ci because we have a local file dependency
+RUN npm install --ignore-scripts --no-update-notifier --omit=dev && npm run build
 
 # Deploy using Caddy to host static files
 FROM caddy:2.10.2-alpine
