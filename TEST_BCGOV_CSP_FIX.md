@@ -13,7 +13,7 @@ Since `@bcgov/design-system-react-components` is in a monorepo subdirectory (`pa
    git clone --branch 574-feat-replace-inline-styles-csp-compliance https://github.com/bcgov/design-system.git /tmp/bcgov-design-system
    cd /tmp/bcgov-design-system/packages/react-components
    npm install
-   npm run build
+   npm run rollup
    ```
 
 2. Link the local package:
