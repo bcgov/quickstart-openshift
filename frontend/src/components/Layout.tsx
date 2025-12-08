@@ -10,7 +10,9 @@ type Props = {
 const Layout: FC<Props> = ({ children }) => {
   return (
     <div className="d-flex flex-column min-vh-100">
-      <Header title={'QuickStart OpenShift'}>
+      {/* Test: Override default logo to diagnose CSP inline style violations */}
+      {/* Setting logoImage to empty string to test if default logo causes inline styles */}
+      <Header title={'QuickStart OpenShift'} logoImage="">
         {' '}
         <Link to="/">
           <CSPCompliantButton variant="light" size="lg">
@@ -21,7 +23,9 @@ const Layout: FC<Props> = ({ children }) => {
       <div className="d-flex flex-grow-1 align-items-start justify-content-center mt-5 mb-5 ml-1 mr-1">
         {children}
       </div>
-      <Footer />
+      {/* Test: Override default logo to diagnose CSP inline style violations */}
+      {/* Setting logo to empty string to test if default logo causes inline styles */}
+      <Footer logo="" />
     </div>
   )
 }
