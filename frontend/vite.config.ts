@@ -62,16 +62,6 @@ export default defineConfig({
           axios: ['axios'],
         },
       },
-      // Explicitly externalize React to prevent bundling
-      external: (id) => {
-        // Don't externalize our own code
-        if (id.startsWith('.') || id.startsWith('/')) return false
-        // Externalize React - it should come from node_modules
-        if (id === 'react' || id === 'react-dom' || id.startsWith('react/') || id.startsWith('react-dom/')) {
-          return false // Let Vite handle React bundling
-        }
-        return false
-      },
     },
   },
   css: {
