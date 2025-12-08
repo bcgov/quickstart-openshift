@@ -13,6 +13,11 @@ const dataSourceURL = PGBOUNCER_URL
   ? `${PGBOUNCER_URL}?schema=${DB_SCHEMA}&pgbouncer=true`
   : `postgresql://${DB_USER}:${DB_PWD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=${DB_SCHEMA}&connection_limit=5`
 
+// Prisma 7 requires DATABASE_URL environment variable (no longer accepts datasources config)
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = dataSourceURL
+}
+
 @Injectable()
 class PrismaService
   extends PrismaClient<Prisma.PrismaClientOptions, 'query'>
@@ -26,11 +31,6 @@ class PrismaService
     }
     super({
       errorFormat: 'pretty',
-      datasources: {
-        db: {
-          url: dataSourceURL,
-        },
-      },
       log: [
         { emit: 'event', level: 'query' },
         { emit: 'stdout', level: 'info' },

@@ -8,8 +8,9 @@ export class MetricsController {
 
   @Get()
   async getMetrics(@Res() res: Response) {
-    const prismaMetrics = await this.prisma.$metrics.prometheus()
+    // Prisma $metrics API was deprecated in 6.14+ and removed in 7.0
+    // Return application metrics only
     const appMetrics = await register.metrics()
-    res.end(prismaMetrics + appMetrics)
+    res.end(appMetrics)
   }
 }
