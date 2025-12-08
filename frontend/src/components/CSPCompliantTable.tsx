@@ -6,6 +6,7 @@
  */
 
 import type { FC, ReactNode } from 'react'
+import { classNames } from '@/utils/classNames'
 
 type TableProps = {
   striped?: boolean
@@ -22,15 +23,13 @@ const CSPCompliantTable: FC<TableProps> = ({
   children,
   className = '',
 }) => {
-  const classes = [
+  const classes = classNames(
     'table',
     striped && 'table-striped',
     bordered && 'table-bordered',
     hover && 'table-hover',
     className,
-  ]
-    .filter(Boolean)
-    .join(' ')
+  )
 
   return <table className={classes}>{children}</table>
 }

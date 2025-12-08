@@ -10,6 +10,7 @@
 
 import type { FC, ReactNode } from 'react'
 import { useEffect } from 'react'
+import { classNames } from '@/utils/classNames'
 
 type ModalProps = {
   show: boolean
@@ -73,7 +74,7 @@ const CSPCompliantModal: FC<ModalProps> = ({
 
       {/* Modal */}
       <div
-        className={`modal show ${centered ? 'modal-centered' : ''}`}
+        className={classNames('modal', 'show', centered && 'modal-centered')}
         role="dialog"
         aria-modal="true"
         tabIndex={-1}
@@ -91,7 +92,7 @@ const CSPCompliantModal: FC<ModalProps> = ({
           }
         }}
       >
-        <div className={`modal-dialog ${centered ? 'modal-dialog-centered' : ''} ${sizeClass}`}>
+        <div className={classNames('modal-dialog', centered && 'modal-dialog-centered', sizeClass)}>
           <div className="modal-content">{children}</div>
         </div>
       </div>

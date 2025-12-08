@@ -6,6 +6,7 @@
  */
 
 import type { FC, ReactNode, ButtonHTMLAttributes } from 'react'
+import { classNames } from '@/utils/classNames'
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?:
@@ -29,9 +30,7 @@ const CSPCompliantButton: FC<ButtonProps> = ({
   className = '',
   ...props
 }) => {
-  const classes = ['btn', `btn-${variant}`, size && `btn-${size}`, className]
-    .filter(Boolean)
-    .join(' ')
+  const classes = classNames('btn', `btn-${variant}`, size && `btn-${size}`, className)
 
   return (
     <button className={classes} {...props}>
