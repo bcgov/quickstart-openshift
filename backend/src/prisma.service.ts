@@ -1,6 +1,8 @@
 import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { Injectable, Logger } from '@nestjs/common'
 import { Prisma, PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
 
 const DB_HOST = process.env.POSTGRES_HOST || 'localhost'
 const DB_USER = process.env.POSTGRES_USER || 'postgres'
@@ -29,7 +31,13 @@ class PrismaService
     if (PrismaService.instance) {
       return PrismaService.instance
     }
+
+    // Prisma 7 requires adapter for database connections
+    const pool = new Pool({ connectionString: dataSourceURL })
+    const adapter = new PrismaPg(pool)
+
     super({
+      adapter,
       errorFormat: 'pretty',
       log: [
         { emit: 'event', level: 'query' },
