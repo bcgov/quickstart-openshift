@@ -4,37 +4,71 @@
  * Intercepts inline style application and converts to CSS classes
  * to comply with Content Security Policy (no 'unsafe-inline').
  * 
- * This runs before React mounts to catch all inline style operations.
+ * This MUST run before React mounts to catch all inline style operations.
+ * Intercepts: setAttribute('style', ...), element.style.setProperty, element.style.property = value
  */
 
 // Map of inline styles to CSS classes
 const styleToClassMap = new Map<string, string>()
 let styleCounter = 0
 
-// Generate a unique class name for a given style string
-function getClassForStyle(styleString: string): string {
-  if (styleToClassMap.has(styleString)) {
-    return styleToClassMap.get(styleString)!
-  }
-  
-  const className = `csp-style-${styleCounter++}`
-  styleToClassMap.set(styleString, className)
-  
-  // Inject CSS rule
-  if (!document.getElementById('csp-dynamic-styles')) {
-    const styleElement = document.createElement('style')
+// Ensure style element exists
+function ensureStyleElement(): HTMLStyleElement {
+  let styleElement = document.getElementById('csp-dynamic-styles') as HTMLStyleElement
+  if (!styleElement) {
+    styleElement = document.createElement('style')
     styleElement.id = 'csp-dynamic-styles'
     document.head.appendChild(styleElement)
   }
+  return styleElement
+}
+
+// Generate a unique class name for a given style string
+function getClassForStyle(styleString: string): string {
+  // Normalize the style string (trim, remove extra spaces)
+  const normalized = styleString.trim().replace(/\s+/g, ' ').replace(/;\s*;/g, ';')
   
-  const styleElement = document.getElementById('csp-dynamic-styles') as HTMLStyleElement
-  const cssRule = `.${className} { ${styleString} }`
+  if (styleToClassMap.has(normalized)) {
+    return styleToClassMap.get(normalized)!
+  }
+  
+  const className = `csp-style-${styleCounter++}`
+  styleToClassMap.set(normalized, className)
+  
+  // Inject CSS rule
+  const styleElement = ensureStyleElement()
+  const cssRule = `.${className} { ${normalized} }`
   styleElement.textContent = (styleElement.textContent || '') + '\n' + cssRule
   
   return className
 }
 
-// Intercept element.style.setProperty - MUST run before any other code
+// Convert inline style string to class and apply
+function convertStyleToClass(element: HTMLElement, styleValue: string): void {
+  if (!styleValue || !styleValue.trim()) {
+    return
+  }
+  
+  const className = getClassForStyle(styleValue)
+  element.classList.add(className)
+}
+
+// CRITICAL: Intercept setAttribute BEFORE anything else - React uses this
+const originalSetAttribute = Element.prototype.setAttribute
+Element.prototype.setAttribute = function(name: string, value: string) {
+  // Synchronously intercept style attribute before it's set
+  if (name === 'style' && this instanceof HTMLElement && value) {
+    convertStyleToClass(this as HTMLElement, value)
+    // DON'T call original - this prevents the style attribute from being set
+    // which would trigger CSP violation
+    return
+  }
+  
+  // For all other attributes, call original
+  return originalSetAttribute.call(this, name, value)
+}
+
+// Intercept element.style.setProperty
 const originalSetProperty = CSSStyleDeclaration.prototype.setProperty
 CSSStyleDeclaration.prototype.setProperty = function(property: string, value: string, priority?: string) {
   // Get the element this style belongs to
@@ -52,60 +86,11 @@ CSSStyleDeclaration.prototype.setProperty = function(property: string, value: st
     element.classList.add(className)
     
     // CRITICAL: Don't call original - this prevents the inline style from being applied
-    // which would violate CSP
     return undefined
   }
   
   // For CSS rules (not inline), call original
   return originalSetProperty.call(this, property, value, priority)
-}
-
-// Also intercept the style attribute directly via MutationObserver
-if (typeof window !== 'undefined' && document.readyState === 'loading') {
-  // Wait for DOM to be ready
-  document.addEventListener('DOMContentLoaded', () => {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-          const target = mutation.target as HTMLElement
-          const styleAttr = target.getAttribute('style')
-          if (styleAttr) {
-            // Convert to class
-            const className = getClassForStyle(styleAttr)
-            target.classList.add(className)
-            target.removeAttribute('style')
-          }
-        }
-      })
-    })
-    
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ['style'],
-      subtree: true,
-    })
-  })
-} else if (typeof window !== 'undefined') {
-  // DOM already loaded, observe immediately
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-        const target = mutation.target as HTMLElement
-        const styleAttr = target.getAttribute('style')
-        if (styleAttr) {
-          const className = getClassForStyle(styleAttr)
-          target.classList.add(className)
-          target.removeAttribute('style')
-        }
-      }
-    })
-  })
-  
-  observer.observe(document.body, {
-    attributes: true,
-    attributeFilter: ['style'],
-    subtree: true,
-  })
 }
 
 // Intercept direct style property assignment (e.g., element.style.display = 'block')

@@ -7,6 +7,41 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <link rel="icon" href="/favicon.ico" />
     <title>QuickStart OpenShift</title>
+    <script>
+      // CRITICAL: Inline script runs immediately, before any modules load
+      // This intercepts setAttribute synchronously before React can use it
+      (function() {
+        'use strict';
+        const originalSetAttribute = Element.prototype.setAttribute;
+        const styleMap = new Map();
+        let counter = 0;
+        
+        function getClass(style) {
+          const normalized = style.trim().replace(/\s+/g, ' ');
+          if (styleMap.has(normalized)) return styleMap.get(normalized);
+          
+          const className = 'csp-style-' + (counter++);
+          styleMap.set(normalized, className);
+          
+          let el = document.getElementById('csp-dynamic-styles');
+          if (!el) {
+            el = document.createElement('style');
+            el.id = 'csp-dynamic-styles';
+            document.head.appendChild(el);
+          }
+          el.textContent += '\n.' + className + ' { ' + normalized + ' }';
+          return className;
+        }
+        
+        Element.prototype.setAttribute = function(name, value) {
+          if (name === 'style' && this.nodeType === 1 && value) {
+            this.classList.add(getClass(value));
+            return; // Don't set style attribute - prevents CSP violation
+          }
+          return originalSetAttribute.call(this, name, value);
+        };
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
