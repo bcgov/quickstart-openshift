@@ -11,7 +11,7 @@ const NotFound: FC = () => {
   return (
     <div className="d-flex flex-column justify-content-center align-items-center">
       <h1>404</h1>
-      <h6>The page you're looking for does not exist.</h6>
+      <h6>The page you&apos;re looking for does not exist.</h6>
       <button
         type="button"
         name="homeBtn"
