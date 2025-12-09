@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import type { AxiosResponse } from '~/axios'
 import type UserDto from '@/interfaces/UserDto'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import apiService from '@/service/api-service'
 
 type ModalProps = {
@@ -11,22 +11,70 @@ type ModalProps = {
 }
 
 const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
-  useEffect(() => {
-    // Handle ESC key to close modal
-    const handleEsc = (e: KeyboardEvent) => {
+  const modalRef = useRef<HTMLDivElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const previouslyFocusedElement = useRef<HTMLElement | null>(null)
+
+  // Memoize ESC handler to prevent event listener issues
+  const handleEsc = useCallback(
+    (e: KeyboardEvent) => {
       if (e.key === 'Escape' && show) {
         onHide()
       }
-    }
+    },
+    [ show, onHide ],
+  )
+
+  useEffect(() => {
     if (show) {
+      // Store the previously focused element
+      previouslyFocusedElement.current = document.activeElement as HTMLElement
+
+      // Add event listeners
       document.addEventListener('keydown', handleEsc)
       document.body.classList.add('modal-open')
+
+      // Focus the close button when modal opens
+      setTimeout(() => {
+        closeButtonRef.current?.focus()
+      }, 0)
+
+      // Focus trap: handle Tab key to keep focus within modal
+      const handleTabKey = (e: KeyboardEvent) => {
+        if (e.key !== 'Tab' || !modalRef.current) return
+
+        const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        )
+        const firstElement = focusableElements[ 0 ]
+        const lastElement = focusableElements[ focusableElements.length - 1 ]
+
+        if (e.shiftKey) {
+          // Shift + Tab
+          if (document.activeElement === firstElement) {
+            e.preventDefault()
+            lastElement?.focus()
+          }
+        } else {
+          // Tab
+          if (document.activeElement === lastElement) {
+            e.preventDefault()
+            firstElement?.focus()
+          }
+        }
+      }
+
+      document.addEventListener('keydown', handleTabKey)
+
+      return () => {
+        document.removeEventListener('keydown', handleEsc)
+        document.removeEventListener('keydown', handleTabKey)
+        document.body.classList.remove('modal-open')
+        // Return focus to previously focused element
+        previouslyFocusedElement.current?.focus()
+      }
     }
-    return () => {
-      document.removeEventListener('keydown', handleEsc)
-      document.body.classList.remove('modal-open')
-    }
-  }, [show, onHide])
+  }, [ show, handleEsc ])
 
   if (!show) return null
 
@@ -34,6 +82,7 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
     <>
       <div className="modal-backdrop fade show" onClick={onHide}></div>
       <div
+        ref={modalRef}
         className="modal fade show"
         tabIndex={-1}
         role="dialog"
@@ -47,6 +96,7 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
                 Row Details
               </h5>
               <button
+                ref={closeButtonRef}
                 type="button"
                 className="btn-close"
                 onClick={onHide}
@@ -67,8 +117,8 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
 }
 
 const Dashboard: FC = () => {
-  const [data, setData] = useState<any>([])
-  const [selectedUser, setSelectedUser] = useState<UserDto | undefined>(undefined)
+  const [ data, setData ] = useState<any>([])
+  const [ selectedUser, setSelectedUser ] = useState<UserDto | undefined>(undefined)
 
   useEffect(() => {
     apiService
