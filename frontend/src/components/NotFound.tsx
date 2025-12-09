@@ -1,5 +1,4 @@
 import type { FC } from 'react'
-import { Button } from 'react-bootstrap'
 import { useNavigate } from '@tanstack/react-router'
 
 const NotFound: FC = () => {
@@ -12,10 +11,16 @@ const NotFound: FC = () => {
   return (
     <div className="d-flex flex-column justify-content-center align-items-center">
       <h1>404</h1>
-      <h6>The page you’re looking for does not exist.</h6>
-      <Button name="homeBtn" id="homeBtn" onClick={() => buttonClicked()} variant="contained">
+      <h6>The page you&apos;re looking for does not exist.</h6>
+      <button
+        type="button"
+        name="homeBtn"
+        id="homeBtn"
+        onClick={() => buttonClicked()}
+        className="btn btn-primary"
+      >
         Back Home
-      </Button>
+      </button>
     </div>
   )
 }
