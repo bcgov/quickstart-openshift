@@ -16,10 +16,18 @@ RUN npm ci --ignore-scripts --no-update-notifier && npm run rollup
 # Build our application
 WORKDIR /app
 COPY package*.json ./
-# Remove package-lock.json to regenerate with correct file path
+# WARNING: Using npm install instead of npm ci due to local file dependency for testing fork branch.
+# This is UNSAFE for production because:
+# - npm install can install different versions than package-lock.json specifies
+# - Builds are non-deterministic and may differ between runs
+# - Security vulnerabilities may be introduced from dependency resolution changes
+# We accept this risk ONLY because we're testing a fork branch via local file dependency:
+# "@bcgov/design-system-react-components": "file:../tmp/bcgov-design-system/packages/react-components"
+# This path only exists in Docker build context, so package-lock.json cannot contain it.
+# npm ci requires exact match between package.json and package-lock.json, so it will fail here.
+# TODO: Remove this once fork branch is merged/published and we can use a published version.
 RUN rm -f package-lock.json
 COPY . ./
-# Use npm install to resolve the local file dependency
 RUN npm install --ignore-scripts --no-update-notifier --omit=dev && npm run build
 
 # Deploy using Caddy to host static files
