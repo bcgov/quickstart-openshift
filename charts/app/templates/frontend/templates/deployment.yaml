@@ -45,6 +45,9 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
+            - name: health
+              containerPort: 3001
+              protocol: TCP
           startupProbe:
             httpGet:
               path: /
@@ -58,7 +61,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: 3001
+              port: health
               scheme: HTTP
             initialDelaySeconds: 5
             periodSeconds: 2
@@ -71,7 +74,7 @@ spec:
             failureThreshold: 3
             httpGet:
               path: /health
-              port: 3001
+              port: health
               scheme: HTTP
             initialDelaySeconds: 15
             periodSeconds: 30
