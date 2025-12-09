@@ -20,6 +20,7 @@
     "@bcgov/bc-sans": "^2.1.0",
     "@bcgov/design-system-react-components": "file:../tmp/bcgov-design-system/packages/react-components",
     "@popperjs/core": "^2.11.8",
+    "react-aria-components": "^1.13.0",
     "@tanstack/react-router": "^1.114.12",
     "@tanstack/router-plugin": "^1.114.27",
     "@types/node": "^24.0.0",
