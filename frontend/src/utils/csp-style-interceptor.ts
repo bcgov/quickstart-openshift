@@ -33,37 +33,50 @@ function getClassForStyle(styleString: string): string {
   
   return className
 }
+}
 
 // Intercept element.style.setProperty
 const originalSetProperty = CSSStyleDeclaration.prototype.setProperty
 CSSStyleDeclaration.prototype.setProperty = function(property: string, value: string, priority?: string) {
-  // For CSP compliance, we need to block inline styles
-  // Instead, we'll convert to CSS classes
-  // This is a workaround - ideally libraries shouldn't use inline styles
+  // Get the element this style belongs to
+  const element = (this as any).parentElement as HTMLElement | null
   
-  // Get all current inline styles
-  const styles: string[] = []
-  for (let i = 0; i < this.length; i++) {
-    const prop = this[i]
-    styles.push(`${prop}: ${this.getPropertyValue(prop)}`)
-  }
-  
-  // Add the new style
-  styles.push(`${property}: ${value}${priority ? ' !important' : ''}`)
-  const styleString = styles.join('; ')
-  
-  // Convert to class
-  const className = getClassForStyle(styleString)
-  
-  // Apply class instead of inline style
-  if (this.parentRule === null && (this as any).parentElement) {
-    const element = (this as any).parentElement as HTMLElement
+  // Only intercept if this is an inline style (not a CSS rule)
+  if (element && this.parentRule === null) {
+    // Build the complete style string
+    const currentStyles = new Map<string, string>()
+    
+    // Get existing inline styles (but don't read from this.style as it would trigger our interceptor)
+    const existingStyleAttr = element.getAttribute('style') || ''
+    if (existingStyleAttr) {
+      existingStyleAttr.split(';').forEach(rule => {
+        const [key, val] = rule.split(':').map(s => s.trim())
+        if (key && val) {
+          currentStyles.set(key, val)
+        }
+      })
+    }
+    
+    // Add the new style
+    currentStyles.set(property, value)
+    
+    // Build style string
+    const styleString = Array.from(currentStyles.entries())
+      .map(([k, v]) => `${k}: ${v}${priority === 'important' ? ' !important' : ''}`)
+      .join('; ')
+    
+    // Convert to class
+    const className = getClassForStyle(styleString)
+    
+    // Apply class and remove inline style attribute
     element.classList.add(className)
-    // Clear inline styles
     element.removeAttribute('style')
+    
+    // DON'T call original - this prevents CSP violation
+    return undefined
   }
   
-  // Still call original for libraries that expect it to work
+  // For CSS rules (not inline), call original
   return originalSetProperty.call(this, property, value, priority)
 }
 
