@@ -33,7 +33,6 @@ function getClassForStyle(styleString: string): string {
   
   return className
 }
-}
 
 // Intercept element.style.setProperty
 const originalSetProperty = CSSStyleDeclaration.prototype.setProperty
