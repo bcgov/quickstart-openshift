@@ -1,6 +1,6 @@
 # Testing BCGov CSP Fix Branch
 
-This PR tests the BCGov design system CSP fix from branch `574-feat-replace-inline-styles-csp-compliance`.
+This PR tests the BCGov design system CSP fix from branch `574-refactor-bc-logo-icon` (PR #577).
 
 ## CI/CD Integration
 
@@ -15,7 +15,7 @@ The Dockerfile has been modified to automatically clone and build the BCGov CSP 
 
 1. Clone the BCGov design system repo:
    ```bash
-   git clone --branch 574-feat-replace-inline-styles-csp-compliance https://github.com/bcgov/design-system.git /tmp/bcgov-design-system
+   git clone --branch 574-refactor-bc-logo-icon https://github.com/bcgov/design-system.git /tmp/bcgov-design-system
    cd /tmp/bcgov-design-system/packages/react-components
    npm install
    npm run rollup
@@ -53,6 +53,7 @@ Once installed, verify:
 ## Related
 
 - BCGov Issue: https://github.com/bcgov/design-system/issues/574
-- BCGov Branch: https://github.com/bcgov/design-system/tree/574-feat-replace-inline-styles-csp-compliance
+- BCGov Branch: https://github.com/bcgov/design-system/tree/574-refactor-bc-logo-icon
+- BCGov PR: https://github.com/bcgov/design-system/pull/577
 - Original Diagnostic PR: https://github.com/bcgov/quickstart-openshift/pull/2549
 

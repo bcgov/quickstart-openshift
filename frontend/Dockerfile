@@ -4,9 +4,9 @@ FROM node:24-slim AS build
 # Install git (needed to clone BCGov repo)
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
-# Clone and build BCGov design system CSP fix branch
+# Clone and build BCGov design system logo refactor branch (PR #577)
 WORKDIR /tmp
-RUN git clone --depth 1 --branch 574-feat-replace-inline-styles-csp-compliance \
+RUN git clone --depth 1 --branch 574-refactor-bc-logo-icon \
     https://github.com/bcgov/design-system.git bcgov-design-system
 WORKDIR /tmp/bcgov-design-system/packages/react-components
 RUN npm ci --ignore-scripts --no-update-notifier && npm run rollup
