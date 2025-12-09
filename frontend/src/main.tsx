@@ -1,3 +1,6 @@
+// Import CSP interceptor FIRST before anything else
+import '@/utils/csp-style-interceptor'
+
 import '@bcgov/bc-sans/css/BC_Sans.css'
 import { StrictMode } from 'react'
 import * as ReactDOM from 'react-dom/client'

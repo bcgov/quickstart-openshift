@@ -34,49 +34,78 @@ function getClassForStyle(styleString: string): string {
   return className
 }
 
-// Intercept element.style.setProperty
+// Intercept element.style.setProperty - MUST run before any other code
 const originalSetProperty = CSSStyleDeclaration.prototype.setProperty
 CSSStyleDeclaration.prototype.setProperty = function(property: string, value: string, priority?: string) {
   // Get the element this style belongs to
   const element = (this as any).parentElement as HTMLElement | null
   
   // Only intercept if this is an inline style (not a CSS rule)
-  if (element && this.parentRule === null) {
-    // Build the complete style string
-    const currentStyles = new Map<string, string>()
-    
-    // Get existing inline styles (but don't read from this.style as it would trigger our interceptor)
-    const existingStyleAttr = element.getAttribute('style') || ''
-    if (existingStyleAttr) {
-      existingStyleAttr.split(';').forEach(rule => {
-        const [key, val] = rule.split(':').map(s => s.trim())
-        if (key && val) {
-          currentStyles.set(key, val)
-        }
-      })
-    }
-    
-    // Add the new style
-    currentStyles.set(property, value)
-    
-    // Build style string
-    const styleString = Array.from(currentStyles.entries())
-      .map(([k, v]) => `${k}: ${v}${priority === 'important' ? ' !important' : ''}`)
-      .join('; ')
+  if (element && this.parentRule === null && element.nodeType === 1) {
+    // Build style string for just this property
+    const styleString = `${property}: ${value}${priority === 'important' ? ' !important' : ''}`
     
     // Convert to class
     const className = getClassForStyle(styleString)
     
-    // Apply class and remove inline style attribute
+    // Apply class immediately
     element.classList.add(className)
-    element.removeAttribute('style')
     
-    // DON'T call original - this prevents CSP violation
+    // CRITICAL: Don't call original - this prevents the inline style from being applied
+    // which would violate CSP
     return undefined
   }
   
   // For CSS rules (not inline), call original
   return originalSetProperty.call(this, property, value, priority)
+}
+
+// Also intercept the style attribute directly via MutationObserver
+if (typeof window !== 'undefined' && document.readyState === 'loading') {
+  // Wait for DOM to be ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          const target = mutation.target as HTMLElement
+          const styleAttr = target.getAttribute('style')
+          if (styleAttr) {
+            // Convert to class
+            const className = getClassForStyle(styleAttr)
+            target.classList.add(className)
+            target.removeAttribute('style')
+          }
+        }
+      })
+    })
+    
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['style'],
+      subtree: true,
+    })
+  })
+} else if (typeof window !== 'undefined') {
+  // DOM already loaded, observe immediately
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+        const target = mutation.target as HTMLElement
+        const styleAttr = target.getAttribute('style')
+        if (styleAttr) {
+          const className = getClassForStyle(styleAttr)
+          target.classList.add(className)
+          target.removeAttribute('style')
+        }
+      }
+    })
+  })
+  
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['style'],
+    subtree: true,
+  })
 }
 
 // Intercept direct style property assignment (e.g., element.style.display = 'block')
