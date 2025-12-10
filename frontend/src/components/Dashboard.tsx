@@ -117,6 +117,8 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
     }
   }
 
+  if (!show) return null
+
   return (
     <>
       <button
