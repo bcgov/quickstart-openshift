@@ -22,7 +22,7 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
         onHide()
       }
     },
-    [ show, onHide ],
+    [show, onHide],
   )
 
   useEffect(() => {
@@ -46,8 +46,8 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
         const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
         )
-        const firstElement = focusableElements[ 0 ]
-        const lastElement = focusableElements[ focusableElements.length - 1 ]
+        const firstElement = focusableElements[0]
+        const lastElement = focusableElements[focusableElements.length - 1]
 
         if (e.shiftKey) {
           // Shift + Tab
@@ -74,7 +74,7 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
         previouslyFocusedElement.current?.focus()
       }
     }
-  }, [ show, handleEsc ])
+  }, [show, handleEsc])
 
   if (!show) return null
 
@@ -117,8 +117,8 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
 }
 
 const Dashboard: FC = () => {
-  const [ data, setData ] = useState<any>([])
-  const [ selectedUser, setSelectedUser ] = useState<UserDto | undefined>(undefined)
+  const [data, setData] = useState<any>([])
+  const [selectedUser, setSelectedUser] = useState<UserDto | undefined>(undefined)
 
   useEffect(() => {
     apiService
