@@ -84,11 +84,20 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
     }
   }, [show, handleEsc])
 
-  // Handle backdrop keyboard interaction
-  const handleBackdropKeyDown = (e: React.KeyboardEvent) => {
+  // Handle backdrop keyboard interaction for accessibility
+  const handleBackdropKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
       e.preventDefault()
+      e.stopPropagation()
       onHide()
+    }
+  }
+
+  const handleBackdropKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // Ensure keyboard events are properly handled
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      e.stopPropagation()
     }
   }
 
@@ -99,6 +108,7 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
         className="modal-backdrop fade show"
         onClick={onHide}
         onKeyDown={handleBackdropKeyDown}
+        onKeyUp={handleBackdropKeyUp}
         role="button"
         tabIndex={0}
         aria-label="Close modal"
