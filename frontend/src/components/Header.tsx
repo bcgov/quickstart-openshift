@@ -8,18 +8,19 @@ type HeaderProps = {
 
 const Header: FC<HeaderProps> = ({ title, children }) => {
   return (
-    <header className="bg-primary text-white">
+    <header className="bcgov-header">
       <div className="container-fluid">
         <div className="row align-items-center py-2">
           <div className="col-auto">
             <img src={logo} alt="British Columbia" height="40" className="me-2" />
           </div>
           <div className="col">
-            <h1 className="h5 mb-0">{title}</h1>
+            <h1 className="h5 mb-0 text-white">{title}</h1>
           </div>
           {children && <div className="col-auto">{children}</div>}
         </div>
       </div>
+      <div className="bcgov-header-banner"></div>
     </header>
   )
 }
