@@ -31,3 +31,18 @@ body.modal-open {
 .modal-backdrop.show {
   opacity: 0.5;
 }
+
+// Style button backdrop to look like div backdrop
+button.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1040;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}

@@ -12,7 +12,7 @@ type ModalProps = {
 
 const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
   const modalRef = useRef<HTMLDialogElement>(null)
-  const backdropRef = useRef<HTMLDivElement>(null)
+  const backdropRef = useRef<HTMLButtonElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const previouslyFocusedElement = useRef<HTMLElement | null>(null)
 
@@ -94,14 +94,14 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
   }, [show, handleEsc])
 
   // Handle backdrop click - only close if clicking the backdrop itself, not dragging from modal
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleBackdropClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (e.target === e.currentTarget) {
       onHide()
     }
   }
 
   // Handle backdrop keyboard interaction for accessibility
-  const handleBackdropKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleBackdropKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
       e.preventDefault()
       e.stopPropagation()
@@ -109,7 +109,7 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
     }
   }
 
-  const handleBackdropKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleBackdropKeyUp = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     // Ensure keyboard events are properly handled
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
@@ -119,16 +119,15 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
 
   return (
     <>
-      <div
+      <button
         ref={backdropRef}
+        type="button"
         className="modal-backdrop fade show"
         onClick={handleBackdropClick}
         onKeyDown={handleBackdropKeyDown}
         onKeyUp={handleBackdropKeyUp}
-        role="button"
-        tabIndex={0}
         aria-label="Close modal"
-      ></div>
+      ></button>
       <dialog
         ref={modalRef}
         className="modal fade show"
