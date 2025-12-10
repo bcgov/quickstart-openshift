@@ -19,6 +19,11 @@ $bootstrap-icons-font-src:
   display: block;
 }
 
+// Hide native dialog backdrop since we use Bootstrap's backdrop div
+dialog.modal::backdrop {
+  display: none;
+}
+
 body.modal-open {
   overflow: hidden;
 }

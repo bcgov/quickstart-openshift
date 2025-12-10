@@ -11,7 +11,8 @@ type ModalProps = {
 }
 
 const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
-  const modalRef = useRef<HTMLDivElement>(null)
+  const modalRef = useRef<HTMLDialogElement>(null)
+  const backdropRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const previouslyFocusedElement = useRef<HTMLElement | null>(null)
 
@@ -27,6 +28,8 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
 
   useEffect(() => {
     if (show) {
+      if (!modalRef.current) return
+
       // Store the previously focused element
       previouslyFocusedElement.current = document.activeElement as HTMLElement
 
@@ -34,7 +37,8 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
       document.addEventListener('keydown', handleEsc)
       document.body.classList.add('modal-open')
 
-      // Focus the close button when modal opens
+      // Show the dialog element and focus the close button
+      modalRef.current.showModal()
       setTimeout(() => {
         closeButtonRef.current?.focus()
       }, 0)
@@ -49,18 +53,17 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
         const firstElement = focusableElements[0]
         const lastElement = focusableElements[focusableElements.length - 1]
 
-        if (e.shiftKey) {
-          // Shift + Tab
-          if (document.activeElement === firstElement) {
-            e.preventDefault()
-            lastElement?.focus()
-          }
-        } else {
-          // Tab
-          if (document.activeElement === lastElement) {
-            e.preventDefault()
-            firstElement?.focus()
-          }
+        // Shift + Tab: if at first element, wrap to last
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault()
+          lastElement?.focus()
+          return
+        }
+
+        // Tab: if at last element, wrap to first
+        if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault()
+          firstElement?.focus()
         }
       }
 
@@ -70,24 +73,40 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
         document.removeEventListener('keydown', handleEsc)
         document.removeEventListener('keydown', handleTabKey)
         document.body.classList.remove('modal-open')
+        // Close the dialog element
+        modalRef.current?.close()
         // Return focus to previously focused element
         previouslyFocusedElement.current?.focus()
       }
+    } else {
+      // Close dialog when show becomes false
+      modalRef.current?.close()
     }
   }, [show, handleEsc])
 
-  if (!show) return null
+  // Handle backdrop keyboard interaction
+  const handleBackdropKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+      e.preventDefault()
+      onHide()
+    }
+  }
 
   return (
     <>
-      <div className="modal-backdrop fade show" onClick={onHide}></div>
       <div
+        ref={backdropRef}
+        className="modal-backdrop fade show"
+        onClick={onHide}
+        onKeyDown={handleBackdropKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-label="Close modal"
+      ></div>
+      <dialog
         ref={modalRef}
         className="modal fade show"
-        tabIndex={-1}
-        role="dialog"
         aria-labelledby="contained-modal-title-vcenter"
-        aria-modal="true"
       >
         <div className="modal-dialog modal-dialog-centered modal-lg">
           <div className="modal-content">
@@ -111,7 +130,7 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
             </div>
           </div>
         </div>
-      </div>
+      </dialog>
     </>
   )
 }
