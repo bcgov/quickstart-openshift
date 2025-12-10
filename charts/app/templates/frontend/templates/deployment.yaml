@@ -51,7 +51,7 @@ spec:
           startupProbe:
             httpGet:
               path: /
-              port: 3000
+              port: http
               scheme: HTTP
             initialDelaySeconds: 5
             periodSeconds: 5
