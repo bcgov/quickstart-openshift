@@ -28,7 +28,9 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
 
   useEffect(() => {
     if (show) {
-      if (!modalRef.current) return
+      // Store ref value to avoid stale closure issues
+      const dialogElement = modalRef.current
+      if (!dialogElement) return
 
       // Store the previously focused element
       previouslyFocusedElement.current = document.activeElement as HTMLElement
@@ -38,16 +40,18 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
       document.body.classList.add('modal-open')
 
       // Show the dialog element and focus the close button
-      modalRef.current.showModal()
+      if (typeof dialogElement.showModal === 'function') {
+        dialogElement.showModal()
+      }
       setTimeout(() => {
         closeButtonRef.current?.focus()
       }, 0)
 
       // Focus trap: handle Tab key to keep focus within modal
       const handleTabKey = (e: KeyboardEvent) => {
-        if (e.key !== 'Tab' || !modalRef.current) return
+        if (e.key !== 'Tab' || !dialogElement) return
 
-        const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+        const focusableElements = dialogElement.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
         )
         const firstElement = focusableElements[0]
@@ -73,14 +77,19 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
         document.removeEventListener('keydown', handleEsc)
         document.removeEventListener('keydown', handleTabKey)
         document.body.classList.remove('modal-open')
-        // Close the dialog element
-        modalRef.current?.close()
+        // Close the dialog element (check if method exists for test compatibility)
+        if (dialogElement && typeof dialogElement.close === 'function') {
+          dialogElement.close()
+        }
         // Return focus to previously focused element
         previouslyFocusedElement.current?.focus()
       }
     } else {
-      // Close dialog when show becomes false
-      modalRef.current?.close()
+      // Close dialog when show becomes false (check if method exists for test compatibility)
+      const dialogElement = modalRef.current
+      if (dialogElement && typeof dialogElement.close === 'function') {
+        dialogElement.close()
+      }
     }
   }, [show, handleEsc])
 
