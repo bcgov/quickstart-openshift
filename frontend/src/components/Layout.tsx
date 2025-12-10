@@ -1,6 +1,7 @@
 import type { FC } from 'react'
-import { Footer, Header } from '@bcgov/design-system-react-components'
 import { Link } from '@tanstack/react-router'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 
 type Props = {
   children: React.ReactNode
@@ -9,8 +10,7 @@ type Props = {
 const Layout: FC<Props> = ({ children }) => {
   return (
     <div className="d-flex flex-column min-vh-100">
-      <Header title={'QuickStart OpenShift'}>
-        {' '}
+      <Header title="QuickStart OpenShift">
         <Link to="/">
           <button type="button" className="btn btn-light btn-lg">
             <i className="bi bi-house-door-fill" />
