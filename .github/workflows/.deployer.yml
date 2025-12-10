@@ -105,7 +105,7 @@ jobs:
       # Variables
       - if: inputs.tag  == ''
         id: pr
-        uses: bcgov/action-get-pr@21f9351425cd55a98e869ee28919a512aa30647d # v0.0.1
+        uses: bcgov/action-get-pr@35514fa1d4765547da319e967b509363598e8b46 # v0.1.0
 
       - id: vars
         run: |
@@ -147,7 +147,7 @@ jobs:
                 helm uninstall ${{ steps.vars.outputs.release }}
             fi
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Debug Values File
         if: inputs.debug == 'true'
         run: ls -l charts/crunchy/values.yml
