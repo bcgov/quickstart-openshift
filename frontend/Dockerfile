@@ -26,7 +26,10 @@ COPY Caddyfile /etc/caddy/Caddyfile
 COPY coraza.conf /etc/caddy/coraza.conf
 
 # Create directories for Coraza WAF with restricted permissions
-RUN mkdir -p /tmp/coraza && chmod 700 /tmp/coraza
+# Ownership set to UID 1001 (matches OpenShift's default non-root user)
+RUN mkdir -p /tmp/coraza && \
+    chown -R 1001:1001 /tmp/coraza && \
+    chmod 700 /tmp/coraza
 
 RUN caddy fmt /etc/caddy/Caddyfile
 
