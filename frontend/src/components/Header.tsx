@@ -15,7 +15,7 @@ const Header: FC<HeaderProps> = ({ title, children }) => {
             <img src={logo} alt="British Columbia" height="40" className="me-2" />
           </div>
           <div className="col">
-            <h1 className="h5 mb-0 text-white">{title}</h1>
+            <h1 className="bcgov-header-title">{title}</h1>
           </div>
           {children && <div className="col-auto">{children}</div>}
         </div>
