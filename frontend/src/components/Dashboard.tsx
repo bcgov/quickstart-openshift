@@ -84,6 +84,13 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
     }
   }, [show, handleEsc])
 
+  // Handle backdrop click - only close if clicking the backdrop itself, not dragging from modal
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onHide()
+    }
+  }
+
   // Handle backdrop keyboard interaction for accessibility
   const handleBackdropKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
@@ -106,7 +113,7 @@ const ModalComponent: FC<ModalProps> = ({ show, onHide, user }) => {
       <div
         ref={backdropRef}
         className="modal-backdrop fade show"
-        onClick={onHide}
+        onClick={handleBackdropClick}
         onKeyDown={handleBackdropKeyDown}
         onKeyUp={handleBackdropKeyUp}
         role="button"
