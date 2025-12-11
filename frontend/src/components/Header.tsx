@@ -1,5 +1,5 @@
 import type { FC, ReactNode } from 'react'
-import logo from '@/assets/gov-bc-logo-horiz.png'
+import logo from '@/assets/BCID_H_rgb_pos.png'
 
 type HeaderProps = {
   title: string
