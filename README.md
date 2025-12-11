@@ -39,13 +39,19 @@ Initial setup is intended to take an hour or less.  This depends greatly on inte
 
 ## ✅ Prerequisites
 
-The following are required:
+The following are required for all users:
+
+- [ ] 🐙 [GitHub accounts](https://github.com/signup) for all participating team members
+- [ ] 🚀 An OpenShift cluster with project namespaces (DEV, TEST, PROD)
+
+### 🏛️ Additional Requirements for BC Government OpenShift
+
+If you're using BC Government's OpenShift platform, you'll also need:
 
 - [ ] 🏛️ BC Government IDIR accounts for anyone submitting requests
-- [ ] 🐙 [GitHub accounts](https://github.com/signup) for all participating team members
 - [ ] 👥 Membership in the BCGov GitHub organization
     - Join the bcgov organization using [these instructions](https://developer.gov.bc.ca/docs/default/component/bc-developer-guide/use-github-in-bcgov/bc-government-organizations-in-github/#directions-to-sign-up-and-link-your-account-for-bcgov).
-- [ ] 🚀 OpenShift project namespaces:
+- [ ] 🚀 BCGov OpenShift project namespaces:
     - [BCGov signup](https://registry.developer.gov.bc.ca)
 
 ## 📋 Using this Template
