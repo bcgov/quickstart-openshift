@@ -1,6 +1,8 @@
 import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { Injectable, Logger } from '@nestjs/common'
 import { Prisma, PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
 
 const DB_HOST = process.env.POSTGRES_HOST || 'localhost'
 const DB_USER = process.env.POSTGRES_USER || 'postgres'
@@ -20,17 +22,16 @@ class PrismaService
 {
   private logger = new Logger('PRISMA')
   private static instance: PrismaService
+  private pool: Pool
   constructor() {
     if (PrismaService.instance) {
       return PrismaService.instance
     }
+    this.pool = new Pool({ connectionString: dataSourceURL })
+    const adapter = new PrismaPg(this.pool)
     super({
+      adapter,
       errorFormat: 'pretty',
-      datasources: {
-        db: {
-          url: dataSourceURL,
-        },
-      },
       log: [
         { emit: 'event', level: 'query' },
         { emit: 'stdout', level: 'info' },
