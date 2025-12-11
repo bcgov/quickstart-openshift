@@ -100,7 +100,6 @@ Here is the arrangement of secrets, variables and environments for this reposito
 | Environment | Name                   | Description                                    |
 |-------------|------------------------|------------------------------------------------|
 | \<none\>    | `vars.OC_SERVER`       | Common server address (repository-level)       |
-| \<none\>    | `vars.MSTEAMS_WEBHOOK` | Common alert webhook (repository-level)        |
 | \<none\>    | `secrets.OC_NAMESPACE` | DEV namespace (repository-level)               |
 | \<none\>    | `secrets.OC_TOKEN`     | DEV service token (repository-level)           |
 | TEST        | `secrets.OC_NAMESPACE` | TEST namespace (overrides repository-level)     |
@@ -152,12 +151,6 @@ OpenShift server address (API endpoint for your OpenShift cluster).
 * Consume: `{{ vars.OC_SERVER }}`
 * Example values (BCGov): `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 * For other OpenShift clusters: Use your cluster's API server address (typically `https://api.<cluster-domain>:6443`)
-
-**`MSTEAMS_WEBHOOK`** 📢
-* Consume: `{{ vars.MSTEAMS_WEBHOOK }}`
-* Value: See MS Teams documentation for [webhooks](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet) and [message cards](https://learn.microsoft.com/en-us/outlook/actionable-messages/message-card-reference)
-
-![https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif](https://learn.microsoft.com/en-us/microsoftteams/platform/assets/images/create-incoming-webhook.gif)
 
 ## 🔄 Updating Dependencies
 
