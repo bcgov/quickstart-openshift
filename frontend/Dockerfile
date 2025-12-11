@@ -25,6 +25,12 @@ COPY --from=build /app/dist /srv
 COPY Caddyfile /etc/caddy/Caddyfile
 COPY coraza.conf /etc/caddy/coraza.conf
 
+# Set permissions for static files (OpenShift-compatible)
+# OpenShift uses random UIDs but assigns them to root group (GID 0)
+# Set ownership to user 1001 with root group, and readable permissions
+RUN chown -R 1001:0 /srv && \
+    chmod -R 755 /srv
+
 # Create directories for Coraza WAF with restricted permissions
 # OpenShift uses random UIDs, so use root group (GID 0) with group write permissions
 # This allows any UID in the root group (which OpenShift assigns to all containers) to access
