@@ -9,7 +9,7 @@ export class HealthController {
     private health: HealthCheckService,
     private prisma: PrismaHealthIndicator,
     private readonly prismaService: PrismaService,
-  ) { }
+  ) {}
 
   @Get()
   @HealthCheck()

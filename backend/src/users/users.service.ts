@@ -8,7 +8,7 @@ import { Prisma } from '../../generated/prisma/client.js'
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async create(user: CreateUserDto): Promise<UserDto> {
     const savedUser = await this.prisma.users.create({
@@ -130,25 +130,25 @@ export class UsersService {
 
     for (const item of filterObj) {
       if (item.operation === 'like') {
-        prismaFilterObj[ item.key ] = { contains: item.value }
+        prismaFilterObj[item.key] = { contains: item.value }
       } else if (item.operation === 'eq') {
-        prismaFilterObj[ item.key ] = { equals: item.value }
+        prismaFilterObj[item.key] = { equals: item.value }
       } else if (item.operation === 'neq') {
-        prismaFilterObj[ item.key ] = { not: { equals: item.value } }
+        prismaFilterObj[item.key] = { not: { equals: item.value } }
       } else if (item.operation === 'gt') {
-        prismaFilterObj[ item.key ] = { gt: item.value }
+        prismaFilterObj[item.key] = { gt: item.value }
       } else if (item.operation === 'gte') {
-        prismaFilterObj[ item.key ] = { gte: item.value }
+        prismaFilterObj[item.key] = { gte: item.value }
       } else if (item.operation === 'lt') {
-        prismaFilterObj[ item.key ] = { lt: item.value }
+        prismaFilterObj[item.key] = { lt: item.value }
       } else if (item.operation === 'lte') {
-        prismaFilterObj[ item.key ] = { lte: item.value }
+        prismaFilterObj[item.key] = { lte: item.value }
       } else if (item.operation === 'in') {
-        prismaFilterObj[ item.key ] = { in: item.value }
+        prismaFilterObj[item.key] = { in: item.value }
       } else if (item.operation === 'notin') {
-        prismaFilterObj[ item.key ] = { not: { in: item.value } }
+        prismaFilterObj[item.key] = { not: { in: item.value } }
       } else if (item.operation === 'isnull') {
-        prismaFilterObj[ item.key ] = { equals: null }
+        prismaFilterObj[item.key] = { equals: null }
       }
     }
     return prismaFilterObj

@@ -73,9 +73,7 @@ describe('MetricsController', () => {
       vi.mocked(register.metrics).mockRejectedValue(error)
 
       // Act & Assert
-      await expect(controller.getMetrics(mockResponse)).rejects.toThrow(
-        'Metrics collection failed',
-      )
+      await expect(controller.getMetrics(mockResponse)).rejects.toThrow('Metrics collection failed')
       expect(register.metrics).toHaveBeenCalledTimes(1)
       expect(mockResponse.end).not.toHaveBeenCalled()
     })
