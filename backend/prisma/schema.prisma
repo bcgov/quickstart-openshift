@@ -18,5 +18,5 @@ model users {
   email String  @db.VarChar(200)
 
   @@schema("users")
-  @@map("USERS")
+  @@map("users")
 }
