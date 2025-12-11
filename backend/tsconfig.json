@@ -28,6 +28,7 @@
   },
   "include": [
     "src/**/*.ts",
-    "test/**/*.ts"
+    "test/**/*.ts",
+    "generated/**/*.ts"
   ],
 }

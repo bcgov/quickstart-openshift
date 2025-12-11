@@ -6,6 +6,7 @@
     "prisma-generate": "prisma generate",
     "prebuild": "rimraf dist",
     "build": "prisma generate && nest build",
+    "postbuild": "test -d generated/prisma && mkdir -p dist/generated && cp -r generated/prisma dist/generated/ || true",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "deploy": "npm ci --ignore-scripts --no-update-notifier && npm run build",
     "start": "nest start",
