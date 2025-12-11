@@ -40,8 +40,8 @@ describe('UserService', () => {
     email: 'numtwo@test.com',
   }
 
-  const userArray = [oneUser, twoUser]
-  const savedUserArray = [savedUser1, savedUser2]
+  const userArray = [ oneUser, twoUser ]
+  const savedUserArray = [ savedUser1, savedUser2 ]
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -215,8 +215,8 @@ describe('UserService', () => {
         { key: 'e', operation: 'gte', value: '5' },
         { key: 'f', operation: 'lt', value: '6' },
         { key: 'g', operation: 'lte', value: '7' },
-        { key: 'h', operation: 'in', value: ['8'] },
-        { key: 'i', operation: 'notin', value: ['9'] },
+        { key: 'h', operation: 'in', value: [ '8' ] },
+        { key: 'i', operation: 'notin', value: [ '9' ] },
         { key: 'j', operation: 'isnull', value: '10' },
       ]
 
@@ -228,8 +228,8 @@ describe('UserService', () => {
         e: { gte: '5' },
         f: { lt: '6' },
         g: { lte: '7' },
-        h: { in: ['8'] },
-        i: { not: { in: ['9'] } },
+        h: { in: [ '8' ] },
+        i: { not: { in: [ '9' ] } },
         j: { equals: null },
       }
 
