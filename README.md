@@ -8,7 +8,7 @@
 
 ## 🔄 Pull Request-Based Workflows with Sample Stack
 
-This repository provides a template to rapidly deploy a modern web application stack to the BC Government's OpenShift platform using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability.  By hitting the ground running we can save weeks-to-months of development time plus receive regular updates and features.
+This repository provides a template to rapidly deploy a modern web application stack to OpenShift using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability.  By hitting the ground running we can save weeks-to-months of development time plus receive regular updates and features.
 
 **Includes:**
 * 🔄 Pull Request-based pipeline
@@ -39,13 +39,19 @@ Initial setup is intended to take an hour or less.  This depends greatly on inte
 
 ## ✅ Prerequisites
 
-The following are required:
+The following are required for all users:
+
+- [ ] 🐙 [GitHub accounts](https://github.com/signup) for all participating team members
+- [ ] 🚀 An OpenShift cluster with project namespaces (DEV, TEST, PROD)
+
+### 🏛️ Additional Requirements for BC Government OpenShift
+
+If you're using BC Government's OpenShift platform, you'll also need:
 
 - [ ] 🏛️ BC Government IDIR accounts for anyone submitting requests
-- [ ] 🐙 [GitHub accounts](https://github.com/signup) for all participating team members
 - [ ] 👥 Membership in the BCGov GitHub organization
     - Join the bcgov organization using [these instructions](https://developer.gov.bc.ca/docs/default/component/bc-developer-guide/use-github-in-bcgov/bc-government-organizations-in-github/#directions-to-sign-up-and-link-your-account-for-bcgov).
-- [ ] 🚀 OpenShift project namespaces:
+- [ ] 🚀 BCGov OpenShift project namespaces:
     - [BCGov signup](https://registry.developer.gov.bc.ca)
 
 ## 📋 Using this Template
@@ -62,6 +68,11 @@ Create a new repository using this repository as a template.
 
 Variables and secrets are consumed by workflows.  Variables are visible in workflows and logs, while secrets are hidden/redacted.
 
+**Repository-level vs Environment-specific:**
+
+- **Repository-level** (shown as `<none>` in the environment column): These are available to all workflows and environments. They're created at the repository level and apply globally unless overridden by environment-specific values.
+- **Environment-specific**: These are scoped to a particular environment (e.g., TEST, PROD) and override repository-level values when that environment is used.
+
 To create new secrets from GitHub.com click:
 
 * `Settings > Secrets and Variables > Actions > Secrets > New repository secret`
@@ -70,7 +81,7 @@ Note: Dependabot, which we don't recommend as highly as Renovate, requires its o
 
 ### 🌍 Environments
 
-Environments are groups of secrets and variables with optional access controls.  This includes limiting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values add to or override any common (environment-free) values.
+Environments are groups of secrets and variables with optional access controls.  This includes limiting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values add to or override any repository-level values.
 
 To create new environments from GitHub.com click:
 
@@ -86,16 +97,16 @@ Environments provide a [number of features](https://docs.github.com/en/actions/d
 
 Here is the arrangement of secrets, variables and environments for this repository.
 
-| Environment | Name                   | Description           |
-|-------------|------------------------|-----------------------|
-| \<none\>    | `vars.OC_SERVER`       | Common server address |
-| \<none\>    | `vars.MSTEAMS_WEBHOOK` | Common alert webhook  |
-| \<none\>    | `secrets.OC_NAMESPACE` | DEV namespace         |
-| \<none\>    | `secrets.OC_TOKEN`     | DEV service token     |
-| TEST        | `secrets.OC_NAMESPACE` | TEST namespace        |
-| TEST        | `secrets.OC_TOKEN`     | TEST service token    |
-| PROD        | `secrets.OC_NAMESPACE` | PROD namespace        |
-| PROD        | `secrets.OC_TOKEN`     | PROD service token    |
+| Environment | Name                   | Description                                    |
+|-------------|------------------------|------------------------------------------------|
+| \<none\>    | `vars.OC_SERVER`       | Common server address (repository-level)       |
+| \<none\>    | `vars.MSTEAMS_WEBHOOK` | Common alert webhook (repository-level)        |
+| \<none\>    | `secrets.OC_NAMESPACE` | DEV namespace (repository-level)               |
+| \<none\>    | `secrets.OC_TOKEN`     | DEV service token (repository-level)           |
+| TEST        | `secrets.OC_NAMESPACE` | TEST namespace (overrides repository-level)     |
+| TEST        | `secrets.OC_TOKEN`     | TEST service token (overrides repository-level) |
+| PROD        | `secrets.OC_NAMESPACE` | PROD namespace (overrides repository-level)    |
+| PROD        | `secrets.OC_TOKEN`     | PROD service token (overrides repository-level) |
 
 ### 🔐 Secret Values
 
@@ -107,7 +118,7 @@ OpenShift's service account token, different for every namespace.  This guide as
 
 Locate an OpenShift pipeline token:
 
-1. Login to your OpenShift cluster, e.g.: [Gold](https://console.apps.gold.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/)
+1. Login to your OpenShift cluster (for BCGov users: [Gold](https://console.apps.gold.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/))
 2. Select your DEV namespace
 3. Click Workloads > Secrets (under Workloads for Administrator view)
 4. Select `pipeline-token-...` or a similarly privileged token
@@ -137,9 +148,10 @@ BC Government employees can request SonarCloud projects by creating an [issue](h
 
 **`OC_SERVER`** 🌐
 
-OpenShift server address.
+OpenShift server address (API endpoint for your OpenShift cluster).
 * Consume: `{{ vars.OC_SERVER }}`
-* Value: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
+* Example values (BCGov): `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
+* For other OpenShift clusters: Use your cluster's API server address (typically `https://api.<cluster-domain>:6443`)
 
 **`MSTEAMS_WEBHOOK`** 📢
 * Consume: `{{ vars.MSTEAMS_WEBHOOK }}`
@@ -402,7 +414,8 @@ Runs on scheduled job (cronjob) or workflow dispatch.
 
 There is a long-lived custom route available to be assigned to specific Pull Request deployments.  Add the label `demo` to that pull request or run the `DEMO Route` workflow.
 
-Typical route: `https://<REPO_NAME>-demo.apps.silver.devops.gov.bc.ca`
+Typical route format: `https://<REPO_NAME>-demo.<your-openshift-domain>`  
+Example (BCGov): `https://<REPO_NAME>-demo.apps.silver.devops.gov.bc.ca`
 
 #### 🏷️ PR Label
 
@@ -449,23 +462,39 @@ The starter stack includes a frontend (React, Bootstrap, Vite, Caddy), backend (
 * 🏗️ [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
 * 🔄 [Flyway](https://flywaydb.org/) database migrations
 * 🐘 [Crunchy](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes) Postgres/PostGIS Database
-* 🛡️ [Coraza WAF](https://github.com/corazawaf/coraza-caddy) Web Application Firewall integrated with Caddy
+* 🛡️ [OWASP Coraza WAF](https://github.com/corazawaf/coraza-caddy) Web Application Firewall integrated with Caddy
 
 PostGIS is enabled by default for geospatial data support when postGISVersion value is provided. To switch to standard PostgreSQL, update the `postGISVersion` field in the [Crunchy Helm chart values](./charts/crunchy/values.yml) to `~`. This disables PostGIS extensions, making it a plain PostgreSQL setup.
 
-### 🛡️ Coraza WAF: Customization & Troubleshooting
+### 🛡️ OWASP Coraza WAF: Application Security
 
-The Coraza Web Application Firewall (WAF) protects your application from common web threats. If you need to customize its behavior or troubleshoot blocked requests, follow these steps:
+[OWASP Coraza](https://coraza.io/) is an open-source Web Application Firewall (WAF) that provides application-layer security protection against common web attacks. As part of the OWASP (Open Web Application Security Project) ecosystem, Coraza can be used alongside other OWASP security tools. For example, [OWASP ZAP](https://www.zaproxy.org/) (Zed Attack Proxy) is a security testing and validation tool that can be used to test applications protected by Coraza, though there is no special integration between them.
+
+**Why Coraza WAF is Important:**
+
+Coraza WAF acts as a security shield for your application, protecting against:
+- **SQL Injection (SQLi)** attacks that attempt to manipulate database queries
+- **Cross-Site Scripting (XSS)** attacks that inject malicious scripts into web pages
+- **Path Traversal** attempts to access unauthorized files or directories
+- **Security Scanner** probes from automated attack tools
+- **Sensitive Path** access attempts (e.g., `.env`, `.git`, admin panels)
+
+The WAF is integrated directly into the Caddy web server, providing real-time protection with minimal performance overhead. It uses pattern-based rules and operators (such as regular expressions and string matching) to identify and block malicious requests before they reach your application.
+
+**Customization & Troubleshooting:**
 
 **1. Modifying WAF Rules**
 - WAF rules are defined in `frontend/coraza.conf`.
 - Edit this file to add, remove, or adjust rules. For example, to allow a specific request method, modify or comment out the relevant rule.
-- After making changes, restart the frontend service (Caddy) to apply updates.
+- After making changes, restart the frontend service using Docker Compose:
+  ```bash
+  docker compose restart frontend
+  ```
 
 **2. Viewing WAF Logs**
-- WAF logs are typically output to the Caddy logs. Check the container logs with:
+- WAF logs are typically output to the Caddy logs. When running locally with Docker Compose, check the container logs with:
   ```bash
-  oc logs <pod-name> -n <namespace>
+  docker compose logs frontend
   ```
 - Look for entries containing "coraza" or "WAF" to identify blocked requests and rule matches.
 
@@ -481,11 +510,6 @@ The Coraza Web Application Firewall (WAF) protects your application from common 
 - Test thoroughly after making changes to ensure security is maintained.
 
 For more details, see the [Coraza documentation](https://coraza.io/docs/).
-
-```yaml
-# Example: Switching to PostgreSQL
-postGISVersion: ~
-```
 
 ## 🗄️ Crunchy Database
 
@@ -532,10 +556,10 @@ The sample Java, Python and Go backends repository has been archived, but we hav
 
 The database documentation is created and deployed to GitHub pages.  See [here](https://bcgov.github.io/quickstart-openshift/schemaspy/index.html).
 
-After a full workflow run and merge can been run, please do the following:
+After a full workflow run and merge has been completed, please do the following:
 
-1. ⚙️ Select Settings (gear, top right)  *> Pages (under `Code and automation`)
-2. 👆 Click `Branch` or `Add teams`
+1. ⚙️ Select Settings (gear, top right) > Pages (under `Code and automation`)
+2. 👆 Click `Branch`
 3. 🌿 Select `gh-pages`
 4. 💾 Click `Save`
 
@@ -552,7 +576,6 @@ After a full workflow run and merge can been run, please do the following:
 
 
 
-# 📖 [How Tos](./HOWTO.md)
 ## 🏗️ Architecture
 
 The architecture diagram provides an overview of the system's components, their interactions, and the deployment structure. It illustrates the relationships between the frontend, backend, database, and other infrastructure elements within the OpenShift environment.
