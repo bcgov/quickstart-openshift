@@ -582,12 +582,6 @@ The architecture diagram provides an overview of the system's components, their 
 
 ![Architecture](./.diagrams/architecture/arch.drawio.svg)
 
-## 📖 How-To Guides
-
-For detailed how-to guides on common tasks and configurations, see [HOWTO.md](./HOWTO.md). This includes guides for:
-- Passing configuration as environment variables to the SPA frontend
-- Additional configuration examples and best practices
-
 ## 🤝 Contributing
 
 We welcome contributions to improve this template! 
