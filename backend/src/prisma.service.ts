@@ -58,7 +58,8 @@ class PrismaService
 
   async onModuleDestroy() {
     await this.$disconnect()
-    await this.pool.end()
+    // Note: $disconnect() with PrismaPg adapter handles pool cleanup
+    // No need to manually call pool.end() as it's managed by the adapter
   }
 }
 
