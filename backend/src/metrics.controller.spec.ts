@@ -3,7 +3,6 @@ import { Test } from '@nestjs/testing'
 import { MetricsController } from './metrics.controller'
 import type { INestApplication } from '@nestjs/common'
 import request from 'supertest'
-import * as prom from 'prom-client'
 
 // Mock the prom middleware
 vi.mock('src/middleware/prom', () => {
