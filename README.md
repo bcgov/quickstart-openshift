@@ -468,7 +468,7 @@ PostGIS is enabled by default for geospatial data support when postGISVersion va
 
 ### 🛡️ OWASP Coraza WAF: Application Security
 
-[OWASP Coraza](https://coraza.io/) is an open-source Web Application Firewall (WAF) that provides application-layer security protection against common web attacks. As part of the OWASP (Open Web Application Security Project) ecosystem, Coraza is designed to complement and work alongside other OWASP security tools, including [OWASP ZAP](https://www.zaproxy.org/) (Zed Attack Proxy), which is used for security testing and validation.
+[OWASP Coraza](https://coraza.io/) is an open-source Web Application Firewall (WAF) that provides application-layer security protection against common web attacks. As part of the OWASP (Open Web Application Security Project) ecosystem, Coraza can be used alongside other OWASP security tools. For example, [OWASP ZAP](https://www.zaproxy.org/) (Zed Attack Proxy) is a security testing and validation tool that can be used to test applications protected by Coraza, though there is no special integration between them.
 
 **Why Coraza WAF is Important:**
 
@@ -479,7 +479,7 @@ Coraza WAF acts as a security shield for your application, protecting against:
 - **Security Scanner** probes from automated attack tools
 - **Sensitive Path** access attempts (e.g., `.env`, `.git`, admin panels)
 
-The WAF is integrated directly into the Caddy web server, providing real-time protection with minimal performance overhead. It uses a combination of machine learning-based detection (via built-in operators) and pattern-based rules to identify and block malicious requests before they reach your application.
+The WAF is integrated directly into the Caddy web server, providing real-time protection with minimal performance overhead. It uses pattern-based rules and operators (such as regular expressions and string matching) to identify and block malicious requests before they reach your application.
 
 **Customization & Troubleshooting:**
 
