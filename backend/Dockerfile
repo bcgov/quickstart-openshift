@@ -25,6 +25,7 @@ WORKDIR /app
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=build /app/generated ./generated
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/dist/generated ./dist/generated
 
 # Boilerplate, not used in OpenShift/Kubernetes
 EXPOSE 3000
