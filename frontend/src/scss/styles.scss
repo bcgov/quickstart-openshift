@@ -55,11 +55,29 @@ button.modal-backdrop {
   border-bottom: 1px solid #e0e0e0;
 }
 
+.bcgov-header-row {
+  padding: 0.75rem 0;
+  min-height: 60px;
+}
+
+.bcgov-header-logo {
+  padding-right: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
 .bcgov-header-separator {
   width: 1px;
   height: 40px;
   background-color: #e0e0e0;
-  margin: 0 1rem;
+  margin: 0 1.5rem;
+  align-self: center;
+}
+
+.bcgov-header-title-container {
+  padding-left: 0;
+  display: flex;
+  align-items: center;
 }
 
 .bcgov-header-title {
@@ -67,6 +85,7 @@ button.modal-backdrop {
   font-weight: bold;
   color: #000000;
   margin: 0;
+  line-height: 1.2;
 }
 
 .bcgov-header-banner {
