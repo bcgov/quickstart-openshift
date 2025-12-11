@@ -1,16 +1,21 @@
 generator client {
-  provider = "prisma-client-js"
-  previewFeatures = ["metrics"]
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
+// NOTE: The datasource URL is now configured in prisma.config.ts (Prisma 7+).
+// This file no longer contains the `url` field for the datasource.
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  schemas  = ["users"]
 }
 
 model users {
   id    Decimal @id(map: "USER_PK") @default(dbgenerated("nextval('\"USER_SEQ\"'::regclass)")) @db.Decimal
   name  String  @db.VarChar(200)
   email String  @db.VarChar(200)
+
+  @@schema("users")
 }

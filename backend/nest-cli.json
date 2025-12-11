@@ -3,6 +3,13 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "builder": "swc",
-    "typeCheck": true
+    "typeCheck": true,
+    "assets": [
+      {
+        "include": "../generated/prisma/**/*",
+        "outDir": "dist"
+      }
+    ],
+    "watchAssets": true
   }
 }

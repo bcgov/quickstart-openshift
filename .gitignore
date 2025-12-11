@@ -377,3 +377,6 @@ pyrightconfig.json
 # The symlink points to ~/Documents/4-Specs/quickstart-openshift
 # See specs/README.md for setup instructions if needed
 specs
+
+# Prisma 7 generated client
+backend/generated/
