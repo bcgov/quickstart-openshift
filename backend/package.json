@@ -6,7 +6,7 @@
     "prisma-generate": "prisma generate",
     "prebuild": "rimraf dist",
     "build": "prisma generate && nest build",
-    "postbuild": "mkdir -p dist/generated && npx swc generated/prisma -d dist/generated/prisma -C module.type=commonjs",
+    "postbuild": "mkdir -p dist/generated/prisma && cd generated && npx swc prisma -d ../dist/generated/prisma -C module.type=commonjs --strip-leading-paths",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "deploy": "npm ci --ignore-scripts --no-update-notifier && npm run build",
     "start": "nest start",
