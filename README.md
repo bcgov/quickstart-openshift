@@ -68,6 +68,11 @@ Create a new repository using this repository as a template.
 
 Variables and secrets are consumed by workflows.  Variables are visible in workflows and logs, while secrets are hidden/redacted.
 
+**Repository-level vs Environment-specific:**
+
+- **Repository-level** (shown as `<none>` in the environment column): These are available to all workflows and environments. They're created at the repository level and apply globally unless overridden by environment-specific values.
+- **Environment-specific**: These are scoped to a particular environment (e.g., TEST, PROD) and override repository-level values when that environment is used.
+
 To create new secrets from GitHub.com click:
 
 * `Settings > Secrets and Variables > Actions > Secrets > New repository secret`
@@ -76,7 +81,7 @@ Note: Dependabot, which we don't recommend as highly as Renovate, requires its o
 
 ### 🌍 Environments
 
-Environments are groups of secrets and variables with optional access controls.  This includes limiting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values add to or override any common (environment-free) values.
+Environments are groups of secrets and variables with optional access controls.  This includes limiting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values add to or override any repository-level values.
 
 To create new environments from GitHub.com click:
 
@@ -92,16 +97,16 @@ Environments provide a [number of features](https://docs.github.com/en/actions/d
 
 Here is the arrangement of secrets, variables and environments for this repository.
 
-| Environment | Name                   | Description           |
-|-------------|------------------------|-----------------------|
-| \<none\>    | `vars.OC_SERVER`       | Common server address |
-| \<none\>    | `vars.MSTEAMS_WEBHOOK` | Common alert webhook  |
-| \<none\>    | `secrets.OC_NAMESPACE` | DEV namespace         |
-| \<none\>    | `secrets.OC_TOKEN`     | DEV service token     |
-| TEST        | `secrets.OC_NAMESPACE` | TEST namespace        |
-| TEST        | `secrets.OC_TOKEN`     | TEST service token    |
-| PROD        | `secrets.OC_NAMESPACE` | PROD namespace        |
-| PROD        | `secrets.OC_TOKEN`     | PROD service token    |
+| Environment | Name                   | Description                                    |
+|-------------|------------------------|------------------------------------------------|
+| \<none\>    | `vars.OC_SERVER`       | Common server address (repository-level)       |
+| \<none\>    | `vars.MSTEAMS_WEBHOOK` | Common alert webhook (repository-level)        |
+| \<none\>    | `secrets.OC_NAMESPACE` | DEV namespace (repository-level)               |
+| \<none\>    | `secrets.OC_TOKEN`     | DEV service token (repository-level)           |
+| TEST        | `secrets.OC_NAMESPACE` | TEST namespace (overrides repository-level)     |
+| TEST        | `secrets.OC_TOKEN`     | TEST service token (overrides repository-level) |
+| PROD        | `secrets.OC_NAMESPACE` | PROD namespace (overrides repository-level)    |
+| PROD        | `secrets.OC_TOKEN`     | PROD service token (overrides repository-level) |
 
 ### 🔐 Secret Values
 
