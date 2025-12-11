@@ -21,7 +21,7 @@ describe('MetricsController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [MetricsController],
+      controllers: [ MetricsController ],
     }).compile()
 
     controller = module.get<MetricsController>(MetricsController)
