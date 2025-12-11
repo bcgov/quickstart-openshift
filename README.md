@@ -449,23 +449,39 @@ The starter stack includes a frontend (React, Bootstrap, Vite, Caddy), backend (
 * 🏗️ [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
 * 🔄 [Flyway](https://flywaydb.org/) database migrations
 * 🐘 [Crunchy](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes) Postgres/PostGIS Database
-* 🛡️ [Coraza WAF](https://github.com/corazawaf/coraza-caddy) Web Application Firewall integrated with Caddy
+* 🛡️ [OWASP Coraza WAF](https://github.com/corazawaf/coraza-caddy) Web Application Firewall integrated with Caddy
 
 PostGIS is enabled by default for geospatial data support when postGISVersion value is provided. To switch to standard PostgreSQL, update the `postGISVersion` field in the [Crunchy Helm chart values](./charts/crunchy/values.yml) to `~`. This disables PostGIS extensions, making it a plain PostgreSQL setup.
 
-### 🛡️ Coraza WAF: Customization & Troubleshooting
+### 🛡️ OWASP Coraza WAF: Application Security
 
-The Coraza Web Application Firewall (WAF) protects your application from common web threats. If you need to customize its behavior or troubleshoot blocked requests, follow these steps:
+[OWASP Coraza](https://coraza.io/) is an open-source Web Application Firewall (WAF) that provides application-layer security protection against common web attacks. As part of the OWASP (Open Web Application Security Project) ecosystem, Coraza is designed to complement and work alongside other OWASP security tools, including [OWASP ZAP](https://www.zaproxy.org/) (Zed Attack Proxy), which is used for security testing and validation.
+
+**Why Coraza WAF is Important:**
+
+Coraza WAF acts as a security shield for your application, protecting against:
+- **SQL Injection (SQLi)** attacks that attempt to manipulate database queries
+- **Cross-Site Scripting (XSS)** attacks that inject malicious scripts into web pages
+- **Path Traversal** attempts to access unauthorized files or directories
+- **Security Scanner** probes from automated attack tools
+- **Sensitive Path** access attempts (e.g., `.env`, `.git`, admin panels)
+
+The WAF is integrated directly into the Caddy web server, providing real-time protection with minimal performance overhead. It uses a combination of machine learning-based detection (via built-in operators) and pattern-based rules to identify and block malicious requests before they reach your application.
+
+**Customization & Troubleshooting:**
 
 **1. Modifying WAF Rules**
 - WAF rules are defined in `frontend/coraza.conf`.
 - Edit this file to add, remove, or adjust rules. For example, to allow a specific request method, modify or comment out the relevant rule.
-- After making changes, restart the frontend service (Caddy) to apply updates.
+- After making changes, restart the frontend service using Docker Compose:
+  ```bash
+  docker compose restart frontend
+  ```
 
 **2. Viewing WAF Logs**
-- WAF logs are typically output to the Caddy logs. Check the container logs with:
+- WAF logs are typically output to the Caddy logs. When running locally with Docker Compose, check the container logs with:
   ```bash
-  oc logs <pod-name> -n <namespace>
+  docker compose logs frontend
   ```
 - Look for entries containing "coraza" or "WAF" to identify blocked requests and rule matches.
 
@@ -481,11 +497,6 @@ The Coraza Web Application Firewall (WAF) protects your application from common 
 - Test thoroughly after making changes to ensure security is maintained.
 
 For more details, see the [Coraza documentation](https://coraza.io/docs/).
-
-```yaml
-# Example: Switching to PostgreSQL
-postGISVersion: ~
-```
 
 ## 🗄️ Crunchy Database
 
@@ -552,12 +563,17 @@ After a full workflow run and merge can been run, please do the following:
 
 
 
-# 📖 [How Tos](./HOWTO.md)
 ## 🏗️ Architecture
 
 The architecture diagram provides an overview of the system's components, their interactions, and the deployment structure. It illustrates the relationships between the frontend, backend, database, and other infrastructure elements within the OpenShift environment.
 
 ![Architecture](./.diagrams/architecture/arch.drawio.svg)
+
+## 📖 How-To Guides
+
+For detailed how-to guides on common tasks and configurations, see [HOWTO.md](./HOWTO.md). This includes guides for:
+- Passing configuration as environment variables to the SPA frontend
+- Additional configuration examples and best practices
 
 ## 🤝 Contributing
 
