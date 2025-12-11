@@ -6,7 +6,7 @@
     "prisma-generate": "prisma generate",
     "prebuild": "rimraf dist",
     "build": "prisma generate && nest build",
-    "postbuild": "mkdir -p dist/generated/prisma && for file in generated/prisma/**/*.ts; do npx swc \"$file\" -o \"dist/generated/prisma/$(basename \"$file\" .ts).js\" -C module.type=commonjs 2>/dev/null; done && for file in generated/prisma/*.ts; do npx swc \"$file\" -o \"dist/generated/prisma/$(basename \"$file\" .ts).js\" -C module.type=commonjs 2>/dev/null; done",
+    "postbuild": "mkdir -p dist/generated/prisma && for file in generated/prisma/**/*.ts; do npx swc \"$file\" -o \"dist/generated/prisma/$(basename \"$file\" .ts).js\" -C module.type=commonjs 2>/dev/null; done && for file in generated/prisma/*.ts; do npx swc \"$file\" -o \"dist/generated/prisma/$(basename \"$file\" .ts).js\" -C module.type=commonjs 2>/dev/null; done && cp -r dist/generated/prisma generated/ 2>/dev/null || true",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "deploy": "npm ci --ignore-scripts --no-update-notifier && npm run build",
     "start": "nest start",
