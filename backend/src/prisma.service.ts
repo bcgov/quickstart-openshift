@@ -26,8 +26,8 @@ class PrismaService
     if (PrismaService.instance) {
       return PrismaService.instance
     }
-    this.pool = new Pool({ connectionString: dataSourceURL })
-    const adapter = new PrismaPg(this.pool)
+    const pool = new Pool({ connectionString: dataSourceURL })
+    const adapter = new PrismaPg(pool)
     super({
       adapter,
       errorFormat: 'pretty',
@@ -38,6 +38,7 @@ class PrismaService
         { emit: 'stdout', level: 'error' },
       ],
     })
+    this.pool = pool
     PrismaService.instance = this
   }
 
@@ -46,7 +47,7 @@ class PrismaService
     this.$on<any>('query', (e: Prisma.QueryEvent) => {
       // dont print the health check queries, which contains SELECT 1 or COMMIT , BEGIN, DEALLOCATE ALL
       // this is to avoid logging health check queries which are executed by the framework.
-      const excludedPatterns = [ 'COMMIT', 'BEGIN', 'SELECT 1', 'DEALLOCATE ALL' ]
+      const excludedPatterns = ['COMMIT', 'BEGIN', 'SELECT 1', 'DEALLOCATE ALL']
       if (excludedPatterns.some((pattern) => e?.query?.toUpperCase().includes(pattern))) {
         return
       }
@@ -56,6 +57,7 @@ class PrismaService
 
   async onModuleDestroy() {
     await this.$disconnect()
+    await this.pool.end()
   }
 }
 
