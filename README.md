@@ -8,7 +8,7 @@
 
 ## 🔄 Pull Request-Based Workflows with Sample Stack
 
-This repository provides a template to rapidly deploy a modern web application stack to the BC Government's OpenShift platform using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability.  By hitting the ground running we can save weeks-to-months of development time plus receive regular updates and features.
+This repository provides a template to rapidly deploy a modern web application stack to OpenShift using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability.  By hitting the ground running we can save weeks-to-months of development time plus receive regular updates and features.
 
 **Includes:**
 * 🔄 Pull Request-based pipeline
@@ -118,7 +118,7 @@ OpenShift's service account token, different for every namespace.  This guide as
 
 Locate an OpenShift pipeline token:
 
-1. Login to your OpenShift cluster, e.g.: [Gold](https://console.apps.gold.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/)
+1. Login to your OpenShift cluster (for BCGov users: [Gold](https://console.apps.gold.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/))
 2. Select your DEV namespace
 3. Click Workloads > Secrets (under Workloads for Administrator view)
 4. Select `pipeline-token-...` or a similarly privileged token
@@ -148,9 +148,10 @@ BC Government employees can request SonarCloud projects by creating an [issue](h
 
 **`OC_SERVER`** 🌐
 
-OpenShift server address.
+OpenShift server address (API endpoint for your OpenShift cluster).
 * Consume: `{{ vars.OC_SERVER }}`
-* Value: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
+* Example values (BCGov): `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
+* For other OpenShift clusters: Use your cluster's API server address (typically `https://api.<cluster-domain>:6443`)
 
 **`MSTEAMS_WEBHOOK`** 📢
 * Consume: `{{ vars.MSTEAMS_WEBHOOK }}`
@@ -413,7 +414,8 @@ Runs on scheduled job (cronjob) or workflow dispatch.
 
 There is a long-lived custom route available to be assigned to specific Pull Request deployments.  Add the label `demo` to that pull request or run the `DEMO Route` workflow.
 
-Typical route: `https://<REPO_NAME>-demo.apps.silver.devops.gov.bc.ca`
+Typical route format: `https://<REPO_NAME>-demo.<your-openshift-domain>`  
+Example (BCGov): `https://<REPO_NAME>-demo.apps.silver.devops.gov.bc.ca`
 
 #### 🏷️ PR Label
 
@@ -554,10 +556,10 @@ The sample Java, Python and Go backends repository has been archived, but we hav
 
 The database documentation is created and deployed to GitHub pages.  See [here](https://bcgov.github.io/quickstart-openshift/schemaspy/index.html).
 
-After a full workflow run and merge can been run, please do the following:
+After a full workflow run and merge has been completed, please do the following:
 
-1. ⚙️ Select Settings (gear, top right)  *> Pages (under `Code and automation`)
-2. 👆 Click `Branch` or `Add teams`
+1. ⚙️ Select Settings (gear, top right) > Pages (under `Code and automation`)
+2. 👆 Click `Branch`
 3. 🌿 Select `gh-pages`
 4. 💾 Click `Save`
 
