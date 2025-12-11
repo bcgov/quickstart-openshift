@@ -1,42 +1,32 @@
-# Build
-FROM node:24-slim AS build
+# Build static files
+FROM node:24-slim AS static-files
 
-# Copy, build static files; see .dockerignore for exclusions
 WORKDIR /app
 COPY . ./
 RUN npm run deploy
 
 # Build custom Caddy with Coraza WAF plugin
-FROM caddy:2.10.2-builder AS builder
-# Install CA certificates for Go module downloads
+FROM caddy:2.10.2-builder AS xcaddy-builder
+
 RUN apk add --no-cache ca-certificates
 RUN xcaddy build \
     --with github.com/corazawaf/coraza-caddy/v2
 
-# Deploy using custom Caddy to host static files
+# Final image with Caddy binary, static files, Coraza config, verify Caddyfile formatting
 FROM caddy:2.10.2-alpine
-RUN apk add --no-cache ca-certificates
 
-# Copy custom Caddy binary with Coraza
-COPY --from=builder /usr/bin/caddy /usr/bin/caddy
-
-# Copy static files, Coraza config, verify Caddyfile formatting
-COPY --from=build /app/dist /srv
+# Caddy binary with Coraza, static files, Coraza config, verify Caddyfile formatting
+COPY --from=xcaddy-builder /usr/bin/caddy /usr/bin/caddy
+COPY --from=static-files /app/dist /srv
 COPY Caddyfile /etc/caddy/Caddyfile
 COPY coraza.conf /etc/caddy/coraza.conf
 
-# Create directories for Coraza WAF with restricted permissions
-# OpenShift uses random UIDs, so use root group (GID 0) with group write permissions
-# This allows any UID in the root group (which OpenShift assigns to all containers) to access
-RUN mkdir -p /tmp/coraza && \
-    chown -R 1001:0 /tmp/coraza && \
-    chmod -R 770 /tmp/coraza
+# Verify Caddyfile formatting, install CA certificates, create Coraza WAF directories
+RUN caddy fmt /etc/caddy/Caddyfile && \
+    apk add --no-cache ca-certificates && \
+    mkdir -p /tmp/coraza
 
-RUN caddy fmt /etc/caddy/Caddyfile
-
-# Boilerplate, not used in OpenShift/Kubernetes
+# Port, healthchek, non-root user (boilerplate)
 EXPOSE 3000 3001
 HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3001/health
-
-# Nonroot user
 USER 1001
