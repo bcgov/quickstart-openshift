@@ -11,12 +11,8 @@ const Header: FC<HeaderProps> = ({ title, children }) => {
     <header className="bcgov-header">
       <div className="container-fluid">
         <div className="row align-items-center py-2">
-          <div className="col-auto d-flex align-items-center">
-            <img src={logo} alt="British Columbia" height="40" className="me-2" />
-            <div className="bcgov-header-text d-flex flex-column">
-              <span className="bcgov-header-british">BRITISH</span>
-              <span className="bcgov-header-columbia">COLUMBIA</span>
-            </div>
+          <div className="col-auto">
+            <img src={logo} alt="British Columbia" height="40" className="me-3" />
           </div>
           <div className="col-auto bcgov-header-separator"></div>
           <div className="col">
