@@ -1,5 +1,4 @@
 import type { FC, ReactNode } from 'react'
-import logo from '@/assets/BCID_H_rgb_pos.png'
 
 type HeaderProps = {
   title: string
@@ -12,7 +11,7 @@ const Header: FC<HeaderProps> = ({ title, children }) => {
       <div className="container-fluid">
         <div className="row align-items-center bcgov-header-row">
           <div className="col-auto bcgov-header-logo">
-            <img src={logo} alt="British Columbia" height="40" />
+            <img src="/BCID_H_rgb_pos.png" alt="British Columbia" height="40" width="auto" />
           </div>
           <div className="col-auto bcgov-header-separator"></div>
           <div className="col bcgov-header-title-container">
