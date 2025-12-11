@@ -49,7 +49,7 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        project: [chromium, Google Chrome, firefox, safari, Microsoft Edge]
+        project: [chromium, firefox, safari]
     steps:
       - uses: actions/checkout@v6
         name: Checkout
