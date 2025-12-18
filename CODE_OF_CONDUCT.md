@@ -2,7 +2,9 @@
 
 ## Overview
 
-Act in the best interests of the community, the government of British Columbia and your fellow collaborators.  We welcome and appreciate your contributions, in any capacity.
+Act in the best interests of the community, your organization, and your fellow collaborators.  We welcome and appreciate your contributions, in any capacity.
+
+> **Note for template users**: Please customize this section to reflect your organization's values and context.
 
 ## Our Pledge
 
@@ -63,9 +65,13 @@ representative at an online or offline event.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-derek.roberts@gmail.com.
-All complaints will be reviewed and investigated promptly and fairly.
+reported to the community leaders responsible for enforcement. Please contact
+the repository maintainers through GitHub or by creating an issue in this
+repository. All complaints will be reviewed and investigated promptly and fairly.
+
+> **Note for template users**: Please customize this section with your preferred
+> contact method for conduct reports (e.g., a dedicated email address, security
+> team contact, or other appropriate channel for your organization).
 
 All community leaders are obligated to respect the privacy and security of the
 reporter of any incident.
