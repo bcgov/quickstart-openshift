@@ -1,6 +1,5 @@
-import type { KnipConfig } from 'knip'
-
-const config: KnipConfig = {
+// Knip configuration - used by external CI/CD tools, not part of application dependencies
+const config = {
   ignoreExportsUsedInFile: true,
   workspaces: {
     '.': {
