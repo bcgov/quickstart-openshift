@@ -57,7 +57,7 @@
     "eslint-plugin-prettier": "^5.2.3",
     "typescript-eslint": "^8.46.2",
     "istanbul-badges-readme": "^1.9.0",
-    "knip": "^6.0.0",
+    "knip": "^5.0.0",
     "prettier": "^3.5.3",
     "supertest": "^7.0.0",
     "typescript": "^5.2.2",
