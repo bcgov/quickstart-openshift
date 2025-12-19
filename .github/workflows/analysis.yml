@@ -42,6 +42,7 @@ jobs:
             npm ci
             npm run lint
             npm run test:cov
+          dep_scan: true
           dir: backend
           node_version: "22"
           sonar_args: >
@@ -69,6 +70,7 @@ jobs:
             npm ci
             npm run lint
             npm run test:cov
+          dep_scan: true
           dir: frontend
           node_version: "22"
           sonar_args: >
