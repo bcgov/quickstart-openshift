@@ -34,7 +34,7 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: bcgov/action-test-and-analyse@c20d16c26d9b7e6e486f01702880053ed4ebdc91 # v1.5.0
+      - uses: bcgov/action-test-and-analyse@87f88c90526b8b05cea760492ff33db4ba6e271b # v1.6.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
         with:
@@ -42,6 +42,7 @@ jobs:
             npm ci
             npm run lint
             npm run test:cov
+          dep_scan: true
           dir: backend
           node_version: "22"
           sonar_args: >
@@ -53,7 +54,7 @@ jobs:
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_token: ${{ env.SONAR_TOKEN }}
           supply_scan: true
-          triggers: ('backend/')
+          # triggers: ('backend/')
 
   frontend-tests:
     name: Frontend Tests
@@ -61,7 +62,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: bcgov/action-test-and-analyse@c20d16c26d9b7e6e486f01702880053ed4ebdc91 # v1.5.0
+      - uses: bcgov/action-test-and-analyse@87f88c90526b8b05cea760492ff33db4ba6e271b # v1.6.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
         with:
@@ -69,6 +70,7 @@ jobs:
             npm ci
             npm run lint
             npm run test:cov
+          dep_scan: true
           dir: frontend
           node_version: "22"
           sonar_args: >
@@ -80,7 +82,7 @@ jobs:
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_token: ${{ env.SONAR_TOKEN }}
           supply_scan: true
-          triggers: ('frontend/')
+          # triggers: ('frontend/')
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
