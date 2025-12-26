@@ -48,7 +48,7 @@ spec:
           resources:
             requests:
               cpu: 50m
-              memory: 75Mi
+              memory: 200Mi
       containers:
         - name: {{ include "backend.fullname" . }}
           {{- if .Values.backend.securityContext }}
@@ -100,7 +100,7 @@ spec:
           resources: # this is optional
             requests:
               cpu: 50m
-              memory: 75Mi
+              memory: 200Mi
       {{- with .Values.backend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
