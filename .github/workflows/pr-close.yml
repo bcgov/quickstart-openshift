@@ -28,7 +28,7 @@ jobs:
     name: Remove DB User from Crunchy
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov/action-crunchy@fix/pr-close-remove-user # v1.2.5
+      - uses: bcgov/action-crunchy@v1.2.6
         name: Remove PR Specific User
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
