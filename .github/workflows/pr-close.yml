@@ -14,7 +14,7 @@ permissions: {}
 jobs:
   cleanup:
     name: Cleanup and Image Promotion
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-close.yml@d9b3d32fb3f03c4699c2dce83ddfff042cd31a1f # v1.0.0
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-close.yml@v1.0.1 # v1.0.1
     permissions:
       packages: write
     secrets:
@@ -28,7 +28,7 @@ jobs:
     name: Remove DB User from Crunchy
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov/action-crunchy@9b776dc20a55f435b7c5024152b6b7b294362809 # v1.2.5
+      - uses: bcgov/action-crunchy@v1.2.6
         name: Remove PR Specific User
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
