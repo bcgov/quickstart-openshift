@@ -4,16 +4,16 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - '*.md'
-      - '.github/**'
-      - '.github/graphics/**'
-      - '!.github/workflows/**'
+      - "*.md"
+      - ".github/**"
+      - ".github/graphics/**"
+      - "!.github/workflows/**"
   workflow_dispatch:
     inputs:
       tag:
         description: "Image tag set to deploy; e.g. PR number or prod"
         type: string
-        default: 'prod'
+        default: "prod"
 
 concurrency:
   # Do not interrupt previous workflows
@@ -48,8 +48,7 @@ jobs:
     with:
       environment: prod
       db_user: appproxy # appproxy is the user which works with pgbouncer.
-      params:
-        --set backend.deploymentStrategy=RollingUpdate
+      params: --set backend.deploymentStrategy=RollingUpdate
         --set frontend.deploymentStrategy=RollingUpdate
         --set global.autoscaling=true
         --set frontend.pdb.enabled=true
@@ -64,7 +63,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [migrations, backend, frontend]
+        package: [migrations, backend, frontend, database, pgbouncer]
     timeout-minutes: 1
     steps:
       - uses: shrink/actions-docker-registry-tag@f04afd0559f66b288586792eb150f45136a927fa # v4

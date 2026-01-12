@@ -1,0 +1,87 @@
+{{- if eq (default "single" .Values.global.database.provider) "single" }}
+{{- $dbSecretName := printf "%s-db" .Release.Name }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-db
+  labels: {{- include "db.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ .Release.Name }}-db
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "db.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "db.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: db
+        backup: "true"
+    spec:
+      securityContext:
+        fsGroup: {{ default 1001 .Values.global.database.single.securityContext.fsGroup }}
+      containers:
+        - name: postgres
+          image: {{ default (printf "%s/%s/database:%s" (default "ghcr.io" .Values.global.registry) (required "global.repository is required" .Values.global.repository) (required "global.tag is required" .Values.global.tag)) .Values.global.database.single.image }}
+          imagePullPolicy: {{ default "IfNotPresent" .Values.global.database.single.imagePullPolicy }}
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dbSecretName }}
+                  key: databaseUser
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dbSecretName }}
+                  key: databasePassword
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dbSecretName }}
+                  key: databaseName
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          resources: {{- toYaml (.Values.global.database.single.resources | default dict) | nindent 12 }}
+        - name: pgbouncer
+          image: {{ default (printf "%s/%s/pgbouncer:%s" (default "ghcr.io" .Values.global.registry) (required "global.repository is required" .Values.global.repository) (required "global.tag is required" .Values.global.tag)) .Values.global.database.single.pgbouncer.image }}
+          imagePullPolicy: {{ default "IfNotPresent" .Values.global.database.single.pgbouncer.imagePullPolicy }}
+          ports:
+            - name: pgbouncer
+              containerPort: 6432
+              protocol: TCP
+          volumeMounts:
+            - name: pgbouncer-config
+              mountPath: /etc/pgbouncer/pgbouncer.ini
+              subPath: pgbouncer.ini
+            - name: pgbouncer-userlist
+              mountPath: /etc/pgbouncer/userlist.txt
+              subPath: userlist.txt
+          resources: {{- toYaml (.Values.global.database.single.pgbouncer.resources | default dict) | nindent 12 }}
+      volumes:
+        - name: pgbouncer-config
+          configMap:
+            name: {{ .Release.Name }}-pgbouncer
+        - name: pgbouncer-userlist
+          secret:
+            secretName: {{ .Release.Name }}-pgbouncer
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels: {{- include "db.labels" . | nindent 10 }}
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ default "5Gi" .Values.global.database.single.persistence.size }}
+        {{- if .Values.global.database.single.persistence.storageClassName }}
+        storageClassName: {{ .Values.global.database.single.persistence.storageClassName }}
+        {{- end }}
+{{- end }}

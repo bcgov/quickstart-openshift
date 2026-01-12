@@ -1,0 +1,48 @@
+{{- if and (eq (default "single" .Values.global.database.provider) "single") (.Values.global.database.backup.enabled | default false) }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-db-backup
+  labels: {{- include "dbbackup.labels" . | nindent 4 }}
+spec:
+  schedule: {{ default "0 8 * * *" .Values.global.database.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels: {{- include "dbbackup.labels" . | nindent 12 }}
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: {{ default "ghcr.io/bcgov/backup-container:2.11.0" .Values.global.database.backup.image }}
+              imagePullPolicy: {{ default "IfNotPresent" .Values.global.database.backup.imagePullPolicy }}
+              env:
+                - name: BACKUP_STRATEGY
+                  value: {{ default "rolling" .Values.global.database.backup.strategy | quote }}
+                - name: DAILY_BACKUPS
+                  value: {{ default "6" .Values.global.database.backup.retention.daily | quote }}
+                - name: WEEKLY_BACKUPS
+                  value: {{ default "4" .Values.global.database.backup.retention.weekly | quote }}
+                - name: MONTHLY_BACKUPS
+                  value: {{ default "1" .Values.global.database.backup.retention.monthly | quote }}
+                - name: BACKUP_DIR
+                  value: "/backups"
+                - name: DATABASE_SERVICE_NAME
+                  value: {{ printf "%s-db" .Release.Name | quote }}
+              envFrom:
+                - secretRef:
+                    name: {{ .Release.Name }}-db-backup
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+              resources: {{- toYaml (.Values.global.database.backup.resources | default dict) | nindent 16 }}
+          volumes:
+            - name: backups
+              persistentVolumeClaim:
+                claimName: {{ .Release.Name }}-db-backups
+{{- end }}

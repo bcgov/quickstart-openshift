@@ -44,3 +44,45 @@ Selector labels
 app.kubernetes.io/name: {{ include "fullname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Database component helpers (single-db mode)
+*/}}
+{{- define "db.name" -}}
+{{- printf "db" -}}
+{{- end }}
+
+{{- define "db.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "db.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{- define "db.labels" -}}
+{{ include "db.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/component: db
+{{- end }}
+
+{{/*
+Database backup component helpers
+*/}}
+{{- define "dbbackup.name" -}}
+{{- printf "db-backup" -}}
+{{- end }}
+
+{{- define "dbbackup.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "dbbackup.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{- define "dbbackup.labels" -}}
+{{ include "dbbackup.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/component: db-backup
+{{- end }}

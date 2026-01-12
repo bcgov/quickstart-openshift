@@ -1,0 +1,17 @@
+{{- if and (eq (default "single" .Values.global.database.provider) "single") (.Values.global.database.backup.enabled | default false) }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-db-backups
+  labels: {{- include "labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ default "25Gi" .Values.global.database.backup.persistence.size }}
+  {{- if .Values.global.database.backup.persistence.storageClassName }}
+  storageClassName: {{ .Values.global.database.backup.persistence.storageClassName }}
+  {{- end }}
+{{- end }}

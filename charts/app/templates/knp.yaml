@@ -25,7 +25,13 @@ metadata:
 spec:
   podSelector:
     matchLabels:
+      {{- if eq (default "single" .Values.global.database.provider) "crunchy" }}
       postgres-operator.crunchydata.com/cluster: {{ .Values.global.databaseAlias}}
+      {{- else }}
+      app.kubernetes.io/name: {{ include "db.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: db
+      {{- end }}
   ingress:
     - ports:
         - protocol: TCP
@@ -35,6 +41,13 @@ spec:
             matchLabels:
               app.kubernetes.io/name: {{ template  "backend.name"}}
               app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- if eq (default "single" .Values.global.database.provider) "single" }}
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: {{ .Release.Name }}
+            app.kubernetes.io/name: {{ include "dbbackup.name" . }}
+            app.kubernetes.io/component: db-backup
+        {{- end }}
   policyTypes:
     - Ingress
 ---

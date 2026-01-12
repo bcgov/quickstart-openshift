@@ -1,0 +1,39 @@
+{{- if eq (default "single" .Values.global.database.provider) "single" }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-db
+  labels: {{- include "db.labels" . | nindent 4 }}
+  annotations:
+    # For backup-container default NetworkPolicy patterns
+    backup: "true"
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "db.selectorLabels" . | nindent 4 }}
+  ports:
+    # Expose standard Postgres port to clients, route to pgbouncer (6432) inside pod.
+    - name: postgres
+      port: 5432
+      targetPort: pgbouncer
+      protocol: TCP
+
+---
+# Direct-to-Postgres service intended for schema migrations (Flyway) and other
+# clients that should bypass PgBouncer.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-db-direct
+  labels: {{- include "db.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "db.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+      protocol: TCP
+{{- end }}

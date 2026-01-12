@@ -32,7 +32,7 @@ jobs:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
           oc_server: ${{ vars.oc_server }}
-          command: |
+          commands: |
             oc delete route/${{ env.REPO }}-${{ env.DEST }} --ignore-not-found=true
             oc create route edge ${{ env.REPO }}-${{ env.DEST }} \
               --hostname=${{ env.REPO }}-${{ env.DEST }}.${{ env.DOMAIN }} \

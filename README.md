@@ -28,7 +28,7 @@ This repository provides a template to rapidly deploy a modern web application s
 * 🔍 Self-healing through probes/checks (startup, readiness, liveness)
 * 🎯 Point the long-lived DEMO route to PRs by using the `demo` label
 * **Sample application stack:**
-    * 🗄️ Database: Crunchy (Postgres, PostGIS), backups, Flyway
+    * 🗄️ Database: Single Postgres/PostGIS (default) or Crunchy (optional), backups, Flyway
     * 🎨 Frontend: TypeScript, Caddy Server with Coraza WAF
     * ⚙️ Backend: TypeScript, Nest.js
     * 🔄 Alternative backend examples - see [Alternative Backends](#alternative-backends)
@@ -151,6 +151,16 @@ OpenShift server address (API endpoint for your OpenShift cluster).
 * Consume: `{{ vars.OC_SERVER }}`
 * Example values (BCGov): `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 * For other OpenShift clusters: Use your cluster's API server address (typically `https://api.<cluster-domain>:6443`)
+
+**`DB_PROVIDER`** 🗄️
+
+Database provider toggle for deployments.
+
+* Where: `Settings > Secrets and Variables > Actions > Variables`
+* Values: `single` (default) or `crunchy`
+* Behavior:
+    * `single`: Deploys an in-release Postgres/PostGIS StatefulSet with PgBouncer sidecar (no Crunchy operator resources).
+    * `crunchy`: Deploys Crunchy via `bcgov/action-crunchy` and wires the app to the Crunchy-generated service/secrets.
 
 ## 🔄 Updating Dependencies
 
@@ -454,10 +464,14 @@ The starter stack includes a frontend (React, Bootstrap, Vite, Caddy), backend (
 * 💪 [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
 * 🏗️ [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
 * 🔄 [Flyway](https://flywaydb.org/) database migrations
-* 🐘 [Crunchy](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes) Postgres/PostGIS Database
+* 🗄️ Database provider toggle (`single` or `crunchy`)
+* 🐘 [Crunchy](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes) Postgres/PostGIS Database (optional)
+* 🐘 Single Postgres/PostGIS (default) with PgBouncer sidecar
 * 🛡️ [OWASP Coraza WAF](https://github.com/corazawaf/coraza-caddy) Web Application Firewall integrated with Caddy
 
-PostGIS is enabled by default for geospatial data support when postGISVersion value is provided. To switch to standard PostgreSQL, update the `postGISVersion` field in the [Crunchy Helm chart values](./charts/crunchy/values.yml) to `~`. This disables PostGIS extensions, making it a plain PostgreSQL setup.
+PostGIS notes:
+* **Single mode** uses the repository-owned database image (built from `./database/Dockerfile`), currently targeting Postgres 18 + PostGIS.
+* **Crunchy mode** uses `charts/crunchy/values.yml`. PostGIS is enabled when `crunchy.postGISVersion` is set; to switch to standard PostgreSQL, set it to `~`.
 
 ### 🛡️ OWASP Coraza WAF: Application Security
 
@@ -504,9 +518,34 @@ The WAF is integrated directly into the Caddy web server, providing real-time pr
 
 For more details, see the [Coraza documentation](https://coraza.io/docs/).
 
-## 🗄️ Crunchy Database
+## 🗄️ Database
 
-Crunchy is the default choice for high availability (HA) Postgres/PostGIS databases in BC Government.
+This template supports two database providers. The provider is controlled via the repository variable `DB_PROVIDER` and is also passed into Helm as `global.database.provider`.
+
+### 🐘 Single Postgres/PostGIS (default)
+
+This mode deploys a NON-HA database **inside the application Helm release**:
+
+* A Postgres/PostGIS **StatefulSet** and **Service** named `<release>-db`
+* A **PgBouncer sidecar** (service port 5432 targets PgBouncer)
+* Optional backups via a **CronJob** using the BCGov backup container (`ghcr.io/bcgov/backup-container`)
+
+Images:
+* Database image is built from `./database/Dockerfile` and published to GHCR (expected default: `ghcr.io/<org>/<repo>/database:<tag>`)
+* PgBouncer image is built from `./pgbouncer/Dockerfile` and published to GHCR (expected default: `ghcr.io/<org>/<repo>/pgbouncer:<tag>`)
+
+Backups (single mode):
+* Enable with Helm values: `global.database.backup.enabled=true`
+* Configure schedule/retention/PVC under `global.database.backup.*` in `charts/app/values.yaml`
+* Optional object storage settings live under `global.database.backup.s3.*`
+Pros:
+* Simple to maintain, low resource consumption
+Cons:
+* Non HA:  https://developer.gov.bc.ca/docs/default/component/platform-developer-docs/docs/automation-and-resiliency/app-resiliency-guidelines/#a-highly-available-application
+
+### 🐘 Crunchy Database (optional)
+
+Crunchy is still the recommended choice for high availability (HA) Postgres/PostGIS databases in BC Government with its known pitfalls and drawbacks around operational overhead.
 
 ### 🌟 Key Features
 - ⚡ Automatic failover with Patroni
@@ -521,11 +560,7 @@ Crunchy is the default choice for high availability (HA) Postgres/PostGIS databa
 3. **🚨 DR Testing**: Disaster Recovery Testing is **`MANDATORY`** before go live.
 
 ### 💾 Enabling S3 Backups
-To enable S3 backups/recovery, provide these parameters to the GitHub Action:
-- `s3_access_key`
-- `s3_secret_key` 
-- `s3_bucket`
-- `s3_endpoint`
+To enable S3 backups/recovery in Crunchy mode, configure `crunchy.pgBackRest.s3.*` in `charts/crunchy/values.yml` (or an environment-specific override values file).
 
 > **Important**: Never reuse the same s3/object store, bucket path across different Crunchy deployments or instances (dev, test, prod)
 

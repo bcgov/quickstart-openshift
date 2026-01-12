@@ -88,6 +88,10 @@ jobs:
     name: Stack
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-24.04
+    env:
+      # Repo-level toggle: Settings -> Variables -> Actions
+      # Expected values: 'single' or 'crunchy'
+      DB_PROVIDER: ${{ vars.DB_PROVIDER || 'single' }}
     outputs:
       tag: ${{ inputs.tag || steps.pr.outputs.pr }}
       triggered: ${{ steps.deploy.outputs.triggered }}
@@ -95,6 +99,7 @@ jobs:
       - uses: bcgov/action-crunchy@a109166ff26880dc75676492a33b816ac0ce392f # v1.2.6
         name: Deploy Crunchy
         id: deploy_crunchy
+        if: env.DB_PROVIDER == 'crunchy'
         with:
           oc_namespace: ${{ secrets.OC_NAMESPACE }}
           oc_token: ${{ secrets.OC_TOKEN }}
@@ -120,15 +125,44 @@ jobs:
           # version, to support helm packaging for non-pr based releases (workflow_dispatch). default to 1.0.0+github run number
           version=1.0.0+${{ github.run_number }}
 
+          # Database provider toggle
+          db_provider="${DB_PROVIDER}"
+          if [ "${db_provider}" != "single" ] && [ "${db_provider}" != "crunchy" ]; then
+            echo "Unsupported DB_PROVIDER='${db_provider}'. Expected 'single' or 'crunchy'." >&2
+            exit 1
+          fi
+
+          # Database alias used by the Helm chart:
+          # - crunchy: points at operator-created Secrets/Services
+          # - single: points at in-release Service named '${release}-db'
+          crunchy_release="${{ steps.deploy_crunchy.outputs.release }}"
+          if [ "${db_provider}" = "crunchy" ]; then
+            databaseAlias="${crunchy_release}-crunchy"
+            db_password=""
+            db_name=""
+          else
+            databaseAlias="db"
+            db_name="app"
+            # Keep it URL-safe and helm-flag-safe (no quotes/spaces)
+            db_password=$(openssl rand -hex 24)
+          fi
+
             # Summary
           echo "tag=${tag}"
           echo "release=${release}"
           echo "version=${version}"
+          echo "db_provider=${db_provider}"
+          echo "databaseAlias=${databaseAlias}"
+          [ -z "${db_name}" ] || echo "db_name=${db_name}"
 
           # Output
           echo "tag=${tag}" >> $GITHUB_OUTPUT
           echo "release=${release}" >> $GITHUB_OUTPUT
           echo "version=${version}" >> $GITHUB_OUTPUT
+          echo "db_provider=${db_provider}" >> $GITHUB_OUTPUT
+          echo "databaseAlias=${databaseAlias}" >> $GITHUB_OUTPUT
+          echo "db_name=${db_name}" >> $GITHUB_OUTPUT
+          echo "db_password=${db_password}" >> $GITHUB_OUTPUT
 
       - name: Stop pre-existing deployments on PRs (status = pending-upgrade)
         if: github.event_name == 'pull_request'
@@ -172,11 +206,17 @@ jobs:
             helm package -u . --app-version="tag-${{ steps.vars.outputs.tag }}_run-${{ github.run_number }}" --version=${{ steps.pr.outputs.pr || steps.vars.outputs.version }}
             # print the values.yaml file to see the values being used
             # Helm upgrade/rollout
+            DB_PARAMS=""
+            if [ "${{ steps.vars.outputs.db_provider }}" = "single" ]; then
+              DB_PARAMS="--set-string global.secrets.databaseName=${{ steps.vars.outputs.db_name }} --set-string global.secrets.databasePassword=${{ steps.vars.outputs.db_password }}"
+            fi
             helm upgrade \
               --set-string global.repository=${{ github.repository }} \
               --set-string global.tag="${{ steps.vars.outputs.tag }}" \
               --set-string global.config.databaseUser="${{ inputs.db_user }}" \
-              --set-string global.databaseAlias="${{ steps.deploy_crunchy.outputs.release }}-crunchy" \
+              --set-string global.database.provider="${{ steps.vars.outputs.db_provider }}" \
+              --set-string global.databaseAlias="${{ steps.vars.outputs.databaseAlias }}" \
+              ${DB_PARAMS} \
               ${{ inputs.params }} \
               --install --wait ${{ inputs.atomic && '--atomic' || '' }} ${{ steps.vars.outputs.release }} \
               --timeout ${{ inputs.timeout-minutes }}m \

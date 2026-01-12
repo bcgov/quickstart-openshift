@@ -21,6 +21,61 @@ global:
   #-- domain of the application, it is required, apps.silver.devops.gov.bc.ca for silver cluster and apps.devops.gov.bc.ca for gold cluster
   domain: "apps.silver.devops.gov.bc.ca" # it is apps.gold.devops.gov.bc.ca for gold cluster
   databaseAlias: ~ # set using github action workflow during helm deploy.
+  database:
+    # -- Database provider toggle. Set by GitHub Actions via repo var DB_PROVIDER.
+    # Allowed values: 'single' | 'crunchy'
+    provider: single
+
+    # -- Single (in-release) Postgres/PostGIS + pgbouncer.
+    single:
+      # Image built from /database/Dockerfile (expected default).
+      # Example: ghcr.io/<org>/<repo>/database:latest
+      image: ~
+      imagePullPolicy: IfNotPresent
+      persistence:
+        size: 5Gi
+        storageClassName: netapp-block-standard
+      securityContext:
+        fsGroup: 1001
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      pgbouncer:
+        # Defaults to ghcr.io/<org>/<repo>/pgbouncer:<tag> (built from /pgbouncer/Dockerfile)
+        image: ~
+        imagePullPolicy: IfNotPresent
+        maxClientConn: 200
+        defaultPoolSize: 20
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+
+    # -- Backup via bcgov/backup-container (separate CronJob).
+    backup:
+      enabled: false
+      image: ghcr.io/bcgov/backup-container:2.11.0
+      imagePullPolicy: IfNotPresent
+      schedule: "0 8 * * *"
+      strategy: rolling
+      retention:
+        daily: "6"
+        weekly: "4"
+        monthly: "1"
+      persistence:
+        size: 1Gi
+        storageClassName: netapp-file-backup
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      s3:
+        enabled: false
+        bucket: ~
+        endpoint: ~
+        accessKey: ~
+        secretKey: ~
 
 #-- the components of the application, backend.
 backend:

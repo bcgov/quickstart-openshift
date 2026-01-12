@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        package: [backend, frontend, migrations]
+        package: [backend, frontend, migrations, database, pgbouncer]
     timeout-minutes: 10
     steps:
       - uses: bcgov/action-builder-ghcr@2b24ac7f95e6a019064151498660437cca3202c5 # v4.2.1
@@ -40,14 +40,14 @@ jobs:
     with:
       db_user: app-${{ github.event.number }}
       params: --set global.secrets.persist=false
-      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/' '.github/workflows/.deployer.yml')
+      triggers: ('backend/' 'frontend/' 'migrations/' 'database/' 'pgbouncer/' 'charts/' '.github/workflows/.deployer.yml')
       db_triggers: ('charts/crunchy/')
 
   tests:
-     name: Tests
-     if: needs.deploys.outputs.triggered == 'true'
-     needs: [deploys]
-     uses: ./.github/workflows/.tests.yml
+    name: Tests
+    if: needs.deploys.outputs.triggered == 'true'
+    needs: [deploys]
+    uses: ./.github/workflows/.tests.yml
 
   results:
     name: PR Results

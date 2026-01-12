@@ -1,0 +1,30 @@
+{{- if eq (default "single" .Values.global.database.provider) "single" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-pgbouncer
+  labels: {{- include "labels" . | nindent 4 }}
+data:
+  pgbouncer.ini: |
+    [databases]
+    {{- $dbName := default "app" .Values.global.secrets.databaseName }}
+    {{ $dbName }} = host=127.0.0.1 port=5432 dbname={{ $dbName }}
+
+    [pgbouncer]
+    listen_addr = 0.0.0.0
+    listen_port = 6432
+    unix_socket_dir = /tmp
+
+    auth_type = plain
+    auth_file = /etc/pgbouncer/userlist.txt
+
+    pool_mode = transaction
+    max_client_conn = {{ default 200 .Values.global.database.single.pgbouncer.maxClientConn }}
+    default_pool_size = {{ default 20 .Values.global.database.single.pgbouncer.defaultPoolSize }}
+
+    ignore_startup_parameters = extra_float_digits
+    log_connections = 1
+    log_disconnections = 1
+    admin_users = {{ required "global.config.databaseUser is required" .Values.global.config.databaseUser }}
+{{- end }}
