@@ -370,6 +370,34 @@ pyrightconfig.json
 *.pem
 *.pub
 
+# Security-sensitive configuration files (may contain passwords/credentials)
+# Tomcat/Java application server configuration
+**/context.xml
+**/server.xml
+**/tomcat-users.xml
+**/web.xml
+# Java keystores and truststores
+**/*.jks
+**/*.jceks
+**/keystore.*
+**/truststore.*
+# Spring Boot application properties with secrets
+**/application-local.properties
+**/application-prod.properties
+**/application-secrets.properties
+**/application-*.yml
+**/bootstrap-local.yml
+**/bootstrap-prod.yml
+# Other common credential/config files
+**/credentials.json
+**/secrets.json
+**/secrets.yml
+**/secrets.yaml
+**/config.local.*
+**/config.prod.*
+**/*.p12
+**/*.pfx
+
 # IDE
 .codebuddy
 
