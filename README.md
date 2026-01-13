@@ -180,6 +180,8 @@ Dependabot is no longer recommended as an alternative to Renovate for generating
 
 This repository uses [Knip](https://knip.dev/) for dependency scanning to identify unused dependencies and exports. Knip runs automatically as part of the Analysis workflow via the `bcgov/action-test-and-analyse` action.
 
+**Note:** As a template repository, Knip runs in **warning mode** (non-blocking) to allow teams to customize dependencies without build failures. Teams can optionally change `dep_scan: warning` to `dep_scan: error` in their forks to enforce dependency scanning as a blocking check.
+
 ### 📋 Handling Unused Dependencies
 
 When Knip identifies unused dependencies, you have two options:

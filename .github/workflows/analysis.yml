@@ -34,7 +34,7 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: bcgov/action-test-and-analyse@87f88c90526b8b05cea760492ff33db4ba6e271b # v1.6.0
+      - uses: bcgov/action-test-and-analyse@afffbe41eabeb9380cf96a5f7cba3ee01caeb76d # v2.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
         with:
@@ -52,6 +52,7 @@ jobs:
             -Dsonar.tests.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_token: ${{ env.SONAR_TOKEN }}
+          dep_scan: warning
           supply_scan: true
           triggers: ('backend/')
 
@@ -61,7 +62,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: bcgov/action-test-and-analyse@87f88c90526b8b05cea760492ff33db4ba6e271b # v1.6.0
+      - uses: bcgov/action-test-and-analyse@afffbe41eabeb9380cf96a5f7cba3ee01caeb76d # v2.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
         with:
@@ -79,6 +80,7 @@ jobs:
             -Dsonar.tests.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_token: ${{ env.SONAR_TOKEN }}
+          dep_scan: warning
           supply_scan: true
           triggers: ('frontend/')
 

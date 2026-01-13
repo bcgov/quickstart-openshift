@@ -6,7 +6,7 @@ $warning: #81692c;
 $danger: #712024;
 
 // Import Bootstrap and Bootstrap Icons
-@import '~bootstrap/scss/bootstrap';
+@import '../../node_modules/bootstrap/scss/bootstrap';
 $bootstrap-icons-font-src:
   url('../../node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2')
     format('woff2'),
