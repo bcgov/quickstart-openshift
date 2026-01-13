@@ -52,6 +52,7 @@ jobs:
             -Dsonar.tests.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_token: ${{ env.SONAR_TOKEN }}
+          dep_scan: error
           supply_scan: true
           triggers: ('backend/')
 
@@ -79,6 +80,7 @@ jobs:
             -Dsonar.tests.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_token: ${{ env.SONAR_TOKEN }}
+          dep_scan: error
           supply_scan: true
           triggers: ('frontend/')
 
