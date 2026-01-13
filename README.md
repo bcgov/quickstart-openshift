@@ -176,6 +176,73 @@ To opt-in:
 
 Dependabot is no longer recommended as an alternative to Renovate for generating security, vulnerability and dependency pull requests.  It can still be used to generate warnings under the GitHub Security tab, which is only viewable by repository administrators.
 
+## 🔍 Dependency Scanning with Knip
+
+This repository uses [Knip](https://knip.dev/) for dependency scanning to identify unused dependencies and exports. Knip runs automatically as part of the Analysis workflow via the `bcgov/action-test-and-analyse` action.
+
+### 📋 Handling Unused Dependencies
+
+When Knip identifies unused dependencies, you have two options:
+
+1. **Remove the dependency** - If it's truly unused, remove it from `package.json`
+2. **Report as false positive** - If the dependency is used but not detected by static analysis
+
+### 🚫 Reporting False Positives
+
+**Do not create team-specific `knip.config.ts` files.** All Knip configuration is managed centrally in the upstream action repository.
+
+If you encounter a false positive (a dependency that is used but flagged as unused), report it upstream:
+
+1. **Verify it's a false positive** by checking:
+   - Is it exported from a utility file (e.g., `test-utils.tsx`)?
+   - Is it used via dynamic imports?
+   - Is it required by build tools or other dependencies?
+   - Is it used in configuration files that Knip doesn't analyze?
+
+2. **Open a PR to the upstream repository:**
+   - Repository: [`bcgov/action-test-and-analyse`](https://github.com/bcgov/action-test-and-analyse)
+   - File: `.knip.json`
+   - Add the dependency to the `ignoreDependencies` array
+
+3. **Include justification** in your PR:
+   - Why it's a false positive
+   - How the dependency is used
+   - Example: "Exported from test-utils files for use in tests but may not be directly imported yet. Common pattern in testing utilities."
+
+### 📝 Example: Reporting a False Positive
+
+If `@testing-library/user-event` is flagged but exported from `test-utils.tsx`:
+
+**Upstream PR to `bcgov/action-test-and-analyse/.knip.json`:**
+```json
+{
+  "ignoreDependencies": [
+    "swagger-ui-express",
+    "rimraf",
+    "@types/node",
+    "@types/react",
+    "@types/react-dom",
+    "@testing-library/user-event"
+  ],
+  "ignoreBinaries": [
+    "rimraf"
+  ]
+}
+```
+
+**PR Description:**
+> Add `@testing-library/user-event` to ignoreDependencies
+> 
+> This dependency is exported from test-utils files for use in tests but may not be directly imported yet. This is a common pattern in testing utilities where dependencies are re-exported for convenience.
+
+### ✅ Common False Positive Patterns
+
+- **Exported APIs**: Dependencies exported from utility files (like `test-utils.tsx`) that are intended for use but may not be directly imported yet
+- **Indirect usage**: Dependencies used by build tools, scripts, or other dependencies that static analysis can't detect
+- **Dynamic imports**: Dependencies loaded via dynamic imports or string-based requires
+- **Configuration files**: Dependencies used in config files that aren't detected by static analysis
+- **Type-only imports**: TypeScript type-only imports that are stripped at runtime
+
 ## ⚙️ Repository Configuration
 
 ### 🔀 Pull Request Handling
