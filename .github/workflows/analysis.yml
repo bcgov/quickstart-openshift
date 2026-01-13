@@ -34,7 +34,7 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: bcgov/action-test-and-analyse@00370b7d0e776aef0c35d5e5056d49720399e6d1 # v1.7.0
+      - uses: bcgov/action-test-and-analyse@5dd91f12432ba7a91796ae955f793c24d5c04ee8 # v1.7.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
         with:
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: bcgov/action-test-and-analyse@00370b7d0e776aef0c35d5e5056d49720399e6d1 # v1.7.0
+      - uses: bcgov/action-test-and-analyse@5dd91f12432ba7a91796ae955f793c24d5c04ee8 # v1.7.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
         with:
