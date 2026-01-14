@@ -1,0 +1,79 @@
+name: wAVA (Psicurity) Reminder
+
+on:
+  # Quarterly on the 1st day of Jan/Apr/Jul/Oct at 11:00 UTC
+  schedule:
+    - cron: "0 11 1 1,4,7,10 *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  remind:
+    name: Open wAVA reminder issue
+    # Keep this template-friendly; avoid creating reminder issues in forks by default.
+    if: github.repository == 'bcgov/quickstart-openshift'
+    permissions:
+      issues: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - name: Create issue if missing
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = "wAVA: schedule Psicurity web application vulnerability assessment"
+            const label = "security"
+
+            const body = [
+              "This is a scheduled reminder to run a **Psicurity Web Application Vulnerability Assessment (wAVA)**.",
+              "",
+              "- Vendor service: https://psicurity.com/assessments/web-applications/",
+              "- Methodology: OWASP ASVS (manual + automated validation; not a bulk scanner)",
+              "",
+              "### Suggested scope",
+              "- TEST frontend route",
+              "- TEST backend route (API)",
+              "",
+              "### Related tracking",
+              "- GitHub issue: #2023",
+              "- JIRA: SD-83610",
+              "",
+              "Close this issue once the wAVA is scheduled/completed (and remediation work is tracked)."
+            ].join("\\n")
+
+            // Check for an existing open issue with the same title to avoid spam.
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              per_page: 100
+            })
+
+            if (issues.some(i => i.title === title)) {
+              core.info(`Issue already open: "${title}"`)
+              return
+            }
+
+            // Create (and apply label if it exists)
+            const { data: created } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body
+            })
+
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: created.number,
+                labels: [label]
+              })
+            } catch (e) {
+              core.info(`Could not add label "${label}" (may not exist): ${e.message}`)
+            }
