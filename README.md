@@ -468,15 +468,9 @@ Runs on scheduled job (cronjob) or workflow dispatch.
 
 * 🧹 PR environment purge
 * 📚 Generate SchemaSpy documentation
-* 🛡️ OWASP ZAP active scans on TEST routes (creates GitHub issues with reports)
+* 🛡️ Web Application Vulnerability Assessment (wAVA-style) via OWASP ZAP active scans on TEST routes (creates GitHub issues with reports)
 
 ![](.github/graphics/scheduled.png)
-
-## 🛡️ wAVA (Psicurity)
-
-Psicurity wAVA is a **human-led penetration test** (OWASP ASVS based), not an automated scanner. This repo includes a quarterly reminder workflow (`.github/workflows/wava.yml`) that opens a GitHub issue to help ensure wAVA is scheduled regularly:
-
-- Service: `https://psicurity.com/assessments/web-applications/`
 
 ## 🎯 DEMO Routing
 
