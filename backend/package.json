@@ -65,7 +65,7 @@
     "vitest": "^4.0.0"
   },
   "overrides": {
-    "minimist@<1.2.6": "1.2.6",
+    "hono@<4.11.4": "4.11.4",
     "reflect-metadata": "^0.2.2"
   }
 }
