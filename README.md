@@ -468,7 +468,7 @@ Runs on scheduled job (cronjob) or workflow dispatch.
 
 * 🧹 PR environment purge
 * 📚 Generate SchemaSpy documentation
-* 🧪 Tests (e2e, load, integration) on TEST deployment
+* 🛡️ OWASP ZAP active scans on TEST routes (fulfills the wAVA need; see issue #2023)
 
 ![](.github/graphics/scheduled.png)
 
