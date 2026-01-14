@@ -64,10 +64,7 @@ jobs:
 
   # Run sequentially to reduce chances of rate limiting
   zap:
-    # wAVA (Web Application Vulnerability Assessment):
-    # OCIO requested routine web app vulnerability assessments (see issue #2023).
-    # This workflow performs an active OWASP ZAP scan against the deployed TEST routes.
-    name: wAVA (ZAP) Scans
+    name: ZAP Scans
     permissions:
       issues: write
     runs-on: ubuntu-24.04
@@ -84,6 +81,6 @@ jobs:
         with:
           allow_issue_writing: true
           artifact_name: ${{ matrix.name }}
-          issue_title: "wAVA (ZAP) Security Report: ${{ matrix.name }}"
+          issue_title: "ZAP Security Report: ${{ matrix.name }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           target: https://${{ github.event.repository.name }}-test.apps.silver.devops.gov.bc.ca/${{ matrix.path }}
