@@ -5,20 +5,42 @@ on:
     branches: [main]
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
   schedule:
     - cron: "0 11 * * 0" # 3 AM PST = 12 PM UDT, runs sundays
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions: {}
 
 jobs:
+  check-fork:
+    name: Check Fork
+    runs-on: ubuntu-24.04
+    outputs:
+      is_fork: ${{ steps.detect.outputs.is_fork }}
+    steps:
+      - id: detect
+        name: Detect fork PR
+        shell: bash
+        run: |
+          set -e
+          is_fork=false
+          if [ "${{ github.event_name }}" = "pull_request" ] || [ "${{ github.event_name }}" = "pull_request_target" ]; then
+            if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+              is_fork=true
+            fi
+          fi
+          echo "is_fork=$is_fork" >> "$GITHUB_OUTPUT"
+
   backend-tests:
     name: Backend Tests
-    if: (! github.event.pull_request.draft)
+    if: (! github.event.pull_request.draft) && !(github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true')
+    needs: [check-fork]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     services:
@@ -56,9 +78,54 @@ jobs:
           supply_scan: true
           triggers: ('backend/')
 
+  backend-tests-fork:
+    name: Backend Tests (Fork)
+    if: (! github.event.pull_request.draft) && github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true'
+    needs: [check-fork]
+    environment: fork-pr-approval
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: default
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: bcgov/action-test-and-analyse@afffbe41eabeb9380cf96a5f7cba3ee01caeb76d # v2.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
+        with:
+          commands: |
+            npm ci
+            npm run lint
+            npm run test:cov
+          dir: backend
+          node_version: "22"
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          branch: ${{ github.event.pull_request.head.sha }}
+          sonar_args: >
+            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=quickstart-openshift_backend
+            -Dsonar.sources=src
+            -Dsonar.tests.inclusions=**/*spec.ts
+            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
+          sonar_token: ${{ env.SONAR_TOKEN }}
+          dep_scan: warning
+          supply_scan: true
+          triggers: ('backend/')
+
   frontend-tests:
     name: Frontend Tests
-    if: (! github.event.pull_request.draft)
+    if: (! github.event.pull_request.draft) && !(github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true')
+    needs: [check-fork]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -84,10 +151,43 @@ jobs:
           supply_scan: true
           triggers: ('frontend/')
 
+  frontend-tests-fork:
+    name: Frontend Tests (Fork)
+    if: (! github.event.pull_request.draft) && github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true'
+    needs: [check-fork]
+    environment: fork-pr-approval
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: bcgov/action-test-and-analyse@afffbe41eabeb9380cf96a5f7cba3ee01caeb76d # v2.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
+        with:
+          commands: |
+            npm ci
+            npm run lint
+            npm run test:cov
+          dir: frontend
+          node_version: "22"
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          branch: ${{ github.event.pull_request.head.sha }}
+          sonar_args: >
+            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=quickstart-openshift_frontend
+            -Dsonar.sources=src
+            -Dsonar.tests.inclusions=**/*spec.ts
+            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
+          sonar_token: ${{ env.SONAR_TOKEN }}
+          dep_scan: warning
+          supply_scan: true
+          triggers: ('frontend/')
+
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
     name: Trivy Security Scan
-    if: (! github.event.pull_request.draft)
+    if: (! github.event.pull_request.draft) && !(github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true')
+    needs: [check-fork]
     continue-on-error: true
     permissions:
       security-events: write
@@ -110,10 +210,54 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
+  trivy-fork:
+    name: Trivy Security Scan (Fork)
+    if: (! github.event.pull_request.draft) && github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true'
+    needs: [check-fork]
+    environment: fork-pr-approval
+    continue-on-error: true
+    permissions:
+      security-events: write
+      contents: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - name: Checkout fork PR head
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        with:
+          format: "sarif"
+          output: "trivy-results.sarif"
+          ignore-unfixed: true
+          scan-type: "fs"
+          scanners: "vuln,secret,config"
+          severity: "CRITICAL,HIGH"
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: "trivy-results.sarif"
+
   results:
     name: Analysis Results
-    needs: [backend-tests, frontend-tests]
-    if: (! github.event.pull_request.draft)
+    needs: [check-fork, backend-tests, frontend-tests]
+    if: (! github.event.pull_request.draft) && !(github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true')
+    runs-on: ubuntu-24.04
+    steps:
+      - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
+        run: echo "At least one job has failed." && exit 1
+      - run: echo "Success!"
+
+  results-fork:
+    name: Analysis Results (Fork)
+    needs: [check-fork, backend-tests-fork, frontend-tests-fork]
+    if: (! github.event.pull_request.draft) && github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true'
+    environment: fork-pr-approval
     runs-on: ubuntu-24.04
     steps:
       - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
