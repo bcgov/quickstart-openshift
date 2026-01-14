@@ -2,7 +2,6 @@ name: PR
 
 on:
   pull_request:
-  pull_request_target:
 
 concurrency:
   # Cancel in progress for PR open and close
@@ -15,7 +14,6 @@ jobs:
   # https://github.com/bcgov/action-builder-ghcr
   builds:
     name: Builds
-    if: github.event_name == 'pull_request'
     permissions:
       packages: write
     runs-on: ubuntu-24.04
@@ -31,30 +29,9 @@ jobs:
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
-  builds-fork:
-    name: Builds (Fork)
-    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository
-    environment: fork-pr-approval
-    permissions:
-      packages: write
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        package: [backend, frontend, migrations]
-    timeout-minutes: 10
-    steps:
-      - uses: bcgov/action-builder-ghcr@2b24ac7f95e6a019064151498660437cca3202c5 # v4.2.1
-        with:
-          package: ${{ matrix.package }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          tags: ${{ github.event.number }}
-          tag_fallback: latest
-          # For fork PRs, keep it simple and always build.
-
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploys:
     name: Deploys (${{ github.event.number }})
-    if: github.event_name == 'pull_request'
     needs: [builds]
     uses: ./.github/workflows/.deployer.yml
     secrets:
@@ -66,55 +43,16 @@ jobs:
       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/' '.github/workflows/.deployer.yml')
       db_triggers: ('charts/crunchy/')
 
-  deploys-fork:
-    name: Deploys (${{ github.event.number }}) (Fork)
-    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository
-    needs: [builds-fork]
-    environment: fork-pr-approval
-    uses: ./.github/workflows/.deployer.yml
-    secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_token: ${{ secrets.OC_TOKEN }}
-    with:
-      tag: ${{ github.event.number }}
-      db_user: app-${{ github.event.number }}
-      params: --set global.secrets.persist=false
-      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/' '.github/workflows/.deployer.yml')
-      db_triggers: ('charts/crunchy/')
-      repository: ${{ github.event.pull_request.head.repo.full_name }}
-      ref: ${{ github.event.pull_request.head.sha }}
-
   tests:
-    name: Tests
-    if: github.event_name == 'pull_request' && needs.deploys.outputs.triggered == 'true'
-    needs: [deploys]
-    uses: ./.github/workflows/.tests.yml
-
-  tests-fork:
-    name: Tests (Fork)
-    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && needs.deploys-fork.outputs.triggered == 'true'
-    needs: [deploys-fork]
-    environment: fork-pr-approval
-    uses: ./.github/workflows/.tests.yml
-    with:
-      repository: ${{ github.event.pull_request.head.repo.full_name }}
-      ref: ${{ github.event.pull_request.head.sha }}
+     name: Tests
+     if: needs.deploys.outputs.triggered == 'true'
+     needs: [deploys]
+     uses: ./.github/workflows/.tests.yml
 
   results:
     name: PR Results
     needs: [builds, deploys, tests]
-    if: github.event_name == 'pull_request' && always()
-    runs-on: ubuntu-24.04
-    steps:
-      - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
-        run: echo "At least one job has failed." && exit 1
-      - run: echo "Success!"
-
-  results-fork:
-    name: PR Results (Fork)
-    needs: [builds-fork, deploys-fork, tests-fork]
-    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && always()
-    environment: fork-pr-approval
+    if: always()
     runs-on: ubuntu-24.04
     steps:
       - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')

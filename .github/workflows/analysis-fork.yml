@@ -1,24 +1,28 @@
-name: Analysis
+name: Analysis (Fork)
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  pull_request_target:
     types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
-  schedule:
-    - cron: "0 11 * * 0" # 3 AM PST = 12 PM UDT, runs sundays
-  workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions: {}
 
 jobs:
+  gate:
+    name: Fork Approval
+    if: (! github.event.pull_request.draft) && github.event.pull_request.head.repo.full_name != github.repository
+    environment: fork-pr-approval
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "Approved fork PR run"
+
   backend-tests:
     name: Backend Tests
-    if: (! github.event.pull_request.draft)
+    if: (! github.event.pull_request.draft) && github.event.pull_request.head.repo.full_name != github.repository
+    needs: [gate]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     services:
@@ -44,6 +48,8 @@ jobs:
             npm run test:cov
           dir: backend
           node_version: "22"
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          branch: ${{ github.event.pull_request.head.sha }}
           sonar_args: >
             -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
             -Dsonar.organization=bcgov-sonarcloud
@@ -58,7 +64,8 @@ jobs:
 
   frontend-tests:
     name: Frontend Tests
-    if: (! github.event.pull_request.draft)
+    if: (! github.event.pull_request.draft) && github.event.pull_request.head.repo.full_name != github.repository
+    needs: [gate]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -72,6 +79,8 @@ jobs:
             npm run test:cov
           dir: frontend
           node_version: "22"
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          branch: ${{ github.event.pull_request.head.sha }}
           sonar_args: >
             -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
             -Dsonar.organization=bcgov-sonarcloud
@@ -84,36 +93,10 @@ jobs:
           supply_scan: true
           triggers: ('frontend/')
 
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy:
-    name: Trivy Security Scan
-    if: (! github.event.pull_request.draft)
-    continue-on-error: true
-    permissions:
-      security-events: write
-    runs-on: ubuntu-24.04
-    timeout-minutes: 1
-    steps:
-      - uses: actions/checkout@v6
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
-        with:
-          format: "sarif"
-          output: "trivy-results.sarif"
-          ignore-unfixed: true
-          scan-type: "fs"
-          scanners: "vuln,secret,config"
-          severity: "CRITICAL,HIGH"
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: "trivy-results.sarif"
-
   results:
     name: Analysis Results
+    if: (! github.event.pull_request.draft) && github.event.pull_request.head.repo.full_name != github.repository
     needs: [backend-tests, frontend-tests]
-    if: (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     steps:
       - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')

@@ -1,7 +1,7 @@
-name: PR Validate
+name: PR Validate (Fork)
 
 on:
-  pull_request:
+  pull_request_target:
     types: [edited, opened, synchronize, reopened, ready_for_review]
 
 concurrency:
@@ -13,7 +13,7 @@ permissions: {}
 jobs:
   validate:
     name: Validate PR
-    if: (! github.event.pull_request.draft)
+    if: (! github.event.pull_request.draft) && github.event.pull_request.head.repo.full_name != github.repository
     permissions:
       pull-requests: write
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@6d695dd755fa9255ea4bde335890516beb6f95e4 # v1.0.1
@@ -24,7 +24,7 @@ jobs:
 
   results:
     name: Validate Results
-    if: always()
+    if: github.event.pull_request.head.repo.full_name != github.repository && always()
     needs: [validate]
     runs-on: ubuntu-24.04
     steps:

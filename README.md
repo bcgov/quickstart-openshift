@@ -95,7 +95,7 @@ Environments provide a [number of features](https://docs.github.com/en/actions/d
 
 #### Fork PR approval (recommended)
 
-Fork pull requests run workflows via `pull_request_target` and are gated behind a protected environment named `fork-pr-approval`.
+Fork pull requests can run via dedicated fork workflows (e.g. `PR (Fork)`, `Analysis (Fork)`) using `pull_request_target` and are gated behind a protected environment named `fork-pr-approval`.
 
 Create it in GitHub:
 
