@@ -53,6 +53,18 @@ on:
         required: false
         type: string
 
+      # Fork PR support (optional)
+      repository:
+        description: Repository to checkout (e.g. fork full_name); omit for default
+        required: false
+        default: ""
+        type: string
+      ref:
+        description: Git ref/SHA to checkout; omit for default
+        required: false
+        default: ""
+        type: string
+
       ### Usually a bad idea / not recommended
       timeout-minutes:
         description: "Timeout minutes"
@@ -131,7 +143,7 @@ jobs:
           echo "version=${version}" >> $GITHUB_OUTPUT
 
       - name: Stop pre-existing deployments on PRs (status = pending-upgrade)
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
         uses: bcgov/action-oc-runner@f900830adadd4d9eef3ca6ff80103e839ba8b7c0 # v1.3.0
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
@@ -147,7 +159,16 @@ jobs:
                 helm uninstall ${{ steps.vars.outputs.release }}
             fi
 
-      - uses: actions/checkout@v6
+      - name: Checkout (default)
+        if: inputs.repository == '' || inputs.ref == ''
+        uses: actions/checkout@v6
+
+      - name: Checkout (override)
+        if: inputs.repository != '' && inputs.ref != ''
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ inputs.repository }}
+          ref: ${{ inputs.ref }}
       - name: Debug Values File
         if: inputs.debug == 'true'
         run: ls -l charts/crunchy/values.yml
@@ -160,7 +181,7 @@ jobs:
           oc_token: ${{ secrets.oc_token }}
           oc_server: ${{ vars.oc_server }}
           triggers: ${{ inputs.triggers }}
-          ref: ${{ github.ref }}
+          ref: ${{ inputs.ref || github.ref }}
           commands: |
             # Deploy
 

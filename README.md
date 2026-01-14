@@ -93,6 +93,16 @@ Environments provide a [number of features](https://docs.github.com/en/actions/d
 * Wait timer
 * Limit TEST/PROD values to post-merge workflows
 
+#### Fork PR approval (recommended)
+
+Fork pull requests run workflows via `pull_request_target` and are gated behind a protected environment named `fork-pr-approval`.
+
+Create it in GitHub:
+
+1. `Settings → Environments → New environment`
+2. Name: `fork-pr-approval`
+3. Configure **Required reviewers** (recommended) so fork PR workflows pause until explicitly approved
+
 ### 📊 Example
 
 Here is the arrangement of secrets, variables and environments for this repository.
