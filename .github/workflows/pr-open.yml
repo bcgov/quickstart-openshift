@@ -12,26 +12,6 @@ concurrency:
 permissions: {}
 
 jobs:
-  check-fork:
-    name: Check Fork
-    if: github.event_name == 'pull_request_target'
-    runs-on: ubuntu-24.04
-    outputs:
-      is_fork: ${{ steps.detect.outputs.is_fork }}
-    steps:
-      - id: detect
-        name: Detect fork PR
-        shell: bash
-        run: |
-          set -e
-          is_fork=false
-          if [ "${{ github.event_name }}" = "pull_request" ] || [ "${{ github.event_name }}" = "pull_request_target" ]; then
-            if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
-              is_fork=true
-            fi
-          fi
-          echo "is_fork=$is_fork" >> "$GITHUB_OUTPUT"
-
   # https://github.com/bcgov/action-builder-ghcr
   builds:
     name: Builds
@@ -53,81 +33,23 @@ jobs:
 
   builds-fork:
     name: Builds (Fork)
-    if: github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true'
-    needs: [check-fork]
+    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository
     environment: fork-pr-approval
     permissions:
       packages: write
-      contents: read
     runs-on: ubuntu-24.04
     strategy:
       matrix:
         package: [backend, frontend, migrations]
     timeout-minutes: 10
     steps:
-      - name: Checkout fork PR head
-        uses: actions/checkout@v6
+      - uses: bcgov/action-builder-ghcr@2b24ac7f95e6a019064151498660437cca3202c5 # v4.2.1
         with:
+          package: ${{ matrix.package }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
-
-      - name: Determine build trigger
-        id: diff
-        shell: bash
-        run: |
-          set -e
-          git remote add upstream "https://github.com/${{ github.repository }}.git"
-          git fetch --no-tags --depth=1 upstream "${{ github.event.pull_request.base.sha }}"
-          changed="$(git diff --name-only "${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}")"
-          echo "$changed"
-
-          triggered=false
-          case "${{ matrix.package }}" in
-            backend) pattern='^backend/' ;;
-            frontend) pattern='^frontend/' ;;
-            migrations) pattern='^migrations/' ;;
-            *) pattern='^$' ;;
-          esac
-
-          if echo "$changed" | grep -Eq "$pattern"; then
-            triggered=true
-          fi
-          echo "triggered=$triggered" >> "$GITHUB_OUTPUT"
-
-      - name: Retag fallback image
-        if: steps.diff.outputs.triggered != 'true'
-        uses: shrink/actions-docker-registry-tag@f04afd0559f66b288586792eb150f45136a927fa # v4
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: latest
-          tags: |
-            ${{ github.event.number }}
-
-      - name: Set up Docker Buildx
-        if: steps.diff.outputs.triggered == 'true'
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to the Container registry
-        if: steps.diff.outputs.triggered == 'true'
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-
-      - name: Build and push ${{ matrix.package }} Docker image
-        if: steps.diff.outputs.triggered == 'true'
-        uses: docker/build-push-action@v6
-        with:
-          context: ${{ matrix.package }}
-          file: ${{ matrix.package }}/Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository }}/${{ matrix.package }}:${{ github.event.number }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: BUILDKIT_INLINE_CACHE=1
+          tags: ${{ github.event.number }}
+          tag_fallback: latest
+          # For fork PRs, keep it simple and always build.
 
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploys:
@@ -146,8 +68,8 @@ jobs:
 
   deploys-fork:
     name: Deploys (${{ github.event.number }}) (Fork)
-    if: github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true'
-    needs: [builds-fork, check-fork]
+    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository
+    needs: [builds-fork]
     environment: fork-pr-approval
     uses: ./.github/workflows/.deployer.yml
     secrets:
@@ -170,8 +92,8 @@ jobs:
 
   tests-fork:
     name: Tests (Fork)
-    if: github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true' && needs.deploys-fork.outputs.triggered == 'true'
-    needs: [deploys-fork, check-fork]
+    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && needs.deploys-fork.outputs.triggered == 'true'
+    needs: [deploys-fork]
     environment: fork-pr-approval
     uses: ./.github/workflows/.tests.yml
     with:
@@ -190,8 +112,8 @@ jobs:
 
   results-fork:
     name: PR Results (Fork)
-    needs: [check-fork, builds-fork, deploys-fork, tests-fork]
-    if: github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true' && always()
+    needs: [builds-fork, deploys-fork, tests-fork]
+    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && always()
     environment: fork-pr-approval
     runs-on: ubuntu-24.04
     steps:

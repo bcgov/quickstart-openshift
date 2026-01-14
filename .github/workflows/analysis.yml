@@ -186,38 +186,6 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
-  trivy-fork:
-    name: Trivy Security Scan (Fork)
-    if: github.event_name == 'pull_request_target' && (! github.event.pull_request.draft) && github.event.pull_request.head.repo.full_name != github.repository
-    environment: fork-pr-approval
-    continue-on-error: true
-    permissions:
-      security-events: write
-      contents: read
-    runs-on: ubuntu-24.04
-    timeout-minutes: 1
-    steps:
-      - name: Checkout fork PR head
-        uses: actions/checkout@v6
-        with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
-        with:
-          format: "sarif"
-          output: "trivy-results.sarif"
-          ignore-unfixed: true
-          scan-type: "fs"
-          scanners: "vuln,secret,config"
-          severity: "CRITICAL,HIGH"
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: "trivy-results.sarif"
-
   results:
     name: Analysis Results
     needs: [backend-tests, frontend-tests]
