@@ -14,6 +14,7 @@ permissions: {}
 jobs:
   check-fork:
     name: Check Fork
+    if: github.event_name == 'pull_request_target'
     runs-on: ubuntu-24.04
     outputs:
       is_fork: ${{ steps.detect.outputs.is_fork }}
@@ -35,7 +36,6 @@ jobs:
   builds:
     name: Builds
     if: github.event_name == 'pull_request'
-    needs: [check-fork]
     permissions:
       packages: write
     runs-on: ubuntu-24.04
@@ -154,6 +154,7 @@ jobs:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
+      tag: ${{ github.event.number }}
       db_user: app-${{ github.event.number }}
       params: --set global.secrets.persist=false
       triggers: ('backend/' 'frontend/' 'migrations/' 'charts/' '.github/workflows/.deployer.yml')

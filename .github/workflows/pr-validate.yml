@@ -13,29 +13,9 @@ concurrency:
 permissions: {}
 
 jobs:
-  check-fork:
-    name: Check Fork
-    runs-on: ubuntu-24.04
-    outputs:
-      is_fork: ${{ steps.detect.outputs.is_fork }}
-    steps:
-      - id: detect
-        name: Detect fork PR
-        shell: bash
-        run: |
-          set -e
-          is_fork=false
-          if [ "${{ github.event_name }}" = "pull_request" ] || [ "${{ github.event_name }}" = "pull_request_target" ]; then
-            if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
-              is_fork=true
-            fi
-          fi
-          echo "is_fork=$is_fork" >> "$GITHUB_OUTPUT"
-
   validate:
     name: Validate PR
     if: github.event_name == 'pull_request' && (! github.event.pull_request.draft)
-    needs: [check-fork]
     permissions:
       pull-requests: write
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@6d695dd755fa9255ea4bde335890516beb6f95e4 # v1.0.1
@@ -46,9 +26,7 @@ jobs:
 
   validate-fork:
     name: Validate PR (Fork)
-    if: github.event_name == 'pull_request_target' && (! github.event.pull_request.draft) && needs.check-fork.outputs.is_fork == 'true'
-    needs: [check-fork]
-    environment: fork-pr-approval
+    if: github.event_name == 'pull_request_target' && (! github.event.pull_request.draft) && github.event.pull_request.head.repo.full_name != github.repository
     permissions:
       pull-requests: write
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@6d695dd755fa9255ea4bde335890516beb6f95e4 # v1.0.1
@@ -67,9 +45,8 @@ jobs:
 
   results-fork:
     name: Validate Results (Fork)
-    if: github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true' && always()
-    needs: [check-fork, validate-fork]
-    environment: fork-pr-approval
+    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && always()
+    needs: [validate-fork]
     runs-on: ubuntu-24.04
     steps:
       - run: echo "Success!"

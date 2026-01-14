@@ -12,35 +12,15 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions: {}
 
 jobs:
-  check-fork:
-    name: Check Fork
-    runs-on: ubuntu-24.04
-    outputs:
-      is_fork: ${{ steps.detect.outputs.is_fork }}
-    steps:
-      - id: detect
-        name: Detect fork PR
-        shell: bash
-        run: |
-          set -e
-          is_fork=false
-          if [ "${{ github.event_name }}" = "pull_request" ] || [ "${{ github.event_name }}" = "pull_request_target" ]; then
-            if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
-              is_fork=true
-            fi
-          fi
-          echo "is_fork=$is_fork" >> "$GITHUB_OUTPUT"
-
   backend-tests:
     name: Backend Tests
-    if: (! github.event.pull_request.draft) && !(github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true')
-    needs: [check-fork]
+    if: github.event_name != 'pull_request_target' && (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     services:
@@ -80,8 +60,7 @@ jobs:
 
   backend-tests-fork:
     name: Backend Tests (Fork)
-    if: (! github.event.pull_request.draft) && github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true'
-    needs: [check-fork]
+    if: github.event_name == 'pull_request_target' && (! github.event.pull_request.draft) && github.event.pull_request.head.repo.full_name != github.repository
     environment: fork-pr-approval
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -124,8 +103,7 @@ jobs:
 
   frontend-tests:
     name: Frontend Tests
-    if: (! github.event.pull_request.draft) && !(github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true')
-    needs: [check-fork]
+    if: github.event_name != 'pull_request_target' && (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -153,8 +131,7 @@ jobs:
 
   frontend-tests-fork:
     name: Frontend Tests (Fork)
-    if: (! github.event.pull_request.draft) && github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true'
-    needs: [check-fork]
+    if: github.event_name == 'pull_request_target' && (! github.event.pull_request.draft) && github.event.pull_request.head.repo.full_name != github.repository
     environment: fork-pr-approval
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -186,8 +163,7 @@ jobs:
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
     name: Trivy Security Scan
-    if: (! github.event.pull_request.draft) && !(github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true')
-    needs: [check-fork]
+    if: github.event_name != 'pull_request_target' && (! github.event.pull_request.draft)
     continue-on-error: true
     permissions:
       security-events: write
@@ -212,8 +188,7 @@ jobs:
 
   trivy-fork:
     name: Trivy Security Scan (Fork)
-    if: (! github.event.pull_request.draft) && github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true'
-    needs: [check-fork]
+    if: github.event_name == 'pull_request_target' && (! github.event.pull_request.draft) && github.event.pull_request.head.repo.full_name != github.repository
     environment: fork-pr-approval
     continue-on-error: true
     permissions:
@@ -245,8 +220,8 @@ jobs:
 
   results:
     name: Analysis Results
-    needs: [check-fork, backend-tests, frontend-tests]
-    if: (! github.event.pull_request.draft) && !(github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true')
+    needs: [backend-tests, frontend-tests]
+    if: github.event_name != 'pull_request_target' && (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     steps:
       - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
@@ -255,8 +230,8 @@ jobs:
 
   results-fork:
     name: Analysis Results (Fork)
-    needs: [check-fork, backend-tests-fork, frontend-tests-fork]
-    if: (! github.event.pull_request.draft) && github.event_name == 'pull_request_target' && needs.check-fork.outputs.is_fork == 'true'
+    needs: [backend-tests-fork, frontend-tests-fork]
+    if: github.event_name == 'pull_request_target' && (! github.event.pull_request.draft) && github.event.pull_request.head.repo.full_name != github.repository
     environment: fork-pr-approval
     runs-on: ubuntu-24.04
     steps:
