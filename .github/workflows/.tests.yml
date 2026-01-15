@@ -9,18 +9,6 @@ on:
         default: ${{ github.event.number }}
         type: string
 
-      # Fork PR support (optional, for pull_request_target workflows)
-      repository:
-        description: Repository to checkout (fork full_name); omit for default
-        required: false
-        default: ""
-        type: string
-      ref:
-        description: Git ref/SHA to checkout; omit for default
-        required: false
-        default: ""
-        type: string
-
 env:
   DOMAIN: apps.silver.devops.gov.bc.ca
   PREFIX: ${{ github.event.repository.name }}-${{ inputs.target }}
@@ -33,10 +21,20 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 1
     steps:
-      - uses: actions/checkout@v6
+      - name: Download fork code artifact (if fork)
+        id: download-fork-artifact
+        uses: actions/download-artifact@v6
+        continue-on-error: true
         with:
-          repository: ${{ inputs.repository != '' && inputs.repository || github.repository }}
-          ref: ${{ inputs.ref != '' && inputs.ref || github.ref }}
+          name: fork-code
+          path: .
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+        if: |
+          always() && 
+          (steps.download-fork-artifact.outcome == 'failure' || steps.download-fork-artifact.outcome == 'skipped')
+
       - id: cache-npm
         uses: actions/cache@v5
         with:
@@ -66,10 +64,20 @@ jobs:
       matrix:
         project: [chromium, firefox, safari]
     steps:
-      - uses: actions/checkout@v6
+      - name: Download fork code artifact (if fork)
+        id: download-fork-artifact
+        uses: actions/download-artifact@v6
+        continue-on-error: true
         with:
-          repository: ${{ inputs.repository != '' && inputs.repository || github.repository }}
-          ref: ${{ inputs.ref != '' && inputs.ref || github.ref }}
+          name: fork-code
+          path: .
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+        if: |
+          always() && 
+          (steps.download-fork-artifact.outcome == 'failure' || steps.download-fork-artifact.outcome == 'skipped')
+
       - uses: actions/setup-node@v6
         name: Setup Node
         with:
@@ -103,10 +111,20 @@ jobs:
       matrix:
         name: [backend, frontend]
     steps:
-      - uses: actions/checkout@v6
+      - name: Download fork code artifact (if fork)
+        id: download-fork-artifact
+        uses: actions/download-artifact@v6
+        continue-on-error: true
         with:
-          repository: ${{ inputs.repository != '' && inputs.repository || github.repository }}
-          ref: ${{ inputs.ref != '' && inputs.ref || github.ref }}
+          name: fork-code
+          path: .
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+        if: |
+          always() && 
+          (steps.download-fork-artifact.outcome == 'failure' || steps.download-fork-artifact.outcome == 'skipped')
+
       - uses: grafana/setup-k6-action@ffe7d7290dfa715e48c2ccc924d068444c94bde2 # v1.1.0
       - uses: grafana/run-k6-action@a15e2072ede004e8d46141e33d7f7dad8ad08d9d # v1.3.1
         env:

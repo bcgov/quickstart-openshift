@@ -53,18 +53,6 @@ on:
         required: false
         type: string
 
-      # Fork PR support (optional, for pull_request_target workflows)
-      repository:
-        description: Repository to checkout (fork full_name); omit for default
-        required: false
-        default: ""
-        type: string
-      ref:
-        description: Git ref/SHA to checkout; omit for default
-        required: false
-        default: ""
-        type: string
-
       ### Usually a bad idea / not recommended
       timeout-minutes:
         description: "Timeout minutes"
@@ -159,10 +147,19 @@ jobs:
                 helm uninstall ${{ steps.vars.outputs.release }}
             fi
 
-      - uses: actions/checkout@v6
+      - name: Download fork code artifact (if fork)
+        id: download-fork-artifact
+        uses: actions/download-artifact@v6
+        continue-on-error: true
         with:
-          repository: ${{ inputs.repository != '' && inputs.repository || github.repository }}
-          ref: ${{ inputs.ref != '' && inputs.ref || github.ref }}
+          name: fork-code
+          path: .
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+        if: |
+          always() && 
+          (steps.download-fork-artifact.outcome == 'failure' || steps.download-fork-artifact.outcome == 'skipped')
       - name: Debug Values File
         if: inputs.debug == 'true'
         run: ls -l charts/crunchy/values.yml
@@ -175,7 +172,7 @@ jobs:
           oc_token: ${{ secrets.oc_token }}
           oc_server: ${{ vars.oc_server }}
           triggers: ${{ inputs.triggers }}
-          ref: ${{ inputs.ref || github.ref }}
+          ref: ${{ github.ref }}
           commands: |
             # Deploy
 
