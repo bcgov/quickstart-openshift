@@ -1,0 +1,95 @@
+name: .Fork Handler
+
+on:
+  workflow_call:
+    outputs:
+      approved:
+        description: "Whether the PR is approved to proceed"
+        value: ${{ jobs.handler.outputs.approved }}
+      is_fork:
+        description: "Whether this is a fork PR"
+        value: ${{ jobs.handler.outputs.is_fork }}
+      fork_repository:
+        description: "Fork repository full name (if fork)"
+        value: ${{ jobs.handler.outputs.fork_repository }}
+      fork_ref:
+        description: "Fork commit SHA (if fork)"
+        value: ${{ jobs.handler.outputs.fork_ref }}
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  handler:
+    name: Fork Handler
+    runs-on: ubuntu-24.04
+    outputs:
+      approved: ${{ steps.set-outputs.outputs.approved }}
+      is_fork: ${{ steps.set-outputs.outputs.is_fork }}
+      fork_repository: ${{ steps.set-outputs.outputs.fork_repository }}
+      fork_ref: ${{ steps.set-outputs.outputs.fork_ref }}
+    steps:
+      - name: Detect fork
+        id: detect
+        run: |
+          if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "is_fork=true" >> $GITHUB_OUTPUT
+            echo "fork_repository=${{ github.event.pull_request.head.repo.full_name }}" >> $GITHUB_OUTPUT
+            echo "fork_ref=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+            echo "✅ Fork PR detected"
+          else
+            echo "is_fork=false" >> $GITHUB_OUTPUT
+            echo "fork_repository=" >> $GITHUB_OUTPUT
+            echo "fork_ref=" >> $GITHUB_OUTPUT
+            echo "ℹ️ Same-repo PR - no approval needed"
+          fi
+
+      - name: Validate environment exists (for forks)
+        if: steps.detect.outputs.is_fork == 'true'
+        run: |
+          if ! gh api repos/${{ github.repository }}/environments/fork-pr-approval 2>/dev/null; then
+            echo "::error::Fork PR detected but 'fork-pr-approval' environment is not configured."
+            echo "::error::Please create the environment at: Settings → Environments → New environment"
+            echo "::error::Name: fork-pr-approval"
+            echo "::error::Required reviewers: [add trusted approvers]"
+            exit 1
+          fi
+          echo "✅ Environment 'fork-pr-approval' validated"
+
+      - name: Approval gate (for forks)
+        if: steps.detect.outputs.is_fork == 'true'
+        environment: fork-pr-approval
+        run: |
+          echo "✅ Fork PR approved"
+
+      - name: Checkout fork code and create artifact
+        if: steps.detect.outputs.is_fork == 'true'
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ steps.detect.outputs.fork_repository }}
+          ref: ${{ steps.detect.outputs.fork_ref }}
+          fetch-depth: 0
+
+      - name: Create fork code artifact
+        if: steps.detect.outputs.is_fork == 'true'
+        uses: actions/upload-artifact@v6
+        with:
+          name: fork-code
+          path: .
+          retention-days: 1
+
+      - name: Set outputs
+        id: set-outputs
+        run: |
+          if [ "${{ steps.detect.outputs.is_fork }}" == "true" ]; then
+            echo "approved=true" >> $GITHUB_OUTPUT
+            echo "is_fork=true" >> $GITHUB_OUTPUT
+            echo "fork_repository=${{ steps.detect.outputs.fork_repository }}" >> $GITHUB_OUTPUT
+            echo "fork_ref=${{ steps.detect.outputs.fork_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "approved=true" >> $GITHUB_OUTPUT
+            echo "is_fork=false" >> $GITHUB_OUTPUT
+            echo "fork_repository=" >> $GITHUB_OUTPUT
+            echo "fork_ref=" >> $GITHUB_OUTPUT
+          fi

@@ -2,18 +2,27 @@ name: PR
 
 on:
   pull_request:
+  pull_request_target:
 
 concurrency:
   # Cancel in progress for PR open and close
   group: ${{ github.event.number }}
   cancel-in-progress: true
 
-permissions: {}
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
 
 jobs:
+  fork-handler:
+    name: Fork Handler
+    uses: ./.github/workflows/.fork-handler.yml
+
   # https://github.com/bcgov/action-builder-ghcr
   builds:
     name: Builds
+    needs: [fork-handler]
     permissions:
       packages: write
     runs-on: ubuntu-24.04
@@ -32,7 +41,7 @@ jobs:
   # https://github.com/bcgov/quickstart-openshift-helpers
   deploys:
     name: Deploys (${{ github.event.number }})
-    needs: [builds]
+    needs: [fork-handler, builds]
     uses: ./.github/workflows/.deployer.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -44,17 +53,22 @@ jobs:
       db_triggers: ('charts/crunchy/')
 
   tests:
-     name: Tests
-     if: needs.deploys.outputs.triggered == 'true'
-     needs: [deploys]
-     uses: ./.github/workflows/.tests.yml
+    name: Tests
+    if: needs.deploys.outputs.triggered == 'true'
+    needs: [fork-handler, deploys]
+    uses: ./.github/workflows/.tests.yml
 
   results:
     name: PR Results
-    needs: [builds, deploys, tests]
+    needs: [fork-handler, builds, deploys, tests]
     if: always()
     runs-on: ubuntu-24.04
     steps:
+      - name: Handle fork approval denial
+        if: needs.fork-handler.result == 'failure'
+        run: |
+          echo "Fork PR approval was denied or environment misconfigured"
+          exit 0
       - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
         run: echo "At least one job has failed." && exit 1
       - run: echo "Success!"
