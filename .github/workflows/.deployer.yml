@@ -53,9 +53,9 @@ on:
         required: false
         type: string
 
-      # Fork PR support (optional)
+      # Fork PR support (optional, for pull_request_target workflows)
       repository:
-        description: Repository to checkout (e.g. fork full_name); omit for default
+        description: Repository to checkout (fork full_name); omit for default
         required: false
         default: ""
         type: string
@@ -159,16 +159,10 @@ jobs:
                 helm uninstall ${{ steps.vars.outputs.release }}
             fi
 
-      - name: Checkout (default)
-        if: inputs.repository == '' || inputs.ref == ''
-        uses: actions/checkout@v6
-
-      - name: Checkout (override)
-        if: inputs.repository != '' && inputs.ref != ''
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
-          repository: ${{ inputs.repository }}
-          ref: ${{ inputs.ref }}
+          repository: ${{ inputs.repository != '' && inputs.repository || github.repository }}
+          ref: ${{ inputs.ref != '' && inputs.ref || github.ref }}
       - name: Debug Values File
         if: inputs.debug == 'true'
         run: ls -l charts/crunchy/values.yml
