@@ -31,15 +31,6 @@ jobs:
         package: [backend, frontend, migrations]
     timeout-minutes: 10
     steps:
-      - name: Download fork code artifact (if fork)
-        id: download-fork-artifact
-        if: needs.fork-handler.outputs.is_fork == 'true'
-        uses: actions/download-artifact@v6
-        continue-on-error: true
-        with:
-          name: fork-code
-          path: .
-
       - uses: bcgov/action-builder-ghcr@2b24ac7f95e6a019064151498660437cca3202c5 # v4.2.1
         with:
           package: ${{ matrix.package }}
@@ -62,10 +53,10 @@ jobs:
       db_triggers: ('charts/crunchy/')
 
   tests:
-     name: Tests
-     if: needs.deploys.outputs.triggered == 'true'
-     needs: [fork-handler, deploys]
-     uses: ./.github/workflows/.tests.yml
+    name: Tests
+    if: needs.deploys.outputs.triggered == 'true'
+    needs: [fork-handler, deploys]
+    uses: ./.github/workflows/.tests.yml
 
   results:
     name: PR Results
