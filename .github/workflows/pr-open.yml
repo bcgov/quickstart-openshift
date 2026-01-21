@@ -2,6 +2,7 @@ name: PR
 
 on:
   pull_request:
+  pull_request_target:
 
 concurrency:
   # Cancel in progress for PR open and close
@@ -22,7 +23,7 @@ jobs:
         package: [backend, frontend, migrations]
     timeout-minutes: 10
     steps:
-      - uses: bcgov/action-builder-ghcr@2b24ac7f95e6a019064151498660437cca3202c5 # v4.2.1
+      - uses: bcgov/action-builder-ghcr@feat/fork-pr-auto-detection
         with:
           package: ${{ matrix.package }}
           tags: ${{ github.event.number }}
@@ -44,10 +45,10 @@ jobs:
       db_triggers: ('charts/crunchy/')
 
   tests:
-     name: Tests
-     if: needs.deploys.outputs.triggered == 'true'
-     needs: [deploys]
-     uses: ./.github/workflows/.tests.yml
+    name: Tests
+    if: needs.deploys.outputs.triggered == 'true'
+    needs: [deploys]
+    uses: ./.github/workflows/.tests.yml
 
   results:
     name: PR Results
