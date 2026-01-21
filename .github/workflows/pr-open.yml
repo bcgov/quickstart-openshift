@@ -9,12 +9,18 @@ concurrency:
   group: ${{ github.event.number }}
   cancel-in-progress: true
 
-permissions: {}
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
 
 jobs:
   # https://github.com/bcgov/action-builder-ghcr
   builds:
     name: Builds
+    if: |
+      github.event_name == 'pull_request_target' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       packages: write
     runs-on: ubuntu-24.04
