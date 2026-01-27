@@ -26,7 +26,7 @@ jobs:
 
   cleanup_db: # TODO move it off to another action later.
     name: Remove DB User from Crunchy
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     steps:
       - uses: bcgov/action-crunchy@v1.2.6
         name: Remove PR Specific User

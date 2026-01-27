@@ -91,7 +91,7 @@ jobs:
     continue-on-error: true
     permissions:
       security-events: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     timeout-minutes: 1
     steps:
       - uses: actions/checkout@v6
@@ -114,7 +114,7 @@ jobs:
     name: Analysis Results
     needs: [backend-tests, frontend-tests]
     if: (! github.event.pull_request.draft)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     steps:
       - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
         run: echo "At least one job has failed." && exit 1
