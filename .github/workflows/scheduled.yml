@@ -17,7 +17,7 @@ jobs:
     env:
       # https://tecadmin.net/getting-yesterdays-date-in-bash/
       CUTOFF: "1 week ago"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     timeout-minutes: 10
     steps:
       - name: Clean up Helm Releases

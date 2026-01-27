@@ -59,7 +59,7 @@ jobs:
   promote:
     name: Promote Images
     needs: [deploy-prod]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     permissions:
       packages: write
     strategy:
