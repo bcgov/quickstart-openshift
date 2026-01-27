@@ -66,7 +66,7 @@ jobs:
 
       - name: Run Tests
         env:
-          E2E_BASE_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}.${{ env.DOMAIN }}/
+          E2E_BASE_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}/
           CI: "true"
         run: |
           npx playwright test --project="${{ matrix.project }}" --reporter=html
