@@ -30,7 +30,6 @@ spec:
         {{- toYaml .Values.backend.podSecurityContext | nindent 8 }}
         {{- else }}
         runAsNonRoot: true
-        fsGroup: 0
         {{- end }}
       initContainers:
         - name: {{ include "backend.fullname" . }}-init

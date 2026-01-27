@@ -30,7 +30,6 @@ spec:
         {{- toYaml .Values.frontend.podSecurityContext | nindent 8 }}
         {{- else }}
         runAsNonRoot: true
-        fsGroup: 0
         {{- end }}
       containers:
         - name: {{ include "frontend.fullname" . }}
