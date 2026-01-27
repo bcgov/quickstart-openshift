@@ -25,12 +25,17 @@ spec:
       labels:
         {{- include "backend.labels" . | nindent 8 }}
     spec:
-      {{- if .Values.backend.podSecurityContext }}
       securityContext:
-        {{- toYaml .Values.backend.podSecurityContext | nindent 12 }}
-      {{- end }}
+        {{- if .Values.backend.podSecurityContext }}
+        {{- toYaml .Values.backend.podSecurityContext | nindent 8 }}
+        {{- else }}
+        runAsNonRoot: true
+        fsGroup: 0
+        {{- end }}
       initContainers:
         - name: {{ include "backend.fullname" . }}-init
+          securityContext:
+            runAsNonRoot: true
           image: "{{.Values.global.registry}}/{{.Values.global.repository}}/migrations:{{ .Values.global.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ default "Always" .Values.backend.imagePullPolicy }}
           envFrom:
@@ -51,10 +56,12 @@ spec:
               memory: 200Mi
       containers:
         - name: {{ include "backend.fullname" . }}
-          {{- if .Values.backend.securityContext }}
           securityContext:
+            {{- if .Values.backend.securityContext }}
             {{- toYaml .Values.backend.securityContext | nindent 12 }}
-          {{- end }}
+            {{- else }}
+            runAsNonRoot: true
+            {{- end }}
           image: "{{.Values.global.registry}}/{{.Values.global.repository}}/backend:{{ .Values.global.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ default "Always" .Values.backend.imagePullPolicy }}
           envFrom:
