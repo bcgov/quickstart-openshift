@@ -95,12 +95,12 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
-            - name: config
-              mountPath: /config
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: data
           emptyDir: {}
-        - name: config
+        - name: tmp
           emptyDir: {}
       affinity:
         podAntiAffinity:
