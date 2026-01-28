@@ -27,14 +27,21 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: {{ include "frontend.fullname" . }}
           securityContext:
             runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
             # NET_BIND_SERVICE is required for Caddy to function properly in OpenShift
             # even though it only binds to ports > 1024. This may be due to Caddy's
             # internal operations or OpenShift SCC requirements.
             capabilities:
+              drop: [ "ALL" ]
               add: [ "NET_BIND_SERVICE" ]
           image: "{{.Values.global.registry}}/{{.Values.global.repository}}/frontend:{{ .Values.global.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ default "Always" .Values.frontend.imagePullPolicy }}
@@ -82,15 +89,22 @@ spec:
             requests:
               cpu: 30m
               memory: 50Mi
+            limits:
+              cpu: 200m
+              memory: 200Mi
           volumeMounts:
             - name: data
               mountPath: /data
             - name: config
               mountPath: /config
+            - name: coraza-tmp
+              mountPath: /tmp/coraza
       volumes:
         - name: data
           emptyDir: {}
         - name: config
+          emptyDir: {}
+        - name: coraza-tmp
           emptyDir: {}
       affinity:
         podAntiAffinity:
