@@ -43,7 +43,7 @@ spec:
             capabilities:
               drop: [ "ALL" ]
               add: [ "NET_BIND_SERVICE" ]
-          image: "{{.Values.global.registry}}/{{.Values.global.repository}}/frontend:{{ .Values.global.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.global.registry | default "ghcr.io" }}/{{.Values.global.repository}}/frontend:{{ .Values.global.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ default "Always" .Values.frontend.imagePullPolicy }}
           env:
             - name: BACKEND_URL
