@@ -34,6 +34,7 @@ spec:
           securityContext:
             runAsNonRoot: true
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             seccompProfile:
               type: RuntimeDefault
             # NET_BIND_SERVICE is required for Caddy to function properly in OpenShift
@@ -94,12 +95,12 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
-            - name: config
-              mountPath: /config
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: data
           emptyDir: {}
-        - name: config
+        - name: tmp
           emptyDir: {}
       affinity:
         podAntiAffinity:

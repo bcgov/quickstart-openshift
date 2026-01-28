@@ -31,6 +31,7 @@ spec:
         - name: {{ include "backend.fullname" . }}-init
           securityContext:
             runAsNonRoot: true
+            readOnlyRootFilesystem: true
           image: "{{.Values.global.registry}}/{{.Values.global.repository}}/migrations:{{ .Values.global.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ default "Always" .Values.backend.imagePullPolicy }}
           envFrom:
@@ -53,6 +54,7 @@ spec:
         - name: {{ include "backend.fullname" . }}
           securityContext:
             runAsNonRoot: true
+            readOnlyRootFilesystem: true
           image: "{{.Values.global.registry}}/{{.Values.global.repository}}/backend:{{ .Values.global.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ default "Always" .Values.backend.imagePullPolicy }}
           envFrom:
