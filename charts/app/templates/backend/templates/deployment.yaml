@@ -26,11 +26,7 @@ spec:
         {{- include "backend.labels" . | nindent 8 }}
     spec:
       securityContext:
-        {{- if .Values.backend.podSecurityContext }}
-        {{- toYaml .Values.backend.podSecurityContext | nindent 8 }}
-        {{- else }}
         runAsNonRoot: true
-        {{- end }}
       initContainers:
         - name: {{ include "backend.fullname" . }}-init
           securityContext:
@@ -56,11 +52,7 @@ spec:
       containers:
         - name: {{ include "backend.fullname" . }}
           securityContext:
-            {{- if .Values.backend.securityContext }}
-            {{- toYaml .Values.backend.securityContext | nindent 12 }}
-            {{- else }}
             runAsNonRoot: true
-            {{- end }}
           image: "{{.Values.global.registry}}/{{.Values.global.repository}}/backend:{{ .Values.global.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ default "Always" .Values.backend.imagePullPolicy }}
           envFrom:

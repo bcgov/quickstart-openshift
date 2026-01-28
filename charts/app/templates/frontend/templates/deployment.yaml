@@ -26,11 +26,7 @@ spec:
         {{- include "frontend.labels" . | nindent 8 }}
     spec:
       securityContext:
-        {{- if .Values.frontend.podSecurityContext }}
-        {{- toYaml .Values.frontend.podSecurityContext | nindent 8 }}
-        {{- else }}
         runAsNonRoot: true
-        {{- end }}
       containers:
         - name: {{ include "frontend.fullname" . }}
           securityContext:
