@@ -50,6 +50,9 @@ spec:
             requests:
               cpu: 50m
               memory: 200Mi
+            limits:
+              cpu: 4
+              memory: 8Gi
       containers:
         - name: {{ include "backend.fullname" . }}
           securityContext:
@@ -101,6 +104,9 @@ spec:
             requests:
               cpu: 50m
               memory: 200Mi
+            limits:
+              cpu: 4
+              memory: 8Gi
       {{- with .Values.backend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
