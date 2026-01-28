@@ -8,3 +8,8 @@ misconfiguration:
     # that container images use trusted registries (ghcr.io by default)
     values:
       - charts/app/values.yaml
+    # Set repository value so Trivy can render complete image references
+    # This allows Trivy to see full image paths like ghcr.io/example/backend:1.0.0
+    # and verify they use trusted registries (ghcr.io, docker.io)
+    set-string:
+      - global.repository=example
