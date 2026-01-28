@@ -46,6 +46,9 @@ spec:
               value: "10"
             - name: FLYWAY_GROUP
               value: "true"
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           resources:
             requests:
               cpu: 50m
@@ -97,10 +100,16 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 30
             timeoutSeconds: 5
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           resources: # this is optional
             requests:
               cpu: 50m
               memory: 200Mi
+      volumes:
+        - name: tmp
+          emptyDir: {}
       {{- with .Values.backend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
