@@ -4,8 +4,8 @@
 global:
   #-- the registry where the images are stored. override during runtime for other registry at global level or individual level.
   repository: ~ # provide the repo name from where images will be sourced for example bcgo
-  #-- the registry where the images are stored. override during runtime for other registry at global level or individual level. defaults to ghcr.io if not specified (where application images are pushed)
-  registry: ~ # ghcr.io for directly streaming from github container registry or "artifacts.developer.gov.bc.ca/github-docker-remote" for artifactory, or any other registry. defaults to ghcr.io if not specified.
+  #-- the registry where the images are stored. override during runtime for other registry at global level or individual level. default is ghcr.io
+  registry: ghcr.io # ghcr.io for directly streaming from github container registry or "artifacts.developer.gov.bc.ca/github-docker-remote" for artifactory, or any other registry. Templates use default "ghcr.io" as fallback if overridden to null.
   #-- the tag of the image, it can be latest, 1.0.0 etc..., or the sha256 hash
   tag: ~
   #-- turn off autoscaling for the entire suite by setting this to false. default is true.
