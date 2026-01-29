@@ -1,0 +1,4 @@
+# KSV0125: Restrict container images to trusted registries
+# Trivy does not recognize ghcr.io as trusted by default. We use ghcr.io for application images.
+# Registry validation is enforced at deployment time via policy/OPA Gatekeeper.
+KSV0125
