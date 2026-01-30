@@ -8,20 +8,21 @@ RUN npm run deploy
 
 # Build custom Caddy with Coraza WAF plugin
 FROM caddy:2.10.2-builder AS builder
-# Install CA certificates for Go module downloads
-RUN apk add --no-cache ca-certificates
+# Install CA certificates for Go module downloads; libcap for setcap
+RUN apk add --no-cache ca-certificates libcap
 RUN xcaddy build \
     --with github.com/corazawaf/coraza-caddy/v2
+# Strip file capabilities here so the final image does not need libcap
+RUN setcap -r /usr/bin/caddy
 
 # Deploy: use Alpine (not caddy:2.10.2-alpine) because we use our own custom Caddy
 # binary from the builder stage—we never use the Caddy image's binary. Plain Alpine
 # keeps dependencies explicit and avoids coupling to the Caddy image's layout.
 FROM alpine:3.21.0
-RUN apk add --no-cache ca-certificates libcap curl
+RUN apk add --no-cache ca-certificates curl
 
-# Copy custom Caddy binary and strip file capabilities (satisfies KSV022; no NET_BIND_SERVICE)
+# Copy custom Caddy binary (capabilities already stripped in builder; satisfies KSV022)
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
-RUN setcap -r /usr/bin/caddy
 
 # Copy static files, Coraza config
 COPY --from=build /app/dist /srv
