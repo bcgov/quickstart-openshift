@@ -1,3 +1,4 @@
+# Listen only on high ports (3000, 3001, 3003).
 {
 	metrics
 	auto_https off
