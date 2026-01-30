@@ -33,10 +33,6 @@ spec:
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            # NET_BIND_SERVICE required so Caddy can exec on OpenShift when capabilities are dropped (exec otherwise denied).
-            capabilities:
-              drop: [ "ALL" ]
-              add: [ "NET_BIND_SERVICE" ]
           image: "{{ .Values.global.registry | default "ghcr.io" }}/{{.Values.global.repository}}/frontend:{{ .Values.global.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ default "Always" .Values.frontend.imagePullPolicy }}
           env:
