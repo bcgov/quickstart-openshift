@@ -1,0 +1,15 @@
+# KSV0125: Restrict container images to trusted registries
+# Trivy does not recognize ghcr.io as trusted by default. We use ghcr.io for application images.
+# Registry validation is enforced at deployment time via policy/OPA Gatekeeper.
+KSV0125
+
+# KSV020, KSV021: runAsUser/runAsGroup > 10000
+# OpenShift restricted-v2 SCC assigns namespace-specific UID range (e.g. 1002750000-1002759999).
+# Cannot hardcode in template; OpenShift injects at deploy time.
+KSV020
+KSV021
+
+# KSV030, KSV104: seccompProfile
+# OpenShift restricted SCC forbids seccomp: "seccomp may not be set".
+KSV030
+KSV104

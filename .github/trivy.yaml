@@ -8,3 +8,10 @@ misconfiguration:
     # that container images use trusted registries (ghcr.io by default)
     values:
       - charts/app/values.yaml
+    # Set registry and repository values so Trivy can render complete image references
+    # Application images (backend, frontend, migrations) are pushed to ghcr.io
+    # Base images in Dockerfiles are pulled from docker.io (default Docker registry)
+    # Both registries are trusted
+    set-string:
+      - global.registry=ghcr.io
+      - global.repository=example
