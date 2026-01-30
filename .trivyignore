@@ -9,6 +9,10 @@ KSV0125
 KSV020
 KSV021
 
+# KSV022: Specific capabilities added (NET_BIND_SERVICE)
+# Frontend Caddy needs NET_BIND_SERVICE to exec on OpenShift when capabilities are dropped; otherwise "exec /usr/bin/caddy: operation not permitted".
+KSV022
+
 # KSV030, KSV104: seccompProfile
 # OpenShift restricted SCC forbids seccomp: "seccomp may not be set".
 KSV030
