@@ -19,7 +19,7 @@ RUN setcap -r /usr/bin/caddy
 # binary from the builder stage—we never use the Caddy image's binary. Plain Alpine
 # keeps dependencies explicit and avoids coupling to the Caddy image's layout.
 FROM alpine:3.21.0
-RUN apk add --no-cache ca-certificates curl
+RUN apk add --no-cache ca-certificates
 
 # Copy custom Caddy binary (capabilities already stripped in builder; satisfies KSV022)
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
@@ -42,7 +42,8 @@ RUN mkdir -p /tmp/coraza && \
 RUN /usr/bin/caddy fmt /etc/caddy/Caddyfile
 
 EXPOSE 3000 3001
-HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3001/health
+# OpenShift ignores HEALTHCHECK; kept for Trivy/Docker best practices. Uses busybox wget (no curl).
+HEALTHCHECK --interval=30s --timeout=3s CMD wget -q -O /dev/null http://127.0.0.1:3001/health || exit 1
 
 USER 1001
 ENTRYPOINT ["/usr/bin/caddy"]
