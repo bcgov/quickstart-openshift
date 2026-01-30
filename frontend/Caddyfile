@@ -1,8 +1,11 @@
+# Listen only on high ports (3000, 3001, 3003). No 80/443 — avoids NET_BIND_SERVICE in Kubernetes/OpenShift.
 {
 	metrics
 	auto_https off
 	admin 0.0.0.0:3003
 	order coraza_waf first
+	http_port 3000
+	https_port 3001
 }
 :3000 {
 	log {
