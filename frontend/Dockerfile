@@ -13,11 +13,11 @@ RUN apk add --no-cache ca-certificates
 RUN xcaddy build \
     --with github.com/corazawaf/coraza-caddy/v2
 
-# Deploy: minimal Alpine base, no Caddy image setcap, explicit exec-form entrypoint
-FROM alpine:3.19
-RUN apk add --no-cache ca-certificates libcap curl
+# Deploy: use Caddy image base, strip capabilities from custom binary
+FROM caddy:2.10.2-alpine
+RUN apk add --no-cache libcap
 
-# Copy custom Caddy binary (no file capabilities from Caddy image)
+# Copy custom Caddy binary and strip file capabilities
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 RUN setcap -r /usr/bin/caddy 2>/dev/null || true
 
