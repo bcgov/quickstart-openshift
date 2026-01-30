@@ -16,7 +16,7 @@ RUN xcaddy build \
 # Deploy: use Alpine (not caddy:2.10.2-alpine) because we use our own custom Caddy
 # binary from the builder stage—we never use the Caddy image's binary. Plain Alpine
 # keeps dependencies explicit and avoids coupling to the Caddy image's layout.
-FROM alpine:3.19
+FROM alpine:3.21.0
 RUN apk add --no-cache ca-certificates libcap curl
 
 # Copy custom Caddy binary and strip file capabilities (satisfies KSV022; no NET_BIND_SERVICE)
