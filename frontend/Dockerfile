@@ -18,7 +18,7 @@ RUN setcap -r /usr/bin/caddy
 # Deploy: use Alpine (not caddy:2.10.2-alpine) because we use our own custom Caddy
 # binary from the caddy stage—we never use the Caddy image's binary. Plain Alpine
 # keeps dependencies explicit and avoids coupling to the Caddy image's layout.
-FROM alpine:3.21.0
+FROM alpine:3.23.2
 RUN apk add --no-cache ca-certificates
 
 # Copy custom Caddy binary (capabilities already stripped in caddy stage; satisfies KSV022)
