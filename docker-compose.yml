@@ -23,7 +23,7 @@ services:
     ports: ["5432:5432"]
 
   migrations:
-    image: flyway/flyway:11-alpine
+    image: flyway/flyway:12-alpine
     container_name: migrations
     command: info migrate info
     volumes: ["./migrations/sql:/flyway/sql:ro"]
