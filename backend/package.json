@@ -66,6 +66,9 @@
   },
   "overrides": {
     "hono@<4.11.7": "4.11.7",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "chevrotain": {
+      "lodash": "4.17.23"
+    }
   }
 }
