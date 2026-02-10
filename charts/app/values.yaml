@@ -13,13 +13,20 @@ global:
   #-- global secrets, can be accessed by sub-charts.
   secrets:
     enabled: true
+    #-- Postgres password. Required if crunchy pguser secret doesn't exist.
     databasePassword: ~
+    #-- Database name. Required if crunchy pguser secret doesn't exist.
     databaseName: ~
+    #-- Database host. Required if crunchy pguser secret doesn't exist.
     databaseHost: ~
+    #-- Database port. Defaults to 5432 if crunchy pguser secret doesn't exist.
     databasePort: 5432
+    #-- PgBouncer connection URL. Required if crunchy pguser secret doesn't exist.
     databasePgbouncerUrl: ~
+    #-- Keep secret after helm uninstall if set to true
     persist: true
   config:
+    #-- Database user. Required when secrets are enabled.
     databaseUser: ~
   #-- domain of the application, it is required, apps.silver.devops.gov.bc.ca for silver cluster and apps.devops.gov.bc.ca for gold cluster
   domain: "apps.silver.devops.gov.bc.ca" # it is apps.gold.devops.gov.bc.ca for gold cluster
