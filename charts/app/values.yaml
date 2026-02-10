@@ -13,10 +13,20 @@ global:
   #-- global secrets, can be accessed by sub-charts.
   secrets:
     enabled: true
+    #-- Database password. Required when secrets are enabled.
     databasePassword: ~
+    #-- Database name. Required when secrets are enabled.
     databaseName: ~
+    #-- Database host/IP. Required when secrets are enabled.
+    databaseHost: ~
+    #-- Database port. Defaults to 5432 if not specified.
+    databasePort: 5432
+    #-- PgBouncer connection URL for connection pooling. Required when secrets are enabled.
+    databasePgbouncerUrl: ~
+    #-- Keep secret after helm uninstall if set to true
     persist: true
   config:
+    #-- Database user. Required when secrets are enabled.
     databaseUser: ~
   #-- domain of the application, it is required, apps.silver.devops.gov.bc.ca for silver cluster and apps.devops.gov.bc.ca for gold cluster
   domain: "apps.silver.devops.gov.bc.ca" # it is apps.gold.devops.gov.bc.ca for gold cluster
