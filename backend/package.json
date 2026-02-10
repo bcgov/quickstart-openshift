@@ -46,7 +46,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@swc/cli": "^0.7.0",
+    "@swc/cli": "^0.8.0",
     "@swc/core": "^1.10.12",
     "@types/express": "^5.0.0",
     "@types/node": "^24.0.0",
