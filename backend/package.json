@@ -67,18 +67,8 @@
   "overrides": {
     "hono@<4.11.7": "4.11.7",
     "reflect-metadata": "^0.2.2",
-    "prisma": {
-      "@mrleebo/prisma-ast": {
-        "chevrotain": {
-          "@chevrotain/cst-dts-gen": {
-            "lodash": "4.17.23"
-          },
-          "@chevrotain/gast": {
-            "lodash": "4.17.23"
-          },
-          "lodash": "4.17.23"
-        }
-      }
+    "chevrotain": {
+      "lodash": "4.17.23"
     }
   }
 }
