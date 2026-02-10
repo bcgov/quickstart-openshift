@@ -102,6 +102,37 @@ jobs:
           values_file: charts/crunchy/values.yml
           triggers: ${{ inputs.db_triggers }}
 
+      - name: Wait for Crunchy User Secret
+        if: inputs.db_user != ''
+        uses: bcgov/action-oc-runner@f900830adadd4d9eef3ca6ff80103e839ba8b7c0 # v1.3.0
+        with:
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
+          oc_server: ${{ vars.oc_server }}
+          commands: |
+            # Wait for Crunchy operator to create the database user secret
+            SECRET_NAME="${{ steps.deploy_crunchy.outputs.release }}-crunchy-pguser-${{ inputs.db_user }}"
+            echo "Waiting for Crunchy user secret: ${SECRET_NAME}"
+            
+            # Wait up to 2 minutes for the secret to exist and have data
+            for i in {1..24}; do
+              if oc get secret "${SECRET_NAME}" -n ${{ secrets.oc_namespace }} &>/dev/null; then
+                # Check if secret has required fields
+                if oc get secret "${SECRET_NAME}" -n ${{ secrets.oc_namespace }} -o jsonpath='{.data.password}' &>/dev/null && \
+                   oc get secret "${SECRET_NAME}" -n ${{ secrets.oc_namespace }} -o jsonpath='{.data.host}' &>/dev/null; then
+                  echo "✓ Crunchy user secret ${SECRET_NAME} is ready with required fields"
+                  exit 0
+                fi
+              fi
+              echo "Waiting for secret... (attempt $i/24)"
+              sleep 5
+            done
+            
+            echo "ERROR: Crunchy user secret ${SECRET_NAME} was not created within 2 minutes"
+            echo "Available secrets:"
+            oc get secrets -n ${{ secrets.oc_namespace }} | grep crunchy || echo "No crunchy secrets found"
+            exit 1
+
       # Variables
       - if: inputs.tag  == ''
         id: pr

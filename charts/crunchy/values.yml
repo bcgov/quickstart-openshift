@@ -8,6 +8,16 @@ crunchy: # enable it for TEST and PROD, for PR based pipelines simply use single
   postGISVersion: 3.4
   openshift: true
   imagePullPolicy: IfNotPresent
+  # Postgres users - Crunchy operator will create secrets for each user
+  # Format: list of {name: username, databases: [list of databases]}
+  # The operator creates secrets as: {clusterName}-pguser-{username}
+  users:
+    - name: app
+      databases:
+        - app
+    - name: appproxy
+      databases:
+        - app
   # enable below to start a new crunchy cluster after disaster from a backed-up location, crunchy will choose the best place to recover from.
   # follow https://access.crunchydata.com/documentation/postgres-operator/5.2.0/tutorial/disaster-recovery/
   # Clone From Backups Stored in S3 / GCS / Azure Blob Storage
