@@ -15,6 +15,9 @@ global:
     enabled: true
     databasePassword: ~
     databaseName: ~
+    databaseHost: ~
+    databasePort: 5432
+    databasePgbouncerUrl: ~
     persist: true
   config:
     databaseUser: ~
