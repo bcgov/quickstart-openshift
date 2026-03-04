@@ -23,7 +23,6 @@ concurrency:
 permissions: {}
 
 jobs:
-  # https://github.com/bcgov/quickstart-openshift-helpers
   deploy-test:
     name: Deploy (TEST)
     uses: ./.github/workflows/.deployer.yml
