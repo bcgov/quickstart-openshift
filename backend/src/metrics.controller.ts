@@ -1,6 +1,6 @@
 import { Controller, Get, Res } from '@nestjs/common'
 import type { Response } from 'express'
-import { register } from 'src/middleware/prom'
+import { register } from './middleware/prom'
 
 @Controller('metrics')
 export class MetricsController {
