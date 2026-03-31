@@ -8,7 +8,7 @@ import { HttpException } from '@nestjs/common'
 import type { CreateUserDto } from './dto/create-user.dto'
 import type { UpdateUserDto } from './dto/update-user.dto'
 import type { UserDto } from './dto/user.dto'
-import { PrismaService } from 'src/prisma.service'
+import { PrismaService } from '../prisma.service'
 describe('UserController', () => {
   let controller: UsersController
   let usersService: UsersService
