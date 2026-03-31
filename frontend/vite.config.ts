@@ -28,9 +28,8 @@ export default defineConfig({
   },
   resolve: {
     // https://vitejs.dev/config/shared-options.html#resolve-alias
+    tsconfigPaths: true,
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '~': fileURLToPath(new URL('./node_modules', import.meta.url)),
       '~bootstrap': fileURLToPath(
         new URL('./node_modules/bootstrap', import.meta.url),
       ),
@@ -46,15 +45,7 @@ export default defineConfig({
     minify: 'esbuild',
     // Rollup Options
     // https://vitejs.dev/config/build-options.html#build-rollupoptions
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Split external library from transpiled code.
-          react: ['react', 'react-dom'],
-          axios: ['axios'],
-        },
-      },
-    },
+    rollupOptions: {},
   },
   css: {
     preprocessorOptions: {
@@ -62,7 +53,6 @@ export default defineConfig({
         // Silence deprecation warnings caused by Bootstrap SCSS
         // which is out of our control.
         silenceDeprecations: [
-          'mixed-decls',
           'color-functions',
           'global-builtin',
           'import',
