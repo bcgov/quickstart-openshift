@@ -5,7 +5,7 @@ import type { INestApplication } from '@nestjs/common'
 import request from 'supertest'
 
 // Mock the prom middleware
-vi.mock('src/middleware/prom', () => {
+vi.mock('./middleware/prom', () => {
   const mockRegister = {
     metrics: vi.fn(),
   }
@@ -41,7 +41,7 @@ describe('MetricsController', () => {
     it('should return metrics from prometheus register', async () => {
       // Arrange
       const mockMetrics = 'http_requests_total 100\nhttp_requests_duration_seconds 0.5'
-      const { register } = await import('src/middleware/prom')
+      const { register } = await import('./middleware/prom')
       vi.mocked(register.metrics).mockResolvedValue(mockMetrics)
 
       // Act & Assert
@@ -56,7 +56,7 @@ describe('MetricsController', () => {
 
     it('should handle errors when metrics collection fails', async () => {
       // Arrange
-      const { register } = await import('src/middleware/prom')
+      const { register } = await import('./middleware/prom')
       vi.mocked(register.metrics).mockRejectedValue(new Error('Metrics collection failed'))
 
       // Act & Assert
