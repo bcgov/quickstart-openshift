@@ -63,8 +63,6 @@ spec:
             capabilities:
               drop:
                 - ALL
-              add:
-                - NET_RAW
           image: "{{ .Values.global.registry | default "ghcr.io" }}/{{.Values.global.repository}}/backend:{{ .Values.global.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ default "Always" .Values.backend.imagePullPolicy }}
           envFrom:
