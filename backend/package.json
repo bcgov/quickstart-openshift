@@ -66,8 +66,8 @@
   },
   "overrides": {
     "hono@<4.12.7": "4.12.7",
-    "picomatch": "4.0.4",
-    "path-to-regexp": "8.4.1",
+    "picomatch@<4.0.4": "4.0.4",
+    "path-to-regexp@<8.4.1": "8.4.1",
     "file-type@<21.3.2": "21.3.2",
     "reflect-metadata": "^0.2.2",
     "chevrotain": {
