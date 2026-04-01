@@ -1,3 +1,4 @@
+# docker-compose.yml - Local development environment
 # Reusable vars
 x-var:
   - &POSTGRES_USER postgres
