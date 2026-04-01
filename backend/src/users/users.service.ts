@@ -92,8 +92,8 @@ export class UsersService {
       limit = 10
     }
 
-    let sortObj: unknown[] = []
-    let filterObj: Array<{ key: string; operation: string; value: unknown }> = []
+    let sortObj: unknown
+    let filterObj: Array<{ key: string; operation: string; value: unknown }>
     try {
       sortObj = JSON.parse(sort)
       const parsedFilter = JSON.parse(filter)
