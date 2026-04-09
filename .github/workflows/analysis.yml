@@ -52,7 +52,7 @@ jobs:
             -Dsonar.test.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_token: ${{ env.SONAR_TOKEN }}
-          dep_scan: warning
+          dep_scan: warn
           supply_scan: true
           triggers: ('backend/')
 
@@ -80,7 +80,7 @@ jobs:
             -Dsonar.test.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_token: ${{ env.SONAR_TOKEN }}
-          dep_scan: warning
+          dep_scan: warn
           supply_scan: true
           triggers: ('frontend/')
 
@@ -115,7 +115,7 @@ jobs:
   results:
     name: Analysis Results
     needs: [backend-tests, frontend-tests]
-    if: (! github.event.pull_request.draft)
+    if: always() && (! github.event.pull_request.draft)
     runs-on: ubuntu-slim
     steps:
       - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
