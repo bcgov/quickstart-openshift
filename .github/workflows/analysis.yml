@@ -115,7 +115,7 @@ jobs:
   results:
     name: Analysis Results
     needs: [backend-tests, frontend-tests]
-    if: (! github.event.pull_request.draft)
+    if: always() && (! github.event.pull_request.draft)
     runs-on: ubuntu-slim
     steps:
       - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
