@@ -1,0 +1,104 @@
+name: .Unit Tests
+
+on:
+  workflow_call:
+    secrets:
+      SONAR_TOKEN_BACKEND:
+        required: true
+      SONAR_TOKEN_FRONTEND:
+        required: true
+
+jobs:
+  backend-tests:
+    name: Backend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: default
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v6
+      - uses: bcgov/action-test-and-analyse@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
+        with:
+          commands: |
+            npm ci
+            npm run lint
+            npm run test:cov
+          dir: backend
+          node_version: "22"
+          sonar_args: >
+            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=quickstart-openshift_backend
+            -Dsonar.sources=src
+            -Dsonar.test.inclusions=**/*spec.ts
+            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
+          sonar_token: ${{ env.SONAR_TOKEN }}
+          dep_scan: warning
+          supply_scan: true
+          triggers: ('backend/')
+
+  frontend-tests:
+    name: Frontend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: bcgov/action-test-and-analyse@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
+        with:
+          commands: |
+            npm ci
+            npm run lint
+            npm run test:cov
+          dir: frontend
+          node_version: "22"
+          sonar_args: >-
+            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.projectKey=quickstart-openshift_frontend
+            -Dsonar.sources=src
+            -Dsonar.test.inclusions=**/*spec.ts
+            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
+          sonar_token: ${{ env.SONAR_TOKEN }}
+          dep_scan: warning
+          supply_scan: true
+          triggers: ('frontend/')
+
+  trivy:
+    name: Security
+    permissions:
+      security-events: write
+    runs-on: ubuntu-slim
+    timeout-minutes: 1
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          format: "sarif"
+          output: "trivy-results.sarif"
+          ignore-unfixed: true
+          scan-type: "fs"
+          scanners: "vuln,secret,misconfig"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
+          trivy-config: ".github/trivy.yaml"
+          trivyignores: ".trivyignore"
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: "trivy-results.sarif"

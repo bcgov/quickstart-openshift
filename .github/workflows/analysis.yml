@@ -3,8 +3,6 @@ name: Analysis
 on:
   push:
     branches: [main]
-  pull_request:
-    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
   schedule:
     - cron: "0 11 * * 0" # 3 AM PST = 12 PM UDT, runs sundays
   workflow_dispatch:
@@ -16,108 +14,19 @@ concurrency:
 permissions: {}
 
 jobs:
-  backend-tests:
-    name: Backend Tests
-    if: (! github.event.pull_request.draft)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_PASSWORD: default
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    steps:
-      - uses: bcgov/action-test-and-analyse@8f699e3fd3fadd9a6adf6f4b1f2638ef7ecfefb9 # v2.0.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
-        with:
-          commands: |
-            npm ci
-            npm run lint
-            npm run test:cov
-          dir: backend
-          node_version: "22"
-          sonar_args: >
-            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=quickstart-openshift_backend
-            -Dsonar.sources=src
-            -Dsonar.test.inclusions=**/*spec.ts
-            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
-          sonar_token: ${{ env.SONAR_TOKEN }}
-          dep_scan: warning
-          supply_scan: true
-          triggers: ('backend/')
-
-  frontend-tests:
-    name: Frontend Tests
-    if: (! github.event.pull_request.draft)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - uses: bcgov/action-test-and-analyse@8f699e3fd3fadd9a6adf6f4b1f2638ef7ecfefb9 # v2.0.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
-        with:
-          commands: |
-            npm ci
-            npm run lint
-            npm run test:cov
-          dir: frontend
-          node_version: "22"
-          sonar_args: >
-            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=quickstart-openshift_frontend
-            -Dsonar.sources=src
-            -Dsonar.test.inclusions=**/*spec.ts
-            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
-          sonar_token: ${{ env.SONAR_TOKEN }}
-          dep_scan: warning
-          supply_scan: true
-          triggers: ('frontend/')
-
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy:
-    name: Trivy Security Scan
-    if: (! github.event.pull_request.draft)
-    continue-on-error: true
-    permissions:
-      security-events: write
-    runs-on: ubuntu-slim
-    timeout-minutes: 1
-    steps:
-      - uses: actions/checkout@v6
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
-        with:
-          format: "sarif"
-          output: "trivy-results.sarif"
-          ignore-unfixed: true
-          scan-type: "fs"
-          scanners: "vuln,secret,misconfig"
-          severity: "CRITICAL,HIGH"
-          trivy-config: ".github/trivy.yaml"
-          trivyignores: ".trivyignore"
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: "trivy-results.sarif"
+  unit-tests:
+    name: Unit Tests
+    uses: ./.github/workflows/.unit-tests.yml
+    secrets:
+      SONAR_TOKEN_BACKEND: ${{ secrets.SONAR_TOKEN_BACKEND }}
+      SONAR_TOKEN_FRONTEND: ${{ secrets.SONAR_TOKEN_FRONTEND }}
 
   results:
     name: Analysis Results
-    needs: [backend-tests, frontend-tests]
-    if: (! github.event.pull_request.draft)
+    needs: [unit-tests]
+    if: always()
     runs-on: ubuntu-slim
     steps:
-      - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
-        run: echo "At least one job has failed." && exit 1
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'canceled')
+        run: exit 1
       - run: echo "Success!"
