@@ -111,7 +111,9 @@ Here is the arrangement of secrets, variables and environments for this reposito
 
 **`OC_TOKEN`** 🎫
 
-OpenShift's service account token, different for every namespace.  This guide assumes your OpenShift platform team has provisioned a pipeline account.
+OpenShift service account token, different for every namespace.  This guide assumes your team has provisioned a pipeline account in OpenShift. If not, you can create one by following the instructions [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
+
+*Note:* In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
 
 * Consume: `{{ secrets.OC_TOKEN }}`
 
