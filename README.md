@@ -286,7 +286,7 @@ This is required to prevent direct pushes and merges to the default branch.  The
         * Click `Add selected`
     * Target branches:
         * Click `Add target`
-        * Select `Add default branch`
+        * Select `Include default branch`
     * Branch protections:
         * `[x] Restrict deletions`
         * `[x] Require linear history`
