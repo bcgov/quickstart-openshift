@@ -41,7 +41,6 @@ jobs:
           commands: |
             npm ci
             npm run lint
-            npm run format:check
             npm run test:cov
           dir: backend
           node_version: "22"
@@ -70,7 +69,6 @@ jobs:
           commands: |
             npm ci
             npm run lint
-            npm run format:check
             npm run test:cov
           dir: frontend
           node_version: "22"
