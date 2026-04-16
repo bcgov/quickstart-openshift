@@ -12,6 +12,28 @@ concurrency:
 permissions: {}
 
 jobs:
+  stale-branches:
+    name: Close Stale Branches & PRs
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-stale: 14
+          days-before-close: 7
+          stale-label: stale
+          close-issue-message: >
+            This issue has been marked stale due to no activity for 14 days.
+            It will be closed in 7 days if no action is taken.
+            If you still need this, please reopen or comment to reset the timer.
+          close-pr-message: >
+            This PR has been marked stale due to no activity for 14 days.
+            It will be closed in 7 days if no action is taken.
+            If you still need this, please reopen or request review to reset the timer.
+          remove-stale-when-updated: true
+          operations-per-run: 100
+          debug-only: false
+
   ageOutPRs:
     name: PR Deployment Purge
     env:
