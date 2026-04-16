@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
     "test:unit": "vitest --mode test",
     "test:cov": "vitest run --mode test --coverage",
     "build": "vite build"
