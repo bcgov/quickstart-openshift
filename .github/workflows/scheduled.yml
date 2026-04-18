@@ -90,19 +90,11 @@ jobs:
     permissions:
       issues: write
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        name: [backend, frontend]
-        include:
-          - name: backend
-            path: api
-          - name: frontend
     steps:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@3c58388149901b9a03b7718852c5ba889646c27c # v0.13.0
         with:
           allow_issue_writing: true
-          artifact_name: ${{ matrix.name }}
-          issue_title: "ZAP Security Report: ${{ matrix.name }}"
+          issue_title: "ZAP Security Report"
           token: ${{ secrets.GITHUB_TOKEN }}
-          target: https://${{ github.event.repository.name }}-test.apps.silver.devops.gov.bc.ca/${{ matrix.path }}
+          target: https://${{ github.event.repository.name }}-test.apps.silver.devops.gov.bc.ca
