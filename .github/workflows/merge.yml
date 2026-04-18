@@ -16,7 +16,6 @@ on:
         default: 'prod'
 
 concurrency:
-  # Do not interrupt previous workflows
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
@@ -25,12 +24,11 @@ permissions: {}
 jobs:
   deploy-test:
     name: Deploy (TEST)
-    uses: ./.github/workflows/.deployer.yml
+    uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
       environment: test
-      db_user: appproxy # appproxy is the user which works with pgbouncer.
-      tag: ${{ inputs.tag }}
+      target: test
 
   tests:
     name: Tests
@@ -42,18 +40,11 @@ jobs:
   deploy-prod:
     name: Deploy (PROD)
     needs: [tests]
-    uses: ./.github/workflows/.deployer.yml
+    uses: ./.github/workflows/.deploy.yml
     secrets: inherit
     with:
       environment: prod
-      db_user: appproxy # appproxy is the user which works with pgbouncer.
-      params:
-        --set backend.deploymentStrategy=RollingUpdate
-        --set frontend.deploymentStrategy=RollingUpdate
-        --set global.autoscaling=true
-        --set frontend.pdb.enabled=true
-        --set backend.pdb.enabled=true
-      tag: ${{ inputs.tag }}
+      target: prod
 
   promote:
     name: Promote Images
