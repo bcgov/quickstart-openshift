@@ -137,7 +137,7 @@ Create separate tokens for each of the DEV, TEST and PROD namespaces.
     ```
     oc create rolebinding github-actions-edit --clusterrole=edit --serviceaccount=$(oc project -q):github-actions
     ```
-1. Create and copy a token:
+1. Create and copy a token.  It cannot be retrieved again:
     ```
     oc create token github-actions --duration=87600h
     ```
