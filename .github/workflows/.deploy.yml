@@ -20,6 +20,14 @@ on:
         default: ""
         type: string
 
+    secrets:
+      oc_namespace:
+        description: OpenShift namespace
+        required: true
+      oc_token:
+        description: OpenShift token
+        required: true
+
     outputs:
       triggered:
         description: Has deployment been triggered?
@@ -37,9 +45,8 @@ jobs:
         id: deploy
         uses: bcgov/action-deployer-openshift@565e315dfddb8aee08fcfd885a27407dde9a2775 # v4.0.1
         with:
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
           file: common/openshift.init.yml
           overwrite: true
           parameters: -p ZONE=${{ inputs.target }}
@@ -72,9 +79,8 @@ jobs:
         id: deploy
         with:
           file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_token: ${{ secrets.oc_token }}
           overwrite: ${{ matrix.overwrite }}
           parameters: -p ZONE=${{ inputs.target }} -p TAG=${{ inputs.tag }}
           timeout: 15m
