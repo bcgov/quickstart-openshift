@@ -111,37 +111,56 @@ Here is the arrangement of secrets, variables and environments for this reposito
 
 **`OC_TOKEN`** 🎫
 
-OpenShift service account token, different for every namespace.  This guide assumes your team has provisioned a pipeline account in OpenShift. If not, you can create one by following the instructions [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
+Create separate tokens for each of the DEV, TEST and PROD namespaces.  
 
-*Note:* In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
+1. Login to your OpenShift console, e.g. [Silver](https://console.apps.silver.devops.gov.bc.ca/) or [Gold](https://console.apps.gold.devops.gov.bc.ca/).
+1. Select the pulldown with your username in the top right corner.
+1. Select `Copy login command`.
+1. Follow the UI to access a one-time login with token.
+1. Paste the login command into a shell, e.g.:
+    ```
+    oc login --token=... --server=...
+    ```
+1. View available projects:
+    ```
+    oc projects
+    ```
+1. Switch to a namespace:
+    ```
+    oc project <abc123-name>
+    ```
+1. Create a service account:
+    ```
+    oc create sa github-actions
+    ```
+1. Create a role binding:
+    ```
+    oc create rolebinding github-actions-edit --clusterrole=edit --serviceaccount=$(oc project -q):github-actions
+    ```
+1. Create and copy a token.  It cannot be retrieved again:
+    ```
+    oc create token github-actions --duration=87600h
+    ```
 
-* Consume: `{{ secrets.OC_TOKEN }}`
-
-Locate an OpenShift pipeline token:
-
-1. Login to your OpenShift cluster (for BCGov users: [Gold](https://console.apps.gold.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/))
-2. Select your DEV namespace
-3. Click Workloads > Secrets (under Workloads for Administrator view)
-4. Select `pipeline-token-...` or a similarly privileged token
-5. Under Data, copy `token`
-6. Paste into the GitHub Secret `OC_TOKEN`
+* Alternate steps using an inline template can be found [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
+* In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
+* Reference: `{{ secrets.OC_NAMESPACE }}`
 
 **`OC_NAMESPACE`** 📁
 
 Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and PROD.  TOOLS namespaces (e.g. Jenkins, shared Oracle resources) are not used here.  Provided by your OpenShift platform team.
 
-* Consume: `{{ secrets.OC_NAMESPACE }}`
+* Reference: `{{ secrets.OC_NAMESPACE }}`
 * E.g.: `abc123-dev`
 
 **`SONAR_TOKEN(s)`** 📊
 
-If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, while monorepos use similar names.
+If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `SONAR_TOKEN`, while monorepos append component names.
 
-E.g.:
-* `${{ secrets.SONAR_TOKEN_BACKEND }}`
-* `${{ secrets.SONAR_TOKEN_FRONTEND }}`
+* Reference (standalone): `${{ secrets.SONAR_TOKEN }}`
+* Reference (monorepo): `${{ secrets.SONAR_TOKEN_BACKEND }}`, `${{ secrets.SONAR_TOKEN_FRONTEND }}`, etc
 
-BC Government employees can request SonarCloud projects by creating an [issue](https://github.com/BCDevOps/devops-requests/issues/new/choose) with BCDevOps.  Please make sure to request a monorepo with component names (e.g. backend, frontend), which may not be explained in their directions.
+BC Government employees can request SonarCloud projects by creating an [issue](https://github.com/bcgov/devops-requests/issues/new/choose) with the platform team.  Please make sure to request a monorepo with component names (e.g. backend, frontend), which may not be explained in their directions.
 
 ### 📊 Variable Values
 
@@ -150,9 +169,9 @@ BC Government employees can request SonarCloud projects by creating an [issue](h
 **`OC_SERVER`** 🌐
 
 OpenShift server address (API endpoint for your OpenShift cluster).
-* Consume: `{{ vars.OC_SERVER }}`
-* Example values (BCGov): `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
-* For other OpenShift clusters: Use your cluster's API server address (typically `https://api.<cluster-domain>:6443`)
+* Reference: `{{ vars.OC_SERVER }}`
+* BCGov: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
+* Others: Use your cluster's API server address (e.g. `https://api.<cluster-domain>:6443`)
 
 ## 🔄 Updating Dependencies
 
