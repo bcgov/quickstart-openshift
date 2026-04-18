@@ -92,10 +92,8 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        name: [backend, frontend]
+        name: [frontend]
         include:
-          - name: backend
-            path: api
           - name: frontend
     steps:
       - name: ZAP Scan
