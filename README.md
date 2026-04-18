@@ -157,10 +157,10 @@ Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and 
 
 If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `SONAR_TOKEN`, while monorepos append component names.
 
-* Reference (single): `${{ secrets.SONAR_TOKEN }}`
+* Reference (standalone): `${{ secrets.SONAR_TOKEN }}`
 * Reference (monorepo): `${{ secrets.SONAR_TOKEN_BACKEND }}`, `${{ secrets.SONAR_TOKEN_FRONTEND }}`, etc
 
-BC Government employees can request SonarCloud projects by creating an [issue](https://github.com/BCDevOps/devops-requests/issues/new/choose) with BCDevOps.  Please make sure to request a monorepo with component names (e.g. backend, frontend), which may not be explained in their directions.
+BC Government employees can request SonarCloud projects by creating an [issue](https://github.com/bcgov/devops-requests/issues/new/choose) with the platform team.  Please make sure to request a monorepo with component names (e.g. backend, frontend), which may not be explained in their directions.
 
 ### 📊 Variable Values
 
@@ -169,9 +169,9 @@ BC Government employees can request SonarCloud projects by creating an [issue](h
 **`OC_SERVER`** 🌐
 
 OpenShift server address (API endpoint for your OpenShift cluster).
-* Consume: `{{ vars.OC_SERVER }}`
-* Example values (BCGov): `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
-* For other OpenShift clusters: Use your cluster's API server address (typically `https://api.<cluster-domain>:6443`)
+* Reference: `{{ vars.OC_SERVER }}`
+* BCGov: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
+* Others: Use your cluster's API server address (e.g. `https://api.<cluster-domain>:6443`)
 
 ## 🔄 Updating Dependencies
 
