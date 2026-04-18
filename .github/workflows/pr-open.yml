@@ -37,7 +37,7 @@ jobs:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
-      fam_route: ${{ github.event.number }}
+      target: ${{ github.event.number }}
       triggers: ('backend/' 'frontend/' 'migrations/' '.github/workflows/.deploy.yml')
 
   tests:
