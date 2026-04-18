@@ -142,34 +142,23 @@ Create separate tokens for each of the DEV, TEST and PROD namespaces.
     oc create token github-actions --duration=87600h
     ```
 
-Notes:
-- Alternate steps using an inline template can be found [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
-- In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
-
-
-Locate an OpenShift pipeline token:
-
-1. Login to your OpenShift cluster (for BCGov users: [Gold](https://console.apps.gold.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/))
-2. Select your DEV, TEST or PROD namespace
-3. Click Workloads > Secrets (under Workloads for Administrator view)
-4. Select `pipeline-token-...` or a similarly privileged token
-5. Under Data, copy `token`
-6. Paste into the GitHub Secret `OC_TOKEN`
+* Alternate steps using an inline template can be found [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
+* In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
+* Reference: `{{ secrets.OC_NAMESPACE }}`
 
 **`OC_NAMESPACE`** 📁
 
 Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and PROD.  TOOLS namespaces (e.g. Jenkins, shared Oracle resources) are not used here.  Provided by your OpenShift platform team.
 
-* Consume: `{{ secrets.OC_NAMESPACE }}`
+* Reference: `{{ secrets.OC_NAMESPACE }}`
 * E.g.: `abc123-dev`
 
 **`SONAR_TOKEN(s)`** 📊
 
-If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `${{ secrets.SONAR_TOKEN }}`, while monorepos use similar names.
+If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `SONAR_TOKEN`, while monorepos append component names.
 
-E.g.:
-* `${{ secrets.SONAR_TOKEN_BACKEND }}`
-* `${{ secrets.SONAR_TOKEN_FRONTEND }}`
+* Reference (single): `${{ secrets.SONAR_TOKEN }}`
+* Reference (monorepo): `${{ secrets.SONAR_TOKEN_BACKEND }}`, `${{ secrets.SONAR_TOKEN_FRONTEND }}`, etc
 
 BC Government employees can request SonarCloud projects by creating an [issue](https://github.com/BCDevOps/devops-requests/issues/new/choose) with BCDevOps.  Please make sure to request a monorepo with component names (e.g. backend, frontend), which may not be explained in their directions.
 
