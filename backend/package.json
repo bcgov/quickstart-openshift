@@ -46,6 +46,9 @@
     "swagger-ui-express": "^5.0.1",
     "winston": "^3.17.0"
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@swc/cli": "^0.7.0",

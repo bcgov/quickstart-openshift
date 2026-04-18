@@ -22,7 +22,7 @@ export default defineConfig([
       'src/routeTree.gen.ts',
     ],
   },
-  tseslint.configs.recommended,
+  ...tseslint.configs.recommended,
   eslintReact.configs['recommended-typescript'],
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -32,13 +32,11 @@ export default defineConfig([
     rules: {
       'prettier/prettier': 'error',
 
-      // General ESLint rules
       'no-console': 'off',
       'no-debugger': 'warn',
       'no-unused-vars': 'off',
       'no-empty': ['error', { allowEmptyCatch: true }],
 
-      // TypeScript overrides
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
@@ -47,11 +45,12 @@ export default defineConfig([
       '@typescript-eslint/ban-types': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
 
-      // React/TypeScript specific
       'no-use-before-define': 'off',
       '@typescript-eslint/no-use-before-define': ['error', { functions: false }],
       '@typescript-eslint/no-var-requires': 'off',
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+
+      'react/prop-types': 'off',
     },
   },
   prettierConfig,
