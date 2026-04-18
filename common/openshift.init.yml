@@ -22,7 +22,7 @@ objects:
       labels:
         app: ${NAME}-${ZONE}
     stringData:
-      database-name: ${NAME}
+      database-name: ${PG_DATABASE}
       database-password: ${DB_PASSWORD}
       database-user: ${NAME}
   - apiVersion: networking.k8s.io/v1
