@@ -4,14 +4,12 @@ on:
   pull_request:
 
 concurrency:
-  # Cancel in progress for PR open and close
   group: ${{ github.event.number }}
   cancel-in-progress: true
 
 permissions: {}
 
 jobs:
-  # https://github.com/bcgov/action-builder-ghcr
   builds:
     name: Builds
     permissions:
@@ -34,19 +32,17 @@ jobs:
   deploys:
     name: Deploys (${{ github.event.number }})
     needs: [builds]
-    uses: ./.github/workflows/.deployer.yml
+    uses: ./.github/workflows/.deploy.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
-      db_user: app-${{ github.event.number }}
-      params: --set global.secrets.persist=false
-      triggers: ('backend/' 'frontend/' 'migrations/' 'charts/' '.github/workflows/.deployer.yml')
-      db_triggers: ('charts/crunchy/')
+      target: ${{ github.event.number }}
+      triggers: ('backend/' 'frontend/' 'migrations/' '.github/workflows/.deploy.yml')
 
   tests:
      name: Tests
-     if: needs.deploys.outputs.triggered == 'true'
+     if: needs.deploys.outputs.run_tests == 'true'
      needs: [deploys]
      uses: ./.github/workflows/.tests.yml
 
