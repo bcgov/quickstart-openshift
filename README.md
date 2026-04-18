@@ -111,16 +111,46 @@ Here is the arrangement of secrets, variables and environments for this reposito
 
 **`OC_TOKEN`** 🎫
 
-OpenShift service account token, different for every namespace.  This guide assumes your team has provisioned a pipeline account in OpenShift. If not, you can create one by following the instructions [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
+Create separate tokens for each of the DEV, TEST and PROD namespaces.  
 
-*Note:* In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
+1. Login to your OpenShift console, e.g. [Silver](https://console.apps.silver.devops.gov.bc.ca/) or [Gold](https://console.apps.gold.devops.gov.bc.ca/).
+1. Select the pulldown with your username in the top right corner.
+1. Select `Copy login command`.
+1. Follow the UI to access a one-time login with token.
+1. Paste the login command into a shell, e.g.:
+    ```
+    oc login --token=... --server=...
+    ```
+1. View available projects:
+    ```
+    oc projects
+    ```
+1. Switch to a namespace:
+    ```
+    oc project <abc123-name>
+    ```
+1. Create a service account:
+    ```
+    oc create sa github-actions
+    ```
+1. Create a role binding:
+    ```
+    oc create rolebinding github-actions-edit --clusterrole=edit --serviceaccount=$(oc project -q):github-actions
+    ```
+1. Create and copy a token:
+    ```
+    oc create token github-actions --duration=87600h
+    ```
 
-* Consume: `{{ secrets.OC_TOKEN }}`
+Notes:
+- Alternate steps using an inline template can be found [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
+- In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
+
 
 Locate an OpenShift pipeline token:
 
 1. Login to your OpenShift cluster (for BCGov users: [Gold](https://console.apps.gold.devops.gov.bc.ca/) or [Silver](https://console.apps.silver.devops.gov.bc.ca/))
-2. Select your DEV namespace
+2. Select your DEV, TEST or PROD namespace
 3. Click Workloads > Secrets (under Workloads for Administrator view)
 4. Select `pipeline-token-...` or a similarly privileged token
 5. Under Data, copy `token`
