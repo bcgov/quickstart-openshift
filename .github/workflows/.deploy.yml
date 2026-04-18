@@ -3,104 +3,36 @@ name: .Deploys
 on:
   workflow_call:
     inputs:
-      ### Required
-      # Nothing! Only `secrets: inherit` is required
-
-      ### Typical / recommended
-      allowed_origins:
-        description: Allowed origins for CORS
-        required: false
-        type: string
       environment:
-        description: GitHub/OpenShift environment; usually PR number, test or prod
+        description: GitHub/OpenShift environment
         default: ""
-        required: false
-        type: string
-      tag:
-        description: Container tag; usually PR number
-        default: ${{ github.event.number }}
-        required: false
         type: string
       target:
         description: Deployment target; usually PR number, test or prod
         default: ${{ github.event.number }}
-        required: false
+        type: string
+      tag:
+        description: Container tag
+        default: ${{ github.event.number }}
         type: string
       triggers:
         description: Triggers for deployment
         default: ""
         type: string
 
-      ### Per-environment config
-      backend_cpu_request:
-        description: CPU request for backend
-        default: "50m"
-        type: string
-      backend_min_replicas:
-        description: Minimum replicas for backend
-        default: "3"
-        type: string
-      backend_max_replicas:
-        description: Maximum replicas for backend
-        default: "5"
-        type: string
-      backend_primary_db:
-        description: Primary database for backend
-        default: "oracle"
-        type: string
-      deployment_model:
-        description: Deployment model (hybrid or postgres)
-        default: "hybrid"
-        type: string
-      fam_route:
-        description: FAM route for frontend; only needed for PR deployments
-        required: false
-        type: string
-
     outputs:
-      run_tests:
-        description: Run Cypress tests if the core apps have changed (excludes sync)
-        value: ${{ jobs.init.outputs.run_tests }}
+      triggered:
+        description: Has deployment been triggered?
+        value: ${{ jobs.deploy.outputs.triggered }}
 
 permissions: {}
 
 jobs:
   init:
-    name: Deploy (init) - ${{ inputs.deployment_model }}
+    name: Deploy (init)
     environment: ${{ inputs.environment }}
-    outputs:
-      allowed_origins: ${{ steps.allowed_origins.outputs.allowed_origins }}
-      route: ${{ steps.route.outputs.route }}
-      run_tests: ${{ steps.deploy.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
-      - name: FAM routing
-        id: route
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            if [ -n "${{ inputs.fam_route }}" ]; then
-              echo "route=${{ inputs.fam_route }}" >> $GITHUB_OUTPUT
-            else
-              echo "FAM route is required for pull request deployments but was not provided."
-              exit 1
-            fi
-          else
-            if [ -n "${{ inputs.fam_route }}" ]; then
-              echo "route=${{ inputs.fam_route }}" >> $GITHUB_OUTPUT
-            else
-              echo "route=${{ inputs.target }}" >> $GITHUB_OUTPUT
-            fi
-          fi
-
-      - name: ALLOWED_ORIGINS
-        id: allowed_origins
-        run: |
-          if [ -n "${{ inputs.allowed_origins }}" ]; then
-            echo "allowed_origins=${{ inputs.allowed_origins }}" >> $GITHUB_OUTPUT
-          else
-            echo "allowed_origins=https://${{ github.event.repository.name }}-${{ inputs.fam_route }}-frontend.apps.silver.devops.gov.bc.ca" >> $GITHUB_OUTPUT
-          fi
-
       - name: OpenShift Init
         id: deploy
         uses: bcgov/action-deployer-openshift@565e315dfddb8aee08fcfd885a27407dde9a2775 # v4.0.1
@@ -111,63 +43,40 @@ jobs:
           file: common/openshift.init.yml
           overwrite: true
           parameters: -p ZONE=${{ inputs.target }}
-            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
-            -p ORACLE_DB_PASSWORD='${{ secrets.ORACLE_DB_PASSWORD }}'
-            -p ORACLE_DB_HOST='${{ secrets.ORACLE_DB_HOST }}'
-            -p ORACLE_DB_SERVICE='${{ secrets.ORACLE_DB_SERVICE }}'
-            -p POSTGRES_DB_PASSWORD='${{ secrets.POSTGRES_DB_PASSWORD }}'
-            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
-            -p S3_BUCKET='${{ secrets.S3_BUCKET }}'
-            -p S3_ACCESS_KEY='${{ secrets.S3_ACCESS_KEY }}'
-            -p S3_SECRET_KEY='${{ secrets.S3_SECRET_KEY }}'
-            -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
-            -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
           triggers: ${{ inputs.triggers }}
 
   deploy:
-    name: Deploy (${{ matrix.name }}) - ${{ inputs.deployment_model }}
+    name: Deploy (${{ matrix.name }})
     environment: ${{ inputs.environment }}
     needs: [init]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    outputs:
+      triggered: ${{ steps.deploy.outputs.triggered }}
     strategy:
       matrix:
         name: [database, backend, frontend]
         include:
           - name: database
             file: common/openshift.database.yml
-            parameters: -p DB_PVC_SIZE=256Mi
             overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
-            parameters: -p DB_POOL_MAX_SIZE=1
-              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              -p DASHBOARD_JOB_IDIR_USERS=${{ vars.DASHBOARD_JOB_IDIR_USERS }}
-              -p WMS_LAYERS_WHITELIST_USERS=${{ vars.WMS_LAYERS_WHITELIST_USERS }}
-              -p ALLOWED_ORIGINS=${{ needs.init.outputs.allowed_origins }}
-              -p CPU_REQUEST=${{ inputs.backend_cpu_request }}
-              -p MIN_REPLICAS=${{ inputs.backend_min_replicas }}
-              -p MAX_REPLICAS=${{ inputs.backend_max_replicas }}
-              -p PRIMARY_DB=${{ inputs.backend_primary_db }}
-              -p BACKEND_PACKAGE_IMAGE=${{ (inputs.deployment_model == 'hybrid' && 'backend') || 'backend-postgres' }}
             verification_path: /actuator/health
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1
-              -p MAX_REPLICAS=1
-              -p FAM_ROUTE=${{ needs.init.outputs.route }}
-              -p DEPLOYMENT_MODEL=${{ inputs.deployment_model }}
     steps:
       - uses: bcgov/action-deployer-openshift@565e315dfddb8aee08fcfd885a27407dde9a2775 # v4.0.1
-        id: deploys
+        id: deploy
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
-          parameters: -p ZONE=${{ inputs.target }} -p TAG=${{ inputs.tag }} ${{ matrix.parameters }}
+          parameters: -p ZONE=${{ inputs.target }} -p TAG=${{ inputs.tag }}
           timeout: 15m
           triggers: ${{ inputs.triggers }}
+          verification_path: ${{ matrix.verification_path }}
