@@ -29,6 +29,7 @@ jobs:
     with:
       environment: test
       target: test
+      tag: ${{ github.event.inputs.tag || 'prod' }}
 
   tests:
     name: Tests
@@ -45,6 +46,7 @@ jobs:
     with:
       environment: prod
       target: prod
+      tag: ${{ github.event.inputs.tag || 'prod' }}
 
   promote:
     name: Promote Images
@@ -61,5 +63,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.deploy-prod.outputs.tag }}
+          target: ${{ github.event.inputs.tag || 'prod' }}
           tags: prod
