@@ -1,0 +1,25 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+parameters:
+  - name: NAME
+    description: Product name
+    value: quickstart-openshift
+  - name: ZONE
+    description: Deployment zone, e.g. pr-### or test or prod
+    required: true
+  - name: DB_PVC_SIZE
+    description: Size of the database persistent volume claim
+    value: 256Mi
+objects:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: ${NAME}-${ZONE}-database
+      labels:
+        app: ${NAME}-${ZONE}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: ${DB_PVC_SIZE}
