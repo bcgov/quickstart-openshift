@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions: {}
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.0.0
+      - uses: bcgov/action-deployer-openshift@v4.0.0
         with:
           file: common/openshift.init.yml
           oc_namespace: ${{ secrets.oc_namespace }}
@@ -78,7 +78,7 @@ jobs:
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.0.0
+      - uses: bcgov/action-deployer-openshift@v4.0.0
         id: deploy
         with:
           file: ${{ matrix.file }}
