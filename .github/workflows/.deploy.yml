@@ -31,13 +31,16 @@ on:
     outputs:
       triggered:
         description: Has deployment been triggered?
-        value: ${{ matrix.deploy.outputs.triggered }}
+        value: ${{ jobs.deploy.outputs.triggered }}
+
+permissions: {}
 
 jobs:
   init:
     name: Deploy (init)
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-24.04
+    permissions: {}
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v2.0.0
         with:
@@ -56,6 +59,7 @@ jobs:
     needs: [init]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions: {}
     strategy:
       matrix:
         name: [database, backend, frontend]
