@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@bcgov/bc-sans": "^2.1.0",
-    "@bcgov/design-system-react-components": "^0.6.1",
+    "@bcgov/design-system-react-components": "^0.7.0",
     "@popperjs/core": "^2.11.8",
     "@tanstack/react-router": "^1.114.12",
     "@tanstack/router-plugin": "^1.114.27",
