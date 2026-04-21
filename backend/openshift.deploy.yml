@@ -64,16 +64,15 @@ objects:
                   memory: ${MEMORY_REQUEST}
               readinessProbe:
                 httpGet:
-                  path: /actuator/health
+                  path: /
                   port: http
               livenessProbe:
                 httpGet:
-                  path: /actuator/health
+                  path: /
                   port: http
               startupProbe:
-                httpGet:
-                  path: /actuator/health
-                  port: http
+                tcpSocket:
+                  port: 8080
                 failureThreshold: 30
   - apiVersion: v1
     kind: Service
