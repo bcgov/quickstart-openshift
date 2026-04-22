@@ -12,7 +12,7 @@ parameters:
     required: true
   - name: PG_VERSION
     description: PostgreSQL version for the OpenShift internal image
-    value: "15"
+    value: "17"
   - name: DB_PVC_SIZE
     description: Volume space available for data
     value: 256Mi
@@ -26,7 +26,7 @@ objects:
     metadata:
       labels:
         app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}
+      name: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
     spec:
       accessModes:
         - ReadWriteOnce
@@ -54,7 +54,7 @@ objects:
         spec:
           containers:
             - name: ${NAME}-${ZONE}
-              image: image-registry.openshift-image-registry.svc:5000/openshift/postgresql:${PG_VERSION}
+              image: postgres:${PG_VERSION}
               imagePullPolicy: Always
               ports:
                 - containerPort: 5432
@@ -106,7 +106,7 @@ objects:
           volumes:
             - name: ${NAME}-${ZONE}-${COMPONENT}
               persistentVolumeClaim:
-                claimName: ${NAME}-${ZONE}-${COMPONENT}
+                claimName: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
   - apiVersion: v1
     kind: Service
     metadata:
