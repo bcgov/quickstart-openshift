@@ -84,24 +84,24 @@ objects:
                 requests:
                   cpu: 10m
                   memory: 50Mi
-              readinessProbe:
-                exec:
-                  command:
-                    - /usr/bin/env
-                    - bash
-                    - "-c"
-                    - psql -q -U $POSTGRESQL_USER -d $POSTGRESQL_DATABASE -c 'SELECT 1'
-                initialDelaySeconds: 30
-                periodSeconds: 15
-                timeoutSeconds: 5
-              livenessProbe:
-                exec:
-                  command:
-                    - /usr/bin/env
-                    - bash
-                    - "-c"
-                    - psql -q -U $POSTGRESQL_USER -d $POSTGRESQL_DATABASE -c 'SELECT 1'
-                initialDelaySeconds: 60
+              # readinessProbe:
+              #   exec:
+              #     command:
+              #       - /usr/bin/env
+              #       - bash
+              #       - "-c"
+              #       - psql -q -U $POSTGRESQL_USER -d $POSTGRESQL_DATABASE -c 'SELECT 1'
+              #   initialDelaySeconds: 30
+              #   periodSeconds: 15
+              #   timeoutSeconds: 5
+              # livenessProbe:
+              #   exec:
+              #     command:
+              #       - /usr/bin/env
+              #       - bash
+              #       - "-c"
+              #       - psql -q -U $POSTGRESQL_USER -d $POSTGRESQL_DATABASE -c 'SELECT 1'
+              #   initialDelaySeconds: 60
                 periodSeconds: 30
                 timeoutSeconds: 5
           volumes:
