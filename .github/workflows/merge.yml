@@ -16,7 +16,6 @@ on:
         default: 'prod'
 
 concurrency:
-  # Do not interrupt previous workflows
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
@@ -25,12 +24,14 @@ permissions: {}
 jobs:
   deploy-test:
     name: Deploy (TEST)
-    uses: ./.github/workflows/.deployer.yml
-    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
     with:
       environment: test
-      db_user: appproxy # appproxy is the user which works with pgbouncer.
-      tag: ${{ inputs.tag }}
+      target: test
+      tag: ${{ github.event.inputs.tag || 'prod' }}
 
   tests:
     name: Tests
@@ -42,18 +43,14 @@ jobs:
   deploy-prod:
     name: Deploy (PROD)
     needs: [tests]
-    uses: ./.github/workflows/.deployer.yml
-    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
     with:
       environment: prod
-      db_user: appproxy # appproxy is the user which works with pgbouncer.
-      params:
-        --set backend.deploymentStrategy=RollingUpdate
-        --set frontend.deploymentStrategy=RollingUpdate
-        --set global.autoscaling=true
-        --set frontend.pdb.enabled=true
-        --set backend.pdb.enabled=true
-      tag: ${{ inputs.tag }}
+      target: prod
+      tag: ${{ github.event.inputs.tag || 'prod' }}
 
   promote:
     name: Promote Images
@@ -70,5 +67,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.deploy-prod.outputs.tag }}
+          target: ${{ inputs.tag || 'prod' }}
           tags: prod

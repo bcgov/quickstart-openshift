@@ -1,0 +1,94 @@
+name: .Deploys
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: GitHub/OpenShift environment
+        default: ""
+        type: string
+      target:
+        description: Deployment target; usually PR number, test or prod
+        default: ${{ github.event.number }}
+        type: string
+      tag:
+        description: Container tag
+        default: ${{ github.event.number }}
+        type: string
+      triggers:
+        description: Triggers for deployment
+        default: ""
+        type: string
+
+    secrets:
+      oc_namespace:
+        description: OpenShift namespace
+        required: true
+      oc_token:
+        description: OpenShift token
+        required: true
+
+    outputs:
+      triggered:
+        description: Has deployment been triggered?
+        value: ${{ jobs.deploy.outputs.triggered }}
+
+permissions: {}
+
+jobs:
+  init:
+    name: Deploy (init)
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-24.04
+    permissions: {}
+    steps:
+      - uses: bcgov/action-deployer-openshift@v4.0.0
+        with:
+          file: common/openshift.init.yml
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.oc_token }}
+          overwrite: true
+          parameters:
+            -p ZONE=${{ inputs.target }} -p NAME=${{ github.event.repository.name }}
+          triggers: ${{ inputs.triggers }}
+
+  deploy:
+    name: Deploy (${{ matrix.name }})
+    environment: ${{ inputs.environment }}
+    needs: [init]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions: {}
+    strategy:
+      matrix:
+        name: [database, backend, frontend]
+        include:
+          - name: database
+            file: database/openshift.deploy.yml
+            overwrite: false
+            parameters: -p DB_PVC_SIZE=256Mi
+          - name: backend
+            file: backend/openshift.deploy.yml
+            overwrite: true
+            parameters: -p IMAGE_TAG=${{ inputs.tag }}
+          - name: frontend
+            file: frontend/openshift.deploy.yml
+            overwrite: true
+            parameters: -p IMAGE_TAG=${{ inputs.tag }}
+    outputs:
+      triggered: ${{ steps.deploy.outputs.triggered }}
+    steps:
+      - uses: bcgov/action-deployer-openshift@v4.0.0
+        id: deploy
+        with:
+          file: ${{ matrix.file }}
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.oc_token }}
+          overwrite: ${{ matrix.overwrite }}
+          parameters:
+            -p ZONE=${{ inputs.target }} -p NAME=${{ github.event.repository.name }}
+            ${{ matrix.parameters }}
+          timeout: 15m
+          triggers: ${{ inputs.triggers }}

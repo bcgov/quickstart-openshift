@@ -1,0 +1,147 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+parameters:
+  - name: NAME
+    description: Product name
+    required: true
+  - name: COMPONENT
+    description: Component name
+    value: database
+  - name: ZONE
+    description: Deployment zone, e.g. pr-### or prod
+    required: true
+  - name: PG_VERSION
+    description: PostgreSQL version for the OpenShift internal image
+    value: "17"
+  - name: DB_PVC_SIZE
+    description: Volume space available for data
+    value: 256Mi
+  - name: RANDOM_EXPRESSION
+    description: Random expression to make sure deployments update
+    from: "[a-zA-Z0-9]{32}"
+    generate: expression
+objects:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: netapp-file-standard
+      resources:
+        requests:
+          storage: ${DB_PVC_SIZE}
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          deployment: ${NAME}-${ZONE}-${COMPONENT}
+      strategy:
+        type: Recreate
+      template:
+        metadata:
+          labels:
+            app: ${NAME}-${ZONE}
+            deployment: ${NAME}-${ZONE}-${COMPONENT}
+        spec:
+          containers:
+            - name: ${NAME}-${ZONE}
+              image: postgres:${PG_VERSION}
+              imagePullPolicy: Always
+              ports:
+                - containerPort: 5432
+              env:
+                - name: POSTGRESQL_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: database-name
+                - name: POSTGRESQL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: database-password
+                - name: POSTGRESQL_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: database-user
+                - name: RANDOM_EXPRESSION
+                  value: ${RANDOM_EXPRESSION}
+              volumeMounts:
+                - name: ${NAME}-${ZONE}-${COMPONENT}
+                  mountPath: /var/lib/pgsql/data
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 50Mi
+              # readinessProbe:
+              #   exec:
+              #     command:
+              #       - /usr/bin/env
+              #       - bash
+              #       - "-c"
+              #       - psql -q -U $POSTGRESQL_USER -d $POSTGRESQL_DATABASE -c 'SELECT 1'
+              #   initialDelaySeconds: 30
+              #   periodSeconds: 15
+              #   timeoutSeconds: 5
+              # livenessProbe:
+              #   exec:
+              #     command:
+              #       - /usr/bin/env
+              #       - bash
+              #       - "-c"
+              #       - psql -q -U $POSTGRESQL_USER -d $POSTGRESQL_DATABASE -c 'SELECT 1'
+              #   initialDelaySeconds: 60
+                periodSeconds: 30
+                timeoutSeconds: 5
+          volumes:
+            - name: ${NAME}-${ZONE}-${COMPONENT}
+              persistentVolumeClaim:
+                claimName: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
+    spec:
+      ports:
+        - name: postgresql
+          port: 5432
+          targetPort: 5432
+      selector:
+        deployment: ${NAME}-${ZONE}-${COMPONENT}
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-from-openshift-ingress
+    spec:
+      podSelector: {}
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  network.openshift.io/policy-group: ingress
+      policyTypes:
+        - Ingress
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-same-namespace
+    spec:
+      podSelector: {}
+      ingress:
+        - from:
+            - podSelector: {}
+      policyTypes:
+        - Ingress
