@@ -50,7 +50,7 @@ jobs:
     needs: [deploys]
     uses: ./.github/workflows/.tests.yml
 
-   a11y-scan:
+  a11y-scan:
     name: Accessibility Scan
     if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
