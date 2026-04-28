@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions: {}
     steps:
-      - uses: bcgov/action-deployer-openshift@v4.0.0
+      - uses: bcgov/action-deployer-openshift@v4.0.1
         with:
           file: common/openshift.init.yml
           oc_namespace: ${{ secrets.oc_namespace }}
