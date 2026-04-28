@@ -30,6 +30,7 @@ objects:
     spec:
       accessModes:
         - ReadWriteOnce
+      storageClassName: netapp-file-standard
       resources:
         requests:
           storage: ${DB_PVC_SIZE}
