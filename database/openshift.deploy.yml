@@ -26,11 +26,10 @@ objects:
     metadata:
       labels:
         app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
+      name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       accessModes:
         - ReadWriteOnce
-      storageClassName: netapp-file-standard
       resources:
         requests:
           storage: ${DB_PVC_SIZE}
@@ -56,26 +55,24 @@ objects:
             app: ${NAME}-${ZONE}
             deployment: ${NAME}-${ZONE}-${COMPONENT}
         spec:
-          securityContext:
-            fsGroup: 999
           containers:
             - name: ${NAME}-${ZONE}
-              image: postgres:${PG_VERSION}
+              image: image-registry.openshift-image-registry.svc:5000/openshift/postgresql:${PG_VERSION}
               imagePullPolicy: Always
               ports:
                 - containerPort: 5432
               env:
-                - name: POSTGRES_DB
+                - name: POSTGRESQL_DATABASE
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-name
-                - name: POSTGRES_PASSWORD
+                - name: POSTGRESQL_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-password
-                - name: POSTGRES_USER
+                - name: POSTGRESQL_USER
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
@@ -84,7 +81,7 @@ objects:
                   value: ${RANDOM_EXPRESSION}
               volumeMounts:
                 - name: ${NAME}-${ZONE}-${COMPONENT}
-                  mountPath: /var/lib/postgresql/data
+                  mountPath: /var/lib/pgsql/data
               resources:
                 requests:
                   cpu: 10m
@@ -95,7 +92,7 @@ objects:
                     - /usr/bin/env
                     - bash
                     - "-c"
-                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                    - psql -q -U $POSTGRESQL_USER -d $POSTGRESQL_DATABASE -c 'SELECT 1'
                 successThreshold: 1
                 failureThreshold: 5
                 initialDelaySeconds: 60
@@ -107,7 +104,7 @@ objects:
                     - /usr/bin/env
                     - bash
                     - "-c"
-                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                    - psql -q -U $POSTGRESQL_USER -d $POSTGRESQL_DATABASE -c 'SELECT 1'
                 successThreshold: 1
                 failureThreshold: 5
                 initialDelaySeconds: 10
@@ -116,7 +113,7 @@ objects:
           volumes:
             - name: ${NAME}-${ZONE}-${COMPONENT}
               persistentVolumeClaim:
-                claimName: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
+                claimName: ${NAME}-${ZONE}-${COMPONENT}
   - apiVersion: v1
     kind: Service
     metadata:
@@ -130,4 +127,27 @@ objects:
           targetPort: 5432
       selector:
         deployment: ${NAME}-${ZONE}-${COMPONENT}
-
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-from-openshift-ingress
+    spec:
+      podSelector: {}
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  network.openshift.io/policy-group: ingress
+      policyTypes:
+        - Ingress
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-same-namespace
+    spec:
+      podSelector: {}
+      ingress:
+        - from:
+            - podSelector: {}
+      policyTypes:
+        - Ingress
