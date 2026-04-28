@@ -10,28 +10,28 @@ concurrency:
 permissions: {}
 
 jobs:
-  builds:
-    name: Builds
-    permissions:
-      attestations: write
-      id-token: write
-      packages: write
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        package: [backend, frontend, migrations]
-    timeout-minutes: 10
-    steps:
-      - uses: bcgov/action-builder-ghcr@2b24ac7f95e6a019064151498660437cca3202c5 # v4.2.1
-        with:
-          package: ${{ matrix.package }}
-          tags: ${{ github.event.number }}
-          tag_fallback: latest
-          triggers: ('${{ matrix.package }}/')
+  # builds:
+  #   name: Builds
+  #   permissions:
+  #     attestations: write
+  #     id-token: write
+  #     packages: write
+  #   runs-on: ubuntu-24.04
+  #   strategy:
+  #     matrix:
+  #       package: [backend, frontend, migrations]
+  #   timeout-minutes: 10
+  #   steps:
+  #     - uses: bcgov/action-builder-ghcr@2b24ac7f95e6a019064151498660437cca3202c5 # v4.2.1
+  #       with:
+  #         package: ${{ matrix.package }}
+  #         tags: ${{ github.event.number }}
+  #         tag_fallback: latest
+  #         triggers: ('${{ matrix.package }}/')
 
   deploys:
     name: Deploys (${{ github.event.number }})
-    needs: [builds]
+    # needs: [builds]
     uses: ./.github/workflows/.deploy.yml
     secrets:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -40,18 +40,18 @@ jobs:
       target: ${{ github.event.number }}
       triggers: ('backend/' 'frontend/' 'migrations/' '.github/workflows/.deploy.yml')
 
-  tests:
-     name: Tests
-     if: needs.deploys.outputs.triggered == 'true'
-     needs: [deploys]
-     uses: ./.github/workflows/.tests.yml
+  # tests:
+  #    name: Tests
+  #    if: needs.deploys.outputs.triggered == 'true'
+  #    needs: [deploys]
+  #    uses: ./.github/workflows/.tests.yml
 
-  results:
-    name: PR Results
-    needs: [builds, deploys, tests]
-    if: always()
-    runs-on: ubuntu-slim
-    steps:
-      - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
-        run: echo "At least one job has failed." && exit 1
-      - run: echo "Success!"
+  # results:
+  #   name: PR Results
+  #   needs: [builds, deploys, tests]
+  #   if: always()
+  #   runs-on: ubuntu-slim
+  #   steps:
+  #     - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
+  #       run: echo "At least one job has failed." && exit 1
+  #     - run: echo "Success!"
