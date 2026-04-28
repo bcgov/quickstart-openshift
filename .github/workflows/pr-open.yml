@@ -54,22 +54,20 @@ jobs:
     name: Accessibility Scan
     if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
-      
-      - name: Determine frontend URL
-        id: url
-        run: |
-          REPO="${{ github.event.repository.name }}"
-          PR="${{ github.event.pull_request.number }}"
-          NS="${{ secrets.OC_NAMESPACE }}"
-          # OpenShift route: <release>.<namespace>.apps.silver.devops.gov.bc.ca
-          # Release name for PR deployments: repo-pr
-          echo "frontend_url=https://${REPO}-${PR}.${NS}.apps.silver.devops.gov.bc.ca" >> "$GITHUB_OUTPUT"
+      - name: Run GitHub Accessibility Scanner
+        uses: github/accessibility-scanner@v3
+        with:
+          base_url: https://${{ env.PREFIX }}.${{ env.DOMAIN }}
+          # Optional: Create GitHub issues for each violation
+          # create_issues: false
           
       - name: Run GitHub Accessibility Scanner
         id: scanner
