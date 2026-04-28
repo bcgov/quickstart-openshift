@@ -54,27 +54,29 @@ jobs:
     name: Accessibility Scan
     if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v6
-
       - name: Run GitHub Accessibility Scanner
+        id: scanner
         uses: github/accessibility-scanner@v3
         with:
-          base_url: https://${{ env.PREFIX }}.${{ env.DOMAIN }}
-
-      - name: Upload accessibility reports
+          urls: https://${{ github.event.repository.name }}-${{ github.event.pull_request.number }}.apps.silver.devops.gov.bc.ca
+          repository: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          cache_key: a11y-${{ github.event.repository.name }}-${{ github.event.pull_request.number }}
+          open_grouped_issues: false
+          color_scheme: light
+          scans: '["axe"]'
+      - name: Upload scanner results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: a11y-reports
-          path: ./a11y-reports/
+          name: a11y-results
+          path: ${{ steps.scanner.outputs.results_file }}
           retention-days: 30
 
   results:
