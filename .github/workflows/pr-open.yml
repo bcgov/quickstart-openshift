@@ -45,14 +45,51 @@ jobs:
       db_triggers: ('charts/crunchy/')
 
   tests:
-     name: Tests
-     if: needs.deploys.outputs.triggered == 'true'
-     needs: [deploys]
-     uses: ./.github/workflows/.tests.yml
+    name: Tests
+    if: needs.deploys.outputs.triggered == 'true'
+    needs: [deploys]
+    uses: ./.github/workflows/.tests.yml
+
+  a11y-scan:
+    name: Accessibility Scan
+    if: needs.deploys.outputs.triggered == 'true'
+    needs: [deploys]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: Determine frontend URL
+        id: url
+        run: |
+          REPO="${{ github.event.repository.name }}"
+          PR="${{ github.event.pull_request.number }}"
+          NS="${{ secrets.OC_NAMESPACE }}"
+          # OpenShift route: <release>.<namespace>.apps.silver.devops.gov.bc.ca
+          # Release name for PR deployments: repo-pr
+          echo "frontend_url=https://${REPO}-${PR}.${NS}.apps.silver.devops.gov.bc.ca" >> "$GITHUB_OUTPUT"
+          
+      - name: Run GitHub Accessibility Scanner
+        uses: github/accessibility-scanner@v3
+        with:
+          base_url: ${{ steps.url.outputs.frontend_url }}
+          output_dir: ./a11y-reports
+          # Optional: Create GitHub issues for each violation
+          # create_issues: false
+          
+      - name: Upload accessibility reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-reports
+          path: ./a11y-reports/
+          retention-days: 30
 
   results:
     name: PR Results
-    needs: [builds, deploys, tests]
+    needs: [builds, deploys, tests, a11y-scan]
     if: always()
     runs-on: ubuntu-slim
     steps:
