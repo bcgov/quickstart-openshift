@@ -54,21 +54,33 @@ jobs:
     name: Accessibility Scan
     if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}-${{ inputs.target }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: read
     steps:
+      - uses: actions/checkout@v6
+      
+      - name: Determine frontend URL
+        id: url
+        run: |
+          REPO="${{ github.event.repository.name }}"
+          PR="${{ github.event.pull_request.number }}"
+          NS="${{ secrets.OC_NAMESPACE }}"
+          # OpenShift route: <release>.<namespace>.apps.silver.devops.gov.bc.ca
+          # Release name for PR deployments: repo-pr
+          echo "frontend_url=https://${REPO}-${PR}.${NS}.apps.silver.devops.gov.bc.ca" >> "$GITHUB_OUTPUT"
+          
       - name: Run GitHub Accessibility Scanner
         uses: github/accessibility-scanner@v3
         with:
-          base_url: https://${{ env.PREFIX }}.${{ env.DOMAIN }}
-          output_dir: ./a11y-reports
-          # Optional: Create GitHub issues for each violation
-          # create_issues: false
+          urls: ${{ steps.url.outputs.frontend_url }}
+          repository: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          cache_key: a11y-${{ github.event.repository.name }}-${{ github.event.pull_request.number }}
+          open_grouped_issues: false
+          color_scheme: light
+          scans: '["axe"]'
           
       - name: Upload accessibility reports
         if: always()
