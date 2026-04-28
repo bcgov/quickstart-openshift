@@ -130,27 +130,4 @@ objects:
           targetPort: 5432
       selector:
         deployment: ${NAME}-${ZONE}-${COMPONENT}
-  - apiVersion: networking.k8s.io/v1
-    kind: NetworkPolicy
-    metadata:
-      name: allow-from-openshift-ingress
-    spec:
-      podSelector: {}
-      ingress:
-        - from:
-            - namespaceSelector:
-                matchLabels:
-                  network.openshift.io/policy-group: ingress
-      policyTypes:
-        - Ingress
-  - apiVersion: networking.k8s.io/v1
-    kind: NetworkPolicy
-    metadata:
-      name: allow-same-namespace
-    spec:
-      podSelector: {}
-      ingress:
-        - from:
-            - podSelector: {}
-      policyTypes:
-        - Ingress
+
