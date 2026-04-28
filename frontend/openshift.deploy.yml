@@ -31,6 +31,9 @@ parameters:
     value: "25m"
   - name: MEMORY_REQUEST
     value: "50Mi"
+  - name: LOG_LEVEL
+    description: Caddy log level (debug|info|warn|error)
+    value: "info"
 objects:
   - apiVersion: apps/v1
     kind: Deployment
@@ -58,6 +61,11 @@ objects:
               ports:
                 - name: http
                   containerPort: 3000
+              env:
+                - name: LOG_LEVEL
+                  value: ${LOG_LEVEL}
+                - name: BACKEND_URL
+                  value: http://${NAME}-${ZONE}-backend
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
