@@ -31,6 +31,9 @@ parameters:
     value: "25m"
   - name: MEMORY_REQUEST
     value: "100Mi"
+  - name: LOG_LEVEL
+    description: Application log level (debug|info|warn|error)
+    value: "info"
 objects:
   - apiVersion: apps/v1
     kind: Deployment
@@ -57,23 +60,43 @@ objects:
               imagePullPolicy: Always
               ports:
                 - name: http
-                  containerPort: 8080
+                  containerPort: 3000
+              env:
+                - name: LOG_LEVEL
+                  value: ${LOG_LEVEL}
+                - name: POSTGRES_HOST
+                  value: ${NAME}-${ZONE}-database
+                - name: POSTGRES_PORT
+                  value: "5432"
+                - name: POSTGRES_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-name
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-user
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-password
+                - name: POSTGRES_SCHEMA
+                  value: "users"
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
                   memory: ${MEMORY_REQUEST}
               readinessProbe:
                 httpGet:
-                  path: /
+                  path: /api/health
                   port: http
               livenessProbe:
                 httpGet:
-                  path: /
+                  path: /api/health
                   port: http
-              startupProbe:
-                tcpSocket:
-                  port: 8080
-                failureThreshold: 30
   - apiVersion: v1
     kind: Service
     metadata:
@@ -84,7 +107,7 @@ objects:
       ports:
         - name: http
           port: 80
-          targetPort: 8080
+          targetPort: 3000
       selector:
         deployment: ${NAME}-${ZONE}-${COMPONENT}
   - apiVersion: route.openshift.io/v1
