@@ -72,6 +72,7 @@ jobs:
           echo "frontend_url=https://${REPO}-${PR}.${NS}.apps.silver.devops.gov.bc.ca" >> "$GITHUB_OUTPUT"
           
       - name: Run GitHub Accessibility Scanner
+        id: scanner
         uses: github/accessibility-scanner@v3
         with:
           urls: ${{ steps.url.outputs.frontend_url }}
@@ -82,12 +83,12 @@ jobs:
           color_scheme: light
           scans: '["axe"]'
           
-      - name: Upload accessibility reports
+      - name: Upload scanner results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: a11y-reports
-          path: ./a11y-reports/
+          name: a11y-results
+          path: ${{ steps.scanner.outputs.results_file }}
           retention-days: 30
 
   results:
