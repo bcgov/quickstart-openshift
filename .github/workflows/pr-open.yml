@@ -50,7 +50,7 @@ jobs:
     needs: [deploys]
     uses: ./.github/workflows/.tests.yml
 
-  a11y-scan:
+   a11y-scan:
     name: Accessibility Scan
     if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
@@ -62,31 +62,19 @@ jobs:
     permissions:
       contents: read
     steps:
+      - uses: actions/checkout@v6
+
       - name: Run GitHub Accessibility Scanner
         uses: github/accessibility-scanner@v3
         with:
           base_url: https://${{ env.PREFIX }}.${{ env.DOMAIN }}
-          # Optional: Create GitHub issues for each violation
-          # create_issues: false
-          
-      - name: Run GitHub Accessibility Scanner
-        id: scanner
-        uses: github/accessibility-scanner@v3
-        with:
-          urls: ${{ steps.url.outputs.frontend_url }}
-          repository: ${{ github.repository }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          cache_key: a11y-${{ github.event.repository.name }}-${{ github.event.pull_request.number }}
-          open_grouped_issues: false
-          color_scheme: light
-          scans: '["axe"]'
-          
-      - name: Upload scanner results
+
+      - name: Upload accessibility reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: a11y-results
-          path: ${{ steps.scanner.outputs.results_file }}
+          name: a11y-reports
+          path: ./a11y-reports/
           retention-days: 30
 
   results:
