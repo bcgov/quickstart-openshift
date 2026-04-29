@@ -56,27 +56,13 @@ jobs:
     needs: [deploys]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    permissions:
-      contents: write
-      issues: write
     steps:
       - uses: actions/checkout@v6
-      - name: Run GitHub Accessibility Scanner
-        id: scanner
-        uses: github/accessibility-scanner@v3
+      - name: Run axle-action accessibility scanner
+        uses: asafamos/axle-action@v1
         with:
-          urls: https://${{ github.event.repository.name }}-${{ github.event.pull_request.number }}.apps.silver.devops.gov.bc.ca
-          repository: ${{ github.repository }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          cache_key: a11y-${{ github.event.repository.name }}-${{ github.event.pull_request.number }}
-
-      - name: Upload scanner results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: a11y-results
-          path: ${{ steps.scanner.outputs.results_file }}
-          retention-days: 30
+          url: https://${{ github.event.repository.name }}-${{ github.event.pull_request.number }}.apps.silver.devops.gov.bc.ca
+          fail-on: serious
 
   results:
     name: PR Results
