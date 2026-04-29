@@ -71,6 +71,6 @@
   },
   "overrides": {
     "c12": ">=3.3.4 <4",
-    "@hono/node-server": ">=1.19.13 <2"
+    "@hono/node-server": "<3"
   }
 }
