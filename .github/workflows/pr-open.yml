@@ -45,14 +45,44 @@ jobs:
       db_triggers: ('charts/crunchy/')
 
   tests:
-     name: Tests
+    name: Tests
+    if: needs.deploys.outputs.triggered == 'true'
+    needs: [deploys]
+    uses: ./.github/workflows/.tests.yml
+
+  a11y-scan:
+     name: Accessibility Scan
      if: needs.deploys.outputs.triggered == 'true'
      needs: [deploys]
-     uses: ./.github/workflows/.tests.yml
+     runs-on: ubuntu-24.04
+     timeout-minutes: 15
+     steps:
+       - uses: actions/checkout@v6
+       - name: Setup Node.js
+         uses: actions/setup-node@v4
+         with:
+           node-version: '20'
+       - name: Install dependencies
+         working-directory: .github/a11y-scan
+         run: npm install --no-audit --no-fund
+       - name: Install Playwright browsers
+         working-directory: .github/a11y-scan
+         run: npx playwright install --with-deps chromium
+       - name: Run accessibility scan
+         working-directory: .github/a11y-scan
+         run: |
+           node scan.js "https://${{ github.event.repository.name }}-${{ github.event.pull_request.number }}.apps.silver.devops.gov.bc.ca"
+       - name: Upload a11y results
+         if: always()
+         uses: actions/upload-artifact@v4
+         with:
+           name: a11y-results
+           path: .github/a11y-scan/a11y-results.json
+           retention-days: 30
 
   results:
     name: PR Results
-    needs: [builds, deploys, tests]
+    needs: [builds, deploys, tests, a11y-scan]
     if: always()
     runs-on: ubuntu-slim
     steps:

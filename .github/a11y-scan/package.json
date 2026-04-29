@@ -1,0 +1,12 @@
+{
+  "name": "a11y-scan",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "scan": "node scan.js"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.11.0",
+    "playwright": "^1.49.0"
+  }
+}
