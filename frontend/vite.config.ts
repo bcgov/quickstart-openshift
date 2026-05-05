@@ -40,9 +40,6 @@ export default defineConfig({
     // Build Target
     // https://vitejs.dev/config/build-options.html#build-target
     target: 'esnext',
-    // Minify option
-    // https://vitejs.dev/config/build-options.html#build-minify
-    minify: 'esbuild',
     // Rollup Options
     // https://vitejs.dev/config/build-options.html#build-rollupoptions
     rollupOptions: {},
