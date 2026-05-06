@@ -53,7 +53,7 @@ jobs:
           oc_token: ${{ secrets.oc_token }}
           overwrite: true
           parameters:
-            -p DB_PASSWORD=${{ secrets.DB_PASSWORD }} -p ZONE=${{ inputs.target }} -p NAME=${{ github.event.repository.name }}
+            -p DB_PASSWORD=${{ secrets.db_password }} -p ZONE=${{ inputs.target }} -p NAME=${{ github.event.repository.name }}
           triggers: ${{ inputs.triggers }}
 
   deploy:
@@ -71,14 +71,14 @@ jobs:
             file: database/openshift.deploy.yml
             overwrite: true
             parameters: -p DB_PVC_SIZE=256Mi
-          # - name: backend
-          #   file: backend/openshift.deploy.yml
-          #   overwrite: true
-          #   parameters: -p IMAGE_TAG=${{ inputs.tag }}
-          # - name: frontend
-          #   file: frontend/openshift.deploy.yml
-          #   overwrite: true
-          #   parameters: -p IMAGE_TAG=${{ inputs.tag }}
+          - name: backend
+            file: backend/openshift.deploy.yml
+            overwrite: true
+            parameters: -p IMAGE_TAG=${{ inputs.tag }}
+          - name: frontend
+            file: frontend/openshift.deploy.yml
+            overwrite: true
+            parameters: -p IMAGE_TAG=${{ inputs.tag }}
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:

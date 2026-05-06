@@ -54,6 +54,36 @@ objects:
             app: ${NAME}-${ZONE}
             deployment: ${NAME}-${ZONE}-${COMPONENT}
         spec:
+          initContainers:
+            - name: migrations
+              image: ${REGISTRY}/${ORG_NAME}/${NAME}/migrations:${IMAGE_TAG}
+              imagePullPolicy: Always
+              env:
+                - name: POSTGRES_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-name
+                - name: FLYWAY_URL
+                  value: jdbc:postgresql://${NAME}-${ZONE}-database:5432/$(POSTGRES_DATABASE)
+                - name: FLYWAY_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-user
+                - name: FLYWAY_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-password
+                - name: FLYWAY_DEFAULT_SCHEMA
+                  value: "users"
+                - name: FLYWAY_BASELINE_ON_MIGRATE
+                  value: "true"
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 50Mi
           containers:
             - name: ${NAME}
               image: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${IMAGE_TAG}
