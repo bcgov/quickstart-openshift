@@ -82,7 +82,7 @@ objects:
                   value: ${RANDOM_EXPRESSION}
               volumeMounts:
                 - name: ${NAME}-${ZONE}-${COMPONENT}
-                  mountPath: /var/lib/pgsql/data
+                  mountPath: /var/lib/postgresql/data
               resources:
                 requests:
                   cpu: 10m
