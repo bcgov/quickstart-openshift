@@ -63,17 +63,17 @@ objects:
               ports:
                 - containerPort: 5432
               env:
-                - name: POSTGRESQL_DATABASE
+                - name: POSTGRES_DATABASE
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-name
-                - name: POSTGRESQL_PASSWORD
+                - name: POSTGRES_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-password
-                - name: POSTGRESQL_USER
+                - name: POSTGRES_USER
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
@@ -93,7 +93,7 @@ objects:
                     - /usr/bin/env
                     - bash
                     - "-c"
-                    - psql -q -U $POSTGRESQL_USER -d $POSTGRESQL_DATABASE -c 'SELECT 1'
+                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DATABASE -c 'SELECT 1'
                 successThreshold: 1
                 failureThreshold: 5
                 initialDelaySeconds: 60
@@ -105,7 +105,7 @@ objects:
                     - /usr/bin/env
                     - bash
                     - "-c"
-                    - psql -q -U $POSTGRESQL_USER -d $POSTGRESQL_DATABASE -c 'SELECT 1'
+                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DATABASE -c 'SELECT 1'
                 successThreshold: 1
                 failureThreshold: 5
                 initialDelaySeconds: 10
