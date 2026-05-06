@@ -12,8 +12,7 @@ parameters:
     required: true
   - name: DB_PASSWORD
     description: Password for the PostgreSQL connection user.
-    from: "[a-zA-Z0-9]{16}"
-    generate: expression
+    required: true
 objects:
   - apiVersion: v1
     kind: Secret

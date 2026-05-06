@@ -50,7 +50,7 @@ jobs:
           oc_token: ${{ secrets.oc_token }}
           overwrite: true
           parameters:
-            -p ZONE=${{ inputs.target }} -p NAME=${{ github.event.repository.name }}
+            -p DB_PASSWORD=${{ secrets.DB_PASSWORD }} -p ZONE=${{ inputs.target }} -p NAME=${{ github.event.repository.name }}
           triggers: ${{ inputs.triggers }}
 
   deploy:
