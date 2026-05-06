@@ -87,7 +87,7 @@ jobs:
         name: [backend, frontend]
     steps:
       - uses: actions/checkout@v6
-      - uses: grafana/setup-k6-action@70839b2df2ef373adf890a6ce75653774378bffc # v1.2.0
+      - uses: grafana/setup-k6-action@db07bd9765aac508ef18982e52ab937fe633a065 # v1.2.1
       - uses: grafana/run-k6-action@de51a7390bdf0ac85a3bef493691bd71d4c7c158 # v1.4.0
         env:
           BACKEND_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}/api
