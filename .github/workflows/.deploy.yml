@@ -21,6 +21,9 @@ on:
         type: string
 
     secrets:
+      db_password:
+        description: Database password
+        required: true
       oc_namespace:
         description: OpenShift namespace
         required: true
