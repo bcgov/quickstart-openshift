@@ -38,7 +38,7 @@
     "node": ">=22.0.0"
   },
   "devDependencies": {
-    "@eslint-react/eslint-plugin": "^4.2.3",
+    "@eslint-react/eslint-plugin": "^5.0.0",
     "@playwright/test": "^1.51.0",
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^16.0.0",
