@@ -6,7 +6,7 @@ parameters:
     value: quickstart-openshift
   - name: PG_DATABASE
     description: Postgres database name
-    value: database
+    value: app
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
@@ -17,11 +17,11 @@ objects:
   - apiVersion: v1
     kind: Secret
     metadata:
-      name: ${NAME}-${ZONE}-${PG_DATABASE}
+      name: ${NAME}-${ZONE}-database
       labels:
         app: ${NAME}-${ZONE}
     stringData:
-      database-name: ${NAME}
+      database-name: ${PG_DATABASE}
       database-password: ${DB_PASSWORD}
       database-user: ${NAME}
   - apiVersion: networking.k8s.io/v1
