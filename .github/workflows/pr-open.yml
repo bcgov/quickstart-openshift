@@ -31,7 +31,7 @@ jobs:
 
   deploys:
     name: Deploys (${{ github.event.number }})
-    needs: [builds]
+    # needs: [builds]
     uses: ./.github/workflows/.deploy.yml
     secrets:
       db_password: ${{ secrets.DB_PASSWORD }}
