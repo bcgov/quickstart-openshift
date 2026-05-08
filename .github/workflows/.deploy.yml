@@ -71,14 +71,14 @@ jobs:
             file: database/openshift.deploy.yml
             overwrite: true
             parameters: -p DB_PVC_SIZE=256Mi
-          # - name: backend
-          #   file: backend/openshift.deploy.yml
-          #   overwrite: true
-          #   parameters: -p IMAGE_TAG=${{ inputs.tag }}
-          # - name: frontend
-          #   file: frontend/openshift.deploy.yml
-          #   overwrite: true
-          #   parameters: -p IMAGE_TAG=${{ inputs.tag }}
+          - name: backend
+            file: backend/openshift.deploy.yml
+            overwrite: true
+            parameters: -p IMAGE_TAG=${{ inputs.tag }}
+          - name: frontend
+            file: frontend/openshift.deploy.yml
+            overwrite: true
+            parameters: -p IMAGE_TAG=${{ inputs.tag }}
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
