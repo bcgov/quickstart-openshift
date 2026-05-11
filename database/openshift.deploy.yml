@@ -11,7 +11,7 @@ parameters:
     description: Deployment zone, e.g. pr-### or prod
     required: true
   - name: PG_VERSION
-    description: PostgreSQL version for the OpenShift internal image
+    description: PostgreSQL version tag for the Docker Hub postgres image
     value: "17"
   - name: DB_PVC_SIZE
     description: Volume space available for data
@@ -47,9 +47,6 @@ objects:
           deployment: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
         type: Recreate
-        recreateParams:
-          timeoutSeconds: 600
-        activeDeadlineSeconds: 21600
       template:
         metadata:
           labels:
