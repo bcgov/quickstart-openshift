@@ -398,8 +398,9 @@ pyrightconfig.json
 **/*.p12
 **/*.pfx
 
-# IDE
-.codebuddy
+# AI
+.workspaces
+.tmp
 
 # Specs directory (symlinked to external location, excluded from main branch)
 # The symlink points to ~/Documents/4-Specs/quickstart-openshift
