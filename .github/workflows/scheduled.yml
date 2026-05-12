@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-slim
     timeout-minutes: 10
     steps:
-      - name: Clean up Helm Releases
+      - name: Clean up PR Deployments
         uses: bcgov/action-oc-runner@d2fc921aaa9d70684c186dbb7754e6985d44d86f # v1.4.1
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
@@ -53,29 +53,41 @@ jobs:
             set -euo pipefail
 
             # Echos
-            echo "Delete stale Helm releases"
+            echo "Delete stale PR deployments"
             echo "Cutoff: ${{ env.CUTOFF }}"
 
-            # Before date, list of releases
+            # Before date
             BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
-            RELEASES=$(helm ls -aq | grep ${{ github.event.repository.name }} || :)
+            REPO="${{ github.event.repository.name }}"
 
-            # If releases, then iterate
-            [ -z "${RELEASES}" ]|| for r in ${RELEASES[@]}; do
+            # Get deployments matching the repo-PR naming pattern
+            DEPLOYS=$(oc get deploy --no-headers -o custom-columns=:metadata.name,:metadata.creationTimestamp 2>/dev/null | grep -E "${REPO}-[0-9]+" || :)
 
-              # Get last update and convert the date
-              UPDATED=$(date "+%s" -d <<< echo $(helm status $r -o json | jq -r .info.last_deployed))
+            # If deployments, then iterate
+            if [ -n "${DEPLOYS}" ]; then
+              while read -r name created; do
+                # Convert creation timestamp to epoch
+                UPDATED=$(date -d "${created}" +%s 2>/dev/null || :)
 
-              # Compare to cutoff and delete as necessary
-              if [[ ${UPDATED} < ${BEFORE} ]]; then
-                echo -e "\nOlder than cutoff: ${r}"
-                helm uninstall --no-hooks ${r}
-                oc delete pvc/${r}-bitnami-pg-0 || true
-              else
-                echo -e "\nNewer than cutoff: ${r}"
-                echo "No need to delete"
-              fi
-            done
+                # Compare to cutoff and delete as necessary
+                if [[ -n "${UPDATED}" ]] && [[ ${UPDATED} < ${BEFORE} ]]; then
+                  # Get the app label for this deployment
+                  LABEL=$(oc get deploy "${name}" -o jsonpath='{.metadata.labels.app}' 2>/dev/null || :)
+                  if [ -n "${LABEL}" ]; then
+                    echo -e "\nOlder than cutoff: ${name} (app=${LABEL})"
+                    oc delete all,secret,pvc,cm -l "app=${LABEL}" --ignore-not-found
+                  else
+                    echo -e "\nERROR: No app label found on deployment ${name}"
+                    exit 1
+                  fi
+                else
+                  echo -e "\nNewer than cutoff: ${name}"
+                  echo "No need to delete"
+                fi
+              done <<< "${DEPLOYS}"
+            else
+              echo "No PR deployments found for ${{ github.event.repository.name }}"
+            fi
 
   schema-spy:
     name: SchemaSpy
