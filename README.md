@@ -20,7 +20,7 @@ This repository provides a template to rapidly deploy a modern web application s
 * ✅ Enforced code reviews and workflow jobs (pass|fail)
 * 📊 OpenShift Templates
 * 📈 Prometheus Metrics export from Backend/Frontend
-* ⚡ Resource Tuning with Horizontal Pod Autoscaler (TEST/PROD only)
+* ⚡ Resource Tuning with Horizontal Pod Autoscaler
 * 🎯 Affinity and anti-affinity for Scheduling on different worker nodes
 * 🔄 Rolling updates with zero downtime in PROD
 * 🗃️ Database Migrations with Flyway
@@ -144,7 +144,7 @@ Create separate tokens for each of the DEV, TEST and PROD namespaces.
 
 * Alternate steps using an inline template can be found [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
 * In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
-* Reference: `{{ secrets.oc_namespace }}`
+* Reference: `{{ secrets.oc_token }}`
 
 **`OC_NAMESPACE`** 📁
 
