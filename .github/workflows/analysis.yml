@@ -106,7 +106,6 @@ jobs:
           scan-type: "fs"
           scanners: "vuln,secret,misconfig"
           severity: "CRITICAL,HIGH"
-          trivy-config: ".github/trivy.yaml"
           trivyignores: ".trivyignore"
 
       - name: Upload Trivy scan results to GitHub Security tab
