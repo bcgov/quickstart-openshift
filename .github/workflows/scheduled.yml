@@ -70,7 +70,7 @@ jobs:
                 UPDATED=$(date -d "${created}" +%s 2>/dev/null || :)
 
                 # Compare to cutoff and delete as necessary
-                if [[ -n "${UPDATED}" ]] && [[ ${UPDATED} < ${BEFORE} ]]; then
+                if [[ -n "${UPDATED}" ]] && [[ ${UPDATED} -lt ${BEFORE} ]]; then
                   # Get the app label for this deployment
                   LABEL=$(oc get deploy "${name}" -o jsonpath='{.metadata.labels.app}' 2>/dev/null || :)
                   if [ -n "${LABEL}" ]; then
