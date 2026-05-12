@@ -40,7 +40,7 @@ jobs:
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       target: ${{ github.event.number }}
-      triggers: ('backend/', 'frontend/', 'migrations/', '.github/workflows/.deploy.yml')
+      triggers: ('backend/', 'frontend/', 'migrations/', 'common/', 'database/', '.github/workflows/.deploy.yml')
 
   tests:
      name: Tests
