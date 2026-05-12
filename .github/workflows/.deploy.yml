@@ -92,7 +92,7 @@ jobs:
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.oc_token }}
           overwrite: ${{ matrix.overwrite }}
-          parameters: |
+          parameters:
             -p ZONE=${{ inputs.target }} 
             -p NAME=${{ github.event.repository.name }}
             ${{ matrix.parameters }}
