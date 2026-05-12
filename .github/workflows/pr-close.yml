@@ -21,17 +21,5 @@ jobs:
       oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
-      cleanup: helm
+      cleanup: label
       packages: backend frontend migrations
-
-  cleanup_db: # TODO move it off to another action later.
-    name: Remove DB User from Crunchy
-    runs-on: ubuntu-slim
-    steps:
-      - uses: bcgov/action-crunchy@v2.0.0
-        name: Remove PR Specific User
-        with:
-          oc_namespace: ${{ secrets.oc_namespace }}
-          oc_token: ${{ secrets.oc_token }}
-          oc_server: ${{ vars.oc_server }}
-          values_file: charts/crunchy/values.yml
