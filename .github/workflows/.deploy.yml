@@ -52,10 +52,10 @@ jobs:
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.oc_token }}
           overwrite: true
-            parameters: |
-              -p DB_PASSWORD=${{ secrets.db_password }}
-              -p ZONE=${{ inputs.target }}
-              -p NAME=${{ github.event.repository.name }}
+          parameters: |
+            -p DB_PASSWORD=${{ secrets.db_password }}
+            -p ZONE=${{ inputs.target }}
+            -p NAME=${{ github.event.repository.name }}
           triggers: ${{ inputs.triggers }}
 
   deploy:
