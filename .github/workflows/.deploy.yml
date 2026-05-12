@@ -48,7 +48,7 @@ jobs:
         with:
           file: common/openshift.init.yml
           oc_namespace: ${{ secrets.oc_namespace }}
-          oc_server: ${{ vars.OC_SERVER }}
+          oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
           overwrite: true
           parameters:
@@ -87,7 +87,7 @@ jobs:
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ secrets.oc_namespace }}
-          oc_server: ${{ vars.OC_SERVER }}
+          oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
           overwrite: ${{ matrix.overwrite }}
           parameters:

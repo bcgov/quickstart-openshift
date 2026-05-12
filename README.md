@@ -99,13 +99,13 @@ Here is the arrangement of secrets, variables and environments for this reposito
 
 | Environment | Name                   | Description                                    |
 |-------------|------------------------|------------------------------------------------|
-| \<none\>    | `vars.OC_SERVER`       | Common server address (repository-level)       |
-| \<none\>    | `secrets.OC_NAMESPACE` | DEV namespace (repository-level)               |
-| \<none\>    | `secrets.OC_TOKEN`     | DEV service token (repository-level)           |
-| TEST        | `secrets.OC_NAMESPACE` | TEST namespace (overrides repository-level)     |
-| TEST        | `secrets.OC_TOKEN`     | TEST service token (overrides repository-level) |
-| PROD        | `secrets.OC_NAMESPACE` | PROD namespace (overrides repository-level)    |
-| PROD        | `secrets.OC_TOKEN`     | PROD service token (overrides repository-level) |
+| \<none\>    | `vars.oc_server`       | Common server address (repository-level)       |
+| \<none\>    | `secrets.oc_namespace` | DEV namespace (repository-level)               |
+| \<none\>    | `secrets.oc_token`     | DEV service token (repository-level)           |
+| TEST        | `secrets.oc_namespace` | TEST namespace (overrides repository-level)     |
+| TEST        | `secrets.oc_token`     | TEST service token (overrides repository-level) |
+| PROD        | `secrets.oc_namespace` | PROD namespace (overrides repository-level)    |
+| PROD        | `secrets.oc_token`     | PROD service token (overrides repository-level) |
 
 ### 🔐 Secret Values
 
@@ -144,13 +144,13 @@ Create separate tokens for each of the DEV, TEST and PROD namespaces.
 
 * Alternate steps using an inline template can be found [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
 * In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
-* Reference: `{{ secrets.OC_NAMESPACE }}`
+* Reference: `{{ secrets.oc_namespace }}`
 
 **`OC_NAMESPACE`** 📁
 
 Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and PROD.  TOOLS namespaces (e.g. Jenkins, shared Oracle resources) are not used here.  Provided by your OpenShift platform team.
 
-* Reference: `{{ secrets.OC_NAMESPACE }}`
+* Reference: `{{ secrets.oc_namespace }}`
 * E.g.: `abc123-dev`
 
 **`SONAR_TOKEN(s)`** 📊
@@ -169,7 +169,7 @@ BC Government employees can request SonarCloud projects by creating an [issue](h
 **`OC_SERVER`** 🌐
 
 OpenShift server address (API endpoint for your OpenShift cluster).
-* Reference: `{{ vars.OC_SERVER }}`
+* Reference: `{{ vars.oc_server }}`
 * BCGov: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 * Others: Use your cluster's API server address (e.g. `https://api.<cluster-domain>:6443`)
 

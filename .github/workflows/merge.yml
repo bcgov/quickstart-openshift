@@ -32,8 +32,8 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets:
       db_password: ${{ secrets.DB_PASSWORD }}
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_token: ${{ secrets.OC_TOKEN }}
+      oc_namespace: ${{ secrets.oc_namespace }}
+      oc_token: ${{ secrets.oc_token }}
     with:
       environment: test
       target: test
@@ -52,8 +52,8 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     secrets:
       db_password: ${{ secrets.DB_PASSWORD }}
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_token: ${{ secrets.OC_TOKEN }}
+      oc_namespace: ${{ secrets.oc_namespace }}
+      oc_token: ${{ secrets.oc_token }}
     with:
       environment: prod
       target: prod
