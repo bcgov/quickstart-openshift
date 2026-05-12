@@ -84,7 +84,7 @@ jobs:
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
-      - uses: bcgov/action-deployer-openshift@v4.0.0
+      - uses: bcgov/action-deployer-openshift@v4.0.1
         id: deploy
         with:
           file: ${{ matrix.file }}
