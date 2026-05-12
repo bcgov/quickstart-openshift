@@ -28,8 +28,6 @@ objects:
     kind: NetworkPolicy
     metadata:
       name: allow-from-openshift-ingress
-      labels:
-        template: openshift-test
     spec:
       podSelector: {}
       ingress:
