@@ -9,11 +9,6 @@ on:
       - '.github/graphics/**'
       - '!.github/workflows/**'
   workflow_dispatch:
-    inputs:
-      tag:
-        description: "Image tag set to deploy; e.g. PR number or prod"
-        type: string
-        default: 'prod'
 
 concurrency:
   group: ${{ github.workflow }}
@@ -22,8 +17,18 @@ concurrency:
 permissions: {}
 
 jobs:
+  init:
+    name: Initialize
+    outputs:
+      pr: ${{ steps.pr.outputs.pr }}
+    runs-on: ubuntu-24.04
+    steps:
+      # Get PR number for squash merges to main
+      - id: pr
+        uses: bcgov/action-get-pr@bfa713a9ab410c0f0c13126c35983934fc80d15b # v0.1.1
+
   deploy-test:
-    name: Deploy (TEST)
+    name: TEST Deploys (${{ needs.init.outputs.pr }})
     uses: ./.github/workflows/.deploy.yml
     secrets:
       db_password: ${{ secrets.DB_PASSWORD }}
@@ -32,7 +37,7 @@ jobs:
     with:
       environment: test
       target: test
-      tag: ${{ github.event.inputs.tag || 'prod' }}
+      tag: ${{ needs.init.outputs.pr }}
 
   tests:
     name: Tests
@@ -42,7 +47,7 @@ jobs:
       target: test
 
   deploy-prod:
-    name: Deploy (PROD)
+    name: PROD Deploys (${{ needs.init.outputs.pr }})
     needs: [tests]
     uses: ./.github/workflows/.deploy.yml
     secrets:
@@ -52,7 +57,7 @@ jobs:
     with:
       environment: prod
       target: prod
-      tag: ${{ github.event.inputs.tag || 'prod' }}
+      tag: ${{ needs.init.outputs.pr }}
 
   promote:
     name: Promote Images
@@ -69,5 +74,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ inputs.tag || 'prod' }}
+          target: ${{ needs.init.outputs.pr }}
           tags: prod
