@@ -164,12 +164,12 @@ If SonarCloud is being used each application will have its own token.  Single-ap
 
 BC Government employees can request SonarCloud projects by creating an [issue](https://github.com/bcgov/devops-requests/issues/new/choose) with the platform team.  Please make sure to request a monorepo with component names (e.g. backend, frontend), which may not be explained in their directions.
 
-**`db_password`** 
+**db_password**
 
-The password used for the PostgreSQL database. This should be a strong, unique password.
+The password used for the PostgreSQL database. This **MUST** be a strong, unique password and **DISTINCT** across all environments (dev, test, prod). Reusing the same password in development/PRs as in production is a critical security risk.
 
 * Reference: `${{ secrets.db_password }}`
-* Minimum 8 characters recommended.
+* Minimum 12 characters recommended for production.
 
 ### Variable Values
 
