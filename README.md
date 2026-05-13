@@ -653,7 +653,7 @@ After a full workflow run and merge has been completed, please do the following:
 
 The architecture diagram provides an overview of the system's components, their interactions, and the deployment structure. It illustrates the relationships between the frontend, backend, database, and other infrastructure elements within the OpenShift environment.
 
-![Architecture](./.diagrams/architecture/arch.drawio.svg)
+![Architecture](./.github/graphics/architecture.svg)
 
 ## 🤝 Contributing
 
