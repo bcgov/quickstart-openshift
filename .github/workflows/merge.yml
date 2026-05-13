@@ -33,7 +33,6 @@ jobs:
   deploy-test:
     name: TEST Deploys (${{ needs.init.outputs.pr }})
     needs: [init]
-    environment: test
     uses: ./.github/workflows/reusable-deploy.yml
     secrets:
       db_password: ${{ secrets.db_password }}
@@ -54,7 +53,6 @@ jobs:
   deploy-prod:
     name: PROD Deploys (${{ needs.init.outputs.pr }})
     needs: [tests, init]
-    environment: prod
     uses: ./.github/workflows/reusable-deploy.yml
     secrets:
       db_password: ${{ secrets.db_password }}
