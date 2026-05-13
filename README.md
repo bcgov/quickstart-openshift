@@ -660,9 +660,9 @@ The architecture diagram provides an overview of the system's components, their 
 ## Contributing
 
 We welcome contributions to improve this template! 
-Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.
+Please contribute your ideas! [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.
 
-**Built with  by the NRIDS Team**
+**Built by the NRIDS Team**
 
 This repository is provided by NRIDS Architecture and Forestry Digital Services, courtesy of the Government of British Columbia.
 
