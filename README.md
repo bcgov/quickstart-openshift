@@ -96,16 +96,18 @@ Environments provide a [number of features](https://docs.github.com/en/actions/d
 
 Here is the arrangement of secrets, variables and environments for this repository.
 
-| Environment | Name                   | Description                                    |
-|-------------|------------------------|------------------------------------------------|
-| \<none\>    | `vars.oc_server`       | Common server address (repository-level)       |
-| \<none\>    | `secrets.oc_namespace` | DEV namespace (repository-level)               |
-| \<none\>    | `secrets.oc_token`     | DEV service token (repository-level)           |
-| \<none\>    | `secrets.db_password`  | Database password (repository-level)           |
-| TEST        | `secrets.oc_namespace` | TEST namespace (overrides repository-level)     |
-| TEST        | `secrets.oc_token`     | TEST service token (overrides repository-level) |
-| PROD        | `secrets.oc_namespace` | PROD namespace (overrides repository-level)    |
-| PROD        | `secrets.oc_token`     | PROD service token (overrides repository-level) |
+| Environment | Name                   | Description                                     |
+|-------------|------------------------|-------------------------------------------------|
+| <none>      | `vars.oc_server`       | Common server address (repository-level)        |
+| dev         | `secrets.oc_namespace` | DEV namespace (environment-level)               |
+| dev         | `secrets.oc_token`     | DEV service token (environment-level)           |
+| dev         | `secrets.db_password`  | DEV database password (environment-level)        |
+| test        | `secrets.oc_namespace` | TEST namespace (environment-level)              |
+| test        | `secrets.oc_token`     | TEST service token (environment-level)          |
+| test        | `secrets.db_password`  | TEST database password (environment-level)       |
+| prod        | `secrets.oc_namespace` | PROD namespace (environment-level)              |
+| prod        | `secrets.oc_token`     | PROD service token (environment-level)          |
+| prod        | `secrets.db_password`  | PROD database password (environment-level)       |
 
 ### Secret Values
 
