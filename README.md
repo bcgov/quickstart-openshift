@@ -99,9 +99,9 @@ Here is the arrangement of secrets, variables and environments for this reposito
 | Environment | Name                   | Description                                     |
 |-------------|------------------------|-------------------------------------------------|
 | <none>      | `vars.oc_server`       | Common server address (repository-level)        |
-| dev         | `secrets.oc_namespace` | DEV namespace (environment-level)               |
-| dev         | `secrets.oc_token`     | DEV service token (environment-level)           |
-| dev         | `secrets.db_password`  | DEV database password (environment-level)        |
+| pr          | `secrets.oc_namespace` | PR namespace (environment-level)                |
+| pr          | `secrets.oc_token`     | PR service token (environment-level)            |
+| pr          | `secrets.db_password`  | PR database password (environment-level)         |
 | test        | `secrets.oc_namespace` | TEST namespace (environment-level)              |
 | test        | `secrets.oc_token`     | TEST service token (environment-level)          |
 | test        | `secrets.db_password`  | TEST database password (environment-level)       |
@@ -166,7 +166,7 @@ BC Government employees can request SonarCloud projects by creating an [issue](h
 
 **db_password**
 
-The password used for the PostgreSQL database. This **MUST** be a strong, unique password and **DISTINCT** across all environments (dev, test, prod). Reusing the same password in development/PRs as in production is a critical security risk.
+The password used for the PostgreSQL database. This **MUST** be a strong, unique password and **DISTINCT** across all environments (pr, test, prod). Reusing the same password in development/PRs as in production is a critical security risk.
 
 * Reference: `${{ secrets.db_password }}`
 * Minimum 12 characters recommended for production.
