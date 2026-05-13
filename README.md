@@ -98,9 +98,9 @@ Here is the arrangement of secrets, variables and environments for this reposito
 | Environment | Name                   | Description                                     |
 |-------------|------------------------|-------------------------------------------------|
 | <none>      | `vars.oc_server`       | Common server address (repository-level)        |
-| pr          | `secrets.oc_namespace` | PR namespace (environment-level)                |
-| pr          | `secrets.oc_token`     | PR service token (environment-level)            |
-| pr          | `secrets.db_password`  | PR database password (environment-level)         |
+| <none>      | `secrets.oc_namespace` | PR namespace (repository-level)                 |
+| <none>      | `secrets.oc_token`     | PR service token (repository-level)             |
+| <none>      | `secrets.db_password`  | PR database password (repository-level)         |
 | test        | `secrets.oc_namespace` | TEST namespace (environment-level)              |
 | test        | `secrets.oc_token`     | TEST service token (environment-level)          |
 | test        | `secrets.db_password`  | TEST database password (environment-level)       |

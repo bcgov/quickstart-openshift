@@ -39,7 +39,6 @@ jobs:
       oc_namespace: ${{ secrets.oc_namespace }}
       oc_token: ${{ secrets.oc_token }}
     with:
-      environment: pr
       target: ${{ github.event.number }}
       triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/reusable-deploy.yml')
 
