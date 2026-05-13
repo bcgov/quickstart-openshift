@@ -170,6 +170,7 @@ The password used for the PostgreSQL database. This **MUST** be a strong, unique
 
 * Reference: `${{ secrets.db_password }}`
 * Minimum 12 characters recommended for production.
+* **Pro-tip**: Use a password manager (like BitWarden, 1Password, or KeePass) to generate and store long, random, and unique passwords for each environment. Avoid simple, guessable passwords like `password` or `secure`.
 
 ### Variable Values
 
