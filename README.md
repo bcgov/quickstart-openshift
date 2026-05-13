@@ -110,7 +110,7 @@ Here is the arrangement of secrets, variables and environments for this reposito
 
 ### 🔐 Secret Values
 
-**`OC_TOKEN`** 🎫
+**`oc_token`** 🎫
 
 Create separate tokens for each of the DEV, TEST and PROD namespaces.  
 
@@ -145,13 +145,13 @@ Create separate tokens for each of the DEV, TEST and PROD namespaces.
 
 * Alternate steps using an inline template can be found [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
 * In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
-* Reference: `{{ secrets.oc_token }}`
+* Reference: `${{ secrets.oc_token }}`
 
-**`OC_NAMESPACE`** 📁
+**`oc_namespace`** 📁
 
 Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and PROD.  TOOLS namespaces (e.g. Jenkins, shared Oracle resources) are not used here.  Provided by your OpenShift platform team.
 
-* Reference: `{{ secrets.oc_namespace }}`
+* Reference: `${{ secrets.oc_namespace }}`
 * E.g.: `abc123-dev`
 
 **`SONAR_TOKEN(s)`** 📊
@@ -163,21 +163,21 @@ If SonarCloud is being used each application will have its own token.  Single-ap
 
 BC Government employees can request SonarCloud projects by creating an [issue](https://github.com/bcgov/devops-requests/issues/new/choose) with the platform team.  Please make sure to request a monorepo with component names (e.g. backend, frontend), which may not be explained in their directions.
 
-**`DB_PASSWORD`** 🔑
+**`db_password`** 🔑
 
 The password used for the PostgreSQL database. This should be a strong, unique password.
 
-* Reference: `{{ secrets.db_password }}`
+* Reference: `${{ secrets.db_password }}`
 * Minimum 8 characters recommended.
 
 ### 📊 Variable Values
 
 > 👆 Click Settings > Secrets and Variables > Actions > Variables > New repository variable
 
-**`OC_SERVER`** 🌐
+**`oc_server`** 🌐
 
 OpenShift server address (API endpoint for your OpenShift cluster).
-* Reference: `{{ vars.oc_server }}`
+* Reference: `${{ vars.oc_server }}`
 * BCGov: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 * Others: Use your cluster's API server address (e.g. `https://api.<cluster-domain>:6443`)
 
