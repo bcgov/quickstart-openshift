@@ -4,67 +4,67 @@
 [![Analysis](https://github.com/bcgov/quickstart-openshift/actions/workflows/analysis.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/analysis.yml)
 [![Scheduled](https://github.com/bcgov/quickstart-openshift/actions/workflows/scheduled.yml/badge.svg)](https://github.com/bcgov/quickstart-openshift/actions/workflows/scheduled.yml)
 
-# 🚀 QuickStart for OpenShift
+# QuickStart for OpenShift
 
-## 🔄 Pull Request-Based Workflows with Sample Stack
+## Pull Request-Based Workflows with Sample Stack
 
 This repository provides a template to rapidly deploy a modern web application stack to OpenShift using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability.  By hitting the ground running we can save weeks-to-months of development time plus receive regular updates and features.
 
 **Includes:**
-* 🔄 Pull Request-based pipeline
-* 🏖️ Sandboxed development environments
-* 🔒 Gated/controlled production deployments (optional)
-* 📦 Container publishing (ghcr.io) and importing (OpenShift)
-* 🛡️ Security, vulnerability, infrastructure, and container scan tools
-* 🔧 Automatic dependency patching available from [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
-* ✅ Enforced code reviews and workflow jobs (pass|fail)
-* 📊 OpenShift Templates
-* 📈 Prometheus Metrics export from Backend/Frontend
-* ⚡ Resource Tuning with Horizontal Pod Autoscaler
-* 🎯 Affinity and anti-affinity for Scheduling on different worker nodes
-* 🔄 Rolling updates with zero downtime in PROD
-* 🗃️ Database Migrations with Flyway
-* 🛡️ Pod disruption budgets for high availability
-* 🔍 Self-healing through probes/checks (startup, readiness, liveness)
-* 🎯 Point the long-lived DEMO route to PRs by using the `demo` label
+* Pull Request-based pipeline
+* Sandboxed development environments
+* Gated/controlled production deployments (optional)
+* Container publishing (ghcr.io) and importing (OpenShift)
+* Security, vulnerability, infrastructure, and container scan tools
+* Automatic dependency patching available from [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
+* Enforced code reviews and workflow jobs (pass|fail)
+* OpenShift Templates
+* Prometheus Metrics export from Backend/Frontend
+* Resource Tuning with Horizontal Pod Autoscaler
+* Affinity and anti-affinity for Scheduling on different worker nodes
+* Rolling updates with zero downtime in PROD
+* Database Migrations with Flyway
+* Pod disruption budgets for high availability
+* Self-healing through probes/checks (startup, readiness, liveness)
+* Point the long-lived DEMO route to PRs by using the `demo` label
 * **Sample application stack:**
-    * 🗄️ Database: Postgres, Flyway
-    * 🎨 Frontend: TypeScript, Caddy Server with Coraza WAF
-    * ⚙️ Backend: TypeScript, Nest.js
-    * 🔄 Alternative backend examples - see [Alternative Backends](#alternative-backends)
+    * Database: Postgres, Flyway
+    * Frontend: TypeScript, Caddy Server with Coraza WAF
+    * Backend: TypeScript, Nest.js
+    * Alternative backend examples - see [Alternative Backends](#alternative-backends)
 
-# ⚙️ Setup
+# Setup
 
 Initial setup is intended to take an hour or less.  This depends greatly on intended complexity, features selected/excluded and outside cooperation.
 
-## ✅ Prerequisites
+## Prerequisites
 
 The following are required for all users:
 
-- [ ] 🐙 [GitHub accounts](https://github.com/signup) for all participating team members
-- [ ] 🚀 An OpenShift cluster with project namespaces (DEV, TEST, PROD)
+- [ ] [GitHub accounts](https://github.com/signup) for all participating team members
+- [ ] An OpenShift cluster with project namespaces (DEV, TEST, PROD)
 
-### 🏛️ Additional Requirements for BC Government OpenShift
+### Additional Requirements for BC Government OpenShift
 
 If you're using BC Government's OpenShift platform, you'll also need:
 
-- [ ] 🏛️ BC Government IDIR accounts for anyone submitting requests
-- [ ] 👥 Membership in the BCGov GitHub organization
+- [ ] BC Government IDIR accounts for anyone submitting requests
+- [ ] Membership in the BCGov GitHub organization
     - Join the bcgov organization using [these instructions](https://developer.gov.bc.ca/docs/default/component/bc-developer-guide/use-github-in-bcgov/bc-government-organizations-in-github/#directions-to-sign-up-and-link-your-account-for-bcgov).
-- [ ] 🚀 BCGov OpenShift project namespaces:
+- [ ] BCGov OpenShift project namespaces:
     - [BCGov signup](https://registry.developer.gov.bc.ca)
 
-## 📋 Using this Template
+## Using this Template
 
 Create a new repository using this repository as a template.
 
-* ✅ Verify bcgov/quickstart-openshift is selected under Repository template
+* Verify bcgov/quickstart-openshift is selected under Repository template
 
 ![](./.github/graphics/template.png)
 
-## 🔐 Secrets, Variables and Environments
+## Secrets, Variables and Environments
 
-### 🔑 Secrets and Variables
+### Secrets and Variables
 
 Variables and secrets are consumed by workflows.  Variables are visible in workflows and logs, while secrets are hidden/redacted.
 
@@ -79,7 +79,7 @@ To create new secrets from GitHub.com click:
 
 Note: Dependabot, which we don't recommend as highly as Renovate, requires its own set of values.
 
-### 🌍 Environments
+### Environments
 
 Environments are groups of secrets and variables with optional access controls.  This includes limiting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values add to or override any repository-level values.
 
@@ -93,7 +93,7 @@ Environments provide a [number of features](https://docs.github.com/en/actions/d
 * Wait timer
 * Limit TEST/PROD values to post-merge workflows
 
-### 📊 Example
+### Example
 
 Here is the arrangement of secrets, variables and environments for this repository.
 
@@ -108,9 +108,9 @@ Here is the arrangement of secrets, variables and environments for this reposito
 | PROD        | `secrets.oc_namespace` | PROD namespace (overrides repository-level)    |
 | PROD        | `secrets.oc_token`     | PROD service token (overrides repository-level) |
 
-### 🔐 Secret Values
+### Secret Values
 
-**`oc_token`** 🎫
+**`oc_token`** 
 
 Create separate tokens for each of the DEV, TEST and PROD namespaces.  
 
@@ -147,14 +147,14 @@ Create separate tokens for each of the DEV, TEST and PROD namespaces.
 * In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
 * Reference: `${{ secrets.oc_token }}`
 
-**`oc_namespace`** 📁
+**`oc_namespace`** 
 
 Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and PROD.  TOOLS namespaces (e.g. Jenkins, shared Oracle resources) are not used here.  Provided by your OpenShift platform team.
 
 * Reference: `${{ secrets.oc_namespace }}`
 * E.g.: `abc123-dev`
 
-**`SONAR_TOKEN(s)`** 📊
+**`SONAR_TOKEN(s)`** 
 
 If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `SONAR_TOKEN`, while monorepos append component names.
 
@@ -163,29 +163,29 @@ If SonarCloud is being used each application will have its own token.  Single-ap
 
 BC Government employees can request SonarCloud projects by creating an [issue](https://github.com/bcgov/devops-requests/issues/new/choose) with the platform team.  Please make sure to request a monorepo with component names (e.g. backend, frontend), which may not be explained in their directions.
 
-**`db_password`** 🔑
+**`db_password`** 
 
 The password used for the PostgreSQL database. This should be a strong, unique password.
 
 * Reference: `${{ secrets.db_password }}`
 * Minimum 8 characters recommended.
 
-### 📊 Variable Values
+### Variable Values
 
-> 👆 Click Settings > Secrets and Variables > Actions > Variables > New repository variable
+>  Click Settings > Secrets and Variables > Actions > Variables > New repository variable
 
-**`oc_server`** 🌐
+**`oc_server`** 
 
 OpenShift server address (API endpoint for your OpenShift cluster).
 * Reference: `${{ vars.oc_server }}`
 * BCGov: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 * Others: Use your cluster's API server address (e.g. `https://api.<cluster-domain>:6443`)
 
-## 🔄 Updating Dependencies
+## Updating Dependencies
 
 Dependabot and Mend Renovate can both provide dependency updates using pull requests.  Dependabot is simpler to configure, while Renovate is much more configurable and lighter on resources.
 
-### 🤖 Renovate
+### Renovate
 
 A config file (`renovate.json`) is included with this template.  It can source config from our [renovate repository](https://github.com/bcgov/renovate-config).  Renovate can be [self-hosted](https://github.com/renovatebot/github-action) or run using the GitHub App managed at the organization level.  For BC Government the OCIO controls this application, so please opt in with them using a GitHub issue.
 
@@ -201,24 +201,24 @@ To opt-in:
 * Select "Submit new issue"
 * Wait for Renovate to start sending pull requests to your repository
 
-### 🔧 Dependabot
+### Dependabot
 
 Dependabot is no longer recommended as an alternative to Renovate for generating security, vulnerability and dependency pull requests.  It can still be used to generate warnings under the GitHub Security tab, which is only viewable by repository administrators.
 
-## 🔍 Dependency Scanning with Knip
+## Dependency Scanning with Knip
 
 This repository uses [Knip](https://knip.dev/) for dependency scanning to identify unused dependencies and exports. Knip runs automatically as part of the Analysis workflow via the `bcgov/action-test-and-analyse` action.
 
 **Note:** As a template repository, Knip runs in **warning mode** (non-blocking) to allow teams to customize dependencies without build failures. Teams can optionally change `dep_scan: warning` to `dep_scan: error` in their forks to enforce dependency scanning as a blocking check.
 
-### 📋 Handling Unused Dependencies
+### Handling Unused Dependencies
 
 When Knip identifies unused dependencies, you have two options:
 
 1. **Remove the dependency** - If it's truly unused, remove it from `package.json`
 2. **Report as false positive** - If the dependency is used but not detected by static analysis
 
-### 🚫 Reporting False Positives
+### Reporting False Positives
 
 **Do not create team-specific `knip.config.ts` files.** All Knip configuration is managed centrally in the upstream action repository.
 
@@ -240,7 +240,7 @@ If you encounter a false positive (a dependency that is used but flagged as unus
    - How the dependency is used
    - Example: "Exported from test-utils files for use in tests but may not be directly imported yet. Common pattern in testing utilities."
 
-### 📝 Example: Reporting a False Positive
+### Example: Reporting a False Positive
 
 If `@testing-library/user-event` is flagged but exported from `test-utils.tsx`:
 
@@ -266,7 +266,7 @@ If `@testing-library/user-event` is flagged but exported from `test-utils.tsx`:
 > 
 > This dependency is exported from test-utils files for use in tests but may not be directly imported yet. This is a common pattern in testing utilities where dependencies are re-exported for convenience.
 
-### ✅ Common False Positive Patterns
+### Common False Positive Patterns
 
 - **Exported APIs**: Dependencies exported from utility files (like `test-utils.tsx`) that are intended for use but may not be directly imported yet
 - **Indirect usage**: Dependencies used by build tools, scripts, or other dependencies that static analysis can't detect
@@ -274,9 +274,9 @@ If `@testing-library/user-event` is flagged but exported from `test-utils.tsx`:
 - **Configuration files**: Dependencies used in config files that aren't detected by static analysis
 - **Type-only imports**: TypeScript type-only imports that are stripped at runtime
 
-## ⚙️ Repository Configuration
+## Repository Configuration
 
-### 🔀 Pull Request Handling
+### Pull Request Handling
 
 Squash merging is recommended for simplified history and ease of rollback.  Cleaning up merged branches is recommended for your DevOps Specialist's fragile sanity.
 
@@ -292,13 +292,13 @@ Pull Requests:
 * `[uncheck] Allow auto-merge`
 * `[check] Automatically delete head branches`
 
-### 📦 Packages
+### Packages
 
 Packages are available from your repository (link on right).  All should have visibility set to public for the workflows to run successfully.
 
 E.g. https://github.com/bcgov/quickstart-openshift/packages
 
-### 🛡️ Branch Protection Rules
+### Branch Protection Rules
 
 This is required to prevent direct pushes and merges to the default branch.  These steps must be run after one full pull request pipeline has been run to populate the required status checks.
 
@@ -346,17 +346,17 @@ Note: Required status checks will only be available to select after the relevant
 ![](./.github/graphics/branch-code-results.png)
 
 
-### 👥 Adding Team Members
+### Adding Team Members
 
 Don't forget to add your team members!  
 
-1. ⚙️ Select Settings (gear, top right)  *> Collaborators and teams (under `Access`)
-2. 👆 Click `Add people` or `Add teams`
-3. 🔍 Use the search box to find people or teams
-4. 🎭 Choose a role (read, triage, write, maintain, admin)
-5. ➕ Click Add
+1.  Select Settings (gear, top right)  *> Collaborators and teams (under `Access`)
+2.  Click `Add people` or `Add teams`
+3.  Use the search box to find people or teams
+4.  Choose a role (read, triage, write, maintain, admin)
+5.  Click Add
 
-# 🔄 Workflows
+# Workflows
 
 These workflows and actions enforce a pull request based flow.
 ```mermaid
@@ -434,93 +434,93 @@ flowchart TD
     linkStyle default stroke:#757575,stroke-width:1px
 ```
 
-## 🔀 Pull Request
+## Pull Request
 
 Runs on pull request submission.
 
-* 🏖️ Provides safe, sandboxed deployment environments
-* 🏗️ Build action pushes to GitHub Container Registry (ghcr.io)
-* 🔄 Build triggers select new builds vs reusing builds
-* 🚀 Deploy only when changes are made
-* 📋 Deployment includes curl checks and optional penetration tests
-* 🧪 Run tests (e2e, load, integration) when changes are made
-* ✅ Other checks and updates as required
+* Provides safe, sandboxed deployment environments
+* Build action pushes to GitHub Container Registry (ghcr.io)
+* Build triggers select new builds vs reusing builds
+* Deploy only when changes are made
+* Deployment includes curl checks and optional penetration tests
+* Run tests (e2e, load, integration) when changes are made
+* Other checks and updates as required
 
 ![](.github/graphics/pr-open.png)
 
-## ✅ Validation
+## Validation
 
 Runs on pull request submission.
 
-* 📋 Enforces conventional commits in PR title
-* 👋 Adds greetings/directions to PR descriptions
+* Enforces conventional commits in PR title
+* Adds greetings/directions to PR descriptions
 
 ![](.github/graphics/pr-validate.png)
 
 
-## 📊 Analysis
+## Analysis
 
 Runs on pull request submission or merge to the default branch.
 
-* 🧪 Unit tests (should include coverage)
-* 🔍 CodeQL/GitHub security reporting (now handled as GitHub default!)
-* 🛡️ Trivy password, vulnerability and security scanning
+* Unit tests (should include coverage)
+* CodeQL/GitHub security reporting (now handled as GitHub default!)
+* Trivy password, vulnerability and security scanning
 
 ![](.github/graphics/analysis.png)
 
-## ❌ Pull Request Closed
+## Pull Request Closed
 
 Runs on pull request close or merge.
 
-* 🧹 Cleans up OpenShift objects/artifacts
-* 🏷️ Merge retags successful build images as `latest`
+* Cleans up OpenShift objects/artifacts
+* Merge retags successful build images as `latest`
 
 ![](.github/graphics/pr-close.png)
 
-## 🔗 Merge
+## Merge
 
 Runs on merge to main branch.
 
-* 🔍 Code scanning and reporting to GitHub Security overview
-* 🚀 Zero-downtime* TEST deployment
-* 🛡️ Penetration tests on TEST deployment (optional)
-* 🚀 Zero-downtime* PROD deployment
-* 🏷️ Labels successful deployment images as PROD
+* Code scanning and reporting to GitHub Security overview
+* Zero-downtime* TEST deployment
+* Penetration tests on TEST deployment (optional)
+* Zero-downtime* PROD deployment
+* Labels successful deployment images as PROD
 
 \* excludes database changes
 
 ![](.github/graphics/merge.png)
 
-## ⏰ Scheduled
+## Scheduled
 
 Runs on scheduled job (cronjob) or workflow dispatch.
 
-* 🧹 PR environment purge
-* 📚 Generate SchemaSpy documentation
-* 🧪 Tests (e2e, load, integration) on TEST deployment
+* PR environment purge
+* Generate SchemaSpy documentation
+* Tests (e2e, load, integration) on TEST deployment
 
 ![](.github/graphics/scheduled.png)
 
-## 🎯 DEMO Routing
+## DEMO Routing
 
 There is a long-lived custom route available to be assigned to specific Pull Request deployments.  Add the label `demo` to that pull request or run the `DEMO Route` workflow.
 
 Typical route format: `https://<REPO_NAME>-demo.<your-openshift-domain>`  
 Example (BCGov): `https://<REPO_NAME>-demo.apps.silver.devops.gov.bc.ca`
 
-#### 🏷️ PR Label
+#### PR Label
 
 Please note that the label must be manually created using GitHub's web interface.
 
 ![](.github/graphics/demo-label.png)
 
-#### ⚙️ Workflow
+#### Workflow
 ![](.github/graphics/workflow.png)
 
 
-# 📚 App Stack
+# App Stack
 
-**Frontend (JavaScript/TypeScript)** 🎨
+**Frontend (JavaScript/TypeScript)** 
 
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
@@ -532,7 +532,7 @@ Please note that the label must be manually created using GitHub's web interface
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_frontend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_frontend)
 
-**Backend (JavaScript/TypeScript)** ⚙️
+**Backend (JavaScript/TypeScript)** 
 
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
@@ -544,20 +544,20 @@ Please note that the label must be manually created using GitHub's web interface
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=quickstart-openshift_backend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=quickstart-openshift_backend)
 
-## 🚀 Starter
+## Starter
 
 The starter stack includes a frontend (React, Bootstrap, Vite, Caddy), backend (Nest/Node) and Postgres or PostGIS database.  See subfolder for source, including Dockerfiles and OpenShift templates.  Alternative backends are available.
 
 **Features:**
-* 💪 [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
-* 🏗️ [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
-* 🔄 [Flyway](https://flywaydb.org/) database migrations
-* 🐘 [Postgres](https://www.postgresql.org/) Database
-* 🛡️ [OWASP Coraza WAF](https://github.com/corazawaf/coraza-caddy) Web Application Firewall integrated with Caddy
+* [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
+* [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
+* [Flyway](https://flywaydb.org/) database migrations
+* [Postgres](https://www.postgresql.org/) Database
+* [OWASP Coraza WAF](https://github.com/corazawaf/coraza-caddy) Web Application Firewall integrated with Caddy
 
 Postgres is enabled by default for the application stack. Use the OpenShift templates in the `common/` folder to manage the database deployment.
 
-### 🛡️ OWASP Coraza WAF: Application Security
+### OWASP Coraza WAF: Application Security
 
 [OWASP Coraza](https://coraza.io/) is an open-source Web Application Firewall (WAF) that provides application-layer security protection against common web attacks. As part of the OWASP (Open Web Application Security Project) ecosystem, Coraza can be used alongside other OWASP security tools. For example, [OWASP ZAP](https://www.zaproxy.org/) (Zed Attack Proxy) is a security testing and validation tool that can be used to test applications protected by Coraza, though there is no special integration between them.
 
@@ -602,66 +602,66 @@ The WAF is integrated directly into the Caddy web server, providing real-time pr
 
 For more details, see the [Coraza documentation](https://coraza.io/docs/).
 
-## 🗄️ PostgreSQL Database
+## PostgreSQL Database
 
 PostgreSQL is the default database for the QuickStart stack.
 
-### 🌟 Key Features
-- 💾 Persistent storage with PVCs
-- 📊 Monitoring via Prometheus
-- 🔧 Self-healing capabilities with probes
-- ⚡ Resource Tuning with Horizontal Pod Autoscaler (TEST/PROD only)
+### Key Features
+-  Persistent storage with PVCs
+-  Monitoring via Prometheus
+-  Self-healing capabilities with probes
+-  Resource Tuning with Horizontal Pod Autoscaler (TEST/PROD only)
 
-### 💡 Setup Tips
-1. **⚙️ Resource Allocation**: Adjust the resources in `common/openshift.database.yml` based on your application needs.
-2. **🌍 Environment Configuration**: Create environment-specific configs from base values as needed.
-3. **🚨 DR Testing**: Disaster Recovery Testing is **`MANDATORY`** before go live.
+### Setup Tips
+1. ** Resource Allocation**: Adjust the resources in `common/openshift.database.yml` based on your application needs.
+2. ** Environment Configuration**: Create environment-specific configs from base values as needed.
+3. ** DR Testing**: Disaster Recovery Testing is **`MANDATORY`** before go live.
 
 
-## 🔄 Alternative Backends
+## Alternative Backends
 
 The sample Java, Python and Go backends repository has been archived, but we have lots of other great examples of active projects you can learn from!
 
 * [NR-RFC-AlertAuthoring - Python with FastAPI and Alembic](https://github.com/bcgov/nr-rfc-alertauthoring)
 * [QuickStart OpenShift Backends](https://github.com/bcgov/quickstart-openshift-backends)
 
-## 📊 SchemaSpy
+## SchemaSpy
 
 The database documentation is created and deployed to GitHub pages.  See [here](https://bcgov.github.io/quickstart-openshift/schemaspy/index.html).
 
 After a full workflow run and merge has been completed, please do the following:
 
-1. ⚙️ Select Settings (gear, top right) > Pages (under `Code and automation`)
-2. 👆 Click `Branch`
-3. 🌿 Select `gh-pages`
-4. 💾 Click `Save`
+1.  Select Settings (gear, top right) > Pages (under `Code and automation`)
+2.  Click `Branch`
+3.  Select `gh-pages`
+4.  Click `Save`
 
 ![img.png](.github/graphics/schemaspy.png)
 
-# 🔄 Flyway, Prisma, Migrations
-1. 🛠️ [Flyway is used as Database Schema Migration tool](https://www.red-gate.com/products/flyway/community/)
-2. 🔧 [Prisma is used as ORM layer](https://www.prisma.io/)
-3. 💡 The rationale behind using flyway to have schema first approach and let prisma generate ORM schema from the database, which would avoid pitfalls like lazy loading, cascading, etc. when defining entities in ORM manually.
-4. 🐳 Run flyway in the docker compose to apply latest changes to Postgres database.
-5. 🔄 Run npx prisma db pull from backend folder to sync the prisma schema.
-6. ⚙️ Run npx prisma generate to generate the prisma client which will have all the entities populated based on fresh prisma schema.
-7. 💻 If using VS Code, be aware of [this issue](https://stackoverflow.com/questions/65663292/prisma-schema-not-updating-properly-after-adding-new-fields)
+# Flyway, Prisma, Migrations
+1.  [Flyway is used as Database Schema Migration tool](https://www.red-gate.com/products/flyway/community/)
+2.  [Prisma is used as ORM layer](https://www.prisma.io/)
+3.  The rationale behind using flyway to have schema first approach and let prisma generate ORM schema from the database, which would avoid pitfalls like lazy loading, cascading, etc. when defining entities in ORM manually.
+4.  Run flyway in the docker compose to apply latest changes to Postgres database.
+5.  Run npx prisma db pull from backend folder to sync the prisma schema.
+6.  Run npx prisma generate to generate the prisma client which will have all the entities populated based on fresh prisma schema.
+7.  If using VS Code, be aware of [this issue](https://stackoverflow.com/questions/65663292/prisma-schema-not-updating-properly-after-adding-new-fields)
 
 
 
-## 🏗️ Architecture
+## Architecture
 
 The architecture diagram provides an overview of the system's components, their interactions, and the deployment structure. It illustrates the relationships between the frontend, backend, database, and other infrastructure elements within the OpenShift environment.
 
 ![Architecture](./.github/graphics/architecture.svg)
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions to improve this template! 
 Please contribute your ideas!  [Issues](/../../issues) and [Pull Requests](/../../pulls) are appreciated.
 
-**Built with ❤️ by the NRIDS Team**
+**Built with  by the NRIDS Team**
 
 This repository is provided by NRIDS Architecture and Forestry Digital Services, courtesy of the Government of British Columbia.
 
-* 🚀 NRID's [Kickstarter Guide](https://bcgov.github.io/nr-architecture-patterns-library/docs/Agile%20Team%20Kickstarter) (via. Confluence, links may be internal)
+* NRID's [Kickstarter Guide](https://bcgov.github.io/nr-architecture-patterns-library/docs/Agile%20Team%20Kickstarter) (via. Confluence, links may be internal)
