@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: bcgov/action-test-and-analyse@8f699e3fd3fadd9a6adf6f4b1f2638ef7ecfefb9 # v2.0.0
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
+          sonar_token: ${{ secrets.sonar_token_backend }}
         with:
           commands: |
             npm ci
@@ -52,7 +52,7 @@ jobs:
             -Dsonar.sources=src
             -Dsonar.test.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
-          sonar_token: ${{ env.SONAR_TOKEN }}
+          sonar_token: ${{ env.sonar_token }}
           dep_scan: warn
           supply_scan: true
           triggers: ('backend/')
@@ -65,7 +65,7 @@ jobs:
     steps:
       - uses: bcgov/action-test-and-analyse@8f699e3fd3fadd9a6adf6f4b1f2638ef7ecfefb9 # v2.0.0
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
+          sonar_token: ${{ secrets.sonar_token_frontend }}
         with:
           commands: |
             npm ci
@@ -81,7 +81,7 @@ jobs:
             -Dsonar.sources=src
             -Dsonar.test.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
-          sonar_token: ${{ env.SONAR_TOKEN }}
+          sonar_token: ${{ env.sonar_token }}
           dep_scan: warn
           supply_scan: true
           triggers: ('frontend/')
@@ -106,7 +106,6 @@ jobs:
           scan-type: "fs"
           scanners: "vuln,secret,misconfig"
           severity: "CRITICAL,HIGH"
-          trivy-config: ".github/trivy.yaml"
           trivyignores: ".trivyignore"
 
       - name: Upload Trivy scan results to GitHub Security tab

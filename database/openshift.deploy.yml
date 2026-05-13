@@ -1,0 +1,133 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+parameters:
+  - name: NAME
+    description: Product name
+    required: true
+  - name: COMPONENT
+    description: Component name
+    value: database
+  - name: ZONE
+    description: Deployment zone, e.g. pr-### or prod
+    required: true
+  - name: PG_VERSION
+    description: PostgreSQL version tag for the Docker Hub postgres image
+    value: "17"
+  - name: DB_PVC_SIZE
+    description: Volume space available for data
+    value: 256Mi
+  - name: RANDOM_EXPRESSION
+    description: Random expression to make sure deployments update
+    from: "[a-zA-Z0-9]{32}"
+    generate: expression
+objects:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: netapp-file-standard
+      resources:
+        requests:
+          storage: ${DB_PVC_SIZE}
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          deployment: ${NAME}-${ZONE}-${COMPONENT}
+      strategy:
+        type: Recreate
+      template:
+        metadata:
+          labels:
+            app: ${NAME}-${ZONE}
+            deployment: ${NAME}-${ZONE}-${COMPONENT}
+        spec:
+          containers:
+            - name: ${NAME}-${ZONE}
+              image: postgres:${PG_VERSION}
+              imagePullPolicy: Always
+              ports:
+                - containerPort: 5432
+              env:
+                - name: PGDATA
+                  value: /var/lib/postgresql/data/pgdata
+                - name: POSTGRES_DB
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-name
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-password
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-user
+                - name: RANDOM_EXPRESSION
+                  value: ${RANDOM_EXPRESSION}
+              volumeMounts:
+                - name: ${NAME}-${ZONE}-${COMPONENT}
+                  mountPath: /var/lib/postgresql/data
+                - name: socket-dir
+                  mountPath: /var/run/postgresql
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 50Mi
+              readinessProbe:
+                exec:
+                  command:
+                    - /usr/bin/env
+                    - bash
+                    - "-c"
+                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                successThreshold: 1
+                failureThreshold: 5
+                initialDelaySeconds: 60
+                periodSeconds: 15
+                timeoutSeconds: 10
+              livenessProbe:
+                exec:
+                  command:
+                    - /usr/bin/env
+                    - bash
+                    - "-c"
+                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                successThreshold: 1
+                failureThreshold: 5
+                initialDelaySeconds: 10
+                periodSeconds: 15
+                timeoutSeconds: 10
+          volumes:
+            - name: ${NAME}-${ZONE}-${COMPONENT}
+              persistentVolumeClaim:
+                claimName: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
+            - name: socket-dir
+              emptyDir: {}
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
+    spec:
+      ports:
+        - name: postgresql
+          port: 5432
+          targetPort: 5432
+      selector:
+        deployment: ${NAME}-${ZONE}-${COMPONENT}

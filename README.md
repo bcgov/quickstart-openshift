@@ -18,9 +18,9 @@ This repository provides a template to rapidly deploy a modern web application s
 * 🛡️ Security, vulnerability, infrastructure, and container scan tools
 * 🔧 Automatic dependency patching available from [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
 * ✅ Enforced code reviews and workflow jobs (pass|fail)
-* 📊 Helm Package Manager
+* 📊 OpenShift Templates
 * 📈 Prometheus Metrics export from Backend/Frontend
-* ⚡ Resource Tuning with Horizontal Pod Autoscaler (TEST/PROD only)
+* ⚡ Resource Tuning with Horizontal Pod Autoscaler
 * 🎯 Affinity and anti-affinity for Scheduling on different worker nodes
 * 🔄 Rolling updates with zero downtime in PROD
 * 🗃️ Database Migrations with Flyway
@@ -28,7 +28,7 @@ This repository provides a template to rapidly deploy a modern web application s
 * 🔍 Self-healing through probes/checks (startup, readiness, liveness)
 * 🎯 Point the long-lived DEMO route to PRs by using the `demo` label
 * **Sample application stack:**
-    * 🗄️ Database: Crunchy (Postgres, PostGIS), backups, Flyway
+    * 🗄️ Database: Postgres, Flyway
     * 🎨 Frontend: TypeScript, Caddy Server with Coraza WAF
     * ⚙️ Backend: TypeScript, Nest.js
     * 🔄 Alternative backend examples - see [Alternative Backends](#alternative-backends)
@@ -99,13 +99,13 @@ Here is the arrangement of secrets, variables and environments for this reposito
 
 | Environment | Name                   | Description                                    |
 |-------------|------------------------|------------------------------------------------|
-| \<none\>    | `vars.OC_SERVER`       | Common server address (repository-level)       |
-| \<none\>    | `secrets.OC_NAMESPACE` | DEV namespace (repository-level)               |
-| \<none\>    | `secrets.OC_TOKEN`     | DEV service token (repository-level)           |
-| TEST        | `secrets.OC_NAMESPACE` | TEST namespace (overrides repository-level)     |
-| TEST        | `secrets.OC_TOKEN`     | TEST service token (overrides repository-level) |
-| PROD        | `secrets.OC_NAMESPACE` | PROD namespace (overrides repository-level)    |
-| PROD        | `secrets.OC_TOKEN`     | PROD service token (overrides repository-level) |
+| \<none\>    | `vars.oc_server`       | Common server address (repository-level)       |
+| \<none\>    | `secrets.oc_namespace` | DEV namespace (repository-level)               |
+| \<none\>    | `secrets.oc_token`     | DEV service token (repository-level)           |
+| TEST        | `secrets.oc_namespace` | TEST namespace (overrides repository-level)     |
+| TEST        | `secrets.oc_token`     | TEST service token (overrides repository-level) |
+| PROD        | `secrets.oc_namespace` | PROD namespace (overrides repository-level)    |
+| PROD        | `secrets.oc_token`     | PROD service token (overrides repository-level) |
 
 ### 🔐 Secret Values
 
@@ -144,13 +144,13 @@ Create separate tokens for each of the DEV, TEST and PROD namespaces.
 
 * Alternate steps using an inline template can be found [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
 * In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
-* Reference: `{{ secrets.OC_NAMESPACE }}`
+* Reference: `{{ secrets.oc_token }}`
 
 **`OC_NAMESPACE`** 📁
 
 Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and PROD.  TOOLS namespaces (e.g. Jenkins, shared Oracle resources) are not used here.  Provided by your OpenShift platform team.
 
-* Reference: `{{ secrets.OC_NAMESPACE }}`
+* Reference: `{{ secrets.oc_namespace }}`
 * E.g.: `abc123-dev`
 
 **`SONAR_TOKEN(s)`** 📊
@@ -169,7 +169,7 @@ BC Government employees can request SonarCloud projects by creating an [issue](h
 **`OC_SERVER`** 🌐
 
 OpenShift server address (API endpoint for your OpenShift cluster).
-* Reference: `{{ vars.OC_SERVER }}`
+* Reference: `{{ vars.oc_server }}`
 * BCGov: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 * Others: Use your cluster's API server address (e.g. `https://api.<cluster-domain>:6443`)
 
@@ -544,10 +544,10 @@ The starter stack includes a frontend (React, Bootstrap, Vite, Caddy), backend (
 * 💪 [TypeScript](https://www.typescriptlang.org/) strong-typing for JavaScript
 * 🏗️ [NestJS](https://docs.nestjs.com) Nest/Node backend and frontend
 * 🔄 [Flyway](https://flywaydb.org/) database migrations
-* 🐘 [Crunchy](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes) Postgres/PostGIS Database
+* 🐘 [Postgres](https://www.postgresql.org/) Database
 * 🛡️ [OWASP Coraza WAF](https://github.com/corazawaf/coraza-caddy) Web Application Firewall integrated with Caddy
 
-PostGIS is enabled by default for geospatial data support when postGISVersion value is provided. To switch to standard PostgreSQL, update the `postGISVersion` field in the [Crunchy Helm chart values](./charts/crunchy/values.yml) to `~`. This disables PostGIS extensions, making it a plain PostgreSQL setup.
+Postgres is enabled by default for the application stack. Use the OpenShift templates in the `database/` folder to manage the deployment.
 
 ### 🛡️ OWASP Coraza WAF: Application Security
 
@@ -594,38 +594,20 @@ The WAF is integrated directly into the Caddy web server, providing real-time pr
 
 For more details, see the [Coraza documentation](https://coraza.io/docs/).
 
-## 🗄️ Crunchy Database
+## 🗄️ PostgreSQL Database
 
-Crunchy is the default choice for high availability (HA) Postgres/PostGIS databases in BC Government.
+PostgreSQL is the default database for the QuickStart stack.
 
 ### 🌟 Key Features
-- ⚡ Automatic failover with Patroni
-- 💾 Scheduled backups
-- 📊 Monitoring
-- 🔧 Self-healing capabilities
-- 📈 Horizontal scaling options (Read Replicas)
+- 💾 Persistent storage with PVCs
+- 📊 Monitoring via Prometheus
+- 🔧 Self-healing capabilities with probes
+- ⚡ Resource Tuning with Horizontal Pod Autoscaler (TEST/PROD only)
 
 ### 💡 Setup Tips
-1. **⚙️ Resource Allocation**: Adjust the resources in [crunchy helm chart values](charts/crunchy/values.yml) based on your application needs, since the **defaults are just minimal**.
-2. **🌍 Environment Configuration**: Create environment-specific configs from base values.yml as  `values-test.yml` and `values-prod.yml`, Make sure there are **at least 3 replicas in PRODUCTION**.
+1. **⚙️ Resource Allocation**: Adjust the resources in `database/openshift.deploy.yml` based on your application needs.
+2. **🌍 Environment Configuration**: Create environment-specific configs from base values as needed.
 3. **🚨 DR Testing**: Disaster Recovery Testing is **`MANDATORY`** before go live.
-
-### 💾 Enabling S3 Backups
-To enable S3 backups/recovery, provide these parameters to the GitHub Action:
-- `s3_access_key`
-- `s3_secret_key` 
-- `s3_bucket`
-- `s3_endpoint`
-
-> **Important**: Never reuse the same s3/object store, bucket path across different Crunchy deployments or instances (dev, test, prod)
-
-For advanced configuration, see the [re-usable GitHub Action](https://github.com/bcgov/action-crunchy) that manages PR deployments and helm template upgrades.
-
-### 🔧 Troubleshooting and Support
-
-If you encounter issues, check out the [Troubleshooting Guide](https://github.com/bcgov/crunchy-postgres/blob/main/Troubleshoot.md) for quick solutions.
-
-Need more help? Join the discussion in the [CrunchyDB Rocket.Chat Channel](https://chat.developer.gov.bc.ca/channel/crunchydb) to get support from the community and experts.
 
 
 ## 🔄 Alternative Backends
