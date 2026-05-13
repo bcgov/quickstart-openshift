@@ -37,7 +37,7 @@ Fixes # (issue)
 <!-- Go over all the following points, and put an `x` in all the boxes that apply. -->
 <!-- If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
 
-- [x] I have read the [CONTRIBUTING](CONTRIBUTING.md) doc
+- [x] I have read the [CONTRIBUTING](../CONTRIBUTING.md) doc
 - [x] I have performed a self-review of my own code
 - [x] I have commented my code, particularly in hard-to-understand areas
 - [x] I have made corresponding changes to the documentation
