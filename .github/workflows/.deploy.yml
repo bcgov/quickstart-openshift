@@ -34,7 +34,7 @@ on:
     outputs:
       triggered:
         description: Has deployment been triggered?
-        value: ${{ jobs.deploy.outputs.triggered }}
+        value: ${{ jobs.init.outputs.triggered }}
 
 permissions: {}
 
@@ -42,9 +42,12 @@ jobs:
   init:
     name: Deploy (init)
     environment: ${{ inputs.environment }}
+    outputs:
+      triggered: ${{ steps.deploy.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
       - uses: bcgov/action-deployer-openshift@565e315dfddb8aee08fcfd885a27407dde9a2775 #v4.0.1
+        id: deploy
         with:
           file: common/openshift.init.yml
           oc_namespace: ${{ secrets.oc_namespace }}
