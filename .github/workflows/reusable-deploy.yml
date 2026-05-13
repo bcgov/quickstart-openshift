@@ -62,7 +62,6 @@ jobs:
 
   deploy:
     name: Deploy (${{ matrix.name }})
-    environment: ${{ inputs.environment }}
     needs: [init]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
