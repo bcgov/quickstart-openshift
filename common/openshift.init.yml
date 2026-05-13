@@ -27,9 +27,11 @@ objects:
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
-      name: allow-from-openshift-ingress
+      name: ${NAME}-${ZONE}-frontend
     spec:
-      podSelector: {}
+      podSelector:
+        matchLabels:
+          deployment: ${NAME}-${ZONE}-frontend
       ingress:
         - from:
             - namespaceSelector:
@@ -40,13 +42,30 @@ objects:
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
-      name: allow-same-namespace
-      labels:
-        template: quickstart-network-security-policy
+      name: ${NAME}-${ZONE}-backend
     spec:
-      podSelector: {}
+      podSelector:
+        matchLabels:
+          deployment: ${NAME}-${ZONE}-backend
       ingress:
         - from:
-            - podSelector: {}
+            - podSelector:
+                matchLabels:
+                  deployment: ${NAME}-${ZONE}-frontend
+      policyTypes:
+        - Ingress
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: ${NAME}-${ZONE}-database
+    spec:
+      podSelector:
+        matchLabels:
+          deployment: ${NAME}-${ZONE}-database
+      ingress:
+        - from:
+            - podSelector:
+                matchLabels:
+                  deployment: ${NAME}-${ZONE}-backend
       policyTypes:
         - Ingress
