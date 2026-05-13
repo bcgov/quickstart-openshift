@@ -33,20 +33,20 @@ jobs:
   deploys:
     name: Deploys (${{ github.event.number }})
     needs: [builds]
-    uses: ./.github/workflows/.deploy.yml
+    uses: ./.github/workflows/reusable-deploy.yml
     secrets:
       db_password: ${{ secrets.DB_PASSWORD }}
       oc_namespace: ${{ secrets.oc_namespace }}
       oc_token: ${{ secrets.oc_token }}
     with:
       target: ${{ github.event.number }}
-      triggers: ('backend/', 'frontend/', 'migrations/', 'common/', 'database/', '.github/workflows/.deploy.yml')
+      triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/reusable-deploy.yml')
 
   tests:
      name: Tests
      if: needs.deploys.outputs.triggered == 'true'
      needs: [deploys]
-     uses: ./.github/workflows/.tests.yml
+     uses: ./.github/workflows/reusable-tests.yml
 
   results:
     name: PR Results

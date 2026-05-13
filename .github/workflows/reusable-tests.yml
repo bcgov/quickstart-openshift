@@ -1,4 +1,4 @@
-name: .Tests
+name: Reusable Tests
 
 on:
   workflow_call:

@@ -102,6 +102,7 @@ Here is the arrangement of secrets, variables and environments for this reposito
 | \<none\>    | `vars.oc_server`       | Common server address (repository-level)       |
 | \<none\>    | `secrets.oc_namespace` | DEV namespace (repository-level)               |
 | \<none\>    | `secrets.oc_token`     | DEV service token (repository-level)           |
+| \<none\>    | `secrets.db_password`  | Database password (repository-level)           |
 | TEST        | `secrets.oc_namespace` | TEST namespace (overrides repository-level)     |
 | TEST        | `secrets.oc_token`     | TEST service token (overrides repository-level) |
 | PROD        | `secrets.oc_namespace` | PROD namespace (overrides repository-level)    |
@@ -161,6 +162,13 @@ If SonarCloud is being used each application will have its own token.  Single-ap
 * Reference (monorepo): `${{ secrets.SONAR_TOKEN_BACKEND }}`, `${{ secrets.SONAR_TOKEN_FRONTEND }}`, etc
 
 BC Government employees can request SonarCloud projects by creating an [issue](https://github.com/bcgov/devops-requests/issues/new/choose) with the platform team.  Please make sure to request a monorepo with component names (e.g. backend, frontend), which may not be explained in their directions.
+
+**`DB_PASSWORD`** 🔑
+
+The password used for the PostgreSQL database. This should be a strong, unique password.
+
+* Reference: `{{ secrets.db_password }}`
+* Minimum 8 characters recommended.
 
 ### 📊 Variable Values
 
@@ -547,7 +555,7 @@ The starter stack includes a frontend (React, Bootstrap, Vite, Caddy), backend (
 * 🐘 [Postgres](https://www.postgresql.org/) Database
 * 🛡️ [OWASP Coraza WAF](https://github.com/corazawaf/coraza-caddy) Web Application Firewall integrated with Caddy
 
-Postgres is enabled by default for the application stack. Use the OpenShift templates in the `database/` folder to manage the deployment.
+Postgres is enabled by default for the application stack. Use the OpenShift templates in the `common/` folder to manage the database deployment.
 
 ### 🛡️ OWASP Coraza WAF: Application Security
 
@@ -605,7 +613,7 @@ PostgreSQL is the default database for the QuickStart stack.
 - ⚡ Resource Tuning with Horizontal Pod Autoscaler (TEST/PROD only)
 
 ### 💡 Setup Tips
-1. **⚙️ Resource Allocation**: Adjust the resources in `database/openshift.deploy.yml` based on your application needs.
+1. **⚙️ Resource Allocation**: Adjust the resources in `common/openshift.database.yml` based on your application needs.
 2. **🌍 Environment Configuration**: Create environment-specific configs from base values as needed.
 3. **🚨 DR Testing**: Disaster Recovery Testing is **`MANDATORY`** before go live.
 

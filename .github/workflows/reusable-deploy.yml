@@ -1,4 +1,4 @@
-name: .Deploys
+name: Reusable Deploys
 
 on:
   workflow_call:
@@ -71,7 +71,7 @@ jobs:
         name: [database, backend, frontend]
         include:
           - name: database
-            file: database/openshift.deploy.yml
+            file: common/openshift.database.yml
             overwrite: true
             parameters: -p DB_PVC_SIZE=256Mi
           - name: backend

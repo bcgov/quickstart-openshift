@@ -33,7 +33,7 @@ jobs:
   deploy-test:
     name: TEST Deploys (${{ needs.init.outputs.pr }})
     needs: [init]
-    uses: ./.github/workflows/.deploy.yml
+    uses: ./.github/workflows/reusable-deploy.yml
     secrets:
       db_password: ${{ secrets.DB_PASSWORD }}
       oc_namespace: ${{ secrets.oc_namespace }}
@@ -46,14 +46,14 @@ jobs:
   tests:
     name: Tests
     needs: [deploy-test]
-    uses: ./.github/workflows/.tests.yml
+    uses: ./.github/workflows/reusable-tests.yml
     with:
       target: test
 
   deploy-prod:
     name: PROD Deploys (${{ needs.init.outputs.pr }})
     needs: [tests, init]
-    uses: ./.github/workflows/.deploy.yml
+    uses: ./.github/workflows/reusable-deploy.yml
     secrets:
       db_password: ${{ secrets.DB_PASSWORD }}
       oc_namespace: ${{ secrets.oc_namespace }}
