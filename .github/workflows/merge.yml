@@ -19,6 +19,9 @@ permissions: {}
 jobs:
   init:
     name: Initialize
+    permissions:
+      contents: read
+      pull-requests: read
     outputs:
       pr: ${{ steps.pr.outputs.pr }}
     runs-on: ubuntu-24.04
@@ -29,6 +32,7 @@ jobs:
 
   deploy-test:
     name: TEST Deploys (${{ needs.init.outputs.pr }})
+    needs: [init]
     uses: ./.github/workflows/.deploy.yml
     secrets:
       db_password: ${{ secrets.DB_PASSWORD }}
@@ -48,7 +52,7 @@ jobs:
 
   deploy-prod:
     name: PROD Deploys (${{ needs.init.outputs.pr }})
-    needs: [tests]
+    needs: [tests, init]
     uses: ./.github/workflows/.deploy.yml
     secrets:
       db_password: ${{ secrets.DB_PASSWORD }}
@@ -61,7 +65,7 @@ jobs:
 
   promote:
     name: Promote Images
-    needs: [deploy-prod]
+    needs: [deploy-prod, init]
     runs-on: ubuntu-slim
     permissions:
       packages: write
