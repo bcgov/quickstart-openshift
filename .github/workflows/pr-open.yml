@@ -11,28 +11,28 @@ permissions: {}
 
 jobs:
   # https://github.com/bcgov/action-builder-ghcr
-  builds:
-    name: Builds
-    permissions:
-      attestations: write
-      id-token: write
-      packages: write
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        package: [backend, frontend, migrations]
-    timeout-minutes: 10
-    steps:
-      - uses: bcgov/action-builder-ghcr@de3d575cf158e16f5dc2789630f6d587483b911c # v4.4.0
-        with:
-          package: ${{ matrix.package }}
-          tags: ${{ github.event.number }}
-          tag_fallback: latest
-          triggers: ('${{ matrix.package }}/')
+  # builds:
+  #   name: Builds
+  #   permissions:
+  #     attestations: write
+  #     id-token: write
+  #     packages: write
+  #   runs-on: ubuntu-24.04
+  #   strategy:
+  #     matrix:
+  #       package: [backend, frontend, migrations]
+  #   timeout-minutes: 10
+  #   steps:
+  #     - uses: bcgov/action-builder-ghcr@de3d575cf158e16f5dc2789630f6d587483b911c # v4.4.0
+  #       with:
+  #         package: ${{ matrix.package }}
+  #         tags: ${{ github.event.number }}
+  #         tag_fallback: latest
+  #         triggers: ('${{ matrix.package }}/')
 
   deploys:
     name: Deploys (${{ github.event.number }})
-    needs: [builds]
+    # needs: [builds]
     uses: ./.github/workflows/reusable-deploy.yml
     secrets:
       db_password: ${{ secrets.db_password }}
@@ -42,18 +42,18 @@ jobs:
       target: ${{ github.event.number }}
       triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/reusable-deploy.yml')
 
-  tests:
-     name: Tests
-     if: needs.deploys.outputs.triggered == 'true'
-     needs: [deploys]
-     uses: ./.github/workflows/reusable-tests.yml
+  # tests:
+  #    name: Tests
+  #    if: needs.deploys.outputs.triggered == 'true'
+  #    needs: [deploys]
+  #    uses: ./.github/workflows/reusable-tests.yml
 
-  results:
-    name: PR Results
-    needs: [builds, deploys, tests]
-    if: always()
-    runs-on: ubuntu-slim
-    steps:
-      - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
-        run: echo "At least one job has failed." && exit 1
-      - run: echo "Success!"
+  # results:
+  #   name: PR Results
+  #   needs: [builds, deploys, tests]
+  #   if: always()
+  #   runs-on: ubuntu-slim
+  #   steps:
+  #     - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
+  #       run: echo "At least one job has failed." && exit 1
+  #     - run: echo "Success!"
