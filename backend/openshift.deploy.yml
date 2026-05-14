@@ -61,8 +61,15 @@ objects:
                 - -c
                 - |
                   echo "Waiting for database to be reachable..."
+                  max_retries=30
+                  attempt=1
                   until nc -z -v -w3 ${NAME}-${ZONE}-database 5432; do
-                    echo "Database not ready, sleeping..."
+                    if [ "$attempt" -ge "$max_retries" ]; then
+                      echo "ERROR: Database ${NAME}-${ZONE}-database:5432 is not reachable after ${max_retries} attempts." >&2
+                      exit 1
+                    fi
+                    echo "Database not ready (attempt ${attempt}/${max_retries}), sleeping..."
+                    attempt=$((attempt + 1))
                     sleep 2
                   done
                   echo "Database is UP!"

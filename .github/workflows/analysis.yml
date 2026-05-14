@@ -102,7 +102,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .trivycache
-          key: ${{ runner.os }}-trivy-${{ github.run_id }}
+          key: ${{ runner.os }}-trivy-v0.36.0-cache-v1
           restore-keys: |
             ${{ runner.os }}-trivy-
 
