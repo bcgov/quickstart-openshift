@@ -28,6 +28,8 @@ objects:
     kind: NetworkPolicy
     metadata:
       name: allow-from-openshift-ingress
+      labels:
+        app: ${NAME}-${ZONE}
     spec:
       podSelector: {}
       ingress:
@@ -42,6 +44,7 @@ objects:
     metadata:
       name: allow-same-namespace
       labels:
+        app: ${NAME}-${ZONE}
         template: quickstart-network-security-policy
     spec:
       podSelector: {}
