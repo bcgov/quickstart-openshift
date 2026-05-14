@@ -55,7 +55,7 @@ objects:
         spec:
           initContainers:
             - name: wait-for-db
-              image: alpine:latest
+              image: ${REGISTRY}/${ORG_NAME}/${NAME}/migrations:${IMAGE_TAG}
               command:
                 - /bin/sh
                 - -c
