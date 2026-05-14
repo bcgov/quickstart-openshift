@@ -28,9 +28,9 @@ parameters:
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "5"
   - name: CPU_REQUEST
-    value: "25m"
+    value: "50m"
   - name: MEMORY_REQUEST
-    value: "100Mi"
+    value: "128Mi"
   - name: LOG_LEVEL
     description: Application log level (debug|info|warn|error)
     value: "info"
