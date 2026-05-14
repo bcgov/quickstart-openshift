@@ -94,7 +94,7 @@ jobs:
     permissions:
       security-events: write
     runs-on: ubuntu-slim
-    timeout-minutes: 2
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
       - name: Run Trivy vulnerability scanner in repo mode
