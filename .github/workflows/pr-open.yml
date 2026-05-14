@@ -28,7 +28,7 @@ jobs:
           package: ${{ matrix.package }}
           tags: ${{ github.event.number }}
           tag_fallback: latest
-          triggers: ('${{ matrix.package }}/')
+          triggers: ('${{ matrix.package }}/', '.github/workflows/')
 
   deploys:
     name: Deploys (${{ github.event.number }})
@@ -40,7 +40,7 @@ jobs:
       oc_token: ${{ secrets.oc_token }}
     with:
       target: ${{ github.event.number }}
-      triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/reusable-deploy.yml')
+      triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/')
 
   tests:
      name: Tests

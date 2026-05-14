@@ -54,6 +54,18 @@ objects:
             deployment: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           initContainers:
+            - name: wait-for-db
+              image: alpine:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "Waiting for database to be reachable..."
+                  until nc -z -v -w3 ${NAME}-${ZONE}-database 5432; do
+                    echo "Database not ready, sleeping..."
+                    sleep 2
+                  done
+                  echo "Database is UP!"
             - name: migrations
               image: ${REGISTRY}/${ORG_NAME}/${NAME}/migrations:${IMAGE_TAG}
               imagePullPolicy: Always

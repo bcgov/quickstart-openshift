@@ -86,8 +86,8 @@ objects:
                   mountPath: /var/run/postgresql
               resources:
                 requests:
-                  cpu: 10m
-                  memory: 50Mi
+                  cpu: 20m
+                  memory: 128Mi
               readinessProbe:
                 exec:
                   command:
@@ -97,7 +97,7 @@ objects:
                     - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
                 successThreshold: 1
                 failureThreshold: 5
-                initialDelaySeconds: 60
+                initialDelaySeconds: 15
                 periodSeconds: 15
                 timeoutSeconds: 10
               livenessProbe:
@@ -109,7 +109,7 @@ objects:
                     - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
                 successThreshold: 1
                 failureThreshold: 5
-                initialDelaySeconds: 10
+                initialDelaySeconds: 30
                 periodSeconds: 15
                 timeoutSeconds: 10
           volumes:
