@@ -46,7 +46,7 @@ jobs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov/action-deployer-openshift@565e315dfddb8aee08fcfd885a27407dde9a2775 #v4.0.1
+      - uses: bcgov/action-deployer-openshift@feat/lite-mode-opt-out
         id: deploy
         with:
           file: common/openshift.init.yml
@@ -85,7 +85,7 @@ jobs:
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
-      - uses: bcgov/action-deployer-openshift@565e315dfddb8aee08fcfd885a27407dde9a2775 #v4.0.1
+      - uses: bcgov/action-deployer-openshift@feat/lite-mode-opt-out
         id: deploy
         with:
           file: ${{ matrix.file }}
