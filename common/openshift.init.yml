@@ -27,13 +27,13 @@ objects:
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
-      name: ${NAME}-${ZONE}-ingress
+      name: ${NAME}-${ZONE}-frontend-ingress
       labels:
         app: ${NAME}-${ZONE}
     spec:
       podSelector:
         matchLabels:
-          app: ${NAME}-${ZONE}
+          deployment: ${NAME}-${ZONE}-frontend
       ingress:
         - from:
             - namespaceSelector:
@@ -44,18 +44,34 @@ objects:
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
-      name: ${NAME}-${ZONE}-same-namespace
+      name: ${NAME}-${ZONE}-backend-ingress
       labels:
         app: ${NAME}-${ZONE}
-        template: quickstart-network-security-policy
     spec:
       podSelector:
         matchLabels:
-          app: ${NAME}-${ZONE}
+          deployment: ${NAME}-${ZONE}-backend
       ingress:
         - from:
             - podSelector:
                 matchLabels:
-                  app: ${NAME}-${ZONE}
+                  deployment: ${NAME}-${ZONE}-frontend
+      policyTypes:
+        - Ingress
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: ${NAME}-${ZONE}-database-ingress
+      labels:
+        app: ${NAME}-${ZONE}
+    spec:
+      podSelector:
+        matchLabels:
+          deployment: ${NAME}-${ZONE}-database
+      ingress:
+        - from:
+            - podSelector:
+                matchLabels:
+                  deployment: ${NAME}-${ZONE}-backend
       policyTypes:
         - Ingress
