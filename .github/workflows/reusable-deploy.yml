@@ -59,6 +59,7 @@ jobs:
             -p ZONE=${{ inputs.target }}
             -p NAME=${{ github.event.repository.name }}
           triggers: ${{ inputs.triggers }}
+          verbose: true
 
   deploy:
     name: Deploy (${{ matrix.name }})
@@ -93,6 +94,7 @@ jobs:
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
           overwrite: ${{ matrix.overwrite }}
+          verbose: true
           parameters:
             -p ZONE=${{ inputs.target }} 
             -p NAME=${{ github.event.repository.name }}
