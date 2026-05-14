@@ -55,6 +55,7 @@ objects:
         - from:
             - podSelector:
                 matchLabels:
+                  app: ${NAME}-${ZONE}
                   deployment: ${NAME}-${ZONE}-frontend
       policyTypes:
         - Ingress
@@ -72,6 +73,7 @@ objects:
         - from:
             - podSelector:
                 matchLabels:
+                  app: ${NAME}-${ZONE}
                   deployment: ${NAME}-${ZONE}-backend
       policyTypes:
         - Ingress
