@@ -1,4 +1,4 @@
-name: .Tests
+name: Reusable Tests
 
 on:
   workflow_call:
@@ -36,7 +36,7 @@ jobs:
           API_NAME: nest
           BASE_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}
         run: |
-          cd tests/integration
+          cd common/tests/integration
           npm ci
           node src/main.js
 
@@ -93,5 +93,5 @@ jobs:
           BACKEND_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}/api
           FRONTEND_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}
         with:
-          path: ./tests/load/${{ matrix.name }}-test.js
+          path: ./common/tests/load/${{ matrix.name }}-test.js
           flags: --vus 100 --duration 300s

@@ -28,25 +28,25 @@ jobs:
           package: ${{ matrix.package }}
           tags: ${{ github.event.number }}
           tag_fallback: latest
-          triggers: ('${{ matrix.package }}/')
+          triggers: ('${{ matrix.package }}/', '.github/workflows/')
 
   deploys:
     name: Deploys (${{ github.event.number }})
     needs: [builds]
-    uses: ./.github/workflows/.deploy.yml
+    uses: ./.github/workflows/reusable-deploy.yml
     secrets:
-      db_password: ${{ secrets.DB_PASSWORD }}
+      db_password: ${{ secrets.db_password }}
       oc_namespace: ${{ secrets.oc_namespace }}
       oc_token: ${{ secrets.oc_token }}
     with:
       target: ${{ github.event.number }}
-      triggers: ('backend/', 'frontend/', 'migrations/', 'common/', 'database/', '.github/workflows/.deploy.yml')
+      triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/')
 
   tests:
      name: Tests
      if: needs.deploys.outputs.triggered == 'true'
      needs: [deploys]
-     uses: ./.github/workflows/.tests.yml
+     uses: ./.github/workflows/reusable-tests.yml
 
   results:
     name: PR Results
@@ -54,6 +54,6 @@ jobs:
     if: always()
     runs-on: ubuntu-slim
     steps:
-      - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
+      - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'cancelled')
         run: echo "At least one job has failed." && exit 1
       - run: echo "Success!"

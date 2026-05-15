@@ -1,5 +1,5 @@
-# Shared Prettier configuration for entire repository
-# This ensures consistent formatting between frontend, backend, and IDE
+# Prettier configuration for the backend project
+# Keep this in sync manually with other project-level Prettier configs if needed
 
 # Use single quotes instead of double quotes
 singleQuote: true

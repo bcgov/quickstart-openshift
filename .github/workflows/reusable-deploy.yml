@@ -1,4 +1,5 @@
-name: .Deploys
+# Reusable Deploy - Lite Mode Verification
+name: Reusable Deploy
 
 on:
   workflow_call:
@@ -46,7 +47,7 @@ jobs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov/action-deployer-openshift@565e315dfddb8aee08fcfd885a27407dde9a2775 #v4.0.1
+      - uses: bcgov/action-deployer-openshift@feat/lite-mode-opt-out
         id: deploy
         with:
           file: common/openshift.init.yml
@@ -59,6 +60,7 @@ jobs:
             -p ZONE=${{ inputs.target }}
             -p NAME=${{ github.event.repository.name }}
           triggers: ${{ inputs.triggers }}
+          debug: true
 
   deploy:
     name: Deploy (${{ matrix.name }})
@@ -71,31 +73,27 @@ jobs:
         name: [database, backend, frontend]
         include:
           - name: database
-            file: database/openshift.deploy.yml
-            overwrite: true
+            file: common/openshift.database.yml
             parameters: -p DB_PVC_SIZE=256Mi
           - name: backend
             file: backend/openshift.deploy.yml
-            overwrite: true
             parameters: -p IMAGE_TAG=${{ inputs.tag }}
           - name: frontend
             file: frontend/openshift.deploy.yml
-            overwrite: true
             parameters: -p IMAGE_TAG=${{ inputs.tag }}
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
-      - uses: bcgov/action-deployer-openshift@565e315dfddb8aee08fcfd885a27407dde9a2775 #v4.0.1
+      - uses: bcgov/action-deployer-openshift@feat/lite-mode-opt-out
         id: deploy
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
-          overwrite: ${{ matrix.overwrite }}
+          debug: true
           parameters:
-            -p ZONE=${{ inputs.target }} 
+            -p ZONE=${{ inputs.target }}
             -p NAME=${{ github.event.repository.name }}
             ${{ matrix.parameters }}
-          timeout: 15m
           triggers: ${{ inputs.triggers }}

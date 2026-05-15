@@ -28,9 +28,9 @@ parameters:
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "5"
   - name: CPU_REQUEST
-    value: "25m"
+    value: "50m"
   - name: MEMORY_REQUEST
-    value: "100Mi"
+    value: "128Mi"
   - name: LOG_LEVEL
     description: Application log level (debug|info|warn|error)
     value: "info"
@@ -42,7 +42,6 @@ objects:
         app: ${NAME}-${ZONE}
       name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
-      replicas: ${{MIN_REPLICAS}}
       selector:
         matchLabels:
           deployment: ${NAME}-${ZONE}-${COMPONENT}
@@ -55,6 +54,25 @@ objects:
             deployment: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           initContainers:
+            - name: wait-for-db
+              image: ${REGISTRY}/${ORG_NAME}/${NAME}/migrations:${IMAGE_TAG}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "Waiting for database to be reachable..."
+                  max_retries=30
+                  attempt=1
+                  until nc -z -v -w3 ${NAME}-${ZONE}-database 5432; do
+                    if [ "$attempt" -ge "$max_retries" ]; then
+                      echo "ERROR: Database ${NAME}-${ZONE}-database:5432 is not reachable after ${max_retries} attempts." >&2
+                      exit 1
+                    fi
+                    echo "Database not ready (attempt ${attempt}/${max_retries}), sleeping..."
+                    attempt=$((attempt + 1))
+                    sleep 2
+                  done
+                  echo "Database is UP!"
             - name: migrations
               image: ${REGISTRY}/${ORG_NAME}/${NAME}/migrations:${IMAGE_TAG}
               imagePullPolicy: Always
