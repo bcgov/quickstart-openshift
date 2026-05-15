@@ -42,8 +42,8 @@ RUN mkdir -p /tmp/coraza && \
 RUN /usr/bin/caddy fmt /etc/caddy/Caddyfile
 
 # Boilerplate, since there are ignored by Openshift
-HEALTHCHECK --interval=30s --timeout=3s CMD wget -q -O /dev/null http://127.0.0.1:3001/health || exit 1
 EXPOSE 3000 3001
+HEALTHCHECK --interval=30s --timeout=3s CMD wget -q -O /dev/null http://127.0.0.1:3001/health || exit 1
 USER 1001
 
 # Startup
