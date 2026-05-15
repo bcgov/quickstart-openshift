@@ -9,6 +9,7 @@ on:
       - '.github/graphics/**'
       - '!.github/workflows/**'
   workflow_dispatch:
+  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}
@@ -29,7 +30,6 @@ jobs:
       # Get PR number for squash merges to main
       - id: pr
         uses: bcgov/action-get-pr@bf6c85d0ed23a151f2829956c140fde87979bbf2 # v0.2.0
-
   deploy-test:
     name: TEST Deploys (${{ needs.init.outputs.pr }})
     needs: [init]
