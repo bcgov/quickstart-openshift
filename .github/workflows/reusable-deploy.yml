@@ -56,9 +56,9 @@ jobs:
           oc_token: ${{ secrets.oc_token }}
           overwrite: true
           parameters:
-            -p DB_PASSWORD=${{ secrets.db_password }}
-            -p ZONE=${{ inputs.target }}
-            -p NAME=${{ github.event.repository.name }}
+            -p DB_PASSWORD="${{ secrets.db_password }}"
+            -p ZONE="${{ inputs.target }}"
+            -p NAME="${{ github.event.repository.name }}"
           triggers: ${{ inputs.triggers }}
           debug: true
 
@@ -93,7 +93,7 @@ jobs:
           oc_token: ${{ secrets.oc_token }}
           debug: true
           parameters:
-            -p ZONE=${{ inputs.target }}
-            -p NAME=${{ github.event.repository.name }}
+            -p ZONE="${{ inputs.target }}"
+            -p NAME="${{ github.event.repository.name }}"
             ${{ matrix.parameters }}
           triggers: ${{ inputs.triggers }}
