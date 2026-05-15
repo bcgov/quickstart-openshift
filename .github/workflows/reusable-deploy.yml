@@ -74,13 +74,13 @@ jobs:
         include:
           - name: database
             file: common/openshift.database.yml
-            parameters: -p DB_PVC_SIZE=256Mi
+            parameters: -p DB_PVC_SIZE="256Mi"
           - name: backend
             file: backend/openshift.deploy.yml
-            parameters: -p IMAGE_TAG=${{ inputs.tag }}
+            parameters: -p IMAGE_TAG="${{ inputs.tag }}"
           - name: frontend
             file: frontend/openshift.deploy.yml
-            parameters: -p IMAGE_TAG=${{ inputs.tag }}
+            parameters: -p IMAGE_TAG="${{ inputs.tag }}"
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
