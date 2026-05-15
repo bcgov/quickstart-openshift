@@ -84,7 +84,7 @@ jobs:
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
-      - uses: bcgov/action-deployer-openshift@feat/lite-mode-opt-out
+      - uses: bcgov/action-deployer-openshift@d597ac20bc0e7b461aa8c4f3dd6c1276b44afccf #v4.1.0
         id: deploy
         with:
           file: ${{ matrix.file }}
