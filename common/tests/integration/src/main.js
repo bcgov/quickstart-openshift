@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import axios from "axios";
 import * as fs from "fs";
 import * as path from "path";
@@ -7,7 +6,13 @@ import assert from "node:assert/strict";
 
 import pkg from "lodash";
 
-dotenv.config();
+try {
+  process.loadEnvFile();
+} catch (error) {
+  if (error?.code !== "ENOENT") {
+    throw error;
+  }
+}
 
 const { isEqual, omit } = pkg;
 
