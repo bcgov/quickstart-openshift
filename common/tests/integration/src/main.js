@@ -8,8 +8,10 @@ import pkg from "lodash";
 
 try {
   process.loadEnvFile();
-} catch {
-  // .env file is optional (e.g. in CI environments)
+} catch (error) {
+  if (error?.code !== "ENOENT") {
+    throw error;
+  }
 }
 
 const { isEqual, omit } = pkg;
