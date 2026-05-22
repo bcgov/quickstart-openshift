@@ -28,7 +28,7 @@ jobs:
     steps:
       # Get PR number for squash merges to main
       - id: pr
-        uses: bcgov/action-get-pr@ec2d69cce60f86a79cac0fcfc279cb7e8fa08842 # v0.3.0
+        uses: bcgov/action-get-pr@3931962bf13b3f4702d0013ec7c836f752ff1a3b # v0.3.0
   deploy-test:
     name: TEST Deploys (${{ needs.init.outputs.pr }})
     needs: [init]
