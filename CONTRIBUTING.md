@@ -1,9 +1,18 @@
-# How to contribute
+# How to Contribute
 
-Government employees, public and members of the private sector are encouraged to contribute to the repository by **creating a branch and submitting a pull request**.  Outside forks come with permissions complications, but can still be accepted.
+Government employees, members of the public, and the private sector are encouraged to contribute to this repository!
 
-(If you are new to GitHub, you might start with a [basic tutorial](https://help.github.com/articles/set-up-git) and check out a more detailed guide to [pull requests](https://help.github.com/articles/using-pull-requests/).)
+## Git Workflow Strategy
 
-Pull requests will be evaluated by the repository guardians on a schedule and if deemed beneficial will be committed to the main branch.
+We strictly follow a structured Git workflow to keep our history clean and reviewable:
 
-All contributors retain the original copyright to their stuff, but by contributing to this project, you grant a world-wide, royalty-free, perpetual, irrevocable, non-exclusive, transferable license to all users **under the terms of the [license](./LICENSE.md) under which this project is distributed**.
+1. **Always branch off a fresh main:**
+   ````bash
+   git checkout main && git pull
+   ````
+2. **Create a descriptive feature/chore branch:** Use a branch type prefix (e.g., `feat/` or `chore/`):
+   ````bash
+   git switch -c feat/my-awesome-improvement
+   ````
+3. **Submit a Pull Request:** Push to your feature branch and open a PR pointing back to `main`.
+4. **Commit changes using Conventional Commits:** Ensure your commit messages match the Conventional Commit format (e.g., `feat(frontend): add new route` or `chore(hygiene): establish templates`).
