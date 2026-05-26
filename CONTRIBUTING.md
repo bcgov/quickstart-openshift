@@ -1,9 +1,24 @@
-# How to contribute
+# How to Contribute
 
-Government employees, public and members of the private sector are encouraged to contribute to the repository by **creating a branch and submitting a pull request**.  Outside forks come with permissions complications, but can still be accepted.
+Government employees, members of the public, and the private sector are encouraged to contribute to this repository!
 
-(If you are new to GitHub, you might start with a [basic tutorial](https://help.github.com/articles/set-up-git) and check out a more detailed guide to [pull requests](https://help.github.com/articles/using-pull-requests/).)
+## Contribution Licensing
 
-Pull requests will be evaluated by the repository guardians on a schedule and if deemed beneficial will be committed to the main branch.
+Unless otherwise noted, you retain copyright in your contribution and agree that any contribution submitted for inclusion in this repository is provided under the same license terms that apply to this project. See [`LICENSE`](LICENSE) for details.
 
-All contributors retain the original copyright to their stuff, but by contributing to this project, you grant a world-wide, royalty-free, perpetual, irrevocable, non-exclusive, transferable license to all users **under the terms of the [license](./LICENSE.md) under which this project is distributed**.
+## Git Workflow Strategy
+
+We strictly follow a structured Git workflow to keep our history clean and reviewable:
+
+1. **Always branch off a fresh main:**
+   ````bash
+   git checkout main && git pull
+   ````
+2. **Create a descriptive branch:** Use a branch type prefix (e.g., `feat/` or `chore/`):
+   ````bash
+   git switch -c feat/my-awesome-improvement
+   ````
+3. **Submit a Pull Request:**
+   - **Internal Contributors (Push Access):** Push your branch directly to this repository and open a Pull Request pointing back to `main`.
+   - **External Contributors (Forks):** Fork the repository, clone your fork locally, create your branch from an up-to-date `main`, push the branch to your fork, and open a Pull Request from your fork's branch to this repository's `main`.
+4. **Commit changes using Conventional Commits:** Ensure your commit messages match the Conventional Commit format (e.g., `feat(frontend): add new route` or `chore(hygiene): establish templates`).
