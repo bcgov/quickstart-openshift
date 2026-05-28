@@ -43,7 +43,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Clean up PR Deployments
-        uses: bcgov/action-oc-runner@1815ce17a815c71e9078851a2e3da84d191ea6c3 # v1.5.0
+        uses: bcgov/action-oc-runner@b1c55b8a8bd5f42b19f72e6ea7df6d6a6eda44a1 # v1.5.1
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
@@ -94,7 +94,7 @@ jobs:
     permissions:
       contents: write
       pages: write
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@18a043020cdc4f1125ec592524e8163edc767f4a # v1.2.0
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@a11ad3d1b9288fb40757c4314a62eb86ff227931 # v1.2.1
 
   # Run sequentially to reduce chances of rate limiting
   zap:
