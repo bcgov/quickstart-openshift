@@ -1,0 +1,14 @@
+{
+  "type": "PROMETHEUS",
+  "name": "__ALERT_NAME__",
+  "description": "Container in __NAMESPACE__/__COMPONENT__ has restarted more than once per minute for over __DURATION_MINUTES__ minutes.",
+  "severity": "medium",
+  "enabled": true,
+  "config": {
+    "duration": 0,
+    "query": "sum(rate(kube_pod_container_status_restarts_total{kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__COMPONENT__\"}[5m])) * 60 > 1"
+  },
+  "notificationChannelConfigList": [
+    { "type": "EMAIL", "channelId": 0 }
+  ]
+}

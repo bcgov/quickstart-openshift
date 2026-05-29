@@ -1,0 +1,14 @@
+{
+  "type": "PROMETHEUS",
+  "name": "__ALERT_NAME__",
+  "description": "Available replicas for __NAMESPACE__/__COMPONENT__ have been below desired for over __DURATION_MINUTES__ minutes.",
+  "severity": "high",
+  "enabled": true,
+  "config": {
+    "duration": 0,
+    "query": "min(kube_deployment_status_replicas_available{kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__COMPONENT__\"}) < max(kube_deployment_spec_replicas{kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__COMPONENT__\"})"
+  },
+  "notificationChannelConfigList": [
+    { "type": "EMAIL", "channelId": 0 }
+  ]
+}

@@ -171,6 +171,13 @@ The password used for the PostgreSQL database. This **MUST** be a strong, unique
 * Minimum 12 characters recommended for production.
 * **Pro-tip**: Use a password manager (like BitWarden, 1Password, or KeePass) to generate and store long, random, and unique passwords for each environment. Avoid simple, guessable passwords like `password` or `secure`.
 
+**`SYSDIG_API_TOKEN`**
+
+Sysdig API token used to sync the PROD email-alert set on every merge. Sourced from the in-cluster Secret materialized by your `SysdigTeam` CR (BC Gov platform-services provisions this in your `*-tools` namespace). Optional — if unset, the `monitor-prod` step no-ops with a warning, so the deploy still succeeds.
+
+* Reference: `${{ secrets.SYSDIG_API_TOKEN }}`
+* Alert templates live in [`monitoring/alerts/`](./monitoring/alerts/). Add or remove files to customize the alert set per app — see [`bcgov/action-sysdig-monitor`](https://github.com/bcgov/action-sysdig-monitor) for the template schema and placeholder vocabulary.
+
 ### Variable Values
 
 >  Click Settings > Secrets and Variables > Actions > Variables > New repository variable
@@ -487,6 +494,7 @@ Runs on merge to main branch.
 * Penetration tests on TEST deployment (optional)
 * Zero-downtime* PROD deployment
 * Labels successful deployment images as PROD
+* Sysdig email alerts synced to PROD (no-op if `SYSDIG_API_TOKEN` is unset)
 
 \* excludes database changes
 
