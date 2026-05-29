@@ -1,0 +1,14 @@
+{
+  "type": "PROMETHEUS",
+  "name": "__ALERT_NAME__",
+  "description": "Container in __NAMESPACE__/__COMPONENT__ has been in CrashLoopBackOff for over __DURATION_MINUTES__ minutes.",
+  "severity": "high",
+  "enabled": true,
+  "config": {
+    "duration": 0,
+    "query": "max(kube_pod_container_status_waiting_reason{reason=\"CrashLoopBackOff\", kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__COMPONENT__\"}) > 0"
+  },
+  "notificationChannelConfigList": [
+    { "type": "EMAIL", "channelId": 0 }
+  ]
+}

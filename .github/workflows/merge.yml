@@ -62,6 +62,26 @@ jobs:
       target: prod
       tag: ${{ needs.init.outputs.pr }}
 
+  # Sync Sysdig email alerts for PROD. No-ops cleanly if SYSDIG_API_TOKEN is
+  # unset or monitoring/alerts/ is empty — adoption is gradual. Alert
+  # templates live in monitoring/alerts/ in this repo; add or remove files
+  # there to customize the alert set.
+  monitor-prod:
+    name: Sysdig Monitor (PROD)
+    needs: [deploy-prod]
+    runs-on: ubuntu-24.04
+    environment: prod
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: bcgov/action-sysdig-monitor@122c7672e37f97cf27c1b17d1c0738f152b1bcf7 # 0.0.2
+        with:
+          sysdig_api_token: ${{ secrets.SYSDIG_API_TOKEN }}
+          oc_namespace: ${{ secrets.oc_namespace }}
+          app: ${{ github.event.repository.name }}
+
   promote:
     name: Promote Images
     needs: [deploy-prod, init]
