@@ -522,8 +522,8 @@ This repository supports operating downstream projects in a low-maintenance, sus
 
 1. **Automated Dependency Updates**: The repository includes a `renovate.json` file configured to extend [`bcgov/renovate-config`](https://github.com/bcgov/renovate-config). This allows Mend Renovate to scan for updates, group related package updates together, and prepare automated Pull Requests.
 2. **Branch Protection & Gated Merging**: GitHub branch protection rules on `main` ensure that no PR is merged without verifying that the application remains functional.
-3. **CI/CD Validation**: The `PR Validate` and testing workflows deploy pull requests to sandboxed preview environments and execute automated validation checks.
-4. **Automerging**: Once all automated tests and quality checks pass successfully, Renovate will automatically merge the updates back to the `main` branch, triggering an automated rolling deployment with zero downtime.
+3. **CI/CD Validation**: The `PR` workflow builds, deploys, and runs tests against sandboxed preview environments; `PR Validate` enforces PR title/description conventions.
+4. **(Optional) Automerging**: If Renovate automerge is enabled and all required checks pass, Renovate can merge updates back to the `main` branch, triggering an automated rolling deployment.
 
 ## Maintenance Mode Readiness Checklist
 
@@ -536,13 +536,13 @@ Before transitioning an application utilizing this template to full maintenance 
 
 ## Runtime Health Checks & Smoke Testing
 
-To safely automate dependency updates, runtime health checks are mandatory to catch runtime connectivity failures before an update is merged. 
+To safely automate dependency updates, runtime health checks are mandatory to catch runtime connectivity failures before an update is merged.
 
 ### QuickStart Health Check Implementation
 
 This template provides out-of-the-box support for self-healing and verification through container probes:
-- **NestJS Backend**: Implements `/health` or `/healthz` endpoints utilizing standard NestJS Terminus probes (checking DB connections, memory limits, and disk space).
-- **Caddy/Frontend**: Includes light health endpoints to confirm the web server is responsive and serving assets correctly.
+- **NestJS Backend**: Implements an `/api/health` endpoint using NestJS Terminus (currently checks DB connectivity via Prisma).
+- **Frontend (Caddy/Vite)**: OpenShift readiness/liveness probes are configured to check `/` to confirm the web server is responsive and serving assets.
 
 *Tip: For a fully mature maintenance mode setup, customize the backend health checks to query external APIs and database migrations. If a dependency goes down, the health check should return `503 Service Unavailable`, blocking the automated merge.*
 
