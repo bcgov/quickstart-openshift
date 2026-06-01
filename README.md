@@ -7,7 +7,7 @@
 
 ## Pull Request-Based Workflows with Sample Stack
 
-This repository provides a template to rapidly deploy a modern web application stack to OpenShift using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability.  By hitting the ground running we can save weeks-to-months of development time plus receive regular updates and features.
+This repository provides a template to rapidly deploy a modern web application stack to OpenShift using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability. By hitting the ground running we can save weeks‑to‑months of development time, receive regular updates, and built‑in **Maintenance Mode Automation**, which allows an app to go on autopilot for security and dependency updates.  This limits developmer involvement to critical issues only, drastically reducing labor costs and freeing up resources for higher priority work.
 
 **Includes:**
 * Pull Request-based pipeline
@@ -15,7 +15,8 @@ This repository provides a template to rapidly deploy a modern web application s
 * Gated/controlled production deployments (optional)
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure, and container scan tools
-* Automatic dependency patching available from [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
+* Automatic dependency patching via [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
+* Maintenance Mode Automation (hands‑off updates, low‑dev mode) via the same Renovate config
 * Enforced code reviews and workflow jobs (pass|fail)
 * OpenShift Templates
 * Prometheus Metrics export from Backend/Frontend
@@ -29,7 +30,7 @@ This repository provides a template to rapidly deploy a modern web application s
     * Database: Postgres, Flyway
     * Frontend: TypeScript, Caddy Server with Coraza WAF
     * Backend: TypeScript, Nest.js
-    * Alternative backend examples - see [Alternative Backends](#alternative-backends)
+
 
 # Setup
 
@@ -196,6 +197,9 @@ Dependabot and Mend Renovate can both provide dependency updates using pull requ
 ### Renovate
 
 A config file (`renovate.json`) is included with this template.  It can source config from our [renovate repository](https://github.com/bcgov/renovate-config).  Renovate can be [self-hosted](https://github.com/renovatebot/github-action) or run using the GitHub App managed at the organization level.  For BC Government the OCIO controls this application, so please opt in with them using a GitHub issue.
+
+> [!TIP]
+> Once Renovate is set up, you can enable **Maintenance Mode Automation** by following the checklist in the [Maintenance Mode Automation](#maintenance-mode-automation) section of this README. This will let Renovate auto‑merge safe updates after all CI checks pass.
 
 To opt-in:
 * Visit the [Renovate GitHub App](https://github.com/apps/renovate/)
@@ -509,4 +513,52 @@ Runs on scheduled job (cronjob) or workflow dispatch.
 * Tests (e2e, load, integration) on TEST deployment
 
 ![](.github/graphics/scheduled.png)
+
+# Maintenance Mode Automation
+
+This repository supports operating downstream projects in a low-maintenance, sustainment-only mode. When configured, dependency updates can be completely automated with zero manual intervention required for minor and patch updates, and optional hands-off major version bumps.
+
+## How It Works
+
+1. **Automated Dependency Updates**: The repository includes a `renovate.json` file configured to extend [`bcgov/renovate-config`](https://github.com/bcgov/renovate-config). This allows Mend Renovate to scan for updates, group related package updates together, and prepare automated Pull Requests.
+2. **Branch Protection & Gated Merging**: GitHub branch protection rules on `main` ensure that no PR is merged without verifying that the application remains functional.
+3. **CI/CD Validation**: The `PR` workflow builds, deploys, and runs tests against sandboxed preview environments; `PR Validate` enforces PR title/description conventions.
+4. **(Optional) Automerging**: If Renovate automerge is enabled and all required checks pass, Renovate can merge updates back to the `main` branch, triggering an automated rolling deployment.
+
+## Maintenance Mode Readiness Checklist
+
+Before transitioning an application utilizing this template to full maintenance mode, downstream teams should verify and meet the following criteria:
+
+- [ ] **Robust Automated Test Coverage**: A high test coverage threshold (e.g., 70% or higher for both statements and branches) should be enforced. Unit, integration, and end-to-end tests must be capable of catching regressions automatically.
+- [ ] **PR Preview Environments**: Ensure sandboxed preview environments deploy reliably to OpenShift for all pull requests.
+- [ ] **Automated Smoke Tests / Probes**: The application must implement runtime health checks that verify connectivity to database instances and external downstream services (e.g., S3, Keycloak, or mail services).
+- [ ] **Automerge Policies**: Verify that the Mend Renovate GitHub app is integrated and allowed to manage automerges for passing builds.
+
+## Runtime Health Checks & Smoke Testing
+
+To safely automate dependency updates, runtime health checks are mandatory to catch runtime connectivity failures before an update is merged.
+
+### QuickStart Health Check Implementation
+
+This template provides out-of-the-box support for self-healing and verification through container probes:
+- **NestJS Backend**: Implements an `/api/health` endpoint using NestJS Terminus (currently checks DB connectivity via Prisma).
+- **Frontend (Caddy/Vite)**: OpenShift readiness/liveness probes are configured to check `/` to confirm the web server is responsive and serving assets.
+
+*Tip: For a fully mature maintenance mode setup, customize the backend health checks to query external APIs and database migrations. If a dependency goes down, the health check should return `503 Service Unavailable`, blocking the automated merge.*
+
+## Automerge Expectations
+
+### When Automerge Occurs
+- Renovate creates PRs for dependency updates (npm packages, GitHub Actions, Docker base images).
+- All status checks pass successfully:
+  - Linting and unit tests complete.
+  - Preview environment successfully deploys to OpenShift.
+  - Automated smoke tests verify the preview environment is fully functional.
+- No merge conflicts are detected.
+
+### When Manual Intervention is Needed
+- A dependency upgrade causes compile, build, lint, or test failures.
+- A smoke test or deep health check fails post-deployment.
+- A security vulnerability scanner (e.g., Trivy or CodeQL) flags a new vulnerability.
+
 
