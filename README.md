@@ -510,3 +510,51 @@ Runs on scheduled job (cronjob) or workflow dispatch.
 
 ![](.github/graphics/scheduled.png)
 
+# Maintenance Mode Automation
+
+This repository supports operating downstream projects in a low-maintenance, sustainment-only mode. When configured, dependency updates can be completely automated with zero manual intervention required for minor and patch updates, and optional hands-off major version bumps.
+
+## How It Works
+
+1. **Automated Dependency Updates**: The repository includes a `renovate.json` file configured to extend [`bcgov/renovate-config`](https://github.com/bcgov/renovate-config). This allows Mend Renovate to scan for updates, group related package updates together, and prepare automated Pull Requests.
+2. **Branch Protection & Gated Merging**: GitHub branch protection rules on `main` ensure that no PR is merged without verifying that the application remains functional.
+3. **CI/CD Validation**: The `PR Validate` and testing workflows deploy pull requests to sandboxed preview environments and execute automated validation checks.
+4. **Automerging**: Once all automated tests and quality checks pass successfully, Renovate will automatically merge the updates back to the `main` branch, triggering an automated rolling deployment with zero downtime.
+
+## Maintenance Mode Readiness Checklist
+
+Before transitioning an application utilizing this template to full maintenance mode, downstream teams should verify and meet the following criteria:
+
+- [ ] **Robust Automated Test Coverage**: A high test coverage threshold (e.g., 70% or higher for both statements and branches) should be enforced. Unit, integration, and end-to-end tests must be capable of catching regressions automatically.
+- [ ] **PR Preview Environments**: Ensure sandboxed preview environments deploy reliably to OpenShift for all pull requests.
+- [ ] **Automated Smoke Tests / Probes**: The application must implement runtime health checks that verify connectivity to database instances and external downstream services (e.g., S3, Keycloak, or mail services).
+- [ ] **Automerge Policies**: Verify that the Mend Renovate GitHub app is integrated and allowed to manage automerges for passing builds.
+
+## Runtime Health Checks & Smoke Testing
+
+To safely automate dependency updates, runtime health checks are mandatory to catch runtime connectivity failures before an update is merged. 
+
+### QuickStart Health Check Implementation
+
+This template provides out-of-the-box support for self-healing and verification through container probes:
+- **NestJS Backend**: Implements `/health` or `/healthz` endpoints utilizing standard NestJS Terminus probes (checking DB connections, memory limits, and disk space).
+- **Caddy/Frontend**: Includes light health endpoints to confirm the web server is responsive and serving assets correctly.
+
+*Tip: For a fully mature maintenance mode setup, customize the backend health checks to query external APIs and database migrations. If a dependency goes down, the health check should return `503 Service Unavailable`, blocking the automated merge.*
+
+## Automerge Expectations
+
+### When Automerge Occurs
+- Renovate creates PRs for dependency updates (npm packages, GitHub Actions, Docker base images).
+- All status checks pass successfully:
+  - Linting and unit tests complete.
+  - Preview environment successfully deploys to OpenShift.
+  - Automated smoke tests verify the preview environment is fully functional.
+- No merge conflicts are detected.
+
+### When Manual Intervention is Needed
+- A dependency upgrade causes compile, build, lint, or test failures.
+- A smoke test or deep health check fails post-deployment.
+- A security vulnerability scanner (e.g., Trivy or CodeQL) flags a new vulnerability.
+
+
