@@ -7,7 +7,7 @@
 
 ## Pull Request-Based Workflows with Sample Stack
 
-This repository provides a template to rapidly deploy a modern web application stack to OpenShift using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability. By hitting the ground running we can save weeks‑to‑months of development time, receive regular updates, and—thanks to built‑in **Maintenance Mode Automation**—allow the app to enter a low‑dev or maintenance mode where dependency updates are automatically applied, requiring developer involvement only for critical issues and dramatically reducing long‑term labor costs.
+This repository provides a template to rapidly deploy a modern web application stack to OpenShift using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability. By hitting the ground running we can save weeks‑to‑months of development time, receive regular updates, and built‑in **Maintenance Mode Automation**, which allows an app to go on autopilot for security and dependency updates.  This limits developmer involvement to critical issues only, drastically reducing labor costs and freeing up resources for higher priority work.
 
 **Includes:**
 * Pull Request-based pipeline
