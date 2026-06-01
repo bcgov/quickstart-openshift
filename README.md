@@ -7,7 +7,7 @@
 
 ## Pull Request-Based Workflows with Sample Stack
 
-This repository provides a template to rapidly deploy a modern web application stack to OpenShift using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability.  By hitting the ground running we can save weeks-to-months of development time plus receive regular updates and features.
+This repository provides a template to rapidly deploy a modern web application stack to OpenShift using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability. By hitting the ground running we can save weeks‑to‑months of development time, receive regular updates, and—thanks to built‑in **Maintenance Mode Automation**—allow the app to enter a low‑dev or maintenance mode where dependency updates are automatically applied, requiring developer involvement only for critical issues and dramatically reducing long‑term labor costs.
 
 **Includes:**
 * Pull Request-based pipeline
@@ -15,7 +15,7 @@ This repository provides a template to rapidly deploy a modern web application s
 * Gated/controlled production deployments (optional)
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure, and container scan tools
-* Automatic dependency patching available from [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
+* Automatic dependency patching and [Maintenance Mode Automation](#maintenance-mode-automation) via [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
 * Enforced code reviews and workflow jobs (pass|fail)
 * OpenShift Templates
 * Prometheus Metrics export from Backend/Frontend
@@ -29,7 +29,7 @@ This repository provides a template to rapidly deploy a modern web application s
     * Database: Postgres, Flyway
     * Frontend: TypeScript, Caddy Server with Coraza WAF
     * Backend: TypeScript, Nest.js
-    * Alternative backend examples - see [Alternative Backends](#alternative-backends)
+
 
 # Setup
 
@@ -196,6 +196,9 @@ Dependabot and Mend Renovate can both provide dependency updates using pull requ
 ### Renovate
 
 A config file (`renovate.json`) is included with this template.  It can source config from our [renovate repository](https://github.com/bcgov/renovate-config).  Renovate can be [self-hosted](https://github.com/renovatebot/github-action) or run using the GitHub App managed at the organization level.  For BC Government the OCIO controls this application, so please opt in with them using a GitHub issue.
+
+> [!TIP]
+> Once Renovate is set up, you can enable **Maintenance Mode Automation** by following the checklist in the [Maintenance Mode Automation](#maintenance-mode-automation) section of this README. This will let Renovate auto‑merge safe updates after all CI checks pass.
 
 To opt-in:
 * Visit the [Renovate GitHub App](https://github.com/apps/renovate/)
