@@ -15,7 +15,8 @@ This repository provides a template to rapidly deploy a modern web application s
 * Gated/controlled production deployments (optional)
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure, and container scan tools
-* Automatic dependency patching and [Maintenance Mode Automation](#maintenance-mode-automation) via [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
+* Automatic dependency patching via [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
+* Maintenance Mode Automation (hands‑off updates, low‑dev mode) via the same Renovate config
 * Enforced code reviews and workflow jobs (pass|fail)
 * OpenShift Templates
 * Prometheus Metrics export from Backend/Frontend
