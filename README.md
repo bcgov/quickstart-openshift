@@ -368,6 +368,29 @@ Don't forget to add your team members!
 4.  Choose a role (read, triage, write, maintain, admin)
 5.  Click Add
 
+## Container Hardening & Writable Paths
+
+Out of the box, the deployment templates in this repository enforce strict container-level security contexts:
+* **Read-Only Root Filesystems:** Containers cannot write to the root filesystem at runtime (`readOnlyRootFilesystem: true`).
+* **Non-Root Execution:** Containers are blocked from executing as the root user (`runAsNonRoot: true`).
+* **Privilege Escalation Blocked:** Containers cannot gain more privileges than their parent process (`allowPrivilegeEscalation: false`).
+
+### Handling Dynamic Writes
+If your application requires writing files at runtime (e.g., temporary caches, uploaded attachments, config logs):
+1. **Do not disable the security context.**
+2. Mount a memory-backed (`tmpfs`) volume on the writable path using `emptyDir` in `openshift.deploy.yml`:
+   ```yaml
+             volumeMounts:
+               - mountPath: /tmp
+                 name: tmp
+         volumes:
+           - name: tmp
+             emptyDir:
+               medium: Memory
+               sizeLimit: 256Mi
+   ```
+3. **Always specify a `sizeLimit`.** Running memory-backed volumes without a size limit allows a runaway container to exhaust the host node's RAM, triggering an out-of-memory (OOM) storm that will terminate other pods.
+
 # Workflows
 
 These workflows and actions enforce a pull request based flow.
