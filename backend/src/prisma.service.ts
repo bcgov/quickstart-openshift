@@ -17,12 +17,12 @@ const dataSourceURL = PGBOUNCER_URL
 
 @Injectable()
 class PrismaService
-  extends PrismaClient<Prisma.PrismaClientOptions, 'query'>
+  extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
   private logger = new Logger('PRISMA')
   private static instance: PrismaService
-  private pool: Pool
+  private pool!: Pool
   constructor() {
     if (PrismaService.instance) {
       return PrismaService.instance
@@ -45,7 +45,7 @@ class PrismaService
 
   async onModuleInit() {
     await this.$connect()
-    this.$on<any>('query', (e: Prisma.QueryEvent) => {
+    ;(this as any).$on('query', (e: any) => {
       // dont print the health check queries, which contains SELECT 1 or COMMIT , BEGIN, DEALLOCATE ALL
       // this is to avoid logging health check queries which are executed by the framework.
       const excludedPatterns = ['COMMIT', 'BEGIN', 'SELECT 1', 'DEALLOCATE ALL']

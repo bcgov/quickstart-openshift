@@ -37,12 +37,15 @@ export class UsersService {
     })
   }
 
-  async findOne(id: number): Promise<UserDto> {
+  async findOne(id: number): Promise<UserDto | null> {
     const user = await this.prisma.users.findUnique({
       where: {
         id: new Prisma.Decimal(id),
       },
     })
+    if (!user) {
+      return null
+    }
     return {
       id: user.id.toNumber(),
       name: user.name,
@@ -92,7 +95,7 @@ export class UsersService {
       limit = 10
     }
 
-    let sortObj: unknown
+    let sortObj: any
     let filterObj: Array<{ key: string; operation: string; value: unknown }>
     try {
       sortObj = JSON.parse(sort)
