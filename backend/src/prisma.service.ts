@@ -16,10 +16,7 @@ const dataSourceURL = PGBOUNCER_URL
   : `postgresql://${DB_USER}:${DB_PWD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=${DB_SCHEMA}&connection_limit=5`
 
 @Injectable()
-class PrismaService
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   private logger = new Logger('PRISMA')
   private static instance: PrismaService
   private pool!: Pool
