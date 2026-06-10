@@ -1,6 +1,6 @@
 import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { Injectable, Logger } from '@nestjs/common'
-import { PrismaClient } from '../generated/prisma/client.js'
+import { PrismaClient, Prisma } from '../generated/prisma/client.js'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
 
@@ -42,7 +42,7 @@ class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestro
 
   async onModuleInit() {
     await this.$connect()
-    ;(this as any).$on('query', (e: any) => {
+    this.$on('query', (e: Prisma.QueryEvent) => {
       // dont print the health check queries, which contains SELECT 1 or COMMIT , BEGIN, DEALLOCATE ALL
       // this is to avoid logging health check queries which are executed by the framework.
       const excludedPatterns = ['COMMIT', 'BEGIN', 'SELECT 1', 'DEALLOCATE ALL']
