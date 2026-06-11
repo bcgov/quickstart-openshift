@@ -1,6 +1,6 @@
 import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { Injectable, Logger } from '@nestjs/common'
-import { Prisma, PrismaClient } from '../generated/prisma/client.js'
+import { PrismaClient, Prisma } from '../generated/prisma/client.js'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
 
@@ -15,14 +15,15 @@ const dataSourceURL = PGBOUNCER_URL
   ? `${PGBOUNCER_URL}?schema=${DB_SCHEMA}&pgbouncer=true`
   : `postgresql://${DB_USER}:${DB_PWD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=${DB_SCHEMA}&connection_limit=5`
 
+const PrismaClientWithLogs = PrismaClient as unknown as new (
+  options?: Prisma.PrismaClientOptions,
+) => PrismaClient<'query' | 'info' | 'warn' | 'error'>
+
 @Injectable()
-class PrismaService
-  extends PrismaClient<Prisma.PrismaClientOptions, 'query'>
-  implements OnModuleInit, OnModuleDestroy
-{
+class PrismaService extends PrismaClientWithLogs implements OnModuleInit, OnModuleDestroy {
   private logger = new Logger('PRISMA')
   private static instance: PrismaService
-  private pool: Pool
+  private pool!: Pool
   constructor() {
     if (PrismaService.instance) {
       return PrismaService.instance
@@ -45,7 +46,7 @@ class PrismaService
 
   async onModuleInit() {
     await this.$connect()
-    this.$on<any>('query', (e: Prisma.QueryEvent) => {
+    this.$on('query', (e: Prisma.QueryEvent) => {
       // dont print the health check queries, which contains SELECT 1 or COMMIT , BEGIN, DEALLOCATE ALL
       // this is to avoid logging health check queries which are executed by the framework.
       const excludedPatterns = ['COMMIT', 'BEGIN', 'SELECT 1', 'DEALLOCATE ALL']
