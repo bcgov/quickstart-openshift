@@ -16,43 +16,35 @@ parameters:
   - name: DB_PVC_SIZE
     description: Volume space available for data
     value: 256Mi
+  - name: MEMORY_LIMIT
+    description: Memory limit for the database container (bounds the pod's working set).
+    value: 4Gi
   - name: RANDOM_EXPRESSION
     description: Random expression to make sure deployments update
     from: "[a-zA-Z0-9]{32}"
     generate: expression
 objects:
-  - apiVersion: v1
-    kind: PersistentVolumeClaim
-    metadata:
-      labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
-    spec:
-      accessModes:
-        - ReadWriteOnce
-      storageClassName: netapp-file-standard
-      resources:
-        requests:
-          storage: ${DB_PVC_SIZE}
   - apiVersion: apps/v1
-    kind: Deployment
+    kind: StatefulSet
     metadata:
       labels:
         app: ${NAME}-${ZONE}
       name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
+      # Governing (headless) Service below provides stable network identity.
+      serviceName: ${NAME}-${ZONE}-${COMPONENT}
       replicas: 1
       selector:
         matchLabels:
           deployment: ${NAME}-${ZONE}-${COMPONENT}
-      strategy:
-        type: Recreate
       template:
         metadata:
           labels:
             app: ${NAME}-${ZONE}
             deployment: ${NAME}-${ZONE}-${COMPONENT}
         spec:
+          # Give Postgres time to flush and shut down cleanly on SIGTERM during a node drain.
+          terminationGracePeriodSeconds: 60
           containers:
             - name: ${NAME}-${ZONE}
               image: postgres:${PG_VERSION}
@@ -80,14 +72,27 @@ objects:
                 - name: RANDOM_EXPRESSION
                   value: ${RANDOM_EXPRESSION}
               volumeMounts:
-                - name: ${NAME}-${ZONE}-${COMPONENT}
+                - name: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
                   mountPath: /var/lib/postgresql/data
                 - name: socket-dir
                   mountPath: /var/run/postgresql
               resources:
                 requests:
-                  cpu: 20m
-                  memory: 128Mi
+                  cpu: 50m
+                  memory: 256Mi
+                limits:
+                  memory: ${MEMORY_LIMIT}
+              # restricted-v2 SCC hardening. readOnlyRootFilesystem is intentionally
+              # omitted: the postgres entrypoint writes to several root-fs paths
+              # (config, locale, /tmp) beyond the PVC and socket-dir mounts.
+              # OpenShift assigns the UID/GID from the namespace range; do not hard-code it.
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: RuntimeDefault
               readinessProbe:
                 exec:
                   command:
@@ -113,11 +118,23 @@ objects:
                 periodSeconds: 15
                 timeoutSeconds: 10
           volumes:
-            - name: ${NAME}-${ZONE}-${COMPONENT}
-              persistentVolumeClaim:
-                claimName: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
             - name: socket-dir
               emptyDir: {}
+      # Per-pod PVC. Including PG_VERSION in the name provisions a fresh volume on a
+      # major-version bump. netapp-block-standard (RWO block) suits a single-writer DB
+      # and supports resize-up only.
+      volumeClaimTemplates:
+        - metadata:
+            labels:
+              app: ${NAME}-${ZONE}
+            name: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            storageClassName: netapp-block-standard
+            resources:
+              requests:
+                storage: ${DB_PVC_SIZE}
   - apiVersion: v1
     kind: Service
     metadata:
