@@ -31,7 +31,9 @@ objects:
         app: ${NAME}-${ZONE}
       name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
-      # Governing (headless) Service below provides stable network identity.
+      # Governing Service required by the StatefulSet. With a single replica the
+      # ClusterIP Service below doubles as both the governing service and the
+      # connection endpoint; no separate headless Service is needed.
       serviceName: ${NAME}-${ZONE}-${COMPONENT}
       replicas: 1
       selector:
@@ -135,6 +137,9 @@ objects:
             resources:
               requests:
                 storage: ${DB_PVC_SIZE}
+  # ClusterIP Service: the backend connects here via ${NAME}-${ZONE}-${COMPONENT}:5432.
+  # A stable virtual IP is the right choice for a single-replica DB; per-pod
+  # (headless) DNS would only matter for a multi-replica HA cluster.
   - apiVersion: v1
     kind: Service
     metadata:
