@@ -409,3 +409,4 @@ specs
 
 # Prisma 7 generated client
 backend/generated/
+.copilot-memory

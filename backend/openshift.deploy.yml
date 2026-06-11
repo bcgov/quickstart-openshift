@@ -26,11 +26,14 @@ parameters:
     value: "3"
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
-    value: "5"
+    value: "7"
   - name: CPU_REQUEST
-    value: "50m"
+    value: "100m"
   - name: MEMORY_REQUEST
     value: "128Mi"
+  - name: MEMORY_LIMIT
+    description: Memory limit for the container (bounds the pod's working set).
+    value: "4Gi"
   - name: LOG_LEVEL
     description: Application log level (debug|info|warn|error)
     value: "info"
@@ -53,6 +56,16 @@ objects:
             app: ${NAME}-${ZONE}
             deployment: ${NAME}-${ZONE}-${COMPONENT}
         spec:
+          terminationGracePeriodSeconds: 30
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    labelSelector:
+                      matchLabels:
+                        deployment: ${NAME}-${ZONE}-${COMPONENT}
+                    topologyKey: kubernetes.io/hostname
           initContainers:
             - name: wait-for-db
               image: ${REGISTRY}/${ORG_NAME}/${NAME}/migrations:${IMAGE_TAG}
@@ -73,6 +86,13 @@ objects:
                     sleep 2
                   done
                   echo "Database is UP!"
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: RuntimeDefault
             - name: migrations
               image: ${REGISTRY}/${ORG_NAME}/${NAME}/migrations:${IMAGE_TAG}
               imagePullPolicy: Always
@@ -102,6 +122,13 @@ objects:
                 requests:
                   cpu: 10m
                   memory: 50Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: RuntimeDefault
           containers:
             - name: ${NAME}
               image: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${IMAGE_TAG}
@@ -137,14 +164,36 @@ objects:
                 requests:
                   cpu: ${CPU_REQUEST}
                   memory: ${MEMORY_REQUEST}
+                limits:
+                  memory: ${MEMORY_LIMIT}
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: RuntimeDefault
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
               readinessProbe:
                 httpGet:
                   path: /api/health
                   port: http
+                periodSeconds: 5
+                failureThreshold: 3
               livenessProbe:
                 httpGet:
                   path: /api/health
                   port: http
+                periodSeconds: 10
+                failureThreshold: 3
+          volumes:
+            - name: tmp
+              emptyDir:
+                medium: Memory
+                sizeLimit: 256Mi
   - apiVersion: v1
     kind: Service
     metadata:
@@ -178,3 +227,29 @@ objects:
             target:
               type: Utilization
               averageUtilization: 80
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 30
+          policies:
+            - type: Percent
+              value: 100
+              periodSeconds: 60
+          selectPolicy: Max
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+            - type: Percent
+              value: 50
+              periodSeconds: 60
+          selectPolicy: Max
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
+    spec:
+      maxUnavailable: 1
+      selector:
+        matchLabels:
+          deployment: ${NAME}-${ZONE}-${COMPONENT}

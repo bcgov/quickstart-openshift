@@ -23,14 +23,17 @@ parameters:
     value: apps.silver.devops.gov.bc.ca
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
-    value: "1"
+    value: "3"
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "5"
   - name: CPU_REQUEST
-    value: "25m"
+    value: "50m"
   - name: MEMORY_REQUEST
     value: "50Mi"
+  - name: MEMORY_LIMIT
+    description: Memory limit for the container (bounds the pod's working set).
+    value: "1Gi"
   - name: LOG_LEVEL
     description: Caddy log level (debug|info|warn|error)
     value: "info"
@@ -53,6 +56,16 @@ objects:
             app: ${NAME}-${ZONE}
             deployment: ${NAME}-${ZONE}-${COMPONENT}
         spec:
+          terminationGracePeriodSeconds: 30
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    labelSelector:
+                      matchLabels:
+                        deployment: ${NAME}-${ZONE}-${COMPONENT}
+                    topologyKey: kubernetes.io/hostname
           containers:
             - name: ${NAME}
               image: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${IMAGE_TAG}
@@ -65,18 +78,60 @@ objects:
                   value: ${LOG_LEVEL}
                 - name: BACKEND_URL
                   value: http://${NAME}-${ZONE}-backend
+                # readOnlyRootFilesystem: true → redirect every writable path
+                # onto an emptyDir. Caddy stores config/data under the XDG dirs
+                # (mounted at /tmp/caddy); Coraza writes SecTmpDir/SecDataDir
+                # under /tmp/coraza; generic temp files go to TMPDIR.
+                - name: XDG_CONFIG_HOME
+                  value: /tmp/caddy
+                - name: XDG_DATA_HOME
+                  value: /tmp/caddy
+                - name: TMPDIR
+                  value: /tmp/caddy
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
                   memory: ${MEMORY_REQUEST}
+                limits:
+                  memory: ${MEMORY_LIMIT}
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: RuntimeDefault
+              volumeMounts:
+                - name: caddy-data
+                  mountPath: /tmp/caddy
+                - name: coraza-tmp
+                  mountPath: /tmp/coraza
               readinessProbe:
                 httpGet:
                   path: /
                   port: http
+                periodSeconds: 5
+                failureThreshold: 3
               livenessProbe:
                 httpGet:
                   path: /
                   port: http
+                periodSeconds: 10
+                failureThreshold: 3
+              lifecycle:
+                preStop:
+                  exec:
+                    command: ["/bin/sleep", "10"]
+          volumes:
+            - name: caddy-data
+              emptyDir:
+                medium: Memory
+                sizeLimit: 256Mi
+            - name: coraza-tmp
+              emptyDir:
+                medium: Memory
+                sizeLimit: 256Mi
   - apiVersion: v1
     kind: Service
     metadata:
@@ -125,3 +180,29 @@ objects:
             target:
               type: Utilization
               averageUtilization: 80
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 30
+          policies:
+            - type: Percent
+              value: 100
+              periodSeconds: 60
+          selectPolicy: Max
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+            - type: Percent
+              value: 50
+              periodSeconds: 60
+          selectPolicy: Max
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
+    spec:
+      maxUnavailable: 1
+      selector:
+        matchLabels:
+          deployment: ${NAME}-${ZONE}-${COMPONENT}
