@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "strict": false,
+    "strict": true,
     "noUncheckedIndexedAccess": true,
     "moduleDetection": "force",
     "resolveJsonModule": true,
