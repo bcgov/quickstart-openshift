@@ -15,6 +15,7 @@ This repository provides a template to rapidly deploy a modern web application s
 * Gated/controlled production deployments (optional)
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure, and container scan tools
+* Out-of-the-box alignment with **OWASP ASVS** Level 1 & 2 controls (see [SECURITY.md](file:///home/derek/Repos/quickstart-openshift/SECURITY.md#owasp-asvs-alignment))
 * Automatic dependency patching via [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
 * Maintenance Mode Automation (hands‑off updates, low‑dev mode) via the same Renovate config
 * Enforced code reviews and workflow jobs (pass|fail)
@@ -367,6 +368,37 @@ Don't forget to add your team members!
 3.  Use the search box to find people or teams
 4.  Choose a role (read, triage, write, maintain, admin)
 5.  Click Add
+
+## Security & OWASP ASVS Alignment
+
+This repository is architected and hardened out-of-the-box to align with Levels 1 and 2 of the **OWASP Application Security Verification Standard (ASVS) v4.0.3**. A detailed security mapping matrix is documented in [SECURITY.md](file:///home/derek/Repos/quickstart-openshift/SECURITY.md#owasp-asvs-alignment), detailing our implementation of:
+* **Active WAF Defense:** Inline Coraza WAF running inside the Caddy reverse proxy.
+* **Tiered Isolation:** NetworkPolicies enforcing network boundaries between the frontend, backend, and database tiers.
+* **Platform/Container Hardening:** Read-only root filesystems, non-root execution, privilege escalation blocks, default seccomp profiles, and drop capabilities.
+* **Build-Time & Dynamic Testing:** Automated static analysis (Trivy, CodeQL), dependency auditing (Renovate, Knip), and weekly dynamic vulnerability scans (**OWASP ZAP**).
+
+## Container Hardening & Writable Paths
+
+Out of the box, the deployment templates in this repository enforce strict container-level security contexts:
+* **Read-Only Root Filesystems:** Containers cannot write to the root filesystem at runtime (`readOnlyRootFilesystem: true`).
+* **Non-Root Execution:** Containers are blocked from executing as the root user (`runAsNonRoot: true`).
+* **Privilege Escalation Blocked:** Containers cannot gain more privileges than their parent process (`allowPrivilegeEscalation: false`).
+
+### Handling Dynamic Writes
+If your application requires writing files at runtime (e.g., temporary caches, uploaded attachments, config logs):
+1. **Do not disable the security context.**
+2. Mount a memory-backed (`tmpfs`) volume on the writable path using `emptyDir` in `openshift.deploy.yml`:
+   ```yaml
+             volumeMounts:
+               - mountPath: /tmp
+                 name: tmp
+         volumes:
+           - name: tmp
+             emptyDir:
+               medium: Memory
+               sizeLimit: 256Mi
+   ```
+3. **Always specify a `sizeLimit`.** Running memory-backed volumes without a size limit allows a runaway container to exhaust the host node's RAM, triggering an out-of-memory (OOM) storm that will terminate other pods.
 
 # Workflows
 
