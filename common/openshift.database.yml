@@ -74,7 +74,7 @@ objects:
                 - name: RANDOM_EXPRESSION
                   value: ${RANDOM_EXPRESSION}
               volumeMounts:
-                - name: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
+                - name: data
                   mountPath: /var/lib/postgresql/data
                 - name: socket-dir
                   mountPath: /var/run/postgresql
@@ -122,14 +122,17 @@ objects:
           volumes:
             - name: socket-dir
               emptyDir: {}
-      # Per-pod PVC. Including PG_VERSION in the name provisions a fresh volume on a
-      # major-version bump. netapp-block-standard (RWO block) suits a single-writer DB
+      # Per-pod PVC managed by the StatefulSet. The claim-template name is fixed
+      # ("data"): volumeClaimTemplates are immutable once the StatefulSet exists,
+      # so the name must not embed PG_VERSION. A major Postgres upgrade is a
+      # deliberate migration (pg_upgrade or dump/restore), never an automatic
+      # volume swap. netapp-block-standard (RWO block) suits a single-writer DB
       # and supports resize-up only.
       volumeClaimTemplates:
         - metadata:
             labels:
               app: ${NAME}-${ZONE}
-            name: ${NAME}-${ZONE}-${COMPONENT}-${PG_VERSION}
+            name: data
           spec:
             accessModes:
               - ReadWriteOnce
