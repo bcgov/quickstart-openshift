@@ -177,6 +177,12 @@ objects:
               volumeMounts:
                 - name: tmp
                   mountPath: /tmp
+              startupProbe:
+                httpGet:
+                  path: /api/health
+                  port: http
+                periodSeconds: 5
+                failureThreshold: 30
               readinessProbe:
                 httpGet:
                   path: /api/health
