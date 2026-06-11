@@ -107,6 +107,12 @@ objects:
                   mountPath: /tmp/caddy
                 - name: coraza-tmp
                   mountPath: /tmp/coraza
+              startupProbe:
+                httpGet:
+                  path: /
+                  port: http
+                periodSeconds: 5
+                failureThreshold: 30
               readinessProbe:
                 httpGet:
                   path: /
