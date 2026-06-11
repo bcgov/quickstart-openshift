@@ -89,10 +89,14 @@ objects:
               securityContext:
                 allowPrivilegeEscalation: false
                 runAsNonRoot: true
+                readOnlyRootFilesystem: true
                 capabilities:
                   drop: ["ALL"]
                 seccompProfile:
                   type: RuntimeDefault
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
             - name: migrations
               image: ${REGISTRY}/${ORG_NAME}/${NAME}/migrations:${IMAGE_TAG}
               imagePullPolicy: Always
@@ -125,10 +129,14 @@ objects:
               securityContext:
                 allowPrivilegeEscalation: false
                 runAsNonRoot: true
+                readOnlyRootFilesystem: true
                 capabilities:
                   drop: ["ALL"]
                 seccompProfile:
                   type: RuntimeDefault
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
           containers:
             - name: ${NAME}
               image: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${IMAGE_TAG}
@@ -177,6 +185,12 @@ objects:
               volumeMounts:
                 - name: tmp
                   mountPath: /tmp
+              startupProbe:
+                httpGet:
+                  path: /api/health
+                  port: http
+                periodSeconds: 5
+                failureThreshold: 30
               readinessProbe:
                 httpGet:
                   path: /api/health
