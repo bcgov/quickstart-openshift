@@ -15,5 +15,5 @@ describe('AppController (e2e)', () => {
     await app.init()
   })
 
-  it('/ (GET)', () => request(app.getHttpServer()).get('/').expect(200).expect('Hello Backend!'))
+  it('/ (GET)', () => request(app.getHttpServer()).get('/').expect(200).expect('Backend is live!'))
 })

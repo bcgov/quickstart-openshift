@@ -29,7 +29,7 @@ class PrismaService extends PrismaClientWithLogs implements OnModuleInit, OnModu
       return PrismaService.instance
     }
     const pool = new Pool({ connectionString: dataSourceURL })
-    const adapter = new PrismaPg(pool)
+    const adapter = new PrismaPg(pool, { schema: DB_SCHEMA })
     super({
       adapter,
       errorFormat: 'pretty',
