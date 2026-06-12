@@ -48,6 +48,26 @@ jobs:
      needs: [deploys]
      uses: ./.github/workflows/reusable-tests.yml
 
+  scan-images:
+    name: Scan Images
+    needs: [builds]
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        package: [backend, frontend, migrations]
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Run Trivy in image mode
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: 'ghcr.io/${{ github.repository }}/${{ matrix.package }}:${{ github.event.number }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
   # ==========================================================================
   # WARNING: This job acts as the required merge gate for this workflow.
   # If you add a new job to this workflow, you MUST add its ID to the 'needs'
@@ -55,7 +75,7 @@ jobs:
   # ==========================================================================
   results:
     name: PR Results
-    needs: [builds, deploys, tests]
+    needs: [builds, scan-images, deploys, tests]
     if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 1
