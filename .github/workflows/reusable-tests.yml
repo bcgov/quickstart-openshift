@@ -36,7 +36,25 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - env:
+      - name: Wait for backend health check
+        env:
+          BASE_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}
+        run: |
+          echo "Waiting for backend health check at ${BASE_URL}/api/health..."
+          for i in {1..30}; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" "${BASE_URL}/api/health" || true)
+            if [ "$status" -eq 200 ]; then
+              echo "Backend is healthy!"
+              exit 0
+            fi
+            echo "Waiting for health check (HTTP $status), retrying in 10s... ($i/30)"
+            sleep 10
+          done
+          echo "ERROR: Backend did not become healthy in time."
+          exit 1
+
+      - name: Run Integration Tests
+        env:
           API_NAME: nest
           BASE_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}
         run: |
