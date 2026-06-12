@@ -17,7 +17,7 @@ assignees: ''
 - [ ] Critical (24h)
 - [ ] High (1w)
 - [ ] Medium (2w)
-- [ ] Low (Next Sprint)
+- [ ] Low (Next scheduled release)
 
 ## Remediation Plan
 - [ ] Upgrade dependency version

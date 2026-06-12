@@ -32,9 +32,9 @@ Out of the box, this QuickStart repository is hardened to satisfy Level 1 and Le
 
 ## Vulnerability Triage SLAs
 
-All security issues are triaged using CISA KEV and EPSS scores:
-- **Critical** (CVSS 9-10 or CISA KEV): Remediation within 24 hours.
-- **High** (CVSS 7-8.9): Remediation within 1 week.
-- **Medium** (CVSS 4-6.9): Remediation within 2 weeks.
-- **Low** (CVSS 0-3.9): Remediation next scheduled release.
+All security issues are triaged using CISA KEV status and CVSS scores:
+- **Critical** (CVSS 9.0-10.0 or CISA KEV): Remediation within 24 hours.
+- **High** (CVSS 7.0-8.9): Remediation within 1 week.
+- **Medium** (CVSS 4.0-6.9): Remediation within 2 weeks.
+- **Low** (CVSS 0.0-3.9): Remediation next scheduled release.
 
