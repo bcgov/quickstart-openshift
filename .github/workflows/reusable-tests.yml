@@ -42,7 +42,7 @@ jobs:
         run: |
           echo "Waiting for backend health check at ${BASE_URL}/api/health..."
           for i in {1..30}; do
-            status=$(curl -s -o /dev/null -w "%{http_code}" "${BASE_URL}/api/health" || true)
+            status=$(curl -k --connect-timeout 5 --max-time 10 -s -o /dev/null -w "%{http_code}" "${BASE_URL}/api/health" || true)
             if [ "$status" -eq 200 ]; then
               echo "Backend is healthy!"
               exit 0
