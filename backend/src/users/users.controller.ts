@@ -26,8 +26,19 @@ export class UsersController {
   }
 
   @Get()
-  findAll(): Promise<UserDto[]> {
-    return this.usersService.findAll()
+  async findAll(): Promise<UserDto[]> {
+    try {
+      return await this.usersService.findAll()
+    } catch (e: any) {
+      throw new HttpException(
+        {
+          message: e.message || 'Error executing query',
+          stack: e.stack,
+          name: e.name,
+        },
+        500,
+      )
+    }
   }
 
   @Get('search') // it must be ahead of the below Get(":id") to avoid conflict
