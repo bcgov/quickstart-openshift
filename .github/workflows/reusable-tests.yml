@@ -86,6 +86,23 @@ jobs:
           npm ci
           npx playwright install --with-deps
 
+      - name: Wait for frontend health check
+        env:
+          BASE_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}
+        run: |
+          echo "Waiting for frontend health check at ${BASE_URL}..."
+          for i in {1..30}; do
+            status=$(curl -k --connect-timeout 5 --max-time 10 -s -o /dev/null -w "%{http_code}" "${BASE_URL}" || true)
+            if [ "$status" -eq 200 ]; then
+              echo "Frontend is healthy!"
+              exit 0
+            fi
+            echo "Waiting for health check (HTTP $status), retrying in 10s... ($i/30)"
+            sleep 10
+          done
+          echo "ERROR: Frontend did not become healthy in time."
+          exit 1
+
       - name: Run Tests
         env:
           E2E_BASE_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}/
