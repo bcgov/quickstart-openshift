@@ -94,10 +94,11 @@ objects:
               readinessProbe:
                 exec:
                   command:
-                    - /usr/bin/env
-                    - bash
-                    - "-c"
-                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                    - pg_isready
+                    - -d
+                    - $(POSTGRES_DB)
+                    - -U
+                    - $(POSTGRES_USER)
                 successThreshold: 1
                 failureThreshold: 5
                 initialDelaySeconds: 15
@@ -106,10 +107,11 @@ objects:
               livenessProbe:
                 exec:
                   command:
-                    - /usr/bin/env
-                    - bash
-                    - "-c"
-                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                    - pg_isready
+                    - -d
+                    - $(POSTGRES_DB)
+                    - -U
+                    - $(POSTGRES_USER)
                 successThreshold: 1
                 failureThreshold: 5
                 initialDelaySeconds: 30
