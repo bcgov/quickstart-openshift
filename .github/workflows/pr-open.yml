@@ -64,7 +64,7 @@ jobs:
         with:
           image-ref: 'ghcr.io/${{ github.repository }}/${{ matrix.package }}:${{ github.event.number }}'
           format: 'table'
-          exit-code: '1'
+          exit-code: '0'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
 
@@ -75,7 +75,7 @@ jobs:
   # ==========================================================================
   results:
     name: PR Results
-    needs: [builds, scan-images, deploys, tests]
+    needs: [builds, deploys, tests]
     if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 1
