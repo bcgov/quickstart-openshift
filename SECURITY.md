@@ -29,3 +29,12 @@ Out of the box, this QuickStart repository is hardened to satisfy Level 1 and Le
 | **V14.4** | HTTP Secure Headers | Strips identifying `Server` headers and enforces secure HTTP response headers (CSP, HSTS, X-Frame-Options, same-origin, and MIME sniffing blocks). | Configured natively in the frontend [frontend/Caddyfile](file:///home/derek/Repos/quickstart-openshift/frontend/Caddyfile) and verified by weekly OWASP ZAP scans. |
 | **V14.4** | Container Hardening | Restricts container execution permissions and prevents host system modifications. | Enforces `readOnlyRootFilesystem: true`, `runAsNonRoot: true`, `allowPrivilegeEscalation: false`, drop all `capabilities`, and default `seccompProfile` in [backend/openshift.deploy.yml](file:///home/derek/Repos/quickstart-openshift/backend/openshift.deploy.yml) and [frontend/openshift.deploy.yml](file:///home/derek/Repos/quickstart-openshift/frontend/openshift.deploy.yml). |
 | **V14.4** | Network Segmentation | Controls pod communication, isolating network traffic between frontend, backend, and database tiers. | Hardened [NetworkPolicies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) defined in [common/openshift.init.yml](file:///home/derek/Repos/quickstart-openshift/common/openshift.init.yml). |
+
+## Vulnerability Triage SLAs
+
+All security issues are triaged using CISA KEV status and CVSS scores:
+- **Critical** (CVSS 9.0-10.0 or CISA KEV): Remediation within 24 hours.
+- **High** (CVSS 7.0-8.9): Remediation within 1 week.
+- **Medium** (CVSS 4.0-6.9): Remediation within 2 weeks.
+- **Low** (CVSS 0.0-3.9): Remediation next scheduled release.
+
