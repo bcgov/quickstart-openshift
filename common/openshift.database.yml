@@ -19,10 +19,7 @@ parameters:
   - name: MEMORY_LIMIT
     description: Memory limit for the database container (bounds the pod's working set).
     value: 4Gi
-  - name: RANDOM_EXPRESSION
-    description: Random expression to make sure deployments update
-    from: "[a-zA-Z0-9]{32}"
-    generate: expression
+
 objects:
   - apiVersion: apps/v1
     kind: StatefulSet
@@ -71,8 +68,7 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
                       key: database-user
-                - name: RANDOM_EXPRESSION
-                  value: ${RANDOM_EXPRESSION}
+
               volumeMounts:
                 - name: data
                   mountPath: /var/lib/postgresql/data
