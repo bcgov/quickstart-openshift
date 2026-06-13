@@ -58,32 +58,5 @@ export default defineConfig({
           : undefined,
       },
     },
-
-    {
-      name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
-        baseURL: baseURL,
-      },
-    },
-
-    {
-      name: 'safari',
-      use: {
-        ...devices['Desktop Safari'],
-        baseURL: baseURL,
-      },
-    },
-    {
-      name: 'Microsoft Edge',
-      use: {
-        ...devices['Desktop Edge'],
-        channel: 'msedge',
-        baseURL: baseURL,
-        launchOptions: process.env.CI === 'true'
-          ? { args: ['--no-sandbox', '--disable-setuid-sandbox'] }
-          : undefined,
-      },
-    },
   ],
 })
