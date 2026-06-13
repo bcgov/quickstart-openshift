@@ -3,7 +3,7 @@ import { baseURL } from '../utils'
 import type { Page } from 'playwright'
 
 export const dashboard_page = async (page: Page) => {
-  await page.goto(baseURL)
+  await page.goto(baseURL, { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('link', { name: 'Government of British Columbia' })).toBeVisible()
   await expect(page.getByText('QuickStart OpenShift')).toBeVisible()
   await expect(page.getByText('Employee ID')).toBeVisible()

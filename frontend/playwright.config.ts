@@ -32,6 +32,7 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    ignoreHTTPSErrors: true,
   },
 
   /* Configure projects for major browsers */
@@ -41,6 +42,9 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: baseURL,
+        launchOptions: {
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        },
       },
     },
     {
@@ -49,6 +53,9 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         channel: 'chrome',
         baseURL: baseURL,
+        launchOptions: {
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        },
       },
     },
 
@@ -73,6 +80,9 @@ export default defineConfig({
         ...devices['Desktop Edge'],
         channel: 'msedge',
         baseURL: baseURL,
+        launchOptions: {
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        },
       },
     },
   ],
