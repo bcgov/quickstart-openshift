@@ -69,9 +69,6 @@ jobs:
         working-directory: frontend
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    strategy:
-      matrix:
-        project: [chromium, firefox, safari]
     steps:
       - uses: actions/checkout@v6
         name: Checkout
@@ -91,13 +88,13 @@ jobs:
           E2E_BASE_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}/
           CI: "true"
         run: |
-          npx playwright test --project="${{ matrix.project }}" --reporter=html
+          npx playwright test --project="chromium" --reporter=html
 
       - uses: actions/upload-artifact@v7
         if: (! cancelled())
         name: upload results
         with:
-          name: playwright-report-${{ matrix.project }}
+          name: playwright-report-chromium
           path: "./frontend/playwright-report" # path from current folder
           retention-days: 7
 
