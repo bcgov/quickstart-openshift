@@ -32,7 +32,7 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    ignoreHTTPSErrors: true,
+    ignoreHTTPSErrors: process.env.CI === 'true' || process.env.E2E_IGNORE_HTTPS_ERRORS === 'true',
   },
 
   /* Configure projects for major browsers */
@@ -42,9 +42,9 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: baseURL,
-        launchOptions: {
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        },
+        launchOptions: process.env.CI === 'true'
+          ? { args: ['--no-sandbox', '--disable-setuid-sandbox'] }
+          : undefined,
       },
     },
     {
@@ -53,9 +53,9 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         channel: 'chrome',
         baseURL: baseURL,
-        launchOptions: {
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        },
+        launchOptions: process.env.CI === 'true'
+          ? { args: ['--no-sandbox', '--disable-setuid-sandbox'] }
+          : undefined,
       },
     },
 
@@ -80,9 +80,9 @@ export default defineConfig({
         ...devices['Desktop Edge'],
         channel: 'msedge',
         baseURL: baseURL,
-        launchOptions: {
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        },
+        launchOptions: process.env.CI === 'true'
+          ? { args: ['--no-sandbox', '--disable-setuid-sandbox'] }
+          : undefined,
       },
     },
   ],
