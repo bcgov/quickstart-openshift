@@ -21,8 +21,9 @@ describe('NotFound', () => {
   })
 
   test('navigates home when the Back Home button is clicked', async () => {
+    const user = userEvent.setup()
     render(<NotFound />)
-    await userEvent.click(screen.getByRole('button', { name: /back home/i }))
+    await user.click(screen.getByRole('button', { name: /back home/i }))
     expect(navigate).toHaveBeenCalledWith({ to: '/' })
   })
 })

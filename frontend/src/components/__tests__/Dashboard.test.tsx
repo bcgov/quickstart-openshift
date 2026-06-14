@@ -14,16 +14,17 @@ describe('Dashboard', () => {
   })
 
   test('opens and closes the row details modal', async () => {
+    const user = userEvent.setup()
     render(<Dashboard />)
 
     // Wait for the mocked user data to load and render the View Details button.
     const viewDetailsButton = await screen.findByRole('button', { name: /view details/i })
-    await userEvent.click(viewDetailsButton)
+    await user.click(viewDetailsButton)
 
     expect(screen.getByText(/Row Details/i)).toBeInTheDocument()
 
     const closeButtons = screen.getAllByRole('button', { name: 'Close' })
-    await userEvent.click(closeButtons[closeButtons.length - 1])
+    await user.click(closeButtons.at(-1)!)
     await waitFor(() => {
       expect(screen.queryByText(/Row Details/i)).not.toBeInTheDocument()
     })
