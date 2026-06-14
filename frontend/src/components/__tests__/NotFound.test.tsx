@@ -1,20 +1,28 @@
 import { vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import NotFound from '@/components/NotFound'
 
+const navigate = vi.fn()
+
 vi.mock('@tanstack/react-router', () => ({
-  useNavigate: vi.fn(),
+  useNavigate: () => navigate,
 }))
 
 describe('NotFound', () => {
+  beforeEach(() => {
+    navigate.mockClear()
+  })
+
   test('renders a heading with the correct text', () => {
-    const navigate = vi.fn()
-    const useNavigateMock = vi.fn(() => navigate)
-    vi.doMock('@tanstack/react-router', () => ({
-      useNavigate: useNavigateMock,
-    }))
     render(<NotFound />)
     const headingElement = screen.getByRole('heading', { name: /404/i })
     expect(headingElement).toBeInTheDocument()
+  })
+
+  test('navigates home when the Back Home button is clicked', async () => {
+    render(<NotFound />)
+    await userEvent.click(screen.getByRole('button', { name: /back home/i }))
+    expect(navigate).toHaveBeenCalledWith({ to: '/' })
   })
 })
