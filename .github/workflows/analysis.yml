@@ -75,7 +75,7 @@ jobs:
           dir: frontend
           node_version: "22"
           sonar_args: >
-            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts,**/*test.tsx
+            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts,**/*test.tsx,**/routeTree.gen.ts
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.projectKey=quickstart-openshift_frontend
             -Dsonar.sources=src
