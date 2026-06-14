@@ -75,11 +75,11 @@ jobs:
           dir: frontend
           node_version: "22"
           sonar_args: >
-            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
+            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts,**/*test.tsx
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.projectKey=quickstart-openshift_frontend
             -Dsonar.sources=src
-            -Dsonar.test.inclusions=**/*spec.ts
+            -Dsonar.test.inclusions=**/*spec.ts,**/*test.tsx
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
           sonar_token: ${{ env.sonar_token }}
           dep_scan: warn
