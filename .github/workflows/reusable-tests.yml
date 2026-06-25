@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         name: Setup Node
         with:
@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         name: Checkout
       - uses: actions/setup-node@v6
         name: Setup Node
@@ -105,7 +105,7 @@ jobs:
       matrix:
         name: [backend, frontend]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: grafana/setup-k6-action@db07bd9765aac508ef18982e52ab937fe633a065 # v1.2.1
       - uses: grafana/run-k6-action@de51a7390bdf0ac85a3bef493691bd71d4c7c158 # v1.4.0
         env:
