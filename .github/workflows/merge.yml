@@ -75,7 +75,7 @@ jobs:
       contents: read
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: bcgov/action-sysdig-monitor@122c7672e37f97cf27c1b17d1c0738f152b1bcf7 # 0.0.2
         with:
           sysdig_api_token: ${{ secrets.SYSDIG_API_TOKEN }}
