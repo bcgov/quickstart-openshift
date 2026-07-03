@@ -99,7 +99,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Cache Trivy DB
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: .trivycache
           key: ${{ runner.os }}-trivy-v0.36.0-cache-v1
