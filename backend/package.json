@@ -64,7 +64,7 @@
     "magicast": "^0.5.2",
     "prettier": "^3.5.3",
     "supertest": "^7.0.0",
-    "typescript": "^6.0.0",
+    "typescript": "^7.0.0",
     "typescript-eslint": "^8.58.2",
     "unplugin-swc": "^1.5.1",
     "vitest": "^4.0.0"
