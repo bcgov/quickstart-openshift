@@ -43,7 +43,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Clean up PR Deployments
-        uses: bcgov/action-oc-runner@09b5eeae15bdbc7f7a21b406ee2c66a1d5819f8c # v1.6.0
+        uses: bcgov/action-oc-runner@111868d1fc50db0a40417ba321d865ef5c931bbd # v1.7.0
         with:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_token: ${{ secrets.oc_token }}
