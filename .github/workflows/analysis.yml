@@ -90,7 +90,6 @@ jobs:
   trivy:
     name: Trivy Security Scan
     if: (! github.event.pull_request.draft)
-    continue-on-error: true
     permissions:
       security-events: write
     runs-on: ubuntu-slim
@@ -118,8 +117,10 @@ jobs:
           trivyignores: ".github/.trivyignore"
           cache-dir: .trivycache
           skip-dirs: "**/node_modules,**/coverage,**/dist,.git"
+          exit-code: "1"
 
       - name: Upload Trivy scan results to GitHub Security tab
+        if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
           category: "trivy"
@@ -132,7 +133,7 @@ jobs:
   # ==========================================================================
   results:
     name: Analysis Results
-    needs: [backend-tests, frontend-tests]
+    needs: [backend-tests, frontend-tests, trivy]
     if: always() && (! github.event.pull_request.draft)
     runs-on: ubuntu-slim
     timeout-minutes: 1
