@@ -91,8 +91,8 @@ jobs:
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
           debug: true
-          # Lite mode strips HPA + PDB and scales to 1 replica (Recreate) for PR/sandbox deploys
-          lite_mode: ${{ github.event_name == 'pull_request' }}
+          # Temporary: verify HPA/PDB/RollingUpdate on this PR; revert before merge.
+          lite_mode: false
           parameters: -p ZONE="${{ inputs.target }}"
             -p NAME="${{ github.event.repository.name }}"
             ${{ matrix.parameters }}
