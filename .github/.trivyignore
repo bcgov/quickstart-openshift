@@ -1,15 +1,79 @@
-# KSV0125: Restrict container images to trusted registries
-# Trivy does not recognize ghcr.io as trusted by default. We use ghcr.io for application images.
-# Registry validation is enforced at deployment time via policy/OPA Gatekeeper.
-KSV0125
+# ==============================================================================
+# TRIVY CONFIGURATION IGNORE FILE
+# ==============================================================================
+# This repository is a BC Gov quickstart template. The exceptions below address
+# static analysis warnings that are false positives for raw template variables or
+# conflict with OpenShift Container Platform runtime security behaviors.
+#
+# If you copy this quickstart for your own project, keep these ignores unless your
+# runtime environment or deployment registry differs.
+# ==============================================================================
 
-# KSV020, KSV021: runAsUser/runAsGroup > 10000
-# OpenShift restricted-v2 SCC assigns namespace-specific UID range (e.g. 1002750000-1002759999).
-# Cannot hardcode in template; OpenShift injects at deploy time.
+# ------------------------------------------------------------------------------
+# KSV-0125 (AVD-KSV-0125): Restrict container images to trusted registries
+# ------------------------------------------------------------------------------
+# Why Ignored:
+# Container registry, org, and image names are parameterized in the template files
+# (e.g. "${REGISTRY}/${ORG_NAME}/${NAME}/...") so they can be injected dynamically
+# at deploy time. Statically parsing these template strings causes Trivy to flag
+# the parameter expressions as untrusted/invalid registry URLs. The default values
+# (like ghcr.io) are trusted.
+# ------------------------------------------------------------------------------
+KSV0125
+AVD-KSV-0125
+
+# ------------------------------------------------------------------------------
+# KSV-0020 & KSV-0021 (AVD-KSV-0020 & AVD-KSV-0021): Runs with UID/GID <= 10000
+# ------------------------------------------------------------------------------
+# Why Ignored:
+# These alerts complain that the pod securityContext does not hardcode a specific
+# non-root user/group ID greater than 10000 (e.g., runAsUser: 10001).
+#
+# On BC Gov's OpenShift Container Platform (Silver/Gold/Emerald clusters), the
+# Security Context Constraints (SCC) controller dynamically allocates a safe,
+# random range of extremely high UIDs/GIDs (e.g., 1000600000 to 1000609999)
+# at runtime.
+#
+# DO NOT resolve this by hardcoding a specific UID/GID in your manifests. Doing so
+# will cause the OpenShift admission controller to REJECT your pods because the
+# hardcoded ID won't match the namespace's allocated dynamic range.
+# ------------------------------------------------------------------------------
 KSV020
 KSV021
+AVD-KSV-0020
+AVD-KSV-0021
 
-# KSV030, KSV104: seccompProfile
-# OpenShift restricted SCC forbids seccomp: "seccomp may not be set".
+# ------------------------------------------------------------------------------
+# KSV-0030 & KSV-0104 (AVD-KSV-0030 & AVD-KSV-0104): seccompProfile
+# ------------------------------------------------------------------------------
+# Why Ignored:
+# The standard OpenShift restricted SCC forbids setting custom seccomp profiles
+# ("seccomp may not be set") as the platform configures security filters on nodes.
+# ------------------------------------------------------------------------------
 KSV030
 KSV104
+AVD-KSV-0030
+AVD-KSV-0104
+
+# ------------------------------------------------------------------------------
+# KSV-0011 (AVD-KSV-0011): CPU not limited
+# ------------------------------------------------------------------------------
+# Why Ignored:
+# We intentionally omit CPU limits (limits.cpu) from our container configurations.
+# This aligns with BC Gov Private Cloud best practices allowing containers to burst
+# into unallocated node CPU capacity. If limits are set, containers undergo aggressive
+# throttling during peak load.
+# ------------------------------------------------------------------------------
+KSV011
+AVD-KSV-0011
+
+# ------------------------------------------------------------------------------
+# KSV-0018 (AVD-KSV-0018): Memory not limited
+# ------------------------------------------------------------------------------
+# Why Ignored:
+# Standard containers define memory limits, but lightweight utility/init containers
+# (e.g., wait-for-db or migrations) may omit them to prevent OOM termination of brief
+# startup tasks.
+# ------------------------------------------------------------------------------
+KSV018
+AVD-KSV-0018
