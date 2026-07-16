@@ -23,7 +23,7 @@ parameters:
     value: apps.silver.devops.gov.bc.ca
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
-    value: "3"
+    value: "2"
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "5"
@@ -50,6 +50,9 @@ objects:
           deployment: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
         type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 1
+          maxSurge: 1
       template:
         metadata:
           labels:
