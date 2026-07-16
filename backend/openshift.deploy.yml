@@ -209,7 +209,8 @@ objects:
               lifecycle:
                 preStop:
                   exec:
-                    command: ["/bin/sleep", "10"]
+                    # distroless/nodejs has no /bin/sleep; exec hooks skip image ENTRYPOINT
+                    command: ["/nodejs/bin/node", "-e", "setTimeout(() => {}, 10000)"]
           volumes:
             - name: tmp
               emptyDir:
