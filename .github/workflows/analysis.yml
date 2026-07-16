@@ -91,6 +91,7 @@ jobs:
     name: Trivy Security Scan
     if: (! github.event.pull_request.draft)
     permissions:
+      contents: read
       security-events: write
     runs-on: ubuntu-slim
     timeout-minutes: 5
