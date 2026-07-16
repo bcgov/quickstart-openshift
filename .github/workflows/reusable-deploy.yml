@@ -91,8 +91,6 @@ jobs:
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
           debug: true
-          # Temporary: verify HPA/PDB/RollingUpdate on this PR; revert before merge.
-          lite_mode: false
           parameters: -p ZONE="${{ inputs.target }}"
             -p NAME="${{ github.event.repository.name }}"
             ${{ matrix.parameters }}
