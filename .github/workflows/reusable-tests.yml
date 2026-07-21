@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         name: Setup Node
         with:
           node-version: 24
@@ -72,7 +72,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         name: Checkout
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         name: Setup Node
         with:
           node-version: 24
