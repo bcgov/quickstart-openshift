@@ -54,6 +54,17 @@ If you're using BC Government's OpenShift platform, you'll also need:
 - [ ] BCGov OpenShift project namespaces:
     - [BCGov signup](https://registry.developer.gov.bc.ca)
 
+### Recommended Local Developer Setup
+
+To prevent accidental secret leaks (API keys, passwords, credentials) and enforce commit safety during local development, developers are recommended to run the client-side guardrails setup:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/bcgov/agent-guardrails/main/setup.sh | bash
+```
+
+This installs Gitleaks pre-commit hooks to block staged secrets before committing and sets up safety wrappers for local commands.
+
+
 ## Using this Template
 
 Create a new repository using this repository as a template.
