@@ -54,6 +54,24 @@ If you're using BC Government's OpenShift platform, you'll also need:
 - [ ] BCGov OpenShift project namespaces:
     - [BCGov signup](https://registry.developer.gov.bc.ca)
 
+### Recommended Local Developer Setup
+
+To prevent accidental secret leaks (API keys, passwords, credentials) during local development, enable the repository's built-in Gitleaks pre-commit hook:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+This repository also includes standard AI development guidelines out-of-the-box in [.github/copilot-instructions.md](.github/copilot-instructions.md).
+
+For full client-side command wrappers (blocking forbidden flags or cluster commands), developers can optionally run:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/bcgov/agent-guardrails/main/setup.sh | bash
+```
+
+
+
 ## Using this Template
 
 Create a new repository using this repository as a template.

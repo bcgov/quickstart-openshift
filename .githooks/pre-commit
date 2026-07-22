@@ -1,0 +1,10 @@
+#!/bin/bash
+# Pre-commit hook - Blocks commits containing secrets using Gitleaks.
+set -euo pipefail
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "BLOCKED: gitleaks not found. Install gitleaks (https://github.com/gitleaks/gitleaks) to run pre-commit secret checks." >&2
+  exit 1
+fi
+
+gitleaks protect --staged --redact --no-banner
