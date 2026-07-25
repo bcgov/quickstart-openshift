@@ -72,8 +72,6 @@ Or configure individual tools:
 ./scripts/global-instructions.sh
 ```
 
-
-
 ## Using this Template
 
 Create a new repository using this repository as a template.
