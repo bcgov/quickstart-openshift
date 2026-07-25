@@ -106,6 +106,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
+      # Reports everything, blocks on nothing; the SLA step below is the merge gate
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -118,7 +119,7 @@ jobs:
           trivyignores: ".github/.trivyignore"
           cache-dir: .trivycache
           skip-dirs: "**/node_modules,**/coverage,**/dist,.git"
-          exit-code: "1"
+          exit-code: "0"
 
       - name: Upload Trivy scan results to GitHub Security tab
         if: always()
@@ -126,6 +127,23 @@ jobs:
         with:
           category: "trivy"
           sarif_file: "trivy-results.sarif"
+
+      # Advisories inside their SECURITY.md remediation window are excluded here, so a
+      # newly published CVE does not block unrelated PRs before Renovate can patch it.
+      # Secrets and misconfigurations have no publication date and always block.
+      - name: Fail on findings past remediation SLA
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          format: "table"
+          ignore-unfixed: true
+          ignore-policy: ".github/trivy-sla.rego"
+          scan-type: "fs"
+          scanners: "vuln,secret,misconfig"
+          severity: "CRITICAL,HIGH"
+          trivyignores: ".github/.trivyignore"
+          cache-dir: .trivycache
+          skip-dirs: "**/node_modules,**/coverage,**/dist,.git"
+          exit-code: "1"
 
   # ==========================================================================
   # WARNING: This job acts as the required merge gate for this workflow.
