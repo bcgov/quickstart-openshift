@@ -14,7 +14,8 @@
 - NEVER implement unrequested features; limit changes to the active prompt.
 - ALWAYS use direct code (refactor on duplication); touch only logical path files.
 - ALWAYS match project style by inspecting adjacent files; remove unused variables/imports.
-- ALWAYS default environments/toggles to PROD when variables are missing.
+- ALWAYS default security/hardening toggles to their strictest setting when unspecified.
+- NEVER infer a target environment from a missing variable; hard stop with a clear error.
 - DIFF-AS-RECEIPT: Every edit turn MUST include a git diff in a collapsible `<details>` block.
 
 ### Definition of Done
