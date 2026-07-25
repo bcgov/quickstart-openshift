@@ -59,17 +59,17 @@ If you're using BC Government's OpenShift platform, you'll also need:
 To prevent accidental secret leaks (API keys, passwords, credentials) during local development and apply standard BC Gov AI developer rules, run the opt-in setup script:
 
 ```bash
-./scripts/setup-all.sh
+./scripts/setup.sh
 ```
 
 Or configure individual tools:
 
 ```bash
 # Setup global Gitleaks secret interception
-./scripts/setup-gitleaks.sh
+./scripts/global-gitleaks.sh
 
 # Apply global AI instructions (~/.copilot/instructions/instructions.md)
-./scripts/setup-copilot-instructions.sh
+./scripts/global-instructions.sh
 ```
 
 
