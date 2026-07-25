@@ -56,18 +56,20 @@ If you're using BC Government's OpenShift platform, you'll also need:
 
 ### Recommended Local Developer Setup
 
-To prevent accidental secret leaks (API keys, passwords, credentials) during local development, enable the repository's built-in Gitleaks pre-commit hook:
+To prevent accidental secret leaks (API keys, passwords, credentials) during local development and apply standard BC Gov AI developer rules, run the opt-in setup script:
 
 ```bash
-git config core.hooksPath .githooks
+./scripts/setup-all.sh
 ```
 
-This repository also includes standard AI development guidelines out-of-the-box in [.github/copilot-instructions.md](.github/copilot-instructions.md).
-
-For full client-side command wrappers (blocking forbidden flags or cluster commands), developers can optionally run:
+Or configure individual tools:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/bcgov/agent-guardrails/main/setup.sh | bash
+# Setup global Gitleaks secret interception
+./scripts/setup-gitleaks.sh
+
+# Apply global AI instructions (~/.copilot/instructions/instructions.md)
+./scripts/setup-copilot-instructions.sh
 ```
 
 
