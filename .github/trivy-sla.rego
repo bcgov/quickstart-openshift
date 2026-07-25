@@ -1,6 +1,6 @@
-# Fails the build only once the SECURITY.md remediation SLA has lapsed, so a newly
-# published advisory does not block unrelated pull requests before Renovate has had
-# a chance to patch it.  Findings are still reported to the Security tab immediately.
+# Fails main and scheduled runs only once the SECURITY.md remediation SLA has lapsed,
+# so a newly published advisory is reported without turning the repository red before
+# Renovate has had a chance to patch it.
 package trivy
 
 import rego.v1
