@@ -106,7 +106,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-      # Reports everything to the Security tab for triage; blocks on nothing
+      # Reports every severity to the Security tab for triage; blocks on nothing
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -115,7 +115,7 @@ jobs:
           ignore-unfixed: true
           scan-type: "fs"
           scanners: "vuln,secret,misconfig"
-          severity: "CRITICAL,HIGH"
+          severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
           trivyignores: ".github/.trivyignore"
           cache-dir: .trivycache
           skip-dirs: "**/node_modules,**/coverage,**/dist,.git"
@@ -137,7 +137,7 @@ jobs:
           output: "trivy-blocking.txt"
           scan-type: "fs"
           scanners: "secret,misconfig"
-          severity: "CRITICAL,HIGH"
+          severity: "MEDIUM,HIGH,CRITICAL"
           trivyignores: ".github/.trivyignore"
           cache-dir: .trivycache
           skip-dirs: "**/node_modules,**/coverage,**/dist,.git"

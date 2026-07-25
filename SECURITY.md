@@ -38,5 +38,5 @@ All security issues are triaged using CISA KEV status and CVSS scores:
 - **Medium** (CVSS 4.0-6.9): Remediation within 2 weeks.
 - **Low** (CVSS 0.0-3.9): Remediation next scheduled release.
 
-Trivy reports all Critical and High findings to the GitHub Security tab on every run, where dependency advisories are triaged against the windows above. Secrets and misconfigurations are introduced by a change itself, so those fail the run that introduces them.
+Trivy reports findings at every severity to the GitHub Security tab on each run, where dependency advisories are triaged against the windows above. Secrets and misconfigurations are introduced by a change itself, so those fail the run that introduces them at Medium and above.
 
