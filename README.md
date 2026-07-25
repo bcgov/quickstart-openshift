@@ -56,23 +56,22 @@ If you're using BC Government's OpenShift platform, you'll also need:
 
 ### Recommended Local Developer Setup
 
-To prevent accidental secret leaks (API keys, passwords, credentials) during local development and apply standard BC Gov AI developer rules, run the opt-in setup script:
+To prevent accidental secret leaks and apply BC Gov developer standards across all local projects, run the opt-in setup scripts:
 
 ```bash
+# Master setup: Configures global Gitleaks and global AI instructions
 ./scripts/setup.sh
+
+# Or run individual setup scripts:
+./scripts/global-gitleaks.sh       # Setup global Gitleaks secret leak prevention
+./scripts/global-instructions.sh   # Copy BC Gov AI instructions to ~/.copilot/instructions/instructions.md
 ```
 
-Additional local development utilities (supporting both **Docker** and **Podman**):
+#### Additional Local Developer Utilities
+* **Container Reset (Docker & Podman):** `./scripts/clean-containers.sh`
+* **Pre-Push Code Verification:** `./scripts/verify-all.sh`
 
-```bash
-# Clean container caches and dangling volumes
-./scripts/clean-containers.sh
-
-# Run local pre-push verification (frontend/backend lints & tests)
-./scripts/verify-all.sh
-```
-
-See [scripts/README.md](scripts/README.md) for the full index of developer utility scripts.
+See **[scripts/README.md](scripts/README.md)** for full documentation on all helper scripts.
 
 ## Using this Template
 
