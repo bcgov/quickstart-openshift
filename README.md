@@ -56,7 +56,7 @@ If you're using BC Government's OpenShift platform, you'll also need:
 
 ### Recommended Local Developer Setup
 
-To prevent accidental secret leaks and apply BC Gov developer standards across all local projects, run the opt-in setup scripts:
+To prevent accidental secret leaks and apply QuickStart AI instructions across all local projects, run the opt-in setup scripts:
 
 ```bash
 # Master setup: Configures global Gitleaks and global AI instructions
@@ -64,7 +64,7 @@ To prevent accidental secret leaks and apply BC Gov developer standards across a
 
 # Or run individual setup scripts:
 ./scripts/global-gitleaks.sh       # Setup global Gitleaks secret leak prevention
-./scripts/global-instructions.sh   # Copy BC Gov AI instructions to ~/.copilot/instructions/instructions.md
+./scripts/global-instructions.sh   # Copy QuickStart AI instructions to ~/.copilot/instructions/instructions.md
 ```
 
 #### Additional Local Developer Utilities

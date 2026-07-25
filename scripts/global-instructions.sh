@@ -18,4 +18,4 @@ mkdir -p "$DEST_DIR"
 cp "$SOURCE_FILE" "$DEST_FILE"
 
 echo "SUCCESS: Copilot instructions copied to ${DEST_FILE}."
-echo "AI coding tools reading ~/.copilot/instructions/ will now use standard BC Gov development guidelines globally."
+echo "AI coding tools reading ~/.copilot/instructions/ will now use standard QuickStart AI development guidelines globally."
