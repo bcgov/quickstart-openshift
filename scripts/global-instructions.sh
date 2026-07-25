@@ -1,5 +1,5 @@
 #!/bin/bash
-# Setup Copilot Instructions globally across all AI coding sessions.
+# Setup Copilot Instructions globally across all AI coding sessions safely.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -15,6 +15,18 @@ DEST_DIR="${HOME}/.copilot/instructions"
 DEST_FILE="${DEST_DIR}/instructions.md"
 
 mkdir -p "$DEST_DIR"
+
+if [ -f "$DEST_FILE" ]; then
+  if cmp -s "$SOURCE_FILE" "$DEST_FILE"; then
+    echo "INFO: Global instructions at ${DEST_FILE} are already identical and up to date."
+    exit 0
+  else
+    BACKUP_FILE="${DEST_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+    cp "$DEST_FILE" "$BACKUP_FILE"
+    echo "WARNING: Existing global instructions differed. Created backup at ${BACKUP_FILE} before updating."
+  fi
+fi
+
 cp "$SOURCE_FILE" "$DEST_FILE"
 
 echo "SUCCESS: Copilot instructions copied to ${DEST_FILE}."
