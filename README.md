@@ -62,15 +62,17 @@ To prevent accidental secret leaks (API keys, passwords, credentials) during loc
 ./scripts/setup.sh
 ```
 
-Or configure individual tools:
+Additional local development utilities (supporting both **Docker** and **Podman**):
 
 ```bash
-# Setup global Gitleaks secret interception
-./scripts/global-gitleaks.sh
+# Clean container caches and dangling volumes
+./scripts/clean-containers.sh
 
-# Apply global AI instructions (~/.copilot/instructions/instructions.md)
-./scripts/global-instructions.sh
+# Run local pre-push verification (frontend/backend lints & tests)
+./scripts/verify-all.sh
 ```
+
+See [scripts/README.md](scripts/README.md) for the full index of developer utility scripts.
 
 ## Using this Template
 
