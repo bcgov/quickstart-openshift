@@ -1,0 +1,9 @@
+#!/bin/sh
+# Blocks commits containing secrets.  Enable with: git config core.hooksPath .githooks
+# Requires gitleaks 8.19+ for the `git --staged` subcommand.
+command -v gitleaks >/dev/null || {
+  echo "gitleaks not found, install it: https://github.com/gitleaks/gitleaks#installing" >&2
+  echo "(or skip this check once with: git commit --no-verify)" >&2
+  exit 1
+}
+exec gitleaks git --staged --redact --no-banner

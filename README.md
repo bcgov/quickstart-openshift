@@ -15,7 +15,7 @@ This repository provides a template to rapidly deploy a modern web application s
 * Gated/controlled production deployments (optional)
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure, and container scan tools
-* Out-of-the-box alignment with **OWASP ASVS** Level 1 & 2 controls (see [SECURITY.md](file:///home/derek/Repos/quickstart-openshift/SECURITY.md#owasp-asvs-alignment))
+* Out-of-the-box alignment with **OWASP ASVS** Level 1 & 2 controls (see [SECURITY.md](./SECURITY.md#owasp-asvs-alignment))
 * Automatic dependency patching via [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
 * Maintenance Mode Automation (hands‑off updates, low‑dev mode) via the same Renovate config
 * Enforced code reviews and workflow jobs (pass|fail)
@@ -56,22 +56,13 @@ If you're using BC Government's OpenShift platform, you'll also need:
 
 ### Recommended Local Developer Setup
 
-To prevent accidental secret leaks and apply QuickStart AI instructions across all local projects, run the opt-in setup scripts:
+Block accidental secret commits by enabling the repository's [pre-commit hook](./.githooks/pre-commit), which scans staged changes with [Gitleaks](https://github.com/gitleaks/gitleaks#installing):
 
 ```bash
-# Master setup: Configures global Gitleaks and global AI instructions
-./scripts/setup.sh
-
-# Or run individual setup scripts:
-./scripts/global-gitleaks.sh       # Setup global Gitleaks secret leak prevention
-./scripts/global-instructions.sh   # Copy QuickStart AI instructions to ~/.copilot/instructions/instructions.md
+git config core.hooksPath .githooks
 ```
 
-#### Additional Local Developer Utilities
-* **Container Reset (Docker & Podman):** `./scripts/clean-containers.sh`
-* **Pre-Push Code Verification:** `./scripts/verify-all.sh`
-
-See **[scripts/README.md](scripts/README.md)** for full documentation on all helper scripts.
+This is per-clone and opt-in; it only affects this repository.
 
 ## Using this Template
 
@@ -390,7 +381,7 @@ Don't forget to add your team members!
 
 ## Security & OWASP ASVS Alignment
 
-This repository is architected and hardened out-of-the-box to align with Levels 1 and 2 of the **OWASP Application Security Verification Standard (ASVS) v4.0.3**. A detailed security mapping matrix is documented in [SECURITY.md](file:///home/derek/Repos/quickstart-openshift/SECURITY.md#owasp-asvs-alignment), detailing our implementation of:
+This repository is architected and hardened out-of-the-box to align with Levels 1 and 2 of the **OWASP Application Security Verification Standard (ASVS) v4.0.3**. A detailed security mapping matrix is documented in [SECURITY.md](./SECURITY.md#owasp-asvs-alignment), detailing our implementation of:
 * **Active WAF Defense:** Inline Coraza WAF running inside the Caddy reverse proxy.
 * **Tiered Isolation:** NetworkPolicies enforcing network boundaries between the frontend, backend, and database tiers.
 * **Platform/Container Hardening:** Read-only root filesystems, non-root execution, privilege escalation blocks, default seccomp profiles, and drop capabilities.
