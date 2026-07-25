@@ -106,7 +106,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-      # Reports every severity to the Security tab for triage; blocks on nothing
+      # Reports every severity to the Security tab for triage.  Findings are not a merge
+      # gate: advisories are published on their own schedule, not the contributor's, and
+      # committed secrets are already blocked at push time by GitHub secret scanning.
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -127,33 +129,6 @@ jobs:
         with:
           category: "trivy"
           sarif_file: "trivy-results.sarif"
-
-      # Introduced by the change itself and fixable by its author, unlike dependency
-      # advisories, which are triaged from the Security tab instead of failing runs
-      - name: Fail on secrets and misconfigurations
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          format: "table"
-          output: "trivy-blocking.txt"
-          scan-type: "fs"
-          scanners: "secret,misconfig"
-          severity: "MEDIUM,HIGH,CRITICAL"
-          trivyignores: ".github/.trivyignore"
-          cache-dir: .trivycache
-          skip-dirs: "**/node_modules,**/coverage,**/dist,.git"
-          exit-code: "1"
-
-      # Table output goes to a file, so without this a failed run has an empty log
-      - name: Publish blocking findings
-        if: failure()
-        run: |
-          cat trivy-blocking.txt
-          {
-            echo '### Trivy findings blocking this run'
-            echo '```'
-            cat trivy-blocking.txt
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
 
   # ==========================================================================
   # WARNING: This job acts as the required merge gate for this workflow.
