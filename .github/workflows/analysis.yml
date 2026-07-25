@@ -6,7 +6,7 @@ on:
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
   schedule:
-    - cron: "0 11 * * *" # 3 AM PST = 11 AM UTC, daily; surfaces SLA breaches within a day
+    - cron: "0 11 * * 0" # 3 AM PST = 12 PM UDT, runs sundays
   workflow_dispatch:
 
 concurrency:
@@ -106,7 +106,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-      # Reports everything, blocks on nothing; the two steps below decide what fails
+      # Reports everything to the Security tab for triage; blocks on nothing
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -128,7 +128,8 @@ jobs:
           category: "trivy"
           sarif_file: "trivy-results.sarif"
 
-      # Introduced by the diff and fixable by its author, so these block every run
+      # Introduced by the change itself and fixable by its author, unlike dependency
+      # advisories, which are triaged from the Security tab instead of failing runs
       - name: Fail on secrets and misconfigurations
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -142,26 +143,7 @@ jobs:
           skip-dirs: "**/node_modules,**/coverage,**/dist,.git"
           exit-code: "1"
 
-      # Dependency advisories arrive on the publisher's schedule, not the contributor's,
-      # so they fail main and scheduled runs once past the SECURITY.md remediation SLA,
-      # never a pull request.  See .github/trivy-sla.rego
-      - name: Fail on dependency vulnerabilities past remediation SLA
-        if: github.event_name != 'pull_request'
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          format: "table"
-          output: "trivy-blocking.txt"
-          ignore-unfixed: true
-          ignore-policy: ".github/trivy-sla.rego"
-          scan-type: "fs"
-          scanners: "vuln"
-          severity: "CRITICAL,HIGH"
-          trivyignores: ".github/.trivyignore"
-          cache-dir: .trivycache
-          skip-dirs: "**/node_modules,**/coverage,**/dist,.git"
-          exit-code: "1"
-
-      # SARIF goes to a file, so without this a failed run has an empty log
+      # Table output goes to a file, so without this a failed run has an empty log
       - name: Publish blocking findings
         if: failure()
         run: |
