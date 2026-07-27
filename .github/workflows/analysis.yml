@@ -106,6 +106,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
+      # Reports every severity to the Security tab for triage.  Findings are not a merge
+      # gate: advisories are published on their own schedule, not the contributor's, and
+      # committed secrets are already blocked at push time by GitHub secret scanning.
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -114,11 +117,11 @@ jobs:
           ignore-unfixed: true
           scan-type: "fs"
           scanners: "vuln,secret,misconfig"
-          severity: "CRITICAL,HIGH"
+          severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
           trivyignores: ".github/.trivyignore"
           cache-dir: .trivycache
           skip-dirs: "**/node_modules,**/coverage,**/dist,.git"
-          exit-code: "1"
+          exit-code: "0"
 
       - name: Upload Trivy scan results to GitHub Security tab
         if: always()
