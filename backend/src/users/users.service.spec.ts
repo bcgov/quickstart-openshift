@@ -224,6 +224,46 @@ describe('UserService', () => {
       ).rejects.toBeInstanceOf(BadRequestException)
     })
 
+    it('should reject "in"/"notin" filter operations whose array contains non-scalar items', async () => {
+      await expect(
+        service.searchUsers(
+          undefined,
+          undefined,
+          '[{"key":"name","operation":"in","value":[{"nested":"object"}]}]',
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException)
+    })
+
+    it('should reject a non-scalar filter value for a non-array operation instead of crashing in Prisma', async () => {
+      await expect(
+        service.searchUsers(
+          undefined,
+          undefined,
+          '[{"key":"name","operation":"like","value":{"nested":"object"}}]',
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException)
+    })
+
+    it('should allow a numeric filter value for a non-array operation', async () => {
+      const findManySpy = vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
+
+      await service.searchUsers(undefined, undefined, '[{"key":"id","operation":"gt","value":5}]')
+
+      expect(findManySpy).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: { gt: 5 } } }),
+      )
+    })
+
+    it('should not require a value for the "isnull" operation', async () => {
+      const findManySpy = vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
+
+      await service.searchUsers(undefined, undefined, '[{"key":"name","operation":"isnull"}]')
+
+      expect(findManySpy).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { name: { equals: null } } }),
+      )
+    })
+
     it('should reject requests that provide both after and before cursors', async () => {
       await expect(
         service.searchUsers(undefined, undefined, undefined, 'cursorA', 'cursorB'),
@@ -233,6 +273,18 @@ describe('UserService', () => {
     it('should reject a malformed cursor', async () => {
       await expect(
         service.searchUsers(undefined, undefined, undefined, 'not-a-valid-cursor'),
+      ).rejects.toBeInstanceOf(BadRequestException)
+    })
+
+    it('should reject a well-formed cursor with a non-numeric id value instead of crashing', async () => {
+      // Correct shape/keys (so decodeCursor's own checks pass), but "id" is
+      // not parseable as a Decimal - this exercises resolveCursorValue's
+      // guard around `new Prisma.Decimal(raw)`.
+      const badIdCursor = Buffer.from(JSON.stringify({ id: 'not-a-number' }), 'utf8').toString(
+        'base64url',
+      )
+      await expect(
+        service.searchUsers(undefined, undefined, undefined, badIdCursor),
       ).rejects.toBeInstanceOf(BadRequestException)
     })
 
@@ -303,6 +355,38 @@ describe('UserService', () => {
       expect(result.users.map((u) => u.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
       expect(result.hasNextPage).toBe(true)
       expect(result.hasPreviousPage).toBe(false)
+    })
+
+    it('should report no next page (and a null cursor) when an after cursor is beyond the last row', async () => {
+      vi.spyOn(prisma.users, 'findMany').mockResolvedValueOnce([])
+
+      const afterCursor = Buffer.from(JSON.stringify({ id: '999' }), 'utf8').toString('base64url')
+      const result = await service.searchUsers(undefined, undefined, undefined, afterCursor)
+
+      expect(result.users).toHaveLength(0)
+      expect(result.hasNextPage).toBe(false)
+      expect(result.hasPreviousPage).toBe(false)
+      expect(result.nextCursor).toBeNull()
+      expect(result.previousCursor).toBeNull()
+    })
+
+    it('should report no next page (and a null cursor) when a before cursor is at the very start of the result set', async () => {
+      vi.spyOn(prisma.users, 'findMany').mockResolvedValueOnce([])
+
+      const beforeCursor = Buffer.from(JSON.stringify({ id: '1' }), 'utf8').toString('base64url')
+      const result = await service.searchUsers(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        beforeCursor,
+      )
+
+      expect(result.users).toHaveLength(0)
+      expect(result.hasNextPage).toBe(false)
+      expect(result.hasPreviousPage).toBe(false)
+      expect(result.nextCursor).toBeNull()
+      expect(result.previousCursor).toBeNull()
     })
 
     it('should only compute total/totalPages when includeTotalCount is "true"', async () => {

@@ -7,9 +7,15 @@
 -- grows (billions of rows).
 --
 -- The primary key already indexes ID, so only NAME and EMAIL need new
--- indexes here.
-CREATE INDEX IF NOT EXISTS "IDX_USERS_NAME" ON USERS.USERS (NAME);
-CREATE INDEX IF NOT EXISTS "IDX_USERS_EMAIL" ON USERS.USERS (EMAIL);
+-- indexes here. `searchUsers()` always appends ID as a tiebreaker after
+-- the requested sort field (e.g. `ORDER BY name ASC, id ASC`), so these
+-- are composite (NAME, ID) / (EMAIL, ID) indexes rather than single-column
+-- ones: a single-column index on NAME alone can answer the WHERE on NAME
+-- but still forces a separate sort on ID, whereas the composite index lets
+-- the full keyset predicate - `WHERE (name, id) > (?, ?) ORDER BY name, id`
+-- - be answered with a single index range scan.
+CREATE INDEX IF NOT EXISTS "IDX_USERS_NAME_ID" ON USERS.USERS (NAME, ID);
+CREATE INDEX IF NOT EXISTS "IDX_USERS_EMAIL_ID" ON USERS.USERS (EMAIL, ID);
 
 -- Follow-up (manual, not applied automatically here): the "like" filter
 -- operation runs a substring `contains` search, which even with the btree

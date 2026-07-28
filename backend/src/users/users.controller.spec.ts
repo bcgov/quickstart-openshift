@@ -198,5 +198,36 @@ describe('UserController', () => {
           expect(res.body.error).toBe('Bad Request')
         })
     })
+
+    it('given a well-formed cursor with a non-numeric id_should return a 400 instead of a 500', async () => {
+      // Exercises the real service: correct cursor shape/keys, but "id" is
+      // not parseable as a Prisma.Decimal - proves resolveCursorValue's
+      // guard prevents this from bubbling up as an unhandled 500.
+      const badIdCursor = Buffer.from(JSON.stringify({ id: 'not-a-number' }), 'utf8').toString(
+        'base64url',
+      )
+      return request(app.getHttpServer())
+        .get('/users/search')
+        .query({ after: badIdCursor })
+        .expect(400)
+        .expect((res) => {
+          expect(res.body.statusCode).toBe(400)
+          expect(res.body.error).toBe('Bad Request')
+        })
+    })
+
+    it('given a non-scalar filter value_should return a 400 instead of a 500', async () => {
+      // Exercises the real service: proves parseFilter's scalar-value
+      // guard prevents a non-string/number filter value from reaching
+      // Prisma's own (uncaught, 500-triggering) validation error.
+      return request(app.getHttpServer())
+        .get('/users/search')
+        .query({ filter: '[{"key":"name","operation":"like","value":{"nested":"object"}}]' })
+        .expect(400)
+        .expect((res) => {
+          expect(res.body.statusCode).toBe(400)
+          expect(res.body.error).toBe('Bad Request')
+        })
+    })
   })
 })

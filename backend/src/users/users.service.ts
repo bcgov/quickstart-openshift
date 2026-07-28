@@ -192,8 +192,14 @@ export class UsersService {
     const pageRows = hasMore ? rows.slice(0, parsedLimit) : rows
     const orderedRows = mode === 'before' ? pageRows.slice().reverse() : pageRows
 
-    const hasNextPage = mode === 'before' ? true : hasMore
-    const hasPreviousPage = mode === 'before' ? hasMore : Boolean(after)
+    // Guard against an empty page (e.g. a `before` cursor at the very start
+    // of the result set, or an `after` cursor beyond the last row): without
+    // this, hasNextPage/hasPreviousPage could report `true` while there is
+    // no row left to build the matching cursor from, leaving the client
+    // with `hasNextPage: true` but `nextCursor: null`.
+    const hasRows = orderedRows.length > 0
+    const hasNextPage = hasRows && (mode === 'before' ? true : hasMore)
+    const hasPreviousPage = hasRows && (mode === 'before' ? hasMore : Boolean(after))
 
     const firstRow = orderedRows[0]
     const lastRow = orderedRows[orderedRows.length - 1]
@@ -291,11 +297,28 @@ export class UsersService {
       if (!operation || !ALLOWED_FILTER_OPERATIONS.has(operation)) {
         throw new BadRequestException(`Filter operation "${String(operation)}" is not supported`)
       }
-      if ((operation === 'in' || operation === 'notin') && !Array.isArray(value)) {
-        throw new BadRequestException(`Filter operation "${operation}" requires an array value`)
+      if (operation === 'in' || operation === 'notin') {
+        if (!Array.isArray(value) || !value.every((item) => this.isScalarFilterValue(item))) {
+          throw new BadRequestException(
+            `Filter operation "${operation}" requires an array of strings or numbers`,
+          )
+        }
+      } else if (operation !== 'isnull' && !this.isScalarFilterValue(value)) {
+        // "isnull" ignores the supplied value (it always filters on
+        // `equals: null`); every other operation is forwarded straight into
+        // a Prisma scalar filter, so a non-scalar value (object/array/etc.)
+        // here would otherwise reach Prisma and throw its own uncaught
+        // (500-triggering) validation error instead of a controlled 400.
+        throw new BadRequestException(
+          `Filter value for operation "${operation}" must be a string or number`,
+        )
       }
       return { key, operation, value }
     })
+  }
+
+  private isScalarFilterValue(value: unknown): value is string | number {
+    return typeof value === 'string' || typeof value === 'number'
   }
 
   /**
@@ -332,7 +355,18 @@ export class UsersService {
   }
 
   private resolveCursorValue(key: SortableField, raw: string): unknown {
-    return key === 'id' ? new Prisma.Decimal(raw) : raw
+    if (key !== 'id') {
+      return raw
+    }
+    // Prisma.Decimal throws on a non-numeric string (e.g. a hand-crafted or
+    // corrupted cursor). Without this guard that throw would bubble up as
+    // an unhandled 500 instead of the controlled 400 every other malformed
+    // cursor case gets.
+    try {
+      return new Prisma.Decimal(raw)
+    } catch {
+      throw new BadRequestException('Invalid cursor')
+    }
   }
 
   private invertDirections(fields: SortField[]): SortField[] {
