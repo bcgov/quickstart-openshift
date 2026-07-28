@@ -9,8 +9,9 @@ import {
   Query,
   HttpException,
 } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
-import { UsersService } from './users.service'
+import { ApiQuery, ApiTags } from '@nestjs/swagger'
+import { DEFAULT_LIMIT, MAX_LIMIT, UsersService } from './users.service'
+import type { SearchUsersResult } from './users.service'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UserDto } from './dto/user.dto'
@@ -31,16 +32,46 @@ export class UsersController {
   }
 
   @Get('search') // it must be ahead of the below Get(":id") to avoid conflict
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: `Page size (default ${DEFAULT_LIMIT}, max ${MAX_LIMIT})`,
+  })
+  @ApiQuery({
+    name: 'sort',
+    required: false,
+    description: 'JSON array of sort fields, ex: [{"name":"desc"},{"id":"asc"}]',
+  })
+  @ApiQuery({
+    name: 'filter',
+    required: false,
+    description:
+      'JSON array of filter conditions, ex: [{"key":"name","operation":"like","value":"Jo"}]',
+  })
+  @ApiQuery({
+    name: 'after',
+    required: false,
+    description: 'Opaque cursor: fetch the page immediately after this position',
+  })
+  @ApiQuery({
+    name: 'before',
+    required: false,
+    description: 'Opaque cursor: fetch the page immediately before this position',
+  })
+  @ApiQuery({
+    name: 'includeTotalCount',
+    required: false,
+    description: 'Set to "true" to also compute total/totalPages (runs an extra COUNT query)',
+  })
   async searchUsers(
-    @Query('page') page: number,
-    @Query('limit') limit: number,
-    @Query('sort') sort: string, // JSON string to store sort key and sort value, ex: {name: "ASC"}
-    @Query('filter') filter: string, // JSON array for key, operation and value, ex: [{key: "name", operation: "like", value: "Peter"}]
-  ) {
-    if (isNaN(page) || isNaN(limit)) {
-      throw new HttpException('Invalid query parameters', 400)
-    }
-    return this.usersService.searchUsers(page, limit, sort, filter)
+    @Query('limit') limit?: string,
+    @Query('sort') sort?: string,
+    @Query('filter') filter?: string,
+    @Query('after') after?: string,
+    @Query('before') before?: string,
+    @Query('includeTotalCount') includeTotalCount?: string,
+  ): Promise<SearchUsersResult> {
+    return this.usersService.searchUsers(limit, sort, filter, after, before, includeTotalCount)
   }
 
   @Get(':id')

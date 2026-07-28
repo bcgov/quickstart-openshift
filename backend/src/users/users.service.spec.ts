@@ -1,8 +1,16 @@
 import type { TestingModule } from '@nestjs/testing'
 import { Test } from '@nestjs/testing'
-import { UsersService } from './users.service'
+import { BadRequestException } from '@nestjs/common'
+import { DEFAULT_LIMIT, FIND_ALL_MAX_ROWS, MAX_LIMIT, UsersService } from './users.service'
 import { PrismaService } from '../prisma.service'
 import { Prisma } from '../../generated/prisma/client.js'
+
+const makeRows = (ids: number[]) =>
+  ids.map((id) => ({
+    id: new Prisma.Decimal(id),
+    name: `User ${id}`,
+    email: `user${id}@test.com`,
+  }))
 
 describe('UserService', () => {
   let service: UsersService
@@ -83,6 +91,12 @@ describe('UserService', () => {
       const users = await service.findAll()
       expect(users).toEqual(userArray)
     })
+
+    it('should cap the query with a take limit so it can never load unbounded rows', async () => {
+      const findManySpy = vi.spyOn(prisma.users, 'findMany')
+      await service.findAll()
+      expect(findManySpy).toHaveBeenCalledWith({ take: FIND_ALL_MAX_ROWS })
+    })
   })
 
   describe('findOne', () => {
@@ -116,93 +130,211 @@ describe('UserService', () => {
   })
 
   describe('searchUsers', () => {
-    it('should return a list of users with pagination and filtering', async () => {
-      const page = 1
-      const limit = 10
-      const sortObject: Prisma.SortOrder = 'asc'
-      const sort: any = `[{ "name": "${sortObject}" }]`
-      const filter: any = '[{ "name": { "equals": "Peter" } }]'
+    it('given no params should return the first page ordered by id asc with sensible defaults', async () => {
+      const findManySpy = vi.spyOn(prisma.users, 'findMany').mockResolvedValue(savedUserArray)
 
-      vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
-      vi.spyOn(prisma.users, 'count').mockResolvedValue(0)
-      const result = await service.searchUsers(page, limit, sort, filter)
+      const result = await service.searchUsers()
 
-      expect(result).toEqual({
-        users: [],
-        page,
-        limit,
-        total: 0,
-        totalPages: 0,
+      expect(findManySpy).toHaveBeenCalledWith({
+        where: {},
+        orderBy: [{ id: 'asc' }],
+        take: DEFAULT_LIMIT + 1,
       })
+      expect(result).toEqual({
+        users: [oneUser, twoUser],
+        limit: DEFAULT_LIMIT,
+        count: 2,
+        hasNextPage: false,
+        hasPreviousPage: false,
+        nextCursor: null,
+        previousCursor: null,
+      })
+      // total/totalPages are opt-in and must not be computed (no extra COUNT(*)) by default.
+      expect(prisma.users.count).not.toHaveBeenCalled()
     })
 
-    it('given no page should return a list of users with pagination and filtering with default page 1', async () => {
-      const limit = 10
-      const sortObject: Prisma.SortOrder = 'asc'
-      const sort: any = `[{ "name": "${sortObject}" }]`
-      const filter: any = '[{ "name": { "equals": "Peter" } }]'
+    it('should clamp an oversized limit to MAX_LIMIT instead of silently resetting to the default', async () => {
+      const findManySpy = vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
 
-      vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
-      vi.spyOn(prisma.users, 'count').mockResolvedValue(0)
-      const result = await service.searchUsers(null, limit, sort, filter)
+      const result = await service.searchUsers('500')
 
-      expect(result).toEqual({
-        users: [],
-        page: 1,
-        limit,
-        total: 0,
-        totalPages: 0,
-      })
-    })
-    it('given no limit should return a list of users with pagination and filtering with default limit 10', async () => {
-      const page = 1
-      const sortObject: Prisma.SortOrder = 'asc'
-      const sort: any = `[{ "name": "${sortObject}" }]`
-      const filter: any = '[{ "name": { "equals": "Peter" } }]'
-
-      vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
-      vi.spyOn(prisma.users, 'count').mockResolvedValue(0)
-      const result = await service.searchUsers(page, null, sort, filter)
-
-      expect(result).toEqual({
-        users: [],
-        page: 1,
-        limit: 10,
-        total: 0,
-        totalPages: 0,
-      })
+      expect(result.limit).toBe(MAX_LIMIT)
+      expect(findManySpy).toHaveBeenCalledWith(expect.objectContaining({ take: MAX_LIMIT + 1 }))
     })
 
-    it('given  limit greater than 200 should return a list of users with pagination and filtering with default limit 10', async () => {
-      const page = 1
-      const limit = 201
-      const sortObject: Prisma.SortOrder = 'asc'
-      const sort: any = `[{ "name": "${sortObject}" }]`
-      const filter: any = '[{ "name": { "equals": "Peter" } }]'
-
-      vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
-      vi.spyOn(prisma.users, 'count').mockResolvedValue(0)
-      const result = await service.searchUsers(page, limit, sort, filter)
-
-      expect(result).toEqual({
-        users: [],
-        page: 1,
-        limit: 10,
-        total: 0,
-        totalPages: 0,
-      })
+    it('should reject a non-numeric limit with a 400 instead of silently falling back', async () => {
+      await expect(service.searchUsers('not-a-number')).rejects.toBeInstanceOf(BadRequestException)
     })
-    it('given  invalid JSON should throw error', async () => {
-      const page = 1
-      const limit = 201
-      const sortObject: Prisma.SortOrder = 'asc'
-      const sort: any = `[{ "name" "${sortObject}" }]`
-      const filter: any = '[{ "name": { "equals": "Peter" } }]'
-      try {
-        await service.searchUsers(page, limit, sort, filter)
-      } catch (e) {
-        expect(e).toEqual(new Error('Invalid query parameters'))
+
+    it('should reject a zero/negative limit', async () => {
+      await expect(service.searchUsers('0')).rejects.toBeInstanceOf(BadRequestException)
+    })
+
+    it('should return a 400 (not a 500) for invalid sort JSON', async () => {
+      await expect(service.searchUsers(undefined, '[{ invalid')).rejects.toBeInstanceOf(
+        BadRequestException,
+      )
+    })
+
+    it('should reject a sort field that is not on the allow-list', async () => {
+      await expect(service.searchUsers(undefined, '[{"password":"asc"}]')).rejects.toBeInstanceOf(
+        BadRequestException,
+      )
+    })
+
+    it('should reject a sort entry with an invalid direction', async () => {
+      await expect(service.searchUsers(undefined, '[{"name":"ascending"}]')).rejects.toBeInstanceOf(
+        BadRequestException,
+      )
+    })
+
+    it('should return a 400 (not a 500) for invalid filter JSON', async () => {
+      await expect(service.searchUsers(undefined, undefined, 'not-json')).rejects.toBeInstanceOf(
+        BadRequestException,
+      )
+    })
+
+    it('should reject a filter field that is not on the allow-list', async () => {
+      await expect(
+        service.searchUsers(
+          undefined,
+          undefined,
+          '[{"key":"password","operation":"eq","value":"x"}]',
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException)
+    })
+
+    it('should reject an unsupported filter operation', async () => {
+      await expect(
+        service.searchUsers(
+          undefined,
+          undefined,
+          '[{"key":"name","operation":"regex","value":"x"}]',
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException)
+    })
+
+    it('should reject "in"/"notin" filter operations without an array value', async () => {
+      await expect(
+        service.searchUsers(
+          undefined,
+          undefined,
+          '[{"key":"name","operation":"in","value":"not-an-array"}]',
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException)
+    })
+
+    it('should reject requests that provide both after and before cursors', async () => {
+      await expect(
+        service.searchUsers(undefined, undefined, undefined, 'cursorA', 'cursorB'),
+      ).rejects.toBeInstanceOf(BadRequestException)
+    })
+
+    it('should reject a malformed cursor', async () => {
+      await expect(
+        service.searchUsers(undefined, undefined, undefined, 'not-a-valid-cursor'),
+      ).rejects.toBeInstanceOf(BadRequestException)
+    })
+
+    it('should detect a next page via the limit+1 probe row without running a COUNT(*)', async () => {
+      // 11 rows for a default limit of 10 signals "there is more after this page".
+      vi.spyOn(prisma.users, 'findMany').mockResolvedValue(
+        makeRows([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
+      )
+      const countSpy = vi.spyOn(prisma.users, 'count')
+
+      const result = await service.searchUsers()
+
+      expect(result.users).toHaveLength(10)
+      expect(result.hasNextPage).toBe(true)
+      expect(result.hasPreviousPage).toBe(false)
+      expect(result.nextCursor).not.toBeNull()
+      expect(countSpy).not.toHaveBeenCalled()
+
+      const decoded = JSON.parse(Buffer.from(result.nextCursor!, 'base64url').toString('utf8'))
+      expect(decoded).toEqual({ id: '10' })
+    })
+
+    it('should build an indexable keyset WHERE clause from a real after cursor', async () => {
+      const findManySpy = vi
+        .spyOn(prisma.users, 'findMany')
+        .mockResolvedValueOnce(makeRows([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]))
+
+      const firstPage = await service.searchUsers()
+      expect(firstPage.nextCursor).not.toBeNull()
+
+      findManySpy.mockResolvedValueOnce([])
+      await service.searchUsers(undefined, undefined, undefined, firstPage.nextCursor ?? undefined)
+
+      const secondCallArgs = findManySpy.mock.calls[1]?.[0] as {
+        where: { AND: [unknown, { OR: Array<{ id: { gt: Prisma.Decimal } }> }] }
+        orderBy: unknown
+        take: number
       }
+      expect(secondCallArgs.orderBy).toEqual([{ id: 'asc' }])
+      expect(secondCallArgs.take).toBe(DEFAULT_LIMIT + 1)
+      expect(secondCallArgs.where.AND[1].OR[0].id.gt).toBeInstanceOf(Prisma.Decimal)
+      expect(secondCallArgs.where.AND[1].OR[0].id.gt.toString()).toBe('10')
+    })
+
+    it('should invert scan order for a before cursor and reverse rows back to ascending order', async () => {
+      const findManySpy = vi.spyOn(prisma.users, 'findMany')
+      // Simulate paging backwards from id 11: the DB scan (id desc, id < 11)
+      // returns exactly `limit` rows, so there is nothing earlier (hasPreviousPage: false)
+      // but a next page (back towards/through the cursor) always exists (hasNextPage: true).
+      findManySpy.mockResolvedValueOnce(makeRows([10, 9, 8, 7, 6, 5, 4, 3, 2, 1]))
+
+      const beforeCursor = Buffer.from(JSON.stringify({ id: '11' }), 'utf8').toString('base64url')
+      const result = await service.searchUsers(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        beforeCursor,
+      )
+
+      const callArgs = findManySpy.mock.calls[0]?.[0] as {
+        where: { AND: [unknown, { OR: Array<{ id: { lt: Prisma.Decimal } }> }] }
+        orderBy: unknown
+      }
+      expect(callArgs.orderBy).toEqual([{ id: 'desc' }])
+      expect(callArgs.where.AND[1].OR[0].id.lt.toString()).toBe('11')
+
+      expect(result.users.map((u) => u.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+      expect(result.hasNextPage).toBe(true)
+      expect(result.hasPreviousPage).toBe(false)
+    })
+
+    it('should only compute total/totalPages when includeTotalCount is "true"', async () => {
+      vi.spyOn(prisma.users, 'findMany').mockResolvedValue(makeRows([1, 2]))
+      const countSpy = vi.spyOn(prisma.users, 'count').mockResolvedValue(42)
+
+      const result = await service.searchUsers(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        'true',
+      )
+
+      expect(countSpy).toHaveBeenCalledTimes(1)
+      expect(result.total).toBe(42)
+      expect(result.totalPages).toBe(Math.ceil(42 / DEFAULT_LIMIT))
+    })
+
+    it('should apply allow-listed filters via convertFiltersToPrismaFormat', async () => {
+      const findManySpy = vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
+
+      await service.searchUsers(
+        undefined,
+        undefined,
+        '[{"key":"name","operation":"like","value":"Jo"}]',
+      )
+
+      expect(findManySpy).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { name: { contains: 'Jo' } } }),
+      )
     })
   })
   describe('convertFiltersToPrismaFormat', () => {

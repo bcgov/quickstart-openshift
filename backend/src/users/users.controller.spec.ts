@@ -2,6 +2,7 @@ import type { TestingModule } from '@nestjs/testing'
 import { Test } from '@nestjs/testing'
 import { UsersController } from './users.controller'
 import { UsersService } from './users.service'
+import type { SearchUsersResult } from './users.service'
 import request from 'supertest'
 import type { INestApplication } from '@nestjs/common'
 import { HttpException } from '@nestjs/common'
@@ -118,19 +119,19 @@ describe('UserController', () => {
   // Test the GET /users/search endpoint
   describe('GET /users/search', () => {
     // Test with valid query parameters
-    it('given valid query parameters_should return an array of users with pagination metadata', async () => {
+    it('given valid query parameters_should return users with cursor pagination metadata', async () => {
       // Mock the usersService.searchUsers method to return a sample result
-      const result = {
+      const result: SearchUsersResult = {
         users: [
           { id: 1, name: 'Alice', email: 'alice@example.com' },
           { id: 2, name: 'Adam', email: 'Adam@example.com' },
         ],
-        page: 1,
         limit: 10,
-        sort: '{"name":"ASC"}',
-        filter: '[{"key":"name","operation":"like","value":"A"}]',
-        total: 2,
-        totalPages: 1,
+        count: 2,
+        hasNextPage: false,
+        hasPreviousPage: false,
+        nextCursor: null,
+        previousCursor: null,
       }
       vi.spyOn(usersService, 'searchUsers').mockImplementation(async () => result)
 
@@ -138,47 +139,63 @@ describe('UserController', () => {
       return request(app.getHttpServer())
         .get('/users/search')
         .query({
-          page: 1,
           limit: 10,
-          sort: '{"name":"ASC"}',
+          sort: '[{"name":"asc"}]',
           filter: '[{"key":"name","operation":"like","value":"A"}]',
         })
         .expect(200)
         .expect(result)
     })
 
-    // Test with invalid query parameters
-    it('given invalid query parameters_should return a 400 status code with an error message', async () => {
-      // Make a GET request with invalid query parameters and expect a 400 status code and an error message
+    // Test with an invalid limit, exercising the real (unmocked) service to prove
+    // invalid input now correctly yields a 400 instead of an unhandled 500.
+    it('given a non-numeric limit_should return a 400 status code with an error message', async () => {
       return request(app.getHttpServer())
         .get('/users/search')
-        .query({
-          page: 'invalid',
-          limit: 'invalid',
-        })
+        .query({ limit: 'invalid' })
         .expect(400)
-        .expect({
-          statusCode: 400,
-          message: 'Invalid query parameters',
+        .expect((res) => {
+          expect(res.body.statusCode).toBe(400)
+          expect(res.body.error).toBe('Bad Request')
+          expect(typeof res.body.message).toBe('string')
         })
     })
-    it('given sort and filter as invalid query parameters_should return a 400 status code with an error message', async () => {
-      // Make a GET request with invalid query parameters and expect a 400 status code and an error message
-      vi.spyOn(usersService, 'searchUsers').mockImplementation(async () => {
-        throw new HttpException('Invalid query parameters', 400)
-      })
+
+    it('given sort and filter as invalid JSON_should return a 400 status code with an error message', async () => {
+      // Exercises the real service so invalid sort/filter JSON is proven to
+      // yield a controlled 400 rather than an uncaught 500.
       return request(app.getHttpServer())
         .get('/users/search')
         .query({
-          page: 1,
-          limit: 10,
           sort: 'invalid',
           filter: 'invalid',
         })
         .expect(400)
-        .expect({
-          statusCode: 400,
-          message: 'Invalid query parameters',
+        .expect((res) => {
+          expect(res.body.statusCode).toBe(400)
+          expect(res.body.error).toBe('Bad Request')
+        })
+    })
+
+    it('given a sort field outside the allow-list_should return a 400 status code', async () => {
+      return request(app.getHttpServer())
+        .get('/users/search')
+        .query({ sort: '[{"password":"asc"}]' })
+        .expect(400)
+        .expect((res) => {
+          expect(res.body.statusCode).toBe(400)
+          expect(res.body.error).toBe('Bad Request')
+        })
+    })
+
+    it('given both after and before cursors_should return a 400 status code', async () => {
+      return request(app.getHttpServer())
+        .get('/users/search')
+        .query({ after: 'a', before: 'b' })
+        .expect(400)
+        .expect((res) => {
+          expect(res.body.statusCode).toBe(400)
+          expect(res.body.error).toBe('Bad Request')
         })
     })
   })
