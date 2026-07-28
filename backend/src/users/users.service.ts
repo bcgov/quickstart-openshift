@@ -138,6 +138,8 @@ export class UsersService {
    * as raw query-string values (or undefined) and are validated here so a
    * malformed request always yields a 400 instead of a 500 or a silently
    * wrong query.
+   *
+   * @see https://www.prisma.io/docs/orm/v6/prisma-client/queries/pagination#cursor-based-pagination
    */
   async searchUsers(
     limit?: string,

@@ -9,7 +9,7 @@ import {
   Query,
   HttpException,
 } from '@nestjs/common'
-import { ApiQuery, ApiTags } from '@nestjs/swagger'
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { DEFAULT_LIMIT, MAX_LIMIT, UsersService } from './users.service'
 import type { SearchUsersResult } from './users.service'
 import { CreateUserDto } from './dto/create-user.dto'
@@ -32,6 +32,11 @@ export class UsersController {
   }
 
   @Get('search') // it must be ahead of the below Get(":id") to avoid conflict
+  @ApiOperation({
+    summary: 'Search users with cursor-based pagination',
+    description:
+      'Uses keyset pagination. Reuse returned cursors only with the same sort and filter; direct page-number jumps are intentionally unsupported. See [Prisma cursor-based pagination](https://www.prisma.io/docs/orm/v6/prisma-client/queries/pagination#cursor-based-pagination).',
+  })
   @ApiQuery({
     name: 'limit',
     required: false,
