@@ -158,21 +158,9 @@ export class UsersService {
     const filterConditions = this.parseFilter(filter)
     const filterWhere = this.convertFiltersToPrismaFormat(filterConditions)
 
-    // Append `id` as a final tiebreaker whenever it isn't already part of
-    // the sort so ordering - and therefore the cursor - is always a total,
-    // deterministic order even when name/email contain duplicate values.
-    const orderFields: SortField[] = requestedSort.some((field) => field.key === 'id')
-      ? requestedSort
-      : [...requestedSort, { key: 'id', direction: 'asc' }]
-
-    const mode: CursorMode = before ? 'before' : 'after'
-    const cursor = mode === 'before' ? before : after
-
-    let where: Record<string, unknown> = filterWhere
-    if (cursor) {
-      const cursorValues = this.decodeCursor(cursor, orderFields)
-      where = { AND: [filterWhere, this.buildKeysetWhere(orderFields, cursorValues, mode)] }
-    }
+    const orderFields = this.resolveOrderFields(requestedSort)
+    const { mode, cursor } = this.resolveCursorMode(after, before)
+    const where = this.buildWhereClause(filterWhere, orderFields, mode, cursor)
 
     // Paging backwards is done by scanning in the opposite direction (so
     // LIMIT keeps the rows nearest the cursor rather than the ones farthest
@@ -194,26 +182,11 @@ export class UsersService {
     const pageRows = hasMore ? rows.slice(0, parsedLimit) : rows
     const orderedRows = mode === 'before' ? pageRows.slice().reverse() : pageRows
 
-    // Guard against an empty page (e.g. a `before` cursor at the very start
-    // of the result set, or an `after` cursor beyond the last row): without
-    // this, hasNextPage/hasPreviousPage could report `true` while there is
-    // no row left to build the matching cursor from, leaving the client
-    // with `hasNextPage: true` but `nextCursor: null`.
-    const hasRows = orderedRows.length > 0
-    const hasNextPage = hasRows && (mode === 'before' ? true : hasMore)
-    const hasPreviousPage = hasRows && (mode === 'before' ? hasMore : Boolean(after))
-
-    const firstRow = orderedRows[0]
-    const lastRow = orderedRows[orderedRows.length - 1]
-
     const result: SearchUsersResult = {
       users: orderedRows.map((row) => this.toUserDto(row)),
       limit: parsedLimit,
       count: orderedRows.length,
-      hasNextPage,
-      hasPreviousPage,
-      nextCursor: hasNextPage && lastRow ? this.encodeCursor(lastRow, orderFields) : null,
-      previousCursor: hasPreviousPage && firstRow ? this.encodeCursor(firstRow, orderFields) : null,
+      ...this.buildPageMeta(mode, hasMore, after, orderedRows, orderFields),
     }
 
     if (includeTotalCount === 'true') {
@@ -223,6 +196,67 @@ export class UsersService {
     }
 
     return result
+  }
+
+  // Appends `id` as a final tiebreaker whenever it isn't already part of the
+  // sort so ordering - and therefore the cursor - is always a total,
+  // deterministic order even when name/email contain duplicate values.
+  private resolveOrderFields(requestedSort: SortField[]): SortField[] {
+    const hasIdSort = requestedSort.some((field) => field.key === 'id')
+    return hasIdSort ? requestedSort : [...requestedSort, { key: 'id', direction: 'asc' }]
+  }
+
+  private resolveCursorMode(
+    after?: string,
+    before?: string,
+  ): { mode: CursorMode; cursor?: string } {
+    const mode: CursorMode = before ? 'before' : 'after'
+    return { mode, cursor: mode === 'before' ? before : after }
+  }
+
+  private buildWhereClause(
+    filterWhere: Record<string, unknown>,
+    orderFields: SortField[],
+    mode: CursorMode,
+    cursor?: string,
+  ): Record<string, unknown> {
+    if (!cursor) {
+      return filterWhere
+    }
+    const cursorValues = this.decodeCursor(cursor, orderFields)
+    return { AND: [filterWhere, this.buildKeysetWhere(orderFields, cursorValues, mode)] }
+  }
+
+  // Guard against an empty page (e.g. a `before` cursor at the very start of
+  // the result set, or an `after` cursor beyond the last row): without this,
+  // hasNextPage/hasPreviousPage could report `true` while there is no row
+  // left to build the matching cursor from, leaving the client with
+  // `hasNextPage: true` but `nextCursor: null`.
+  private buildPageMeta<T extends { id: Prisma.Decimal; name: string; email: string }>(
+    mode: CursorMode,
+    hasMore: boolean,
+    after: string | undefined,
+    orderedRows: T[],
+    orderFields: SortField[],
+  ): {
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+    nextCursor: string | null
+    previousCursor: string | null
+  } {
+    const hasRows = orderedRows.length > 0
+    const hasNextPage = hasRows && (mode === 'before' ? true : hasMore)
+    const hasPreviousPage = hasRows && (mode === 'before' ? hasMore : Boolean(after))
+
+    const firstRow = orderedRows[0]
+    const lastRow = orderedRows.at(-1)
+
+    return {
+      hasNextPage,
+      hasPreviousPage,
+      nextCursor: hasNextPage && lastRow ? this.encodeCursor(lastRow, orderFields) : null,
+      previousCursor: hasPreviousPage && firstRow ? this.encodeCursor(firstRow, orderFields) : null,
+    }
   }
 
   private parseLimit(limit?: string): number {
