@@ -8,10 +8,11 @@ import {
   Delete,
   Query,
   HttpException,
+  BadRequestException,
 } from '@nestjs/common'
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { DEFAULT_LIMIT, MAX_LIMIT, UsersService } from './users.service'
-import type { SearchUsersResult } from './users.service'
+import type { SearchUsersQueryParameter, SearchUsersResult } from './users.service'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UserDto } from './dto/user.dto'
@@ -45,13 +46,14 @@ export class UsersController {
   @ApiQuery({
     name: 'sort',
     required: false,
-    description: 'JSON array of sort fields, ex: [{"name":"desc"},{"id":"asc"}]',
+    description:
+      'JSON array with one primary field (id, name, or email) and an optional same-direction id tiebreaker, ex: [{"name":"desc"},{"id":"desc"}]',
   })
   @ApiQuery({
     name: 'filter',
     required: false,
     description:
-      'JSON array of filter conditions, ex: [{"key":"name","operation":"like","value":"Jo"}]',
+      'JSON array of typed filter conditions. Name/email "like" values require at least three characters, ex: [{"key":"name","operation":"like","value":"Ali"}].',
   })
   @ApiQuery({
     name: 'after',
@@ -69,13 +71,19 @@ export class UsersController {
     description: 'Set to "true" to also compute total/totalPages (runs an extra COUNT query)',
   })
   async searchUsers(
-    @Query('limit') limit?: string,
-    @Query('sort') sort?: string,
-    @Query('filter') filter?: string,
-    @Query('after') after?: string,
-    @Query('before') before?: string,
-    @Query('includeTotalCount') includeTotalCount?: string,
+    @Query('limit') limit?: SearchUsersQueryParameter,
+    @Query('sort') sort?: SearchUsersQueryParameter,
+    @Query('filter') filter?: SearchUsersQueryParameter,
+    @Query('after') after?: SearchUsersQueryParameter,
+    @Query('before') before?: SearchUsersQueryParameter,
+    @Query('includeTotalCount') includeTotalCount?: SearchUsersQueryParameter,
+    @Query('page') page?: SearchUsersQueryParameter,
   ): Promise<SearchUsersResult> {
+    if (page !== undefined) {
+      throw new BadRequestException(
+        '"page" is not supported; use the returned "after" or "before" cursor',
+      )
+    }
     return this.usersService.searchUsers(limit, sort, filter, after, before, includeTotalCount)
   }
 

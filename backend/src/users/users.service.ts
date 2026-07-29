@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
 
@@ -6,47 +7,82 @@ import { UpdateUserDto } from './dto/update-user.dto'
 import { UserDto } from './dto/user.dto'
 import { Prisma } from '../../generated/prisma/client.js'
 
-// Allow-list of columns that may be sorted/filtered on. This keeps every
-// generated query index-able and stops callers from probing arbitrary
-// fields. Extend this (and add a matching DB index) when new columns are
-// added to the `users` table.
-type SortableField = 'id' | 'name' | 'email'
-const ALLOWED_FIELDS: ReadonlySet<string> = new Set<SortableField>(['id', 'name', 'email'])
+const SORTABLE_FIELDS = ['id', 'name', 'email'] as const
+const SET_FILTER_OPERATIONS = ['in', 'notin'] as const
+const STRING_SCALAR_FILTER_OPERATIONS = ['like', 'eq', 'neq', 'gt', 'gte', 'lt', 'lte'] as const
+const DECIMAL_SCALAR_FILTER_OPERATIONS = ['eq', 'neq', 'gt', 'gte', 'lt', 'lte'] as const
 
-const ALLOWED_FILTER_OPERATIONS: ReadonlySet<string> = new Set([
-  'like',
-  'eq',
-  'neq',
-  'gt',
-  'gte',
-  'lt',
-  'lte',
-  'in',
-  'notin',
-  'isnull',
-])
-
+type SortableField = (typeof SORTABLE_FIELDS)[number]
+type StringFilterField = Exclude<SortableField, 'id'>
+type SetFilterOperation = (typeof SET_FILTER_OPERATIONS)[number]
+type StringScalarFilterOperation = (typeof STRING_SCALAR_FILTER_OPERATIONS)[number]
+type DecimalScalarFilterOperation = (typeof DECIMAL_SCALAR_FILTER_OPERATIONS)[number]
+type StringFilterOperation = StringScalarFilterOperation | SetFilterOperation
+type DecimalFilterOperation = DecimalScalarFilterOperation | SetFilterOperation
 type SortDirection = 'asc' | 'desc'
+type CursorMode = 'after' | 'before'
 
 interface SortField {
   key: SortableField
   direction: SortDirection
 }
 
-interface FilterCondition {
-  key: string
-  operation: string
-  value: unknown
+type StringFilterCondition =
+  | {
+      key: StringFilterField
+      operation: StringScalarFilterOperation
+      value: string
+    }
+  | {
+      key: StringFilterField
+      operation: SetFilterOperation
+      value: string[]
+    }
+
+type DecimalFilterCondition =
+  | {
+      key: 'id'
+      operation: DecimalScalarFilterOperation
+      value: Prisma.Decimal
+    }
+  | {
+      key: 'id'
+      operation: SetFilterOperation
+      value: Prisma.Decimal[]
+    }
+
+type FilterCondition = StringFilterCondition | DecimalFilterCondition
+
+interface CursorPayload {
+  version: number
+  context: string
+  values: Record<string, unknown>
 }
+
+interface SearchRequest {
+  limit: number
+  orderFields: SortField[]
+  filterConditions: FilterCondition[]
+  filterWhere: Prisma.usersWhereInput
+  mode: CursorMode
+  cursor?: string
+  cursorContext: string
+  includeTotalCount: boolean
+}
+
+export type SearchUsersQueryParameter = string | string[]
 
 export const DEFAULT_LIMIT = 10
 export const MAX_LIMIT = 200
+export const MAX_FILTER_CONDITIONS = 10
+export const MAX_FILTER_VALUES = 100
+export const MIN_SUBSTRING_FILTER_LENGTH = 3
 // Hard ceiling for the unpaginated findAll() so a single request can never
 // pull an unbounded number of rows into memory - this endpoint should only
 // ever be used for small/reference tables.
 export const FIND_ALL_MAX_ROWS = 1000
 
-type CursorMode = 'after' | 'before'
+const CURSOR_VERSION = 1
 
 export interface SearchUsersResult {
   users: UserDto[]
@@ -142,219 +178,406 @@ export class UsersService {
    * @see https://www.prisma.io/docs/orm/v6/prisma-client/queries/pagination#cursor-based-pagination
    */
   async searchUsers(
-    limit?: string,
-    sort?: string, // JSON array of sort fields, ex: [{"name":"desc"},{"id":"asc"}]
-    filter?: string, // JSON array for key, operation and value, ex: [{"key": "name", "operation": "like", "value": "Jo"}]
-    after?: string, // opaque cursor: fetch the page immediately after this position
-    before?: string, // opaque cursor: fetch the page immediately before this position
-    includeTotalCount?: string, // set to "true" to also compute total/totalPages (extra COUNT(*) query)
+    limit?: SearchUsersQueryParameter,
+    sort?: SearchUsersQueryParameter,
+    filter?: SearchUsersQueryParameter,
+    after?: SearchUsersQueryParameter,
+    before?: SearchUsersQueryParameter,
+    includeTotalCount?: SearchUsersQueryParameter,
   ): Promise<SearchUsersResult> {
-    if (after && before) {
-      throw new BadRequestException('Provide only one of "after" or "before", not both')
-    }
+    const request = this.parseSearchRequest(limit, sort, filter, after, before, includeTotalCount)
+    const rows = await this.findSearchRows(request)
+    const page = this.createSearchResult(rows, request)
 
-    const parsedLimit = this.parseLimit(limit)
-    const requestedSort = this.parseSort(sort)
+    return this.addOptionalTotalCount(page, request)
+  }
+
+  private parseSearchRequest(
+    limit: SearchUsersQueryParameter | undefined,
+    sort: SearchUsersQueryParameter | undefined,
+    filter: SearchUsersQueryParameter | undefined,
+    after: SearchUsersQueryParameter | undefined,
+    before: SearchUsersQueryParameter | undefined,
+    includeTotalCount: SearchUsersQueryParameter | undefined,
+  ): SearchRequest {
+    const cursors = this.parseCursors(after, before)
+    const orderFields = this.resolveOrderFields(this.parseSort(sort))
     const filterConditions = this.parseFilter(filter)
     const filterWhere = this.convertFiltersToPrismaFormat(filterConditions)
 
-    const orderFields = this.resolveOrderFields(requestedSort)
-    const { mode, cursor } = this.resolveCursorMode(after, before)
-    const where = this.buildWhereClause(filterWhere, orderFields, mode, cursor)
+    return {
+      limit: this.parseLimit(limit),
+      orderFields,
+      filterConditions,
+      filterWhere,
+      mode: cursors.before ? 'before' : 'after',
+      cursor: cursors.before ?? cursors.after,
+      cursorContext: this.createCursorContext(orderFields, filterConditions),
+      includeTotalCount: this.parseIncludeTotalCount(includeTotalCount),
+    }
+  }
 
-    // Paging backwards is done by scanning in the opposite direction (so
-    // LIMIT keeps the rows nearest the cursor rather than the ones farthest
-    // away) and then flipping the page back to normal display order.
-    const scanFields = mode === 'before' ? this.invertDirections(orderFields) : orderFields
-    const orderBy = scanFields.map((field) => ({
-      [field.key]: field.direction,
-    })) as Prisma.usersOrderByWithRelationInput[]
+  private parseCursors(
+    after: SearchUsersQueryParameter | undefined,
+    before: SearchUsersQueryParameter | undefined,
+  ): { after?: string; before?: string } {
+    const parsedAfter = this.parseCursorParameter('after', after)
+    const parsedBefore = this.parseCursorParameter('before', before)
+    if (parsedAfter && parsedBefore) {
+      throw new BadRequestException('Provide only one of "after" or "before", not both')
+    }
+    return { after: parsedAfter, before: parsedBefore }
+  }
 
-    // Fetch one extra row so we can tell whether another page exists without
-    // running a separate (expensive, at scale) COUNT(*) query.
-    const rows = await this.prisma.users.findMany({
-      where,
-      orderBy,
-      take: parsedLimit + 1,
+  private async findSearchRows(request: SearchRequest) {
+    return this.prisma.users.findMany({
+      where: this.buildSearchWhere(request),
+      orderBy: this.getScanOrder(request.orderFields, request.mode),
+      take: request.limit + 1,
     })
+  }
 
-    const hasMore = rows.length > parsedLimit
-    const pageRows = hasMore ? rows.slice(0, parsedLimit) : rows
-    const orderedRows = mode === 'before' ? pageRows.slice().reverse() : pageRows
-
-    const result: SearchUsersResult = {
-      users: orderedRows.map((row) => this.toUserDto(row)),
-      limit: parsedLimit,
-      count: orderedRows.length,
-      ...this.buildPageMeta(mode, hasMore, after, orderedRows, orderFields),
+  private buildSearchWhere(request: SearchRequest): Prisma.usersWhereInput {
+    if (!request.cursor) {
+      return request.filterWhere
     }
 
-    if (includeTotalCount === 'true') {
-      const total = await this.prisma.users.count({ where: filterWhere })
-      result.total = total
-      result.totalPages = Math.ceil(total / parsedLimit)
+    const cursorValues = this.decodeCursor(
+      request.cursor,
+      request.orderFields,
+      request.cursorContext,
+    )
+    return {
+      AND: [
+        request.filterWhere,
+        this.buildKeysetWhere(request.orderFields, cursorValues, request.mode),
+      ],
     }
-
-    return result
   }
 
-  // Appends `id` as a final tiebreaker whenever it isn't already part of the
-  // sort so ordering - and therefore the cursor - is always a total,
-  // deterministic order even when name/email contain duplicate values.
-  private resolveOrderFields(requestedSort: SortField[]): SortField[] {
-    const hasIdSort = requestedSort.some((field) => field.key === 'id')
-    return hasIdSort ? requestedSort : [...requestedSort, { key: 'id', direction: 'asc' }]
-  }
-
-  private resolveCursorMode(
-    after?: string,
-    before?: string,
-  ): { mode: CursorMode; cursor?: string } {
-    const mode: CursorMode = before ? 'before' : 'after'
-    return { mode, cursor: mode === 'before' ? before : after }
-  }
-
-  private buildWhereClause(
-    filterWhere: Record<string, unknown>,
-    orderFields: SortField[],
-    mode: CursorMode,
-    cursor?: string,
-  ): Record<string, unknown> {
-    if (!cursor) {
-      return filterWhere
-    }
-    const cursorValues = this.decodeCursor(cursor, orderFields)
-    return { AND: [filterWhere, this.buildKeysetWhere(orderFields, cursorValues, mode)] }
-  }
-
-  // Guard against an empty page (e.g. a `before` cursor at the very start of
-  // the result set, or an `after` cursor beyond the last row): without this,
-  // hasNextPage/hasPreviousPage could report `true` while there is no row
-  // left to build the matching cursor from, leaving the client with
-  // `hasNextPage: true` but `nextCursor: null`.
-  private buildPageMeta<T extends { id: Prisma.Decimal; name: string; email: string }>(
-    mode: CursorMode,
-    hasMore: boolean,
-    after: string | undefined,
-    orderedRows: T[],
-    orderFields: SortField[],
-  ): {
-    hasNextPage: boolean
-    hasPreviousPage: boolean
-    nextCursor: string | null
-    previousCursor: string | null
-  } {
-    const hasRows = orderedRows.length > 0
-    const hasNextPage = hasRows && (mode === 'before' ? true : hasMore)
-    const hasPreviousPage = hasRows && (mode === 'before' ? hasMore : Boolean(after))
-
+  private createSearchResult(
+    rows: Array<{ id: Prisma.Decimal; name: string; email: string }>,
+    request: SearchRequest,
+  ): SearchUsersResult {
+    const hasMore = rows.length > request.limit
+    const pageRows = hasMore ? rows.slice(0, request.limit) : rows
+    const orderedRows = request.mode === 'before' ? pageRows.slice().reverse() : pageRows
+    const pageInfo = this.getPageInfo(
+      orderedRows.length,
+      request.mode,
+      request.cursor !== undefined,
+      hasMore,
+    )
     const firstRow = orderedRows[0]
     const lastRow = orderedRows.at(-1)
 
     return {
-      hasNextPage,
-      hasPreviousPage,
-      nextCursor: hasNextPage && lastRow ? this.encodeCursor(lastRow, orderFields) : null,
-      previousCursor: hasPreviousPage && firstRow ? this.encodeCursor(firstRow, orderFields) : null,
+      users: orderedRows.map((row) => this.toUserDto(row)),
+      limit: request.limit,
+      count: orderedRows.length,
+      hasNextPage: pageInfo.hasNextPage,
+      hasPreviousPage: pageInfo.hasPreviousPage,
+      nextCursor:
+        pageInfo.hasNextPage && lastRow
+          ? this.encodeCursor(lastRow, request.orderFields, request.cursorContext)
+          : null,
+      previousCursor:
+        pageInfo.hasPreviousPage && firstRow
+          ? this.encodeCursor(firstRow, request.orderFields, request.cursorContext)
+          : null,
     }
   }
 
-  private parseLimit(limit?: string): number {
-    if (limit === undefined || limit === null || limit === '') {
+  private getPageInfo(
+    rowCount: number,
+    mode: CursorMode,
+    hasCursor: boolean,
+    hasMore: boolean,
+  ): Pick<SearchUsersResult, 'hasNextPage' | 'hasPreviousPage'> {
+    if (rowCount === 0) {
+      return { hasNextPage: false, hasPreviousPage: false }
+    }
+    if (mode === 'before') {
+      return { hasNextPage: true, hasPreviousPage: hasMore }
+    }
+    return { hasNextPage: hasMore, hasPreviousPage: hasCursor }
+  }
+
+  private async addOptionalTotalCount(
+    page: SearchUsersResult,
+    request: SearchRequest,
+  ): Promise<SearchUsersResult> {
+    if (!request.includeTotalCount) {
+      return page
+    }
+
+    const total = await this.prisma.users.count({ where: request.filterWhere })
+    return {
+      ...page,
+      total,
+      totalPages: Math.ceil(total / request.limit),
+    }
+  }
+
+  private parseLimit(limit: unknown): number {
+    const rawLimit = this.parseOptionalQueryString('limit', limit)
+    if (rawLimit === undefined || rawLimit === '') {
       return DEFAULT_LIMIT
     }
-    const parsed = Number(limit)
+
+    const parsed = Number(rawLimit)
     if (!Number.isInteger(parsed) || parsed < 1) {
       throw new BadRequestException('"limit" must be a positive integer')
     }
-    // Clamp rather than silently reset to the default: a caller asking for
-    // too much still gets the largest page we're willing to serve.
     return Math.min(parsed, MAX_LIMIT)
   }
 
-  private parseSort(sort?: string): SortField[] {
-    if (sort === undefined || sort === null || sort === '') {
+  private parseSort(sort: unknown): SortField[] {
+    const rawSort = this.parseOptionalQueryString('sort', sort)
+    if (rawSort === undefined || rawSort === '') {
       return []
     }
 
-    let parsed: unknown
-    try {
-      parsed = JSON.parse(sort)
-    } catch {
-      throw new BadRequestException('"sort" must be valid JSON')
+    const parsed = this.parseJsonArray('sort', rawSort)
+    if (parsed.length === 0) {
+      return []
     }
-    if (!Array.isArray(parsed)) {
-      throw new BadRequestException('"sort" must be a JSON array, e.g. [{"name":"asc"}]')
+    if (parsed.length > 2) {
+      throw new BadRequestException(
+        '"sort" supports one field and an optional matching "id" tiebreaker',
+      )
     }
 
-    return parsed.map((entry) => {
-      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-        throw new BadRequestException('Each "sort" entry must be an object, e.g. {"name":"asc"}')
-      }
-      const keys = Object.keys(entry as Record<string, unknown>)
-      const key = keys[0]
-      if (keys.length !== 1 || !key) {
-        throw new BadRequestException('Each "sort" entry must contain exactly one field')
-      }
-      if (!ALLOWED_FIELDS.has(key)) {
-        throw new BadRequestException(`Field "${key}" cannot be sorted on`)
-      }
-      const direction = (entry as Record<string, unknown>)[key]
-      if (direction !== 'asc' && direction !== 'desc') {
-        throw new BadRequestException(`Sort direction for "${key}" must be "asc" or "desc"`)
-      }
-      return { key: key as SortableField, direction }
-    })
+    const sortFields = parsed.map((entry) => this.parseSortField(entry))
+    if (sortFields.length === 2) {
+      this.validateExplicitTieBreaker(sortFields)
+    }
+
+    const primarySort = sortFields[0]
+    return primarySort ? [primarySort] : []
   }
 
-  private parseFilter(filter?: string): FilterCondition[] {
-    if (filter === undefined || filter === null || filter === '') {
+  private parseSortField(entry: unknown): SortField {
+    if (!this.isRecord(entry)) {
+      throw new BadRequestException('Each "sort" entry must be an object, e.g. {"name":"asc"}')
+    }
+
+    const keys = Object.keys(entry)
+    const key = keys[0]
+    if (keys.length !== 1 || !key || !this.isSortableField(key)) {
+      throw new BadRequestException('Each "sort" entry must contain one supported field')
+    }
+
+    const direction = entry[key]
+    if (direction !== 'asc' && direction !== 'desc') {
+      throw new BadRequestException(`Sort direction for "${key}" must be "asc" or "desc"`)
+    }
+    return { key, direction }
+  }
+
+  private validateExplicitTieBreaker(sortFields: SortField[]): void {
+    const primarySort = sortFields[0]
+    const tieBreaker = sortFields[1]
+    if (
+      !primarySort ||
+      !tieBreaker ||
+      primarySort.key === 'id' ||
+      tieBreaker.key !== 'id' ||
+      primarySort.direction !== tieBreaker.direction
+    ) {
+      throw new BadRequestException(
+        'An explicit "id" tiebreaker must follow one non-id sort field with the same direction',
+      )
+    }
+  }
+
+  private resolveOrderFields(requestedSort: SortField[]): SortField[] {
+    const primarySort = requestedSort[0]
+    if (!primarySort) {
+      return [{ key: 'id', direction: 'asc' }]
+    }
+    if (primarySort.key === 'id') {
+      return [primarySort]
+    }
+    return [primarySort, { key: 'id', direction: primarySort.direction }]
+  }
+
+  private parseFilter(filter: unknown): FilterCondition[] {
+    const rawFilter = this.parseOptionalQueryString('filter', filter)
+    if (rawFilter === undefined || rawFilter === '') {
       return []
     }
 
-    let parsed: unknown
-    try {
-      parsed = JSON.parse(filter)
-    } catch {
-      throw new BadRequestException('"filter" must be valid JSON')
+    const parsed = this.parseJsonArray('filter', rawFilter)
+    if (parsed.length > MAX_FILTER_CONDITIONS) {
+      throw new BadRequestException(`"filter" supports at most ${MAX_FILTER_CONDITIONS} conditions`)
     }
-    if (!Array.isArray(parsed)) {
-      throw new BadRequestException('"filter" must be a JSON array')
-    }
-
-    return parsed.map((entry) => {
-      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-        throw new BadRequestException('Each "filter" entry must be an object')
-      }
-      const { key, operation, value } = entry as Partial<FilterCondition>
-      if (!key || !ALLOWED_FIELDS.has(key)) {
-        throw new BadRequestException(`Field "${String(key)}" cannot be filtered on`)
-      }
-      if (!operation || !ALLOWED_FILTER_OPERATIONS.has(operation)) {
-        throw new BadRequestException(`Filter operation "${String(operation)}" is not supported`)
-      }
-      if (operation === 'in' || operation === 'notin') {
-        if (!Array.isArray(value) || !value.every((item) => this.isScalarFilterValue(item))) {
-          throw new BadRequestException(
-            `Filter operation "${operation}" requires an array of strings or numbers`,
-          )
-        }
-      } else if (operation !== 'isnull' && !this.isScalarFilterValue(value)) {
-        // "isnull" ignores the supplied value (it always filters on
-        // `equals: null`); every other operation is forwarded straight into
-        // a Prisma scalar filter, so a non-scalar value (object/array/etc.)
-        // here would otherwise reach Prisma and throw its own uncaught
-        // (500-triggering) validation error instead of a controlled 400.
-        throw new BadRequestException(
-          `Filter value for operation "${operation}" must be a string or number`,
-        )
-      }
-      return { key, operation, value }
-    })
+    return parsed.map((entry) => this.parseFilterCondition(entry))
   }
 
-  private isScalarFilterValue(value: unknown): value is string | number {
-    return typeof value === 'string' || typeof value === 'number'
+  private parseFilterCondition(entry: unknown): FilterCondition {
+    if (!this.isRecord(entry)) {
+      throw new BadRequestException('Each "filter" entry must be an object')
+    }
+    if (entry.key === 'id') {
+      return this.parseDecimalFilterCondition(entry)
+    }
+    if (entry.key === 'name' || entry.key === 'email') {
+      return this.parseStringFilterCondition(entry, entry.key)
+    }
+    throw new BadRequestException(`Field "${String(entry.key)}" cannot be filtered on`)
+  }
+
+  private parseStringFilterCondition(
+    entry: Record<string, unknown>,
+    key: StringFilterField,
+  ): StringFilterCondition {
+    const operation = entry.operation
+    if (typeof operation !== 'string' || !this.isStringFilterOperation(operation)) {
+      throw new BadRequestException(
+        `Filter operation "${String(operation)}" is not supported for "${key}"`,
+      )
+    }
+    if (this.isSetFilterOperation(operation)) {
+      return { key, operation, value: this.parseStringArrayValue(entry.value) }
+    }
+    if (!this.isStringScalarFilterOperation(operation)) {
+      throw new BadRequestException(`Filter operation "${operation}" is not supported for "${key}"`)
+    }
+    return {
+      key,
+      operation,
+      value: this.parseStringScalarValue(operation, entry.value),
+    }
+  }
+
+  private parseDecimalFilterCondition(entry: Record<string, unknown>): DecimalFilterCondition {
+    const operation = entry.operation
+    if (typeof operation !== 'string' || !this.isDecimalFilterOperation(operation)) {
+      throw new BadRequestException('Filter operation is not supported for "id"')
+    }
+    if (this.isSetFilterOperation(operation)) {
+      return { key: 'id', operation, value: this.parseDecimalArrayValue(entry.value) }
+    }
+    if (!this.isDecimalScalarFilterOperation(operation)) {
+      throw new BadRequestException('Filter operation is not supported for "id"')
+    }
+    return { key: 'id', operation, value: this.parseDecimalValue(entry.value) }
+  }
+
+  private parseStringScalarValue(operation: StringScalarFilterOperation, value: unknown): string {
+    const parsedValue = this.parseStringValue(value)
+    if (operation === 'like' && parsedValue.trim().length < MIN_SUBSTRING_FILTER_LENGTH) {
+      throw new BadRequestException(
+        `"like" filters require at least ${MIN_SUBSTRING_FILTER_LENGTH} characters`,
+      )
+    }
+    return parsedValue
+  }
+
+  private parseStringArrayValue(value: unknown): string[] {
+    if (!Array.isArray(value) || value.length === 0 || value.length > MAX_FILTER_VALUES) {
+      throw new BadRequestException(
+        `Array filter values must contain between 1 and ${MAX_FILTER_VALUES} strings`,
+      )
+    }
+    return value.map((item) => this.parseStringValue(item))
+  }
+
+  private parseDecimalArrayValue(value: unknown): Prisma.Decimal[] {
+    if (!Array.isArray(value) || value.length === 0 || value.length > MAX_FILTER_VALUES) {
+      throw new BadRequestException(
+        `Array filter values must contain between 1 and ${MAX_FILTER_VALUES} numbers`,
+      )
+    }
+    return value.map((item) => this.parseDecimalValue(item))
+  }
+
+  private parseStringValue(value: unknown): string {
+    if (typeof value !== 'string') {
+      throw new BadRequestException('String filters require a string value')
+    }
+    return value
+  }
+
+  private parseDecimalValue(value: unknown): Prisma.Decimal {
+    if (!this.isDecimalInput(value)) {
+      throw new BadRequestException('ID filters require a finite numeric value')
+    }
+    try {
+      const decimal = new Prisma.Decimal(value)
+      if (!decimal.isFinite()) {
+        throw new Error('Decimal value is not finite')
+      }
+      return decimal
+    } catch {
+      throw new BadRequestException('ID filters require a finite numeric value')
+    }
+  }
+
+  private parseIncludeTotalCount(includeTotalCount: unknown): boolean {
+    const rawValue = this.parseOptionalQueryString('includeTotalCount', includeTotalCount)
+    if (rawValue === undefined || rawValue === 'false') {
+      return false
+    }
+    if (rawValue === 'true') {
+      return true
+    }
+    throw new BadRequestException('"includeTotalCount" must be "true" or "false"')
+  }
+
+  private parseCursorParameter(name: 'after' | 'before', value: unknown): string | undefined {
+    const cursor = this.parseOptionalQueryString(name, value)
+    if (cursor === '') {
+      throw new BadRequestException(`"${name}" must be a non-empty cursor`)
+    }
+    return cursor
+  }
+
+  private parseOptionalQueryString(name: string, value: unknown): string | undefined {
+    if (value === undefined) {
+      return undefined
+    }
+    if (typeof value !== 'string') {
+      throw new BadRequestException(`"${name}" must be provided once as a string`)
+    }
+    return value
+  }
+
+  private parseJsonArray(name: 'sort' | 'filter', rawValue: string): unknown[] {
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(rawValue)
+    } catch {
+      throw new BadRequestException(`"${name}" must be valid JSON`)
+    }
+    if (!Array.isArray(parsed)) {
+      throw new BadRequestException(`"${name}" must be a JSON array`)
+    }
+    return parsed
+  }
+
+  private createCursorContext(orderFields: SortField[], filters: FilterCondition[]): string {
+    const normalizedFilters = filters
+      .map((filter) =>
+        JSON.stringify({
+          key: filter.key,
+          operation: filter.operation,
+          value: this.normalizeCursorFilterValue(filter.value),
+        }),
+      )
+      .sort()
+
+    return createHash('sha256')
+      .update(JSON.stringify({ orderFields, filters: normalizedFilters }))
+      .digest('base64url')
+  }
+
+  private normalizeCursorFilterValue(value: FilterCondition['value']): string | string[] {
+    if (Array.isArray(value)) {
+      return value.map((item) => item.toString()).sort()
+    }
+    return value.toString()
   }
 
   /**
@@ -368,83 +591,196 @@ export class UsersService {
     orderFields: SortField[],
     cursorValues: Record<string, string>,
     mode: CursorMode,
-  ): Record<string, unknown> {
-    const clauses: Record<string, unknown>[] = []
-    const precedingEqualities: Record<string, unknown> = {}
+  ): Prisma.usersWhereInput {
+    const clauses: Prisma.usersWhereInput[] = []
+    let precedingEqualities: Prisma.usersWhereInput = {}
 
     for (const field of orderFields) {
       const rawValue = cursorValues[field.key]
       if (rawValue === undefined) {
         throw new BadRequestException('Invalid cursor')
       }
-      const value = this.resolveCursorValue(field.key, rawValue)
-      const wantGreaterThan =
-        mode === 'after' ? field.direction === 'asc' : field.direction === 'desc'
       clauses.push({
         ...precedingEqualities,
-        [field.key]: wantGreaterThan ? { gt: value } : { lt: value },
+        ...this.createCursorComparison(field, rawValue, mode),
       })
-      precedingEqualities[field.key] = { equals: value }
+      precedingEqualities = {
+        ...precedingEqualities,
+        ...this.createCursorEquality(field.key, rawValue),
+      }
     }
 
     return { OR: clauses }
   }
 
-  private resolveCursorValue(key: SortableField, raw: string): unknown {
-    if (key !== 'id') {
-      return raw
+  private createCursorComparison(
+    field: SortField,
+    rawValue: string,
+    mode: CursorMode,
+  ): Prisma.usersWhereInput {
+    const useGreaterThan = mode === 'after' ? field.direction === 'asc' : field.direction === 'desc'
+
+    if (field.key === 'id') {
+      const value = this.resolveCursorId(rawValue)
+      return { id: useGreaterThan ? { gt: value } : { lt: value } }
     }
-    // Prisma.Decimal throws on a non-numeric string (e.g. a hand-crafted or
-    // corrupted cursor). Without this guard that throw would bubble up as
-    // an unhandled 500 instead of the controlled 400 every other malformed
-    // cursor case gets.
+    if (field.key === 'name') {
+      return { name: useGreaterThan ? { gt: rawValue } : { lt: rawValue } }
+    }
+    return { email: useGreaterThan ? { gt: rawValue } : { lt: rawValue } }
+  }
+
+  private createCursorEquality(key: SortableField, rawValue: string): Prisma.usersWhereInput {
+    if (key === 'id') {
+      return { id: { equals: this.resolveCursorId(rawValue) } }
+    }
+    if (key === 'name') {
+      return { name: { equals: rawValue } }
+    }
+    return { email: { equals: rawValue } }
+  }
+
+  private resolveCursorId(rawValue: string): Prisma.Decimal {
     try {
-      return new Prisma.Decimal(raw)
+      const decimal = new Prisma.Decimal(rawValue)
+      if (!decimal.isFinite()) {
+        throw new Error('Cursor value is not finite')
+      }
+      return decimal
     } catch {
       throw new BadRequestException('Invalid cursor')
     }
   }
 
+  private getScanOrder(
+    orderFields: SortField[],
+    mode: CursorMode,
+  ): Prisma.usersOrderByWithRelationInput[] {
+    const scanFields = mode === 'before' ? this.invertDirections(orderFields) : orderFields
+    return scanFields.map((field) => this.toPrismaOrderBy(field))
+  }
+
+  private toPrismaOrderBy(field: SortField): Prisma.usersOrderByWithRelationInput {
+    if (field.key === 'id') {
+      return { id: field.direction }
+    }
+    if (field.key === 'name') {
+      return { name: field.direction }
+    }
+    return { email: field.direction }
+  }
+
   private invertDirections(fields: SortField[]): SortField[] {
     return fields.map((field) => ({
       key: field.key,
-      direction: field.direction === 'asc' ? 'desc' : ('asc' as SortDirection),
+      direction: field.direction === 'asc' ? 'desc' : 'asc',
     }))
   }
 
-  private encodeCursor<T extends { id: Prisma.Decimal; name: string; email: string }>(
-    row: T,
+  private encodeCursor(
+    row: { id: Prisma.Decimal; name: string; email: string },
     orderFields: SortField[],
+    context: string,
   ): string {
-    const payload: Record<string, string> = {}
+    const values: Record<string, string> = {}
     for (const field of orderFields) {
       const value = row[field.key]
-      payload[field.key] = value instanceof Prisma.Decimal ? value.toString() : String(value)
+      values[field.key] = value instanceof Prisma.Decimal ? value.toString() : value
+    }
+    const payload: CursorPayload = {
+      version: CURSOR_VERSION,
+      context,
+      values,
     }
     return Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url')
   }
 
-  private decodeCursor(cursor: string, orderFields: SortField[]): Record<string, string> {
+  private decodeCursor(
+    cursor: string,
+    orderFields: SortField[],
+    expectedContext: string,
+  ): Record<string, string> {
     let payload: unknown
     try {
       payload = JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8'))
     } catch {
       throw new BadRequestException('Invalid cursor')
     }
-    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    if (!this.isCursorPayload(payload) || payload.version !== CURSOR_VERSION) {
+      throw new BadRequestException('Invalid cursor')
+    }
+    if (payload.context !== expectedContext) {
+      throw new BadRequestException('Cursor does not match the requested sort and filter')
+    }
+
+    const expectedFields = orderFields.map((field) => field.key)
+    const cursorFields = Object.keys(payload.values)
+    if (
+      cursorFields.length !== expectedFields.length ||
+      !expectedFields.every((field) => typeof payload.values[field] === 'string')
+    ) {
       throw new BadRequestException('Invalid cursor')
     }
 
-    const record = payload as Record<string, unknown>
     const values: Record<string, string> = {}
-    for (const field of orderFields) {
-      const value = record[field.key]
+    for (const field of expectedFields) {
+      const value = payload.values[field]
       if (typeof value !== 'string') {
         throw new BadRequestException('Invalid cursor')
       }
-      values[field.key] = value
+      values[field] = value
     }
     return values
+  }
+
+  private isCursorPayload(value: unknown): value is CursorPayload {
+    return (
+      this.isRecord(value) &&
+      typeof value.version === 'number' &&
+      typeof value.context === 'string' &&
+      this.isRecord(value.values)
+    )
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
+  }
+
+  private isSortableField(value: string): value is SortableField {
+    return SORTABLE_FIELDS.some((field) => field === value)
+  }
+
+  private isSetFilterOperation(value: string): value is SetFilterOperation {
+    return SET_FILTER_OPERATIONS.some((operation) => operation === value)
+  }
+
+  private isStringFilterOperation(value: string): value is StringFilterOperation {
+    return (
+      this.isSetFilterOperation(value) ||
+      STRING_SCALAR_FILTER_OPERATIONS.some((operation) => operation === value)
+    )
+  }
+
+  private isStringScalarFilterOperation(value: string): value is StringScalarFilterOperation {
+    return STRING_SCALAR_FILTER_OPERATIONS.some((operation) => operation === value)
+  }
+
+  private isDecimalFilterOperation(value: string): value is DecimalFilterOperation {
+    return (
+      this.isSetFilterOperation(value) ||
+      DECIMAL_SCALAR_FILTER_OPERATIONS.some((operation) => operation === value)
+    )
+  }
+
+  private isDecimalScalarFilterOperation(value: string): value is DecimalScalarFilterOperation {
+    return DECIMAL_SCALAR_FILTER_OPERATIONS.some((operation) => operation === value)
+  }
+
+  private isDecimalInput(value: unknown): value is string | number {
+    return (
+      (typeof value === 'string' && value.trim() !== '') ||
+      (typeof value === 'number' && Number.isFinite(value))
+    )
   }
 
   private toUserDto(user: { id: Prisma.Decimal; name: string; email: string }): UserDto {
@@ -455,32 +791,65 @@ export class UsersService {
     }
   }
 
-  public convertFiltersToPrismaFormat(filterObj: FilterCondition[]): Record<string, unknown> {
-    const prismaFilterObj: Record<string, unknown> = {}
-
-    for (const item of filterObj) {
-      if (item.operation === 'like') {
-        prismaFilterObj[item.key] = { contains: item.value }
-      } else if (item.operation === 'eq') {
-        prismaFilterObj[item.key] = { equals: item.value }
-      } else if (item.operation === 'neq') {
-        prismaFilterObj[item.key] = { not: { equals: item.value } }
-      } else if (item.operation === 'gt') {
-        prismaFilterObj[item.key] = { gt: item.value }
-      } else if (item.operation === 'gte') {
-        prismaFilterObj[item.key] = { gte: item.value }
-      } else if (item.operation === 'lt') {
-        prismaFilterObj[item.key] = { lt: item.value }
-      } else if (item.operation === 'lte') {
-        prismaFilterObj[item.key] = { lte: item.value }
-      } else if (item.operation === 'in') {
-        prismaFilterObj[item.key] = { in: item.value }
-      } else if (item.operation === 'notin') {
-        prismaFilterObj[item.key] = { not: { in: item.value } }
-      } else if (item.operation === 'isnull') {
-        prismaFilterObj[item.key] = { equals: null }
-      }
+  public convertFiltersToPrismaFormat(filterObj: FilterCondition[]): Prisma.usersWhereInput {
+    const filters = filterObj.map((filter) => this.toPrismaFilter(filter))
+    const onlyFilter = filters.at(0)
+    if (filters.length === 0) {
+      return {}
     }
-    return prismaFilterObj
+    return filters.length === 1 && onlyFilter ? onlyFilter : { AND: filters }
+  }
+
+  private toPrismaFilter(filter: FilterCondition): Prisma.usersWhereInput {
+    if (filter.key === 'id') {
+      return { id: this.toDecimalPrismaFilter(filter) }
+    }
+
+    const stringFilter = this.toStringPrismaFilter(filter)
+    return filter.key === 'name' ? { name: stringFilter } : { email: stringFilter }
+  }
+
+  private toStringPrismaFilter(filter: StringFilterCondition): Prisma.StringFilter {
+    switch (filter.operation) {
+      case 'like':
+        return { contains: filter.value }
+      case 'eq':
+        return { equals: filter.value }
+      case 'neq':
+        return { not: filter.value }
+      case 'gt':
+        return { gt: filter.value }
+      case 'gte':
+        return { gte: filter.value }
+      case 'lt':
+        return { lt: filter.value }
+      case 'lte':
+        return { lte: filter.value }
+      case 'in':
+        return { in: filter.value }
+      case 'notin':
+        return { notIn: filter.value }
+    }
+  }
+
+  private toDecimalPrismaFilter(filter: DecimalFilterCondition): Prisma.DecimalFilter {
+    switch (filter.operation) {
+      case 'eq':
+        return { equals: filter.value }
+      case 'neq':
+        return { not: filter.value }
+      case 'gt':
+        return { gt: filter.value }
+      case 'gte':
+        return { gte: filter.value }
+      case 'lt':
+        return { lt: filter.value }
+      case 'lte':
+        return { lte: filter.value }
+      case 'in':
+        return { in: filter.value }
+      case 'notin':
+        return { notIn: filter.value }
+    }
   }
 }

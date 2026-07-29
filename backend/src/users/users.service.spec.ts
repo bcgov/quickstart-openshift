@@ -1,7 +1,13 @@
 import type { TestingModule } from '@nestjs/testing'
 import { Test } from '@nestjs/testing'
 import { BadRequestException } from '@nestjs/common'
-import { DEFAULT_LIMIT, FIND_ALL_MAX_ROWS, MAX_LIMIT, UsersService } from './users.service'
+import {
+  DEFAULT_LIMIT,
+  FIND_ALL_MAX_ROWS,
+  MAX_LIMIT,
+  MIN_SUBSTRING_FILTER_LENGTH,
+  UsersService,
+} from './users.service'
 import { PrismaService } from '../prisma.service'
 import { Prisma } from '../../generated/prisma/client.js'
 
@@ -11,6 +17,13 @@ const makeRows = (ids: number[]) =>
     name: `User ${id}`,
     email: `user${id}@test.com`,
   }))
+
+const decodeCursor = (cursor: string) =>
+  JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8')) as {
+    version: number
+    context: string
+    values: Record<string, string>
+  }
 
 describe('UserService', () => {
   let service: UsersService
@@ -41,7 +54,6 @@ describe('UserService', () => {
     name: 'Test Numone update',
     email: 'numoneupdate@test.com',
   }
-
   const twoUser = {
     id: 2,
     name: 'Test Numtwo',
@@ -117,6 +129,7 @@ describe('UserService', () => {
     it('should return {deleted: true}', async () => {
       await expect(service.remove(2)).resolves.toEqual({ deleted: true })
     })
+
     it('should return {deleted: false, message: err.message}', async () => {
       const repoSpy = vi
         .spyOn(prisma.users, 'delete')
@@ -130,7 +143,7 @@ describe('UserService', () => {
   })
 
   describe('searchUsers', () => {
-    it('given no params should return the first page ordered by id asc with sensible defaults', async () => {
+    it('returns the first page ordered by id asc with sensible defaults', async () => {
       const findManySpy = vi.spyOn(prisma.users, 'findMany').mockResolvedValue(savedUserArray)
 
       const result = await service.searchUsers()
@@ -149,11 +162,10 @@ describe('UserService', () => {
         nextCursor: null,
         previousCursor: null,
       })
-      // total/totalPages are opt-in and must not be computed (no extra COUNT(*)) by default.
       expect(prisma.users.count).not.toHaveBeenCalled()
     })
 
-    it('should clamp an oversized limit to MAX_LIMIT instead of silently resetting to the default', async () => {
+    it('clamps an oversized limit to MAX_LIMIT', async () => {
       const findManySpy = vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
 
       const result = await service.searchUsers('500')
@@ -162,234 +174,307 @@ describe('UserService', () => {
       expect(findManySpy).toHaveBeenCalledWith(expect.objectContaining({ take: MAX_LIMIT + 1 }))
     })
 
-    it('should reject a non-numeric limit with a 400 instead of silently falling back', async () => {
-      await expect(service.searchUsers('not-a-number')).rejects.toBeInstanceOf(BadRequestException)
+    it.each(['not-a-number', '0', '-1', '1.5'])('rejects an invalid limit of %s', async (limit) => {
+      await expect(service.searchUsers(limit)).rejects.toBeInstanceOf(BadRequestException)
     })
 
-    it('should reject a zero/negative limit', async () => {
-      await expect(service.searchUsers('0')).rejects.toBeInstanceOf(BadRequestException)
+    it('rejects repeated query parameters instead of choosing one silently', async () => {
+      await expect(service.searchUsers(['10', '20'])).rejects.toBeInstanceOf(BadRequestException)
     })
 
-    it('should return a 400 (not a 500) for invalid sort JSON', async () => {
-      await expect(service.searchUsers(undefined, '[{ invalid')).rejects.toBeInstanceOf(
-        BadRequestException,
-      )
+    it('rejects malformed and unsafe sort grammar', async () => {
+      const invalidSorts = [
+        '[{ invalid',
+        '[{"password":"asc"}]',
+        '[{"name":"ascending"}]',
+        '[{"name":"asc"},{"name":"asc"}]',
+        '[{"name":"asc"},{"id":"desc"}]',
+        '[{"id":"asc"},{"name":"asc"}]',
+        '[{"name":"asc"},{"id":"asc"},{"email":"asc"}]',
+      ]
+
+      for (const sort of invalidSorts) {
+        await expect(service.searchUsers(undefined, sort)).rejects.toBeInstanceOf(
+          BadRequestException,
+        )
+      }
     })
 
-    it('should reject a sort field that is not on the allow-list', async () => {
-      await expect(service.searchUsers(undefined, '[{"password":"asc"}]')).rejects.toBeInstanceOf(
-        BadRequestException,
-      )
-    })
-
-    it('should reject a sort entry with an invalid direction', async () => {
-      await expect(service.searchUsers(undefined, '[{"name":"ascending"}]')).rejects.toBeInstanceOf(
-        BadRequestException,
-      )
-    })
-
-    it('should return a 400 (not a 500) for invalid filter JSON', async () => {
-      await expect(service.searchUsers(undefined, undefined, 'not-json')).rejects.toBeInstanceOf(
-        BadRequestException,
-      )
-    })
-
-    it('should reject a filter field that is not on the allow-list', async () => {
-      await expect(
-        service.searchUsers(
-          undefined,
-          undefined,
-          '[{"key":"password","operation":"eq","value":"x"}]',
-        ),
-      ).rejects.toBeInstanceOf(BadRequestException)
-    })
-
-    it('should reject an unsupported filter operation', async () => {
-      await expect(
-        service.searchUsers(
-          undefined,
-          undefined,
-          '[{"key":"name","operation":"regex","value":"x"}]',
-        ),
-      ).rejects.toBeInstanceOf(BadRequestException)
-    })
-
-    it('should reject "in"/"notin" filter operations without an array value', async () => {
-      await expect(
-        service.searchUsers(
-          undefined,
-          undefined,
-          '[{"key":"name","operation":"in","value":"not-an-array"}]',
-        ),
-      ).rejects.toBeInstanceOf(BadRequestException)
-    })
-
-    it('should reject "in"/"notin" filter operations whose array contains non-scalar items', async () => {
-      await expect(
-        service.searchUsers(
-          undefined,
-          undefined,
-          '[{"key":"name","operation":"in","value":[{"nested":"object"}]}]',
-        ),
-      ).rejects.toBeInstanceOf(BadRequestException)
-    })
-
-    it('should reject a non-scalar filter value for a non-array operation instead of crashing in Prisma', async () => {
-      await expect(
-        service.searchUsers(
-          undefined,
-          undefined,
-          '[{"key":"name","operation":"like","value":{"nested":"object"}}]',
-        ),
-      ).rejects.toBeInstanceOf(BadRequestException)
-    })
-
-    it('should allow a numeric filter value for a non-array operation', async () => {
+    it('uses same-direction id tiebreakers so the btree sort index stays usable', async () => {
       const findManySpy = vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
 
-      await service.searchUsers(undefined, undefined, '[{"key":"id","operation":"gt","value":5}]')
+      await service.searchUsers(undefined, '[{"name":"desc"}]')
+      await service.searchUsers(undefined, '[{"email":"asc"},{"id":"asc"}]')
 
-      expect(findManySpy).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { id: { gt: 5 } } }),
+      expect(findManySpy).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ orderBy: [{ name: 'desc' }, { id: 'desc' }] }),
+      )
+      expect(findManySpy).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ orderBy: [{ email: 'asc' }, { id: 'asc' }] }),
       )
     })
 
-    it('should not require a value for the "isnull" operation', async () => {
+    it('rejects malformed and unsupported filters', async () => {
+      const invalidFilters = [
+        'not-json',
+        '[{"key":"password","operation":"eq","value":"x"}]',
+        '[{"key":"name","operation":"regex","value":"x"}]',
+        '[{"key":"name","operation":"isnull"}]',
+        '[{"key":"name","operation":"eq","value":1}]',
+        '[{"key":"id","operation":"eq","value":"not-a-number"}]',
+        '[{"key":"id","operation":"like","value":"1"}]',
+        '[{"key":"name","operation":"in","value":"not-an-array"}]',
+        '[{"key":"name","operation":"in","value":[{"nested":"object"}]}]',
+        '[{"key":"name","operation":"like","value":"   "}]',
+      ]
+
+      for (const filter of invalidFilters) {
+        await expect(service.searchUsers(undefined, undefined, filter)).rejects.toBeInstanceOf(
+          BadRequestException,
+        )
+      }
+    })
+
+    it('requires a useful minimum length for substring filters', async () => {
+      const tooShort = 'x'.repeat(MIN_SUBSTRING_FILTER_LENGTH - 1)
+      await expect(
+        service.searchUsers(
+          undefined,
+          undefined,
+          `[{"key":"name","operation":"like","value":"${tooShort}"}]`,
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException)
+    })
+
+    it('keeps repeated field filters as independent AND conditions with typed ids', async () => {
       const findManySpy = vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
 
-      await service.searchUsers(undefined, undefined, '[{"key":"name","operation":"isnull"}]')
+      await service.searchUsers(
+        undefined,
+        undefined,
+        '[{"key":"id","operation":"gte","value":"10"},{"key":"id","operation":"lt","value":20}]',
+      )
 
       expect(findManySpy).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { name: { equals: null } } }),
+        expect.objectContaining({
+          where: {
+            AND: [
+              { id: { gte: expect.any(Prisma.Decimal) } },
+              { id: { lt: expect.any(Prisma.Decimal) } },
+            ],
+          },
+        }),
       )
     })
 
-    it('should reject requests that provide both after and before cursors', async () => {
+    it('maps string IN filters without allowing an unbounded value list', async () => {
+      const findManySpy = vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
+
+      await service.searchUsers(
+        undefined,
+        undefined,
+        '[{"key":"email","operation":"in","value":["a@example.com","b@example.com"]}]',
+      )
+
+      expect(findManySpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { email: { in: ['a@example.com', 'b@example.com'] } },
+        }),
+      )
+    })
+
+    it('rejects requests that provide both after and before cursors', async () => {
       await expect(
         service.searchUsers(undefined, undefined, undefined, 'cursorA', 'cursorB'),
       ).rejects.toBeInstanceOf(BadRequestException)
     })
 
-    it('should reject a malformed cursor', async () => {
+    it('rejects a malformed cursor', async () => {
       await expect(
         service.searchUsers(undefined, undefined, undefined, 'not-a-valid-cursor'),
       ).rejects.toBeInstanceOf(BadRequestException)
     })
 
-    it('should reject a well-formed cursor with a non-numeric id value instead of crashing', async () => {
-      // Correct shape/keys (so decodeCursor's own checks pass), but "id" is
-      // not parseable as a Decimal - this exercises resolveCursorValue's
-      // guard around `new Prisma.Decimal(raw)`.
-      const badIdCursor = Buffer.from(JSON.stringify({ id: 'not-a-number' }), 'utf8').toString(
-        'base64url',
-      )
-      await expect(
-        service.searchUsers(undefined, undefined, undefined, badIdCursor),
-      ).rejects.toBeInstanceOf(BadRequestException)
-    })
-
-    it('should detect a next page via the limit+1 probe row without running a COUNT(*)', async () => {
-      // 11 rows for a default limit of 10 signals "there is more after this page".
+    it('detects a next page with a limit plus one probe and emits a context-bound cursor', async () => {
       vi.spyOn(prisma.users, 'findMany').mockResolvedValue(
         makeRows([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
       )
-      const countSpy = vi.spyOn(prisma.users, 'count')
 
       const result = await service.searchUsers()
 
-      expect(result.users).toHaveLength(10)
+      expect(result.users).toHaveLength(DEFAULT_LIMIT)
       expect(result.hasNextPage).toBe(true)
       expect(result.hasPreviousPage).toBe(false)
       expect(result.nextCursor).not.toBeNull()
-      expect(countSpy).not.toHaveBeenCalled()
-
-      const decoded = JSON.parse(Buffer.from(result.nextCursor!, 'base64url').toString('utf8'))
-      expect(decoded).toEqual({ id: '10' })
+      expect(prisma.users.count).not.toHaveBeenCalled()
+      expect(decodeCursor(result.nextCursor!)).toEqual({
+        version: 1,
+        context: expect.any(String),
+        values: { id: '10' },
+      })
     })
 
-    it('should build an indexable keyset WHERE clause from a real after cursor', async () => {
+    it('builds a typed indexable keyset predicate from an after cursor', async () => {
       const findManySpy = vi
         .spyOn(prisma.users, 'findMany')
         .mockResolvedValueOnce(makeRows([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]))
+        .mockResolvedValueOnce([])
 
       const firstPage = await service.searchUsers()
-      expect(firstPage.nextCursor).not.toBeNull()
-
-      findManySpy.mockResolvedValueOnce([])
       await service.searchUsers(undefined, undefined, undefined, firstPage.nextCursor ?? undefined)
 
-      const secondCallArgs = findManySpy.mock.calls[1]?.[0] as {
-        where: { AND: [unknown, { OR: Array<{ id: { gt: Prisma.Decimal } }> }] }
-        orderBy: unknown
-        take: number
-      }
-      expect(secondCallArgs.orderBy).toEqual([{ id: 'asc' }])
-      expect(secondCallArgs.take).toBe(DEFAULT_LIMIT + 1)
-      expect(secondCallArgs.where.AND[1].OR[0].id.gt).toBeInstanceOf(Prisma.Decimal)
-      expect(secondCallArgs.where.AND[1].OR[0].id.gt.toString()).toBe('10')
+      expect(findManySpy).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          where: {
+            AND: [
+              {},
+              {
+                OR: [{ id: { gt: expect.any(Prisma.Decimal) } }],
+              },
+            ],
+          },
+          orderBy: [{ id: 'asc' }],
+          take: DEFAULT_LIMIT + 1,
+        }),
+      )
     })
 
-    it('should invert scan order for a before cursor and reverse rows back to ascending order', async () => {
-      const findManySpy = vi.spyOn(prisma.users, 'findMany')
-      // Simulate paging backwards from id 11: the DB scan (id desc, id < 11)
-      // returns exactly `limit` rows, so there is nothing earlier (hasPreviousPage: false)
-      // but a next page (back towards/through the cursor) always exists (hasNextPage: true).
-      findManySpy.mockResolvedValueOnce(makeRows([10, 9, 8, 7, 6, 5, 4, 3, 2, 1]))
-
-      const beforeCursor = Buffer.from(JSON.stringify({ id: '11' }), 'utf8').toString('base64url')
-      const result = await service.searchUsers(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        beforeCursor,
+    it('rejects a context-valid cursor whose id is not numeric', async () => {
+      vi.spyOn(prisma.users, 'findMany').mockResolvedValue(
+        makeRows([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
+      )
+      const firstPage = await service.searchUsers()
+      const malformedPayload = decodeCursor(firstPage.nextCursor!)
+      malformedPayload.values.id = 'not-a-number'
+      const malformedCursor = Buffer.from(JSON.stringify(malformedPayload), 'utf8').toString(
+        'base64url',
       )
 
-      const callArgs = findManySpy.mock.calls[0]?.[0] as {
-        where: { AND: [unknown, { OR: Array<{ id: { lt: Prisma.Decimal } }> }] }
-        orderBy: unknown
-      }
-      expect(callArgs.orderBy).toEqual([{ id: 'desc' }])
-      expect(callArgs.where.AND[1].OR[0].id.lt.toString()).toBe('11')
-
-      expect(result.users.map((u) => u.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-      expect(result.hasNextPage).toBe(true)
-      expect(result.hasPreviousPage).toBe(false)
+      await expect(
+        service.searchUsers(undefined, undefined, undefined, malformedCursor),
+      ).rejects.toBeInstanceOf(BadRequestException)
     })
 
-    it('should report no next page (and a null cursor) when an after cursor is beyond the last row', async () => {
-      vi.spyOn(prisma.users, 'findMany').mockResolvedValueOnce([])
-
-      const afterCursor = Buffer.from(JSON.stringify({ id: '999' }), 'utf8').toString('base64url')
-      const result = await service.searchUsers(undefined, undefined, undefined, afterCursor)
-
-      expect(result.users).toHaveLength(0)
-      expect(result.hasNextPage).toBe(false)
-      expect(result.hasPreviousPage).toBe(false)
-      expect(result.nextCursor).toBeNull()
-      expect(result.previousCursor).toBeNull()
-    })
-
-    it('should report no next page (and a null cursor) when a before cursor is at the very start of the result set', async () => {
-      vi.spyOn(prisma.users, 'findMany').mockResolvedValueOnce([])
-
-      const beforeCursor = Buffer.from(JSON.stringify({ id: '1' }), 'utf8').toString('base64url')
-      const result = await service.searchUsers(
+    it('rejects a cursor reused with a different sort or filter', async () => {
+      vi.spyOn(prisma.users, 'findMany').mockResolvedValue(
+        makeRows([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
+      )
+      const unfilteredPage = await service.searchUsers()
+      const filteredPage = await service.searchUsers(
         undefined,
         undefined,
-        undefined,
-        undefined,
-        beforeCursor,
+        '[{"key":"name","operation":"like","value":"User"}]',
       )
 
-      expect(result.users).toHaveLength(0)
-      expect(result.hasNextPage).toBe(false)
-      expect(result.hasPreviousPage).toBe(false)
-      expect(result.nextCursor).toBeNull()
-      expect(result.previousCursor).toBeNull()
+      await expect(
+        service.searchUsers(
+          undefined,
+          '[{"id":"desc"}]',
+          undefined,
+          unfilteredPage.nextCursor ?? undefined,
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException)
+      await expect(
+        service.searchUsers(
+          undefined,
+          undefined,
+          '[{"key":"name","operation":"like","value":"Other"}]',
+          filteredPage.nextCursor ?? undefined,
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException)
     })
 
-    it('should only compute total/totalPages when includeTotalCount is "true"', async () => {
+    it('accepts a cursor with equivalent filters in a different JSON order', async () => {
+      const findManySpy = vi
+        .spyOn(prisma.users, 'findMany')
+        .mockResolvedValueOnce(makeRows([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]))
+        .mockResolvedValueOnce([])
+      const firstPage = await service.searchUsers(
+        undefined,
+        undefined,
+        '[{"key":"id","operation":"gte","value":1},{"key":"id","operation":"lt","value":100}]',
+      )
+
+      await expect(
+        service.searchUsers(
+          undefined,
+          undefined,
+          '[{"key":"id","operation":"lt","value":100},{"key":"id","operation":"gte","value":1}]',
+          firstPage.nextCursor ?? undefined,
+        ),
+      ).resolves.toMatchObject({ users: [] })
+      expect(findManySpy).toHaveBeenCalledTimes(2)
+    })
+
+    it('scans backwards then reverses rows to the normal order', async () => {
+      const findManySpy = vi
+        .spyOn(prisma.users, 'findMany')
+        .mockResolvedValueOnce(makeRows([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]))
+        .mockResolvedValueOnce(makeRows([11, 12, 13, 14, 15, 16, 17, 18, 19, 20]))
+        .mockResolvedValueOnce(makeRows([10, 9, 8, 7, 6, 5, 4, 3, 2, 1]))
+
+      const firstPage = await service.searchUsers()
+      const secondPage = await service.searchUsers(
+        undefined,
+        undefined,
+        undefined,
+        firstPage.nextCursor ?? undefined,
+      )
+      const previousPage = await service.searchUsers(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        secondPage.previousCursor ?? undefined,
+      )
+
+      expect(previousPage.users.map((user) => user.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+      expect(previousPage.hasNextPage).toBe(true)
+      expect(previousPage.hasPreviousPage).toBe(false)
+      expect(findManySpy).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          where: {
+            AND: [
+              {},
+              {
+                OR: [{ id: { lt: expect.any(Prisma.Decimal) } }],
+              },
+            ],
+          },
+          orderBy: [{ id: 'desc' }],
+        }),
+      )
+    })
+
+    it('returns empty-page metadata without dangling cursors', async () => {
+      const findManySpy = vi
+        .spyOn(prisma.users, 'findMany')
+        .mockResolvedValueOnce(makeRows([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]))
+        .mockResolvedValueOnce([])
+
+      const firstPage = await service.searchUsers()
+      const emptyPage = await service.searchUsers(
+        undefined,
+        undefined,
+        undefined,
+        firstPage.nextCursor ?? undefined,
+      )
+
+      expect(emptyPage).toMatchObject({
+        users: [],
+        hasNextPage: false,
+        hasPreviousPage: false,
+        nextCursor: null,
+        previousCursor: null,
+      })
+      expect(findManySpy).toHaveBeenCalledTimes(2)
+    })
+
+    it('computes total counts only when includeTotalCount is true', async () => {
       vi.spyOn(prisma.users, 'findMany').mockResolvedValue(makeRows([1, 2]))
       const countSpy = vi.spyOn(prisma.users, 'count').mockResolvedValue(42)
 
@@ -402,54 +487,15 @@ describe('UserService', () => {
         'true',
       )
 
-      expect(countSpy).toHaveBeenCalledTimes(1)
+      expect(countSpy).toHaveBeenCalledWith({ where: {} })
       expect(result.total).toBe(42)
       expect(result.totalPages).toBe(Math.ceil(42 / DEFAULT_LIMIT))
     })
 
-    it('should apply allow-listed filters via convertFiltersToPrismaFormat', async () => {
-      const findManySpy = vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
-
-      await service.searchUsers(
-        undefined,
-        undefined,
-        '[{"key":"name","operation":"like","value":"Jo"}]',
-      )
-
-      expect(findManySpy).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { name: { contains: 'Jo' } } }),
-      )
-    })
-  })
-  describe('convertFiltersToPrismaFormat', () => {
-    it("should convert input filters to prisma's filter format", () => {
-      const inputFilter = [
-        { key: 'a', operation: 'like', value: '1' },
-        { key: 'b', operation: 'eq', value: '2' },
-        { key: 'c', operation: 'neq', value: '3' },
-        { key: 'd', operation: 'gt', value: '4' },
-        { key: 'e', operation: 'gte', value: '5' },
-        { key: 'f', operation: 'lt', value: '6' },
-        { key: 'g', operation: 'lte', value: '7' },
-        { key: 'h', operation: 'in', value: ['8'] },
-        { key: 'i', operation: 'notin', value: ['9'] },
-        { key: 'j', operation: 'isnull', value: '10' },
-      ]
-
-      const expectedOutput = {
-        a: { contains: '1' },
-        b: { equals: '2' },
-        c: { not: { equals: '3' } },
-        d: { gt: '4' },
-        e: { gte: '5' },
-        f: { lt: '6' },
-        g: { lte: '7' },
-        h: { in: ['8'] },
-        i: { not: { in: ['9'] } },
-        j: { equals: null },
-      }
-
-      expect(service.convertFiltersToPrismaFormat(inputFilter)).toStrictEqual(expectedOutput)
+    it.each(['yes', ''])('rejects an invalid includeTotalCount value of %j', async (value) => {
+      await expect(
+        service.searchUsers(undefined, undefined, undefined, undefined, undefined, value),
+      ).rejects.toBeInstanceOf(BadRequestException)
     })
   })
 })

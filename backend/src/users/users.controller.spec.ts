@@ -22,7 +22,11 @@ describe('UserController', () => {
         UsersService,
         {
           provide: PrismaService,
-          useValue: {},
+          useValue: {
+            users: {
+              findMany: vi.fn().mockResolvedValue([]),
+            },
+          },
         },
       ],
     }).compile()
@@ -80,12 +84,14 @@ describe('UserController', () => {
       expect(await controller.findOne('1')).toBe(result)
     })
     it('should throw error if user not found', async () => {
-      vi.spyOn(usersService, 'findOne').mockResolvedValue(undefined)
+      vi.spyOn(usersService, 'findOne').mockResolvedValue(null)
       try {
         await controller.findOne('1')
       } catch (e) {
         expect(e).toBeInstanceOf(HttpException)
-        expect(e.message).toBe('User not found.')
+        if (e instanceof HttpException) {
+          expect(e.message).toBe('User not found.')
+        }
       }
     })
   })
@@ -110,9 +116,9 @@ describe('UserController', () => {
   describe('remove', () => {
     it('should remove a user', async () => {
       const id = '1'
-      vi.spyOn(usersService, 'remove').mockResolvedValue(undefined)
+      vi.spyOn(usersService, 'remove').mockResolvedValue({ deleted: true })
 
-      expect(await controller.remove(id)).toBeUndefined()
+      expect(await controller.remove(id)).toEqual({ deleted: true })
       expect(usersService.remove).toHaveBeenCalledWith(+id)
     })
   })
@@ -141,7 +147,7 @@ describe('UserController', () => {
         .query({
           limit: 10,
           sort: '[{"name":"asc"}]',
-          filter: '[{"key":"name","operation":"like","value":"A"}]',
+          filter: '[{"key":"name","operation":"like","value":"Ali"}]',
         })
         .expect(200)
         .expect(result)
@@ -199,16 +205,10 @@ describe('UserController', () => {
         })
     })
 
-    it('given a well-formed cursor with a non-numeric id_should return a 400 instead of a 500', async () => {
-      // Exercises the real service: correct cursor shape/keys, but "id" is
-      // not parseable as a Prisma.Decimal - proves resolveCursorValue's
-      // guard prevents this from bubbling up as an unhandled 500.
-      const badIdCursor = Buffer.from(JSON.stringify({ id: 'not-a-number' }), 'utf8').toString(
-        'base64url',
-      )
+    it('given a malformed cursor_should return a 400 instead of a 500', async () => {
       return request(app.getHttpServer())
         .get('/users/search')
-        .query({ after: badIdCursor })
+        .query({ after: 'not-a-valid-cursor' })
         .expect(400)
         .expect((res) => {
           expect(res.body.statusCode).toBe(400)
@@ -227,6 +227,25 @@ describe('UserController', () => {
         .expect((res) => {
           expect(res.body.statusCode).toBe(400)
           expect(res.body.error).toBe('Bad Request')
+        })
+    })
+
+    it('given a legacy page parameter_should return a 400', async () => {
+      return request(app.getHttpServer())
+        .get('/users/search')
+        .query({ page: '53' })
+        .expect(400)
+        .expect((res) => {
+          expect(res.body.message).toContain('"page" is not supported')
+        })
+    })
+
+    it('given a repeated query parameter_should return a 400', async () => {
+      return request(app.getHttpServer())
+        .get('/users/search?limit=10&limit=20')
+        .expect(400)
+        .expect((res) => {
+          expect(res.body.message).toContain('"limit" must be provided once')
         })
     })
   })

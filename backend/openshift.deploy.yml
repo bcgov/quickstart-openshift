@@ -125,6 +125,8 @@ objects:
                   value: "users"
                 - name: FLYWAY_BASELINE_ON_MIGRATE
                   value: "true"
+                - name: FLYWAY_POSTGRESQL_TRANSACTIONAL_LOCK
+                  value: "false"
               resources:
                 requests:
                   cpu: 10m
