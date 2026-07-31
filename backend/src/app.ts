@@ -4,7 +4,7 @@ import { AppModule } from './app.module'
 import { customLogger } from './common/logger.config'
 import type { NestExpressApplication } from '@nestjs/platform-express'
 import helmet from 'helmet'
-import { VersioningType } from '@nestjs/common'
+import { ValidationPipe, VersioningType } from '@nestjs/common'
 import { metricsMiddleware } from './middleware/prom'
 
 /**
@@ -15,6 +15,16 @@ export async function bootstrap() {
     logger: customLogger,
   })
   app.use(helmet())
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  )
   app.enableCors()
   app.set('trust proxy', 1)
   app.use(metricsMiddleware)

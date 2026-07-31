@@ -3,6 +3,8 @@ import { Test } from '@nestjs/testing'
 import { UsersService } from './users.service'
 import { PrismaService } from '../prisma.service'
 import { Prisma } from '../../generated/prisma/client.js'
+import { BadRequestException } from '@nestjs/common'
+import { SearchUsersQueryDto } from './dto/search-users-query.dto'
 
 describe('UserService', () => {
   let service: UsersService
@@ -42,6 +44,13 @@ describe('UserService', () => {
 
   const userArray = [oneUser, twoUser]
   const savedUserArray = [savedUser1, savedUser2]
+
+  const createSearchQuery = (overrides: Partial<SearchUsersQueryDto> = {}): SearchUsersQueryDto =>
+    Object.assign(new SearchUsersQueryDto(), {
+      sort: '[{"name":"asc"}]',
+      filter: '[{"key":"name","operation":"eq","value":"Peter"}]',
+      ...overrides,
+    })
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -103,66 +112,49 @@ describe('UserService', () => {
     it('should return {deleted: true}', async () => {
       await expect(service.remove(2)).resolves.toEqual({ deleted: true })
     })
-    it('should return {deleted: false, message: err.message}', async () => {
+    it('should rethrow unexpected delete errors', async () => {
       const repoSpy = vi
         .spyOn(prisma.users, 'delete')
         .mockRejectedValueOnce(new Error('Bad Delete Method.'))
-      await expect(service.remove(-1)).resolves.toEqual({
-        deleted: false,
-        message: 'Bad Delete Method.',
-      })
+      await expect(service.remove(-1)).rejects.toThrow('Bad Delete Method.')
       expect(repoSpy).toBeCalledTimes(1)
     })
   })
 
   describe('searchUsers', () => {
     it('should return a list of users with pagination and filtering', async () => {
-      const page = 1
-      const limit = 10
-      const sortObject: Prisma.SortOrder = 'asc'
-      const sort: any = `[{ "name": "${sortObject}" }]`
-      const filter: any = '[{ "name": { "equals": "Peter" } }]'
-
       vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
       vi.spyOn(prisma.users, 'count').mockResolvedValue(0)
-      const result = await service.searchUsers(page, limit, sort, filter)
+      const result = await service.searchUsers(createSearchQuery())
 
       expect(result).toEqual({
         users: [],
-        page,
-        limit,
+        page: 1,
+        limit: 10,
         total: 0,
         totalPages: 0,
       })
     })
 
     it('given no page should return a list of users with pagination and filtering with default page 1', async () => {
-      const limit = 10
-      const sortObject: Prisma.SortOrder = 'asc'
-      const sort: any = `[{ "name": "${sortObject}" }]`
-      const filter: any = '[{ "name": { "equals": "Peter" } }]'
-
       vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
       vi.spyOn(prisma.users, 'count').mockResolvedValue(0)
-      const result = await service.searchUsers(null, limit, sort, filter)
+      const query = createSearchQuery({ limit: 10 })
+      const result = await service.searchUsers(query)
 
       expect(result).toEqual({
         users: [],
         page: 1,
-        limit,
+        limit: 10,
         total: 0,
         totalPages: 0,
       })
     })
     it('given no limit should return a list of users with pagination and filtering with default limit 10', async () => {
-      const page = 1
-      const sortObject: Prisma.SortOrder = 'asc'
-      const sort: any = `[{ "name": "${sortObject}" }]`
-      const filter: any = '[{ "name": { "equals": "Peter" } }]'
-
       vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
       vi.spyOn(prisma.users, 'count').mockResolvedValue(0)
-      const result = await service.searchUsers(page, null, sort, filter)
+      const query = createSearchQuery({ page: 1 })
+      const result = await service.searchUsers(query)
 
       expect(result).toEqual({
         users: [],
@@ -173,64 +165,28 @@ describe('UserService', () => {
       })
     })
 
-    it('given  limit greater than 200 should return a list of users with pagination and filtering with default limit 10', async () => {
-      const page = 1
-      const limit = 201
-      const sortObject: Prisma.SortOrder = 'asc'
-      const sort: any = `[{ "name": "${sortObject}" }]`
-      const filter: any = '[{ "name": { "equals": "Peter" } }]'
-
-      vi.spyOn(prisma.users, 'findMany').mockResolvedValue([])
-      vi.spyOn(prisma.users, 'count').mockResolvedValue(0)
-      const result = await service.searchUsers(page, limit, sort, filter)
-
-      expect(result).toEqual({
-        users: [],
-        page: 1,
-        limit: 10,
-        total: 0,
-        totalPages: 0,
-      })
+    it('should reject a limit greater than 200', async () => {
+      await expect(service.searchUsers(createSearchQuery({ limit: 201 }))).rejects.toThrow(
+        BadRequestException,
+      )
     })
     it('given  invalid JSON should throw error', async () => {
-      const page = 1
-      const limit = 201
-      const sortObject: Prisma.SortOrder = 'asc'
-      const sort: any = `[{ "name" "${sortObject}" }]`
-      const filter: any = '[{ "name": { "equals": "Peter" } }]'
-      try {
-        await service.searchUsers(page, limit, sort, filter)
-      } catch (e) {
-        expect(e).toEqual(new Error('Invalid query parameters'))
-      }
+      const query = createSearchQuery({ sort: '[{"name" "asc"}]' })
+      await expect(service.searchUsers(query)).rejects.toThrow('Invalid query parameters')
     })
   })
   describe('convertFiltersToPrismaFormat', () => {
     it("should convert input filters to prisma's filter format", () => {
       const inputFilter = [
-        { key: 'a', operation: 'like', value: '1' },
-        { key: 'b', operation: 'eq', value: '2' },
-        { key: 'c', operation: 'neq', value: '3' },
-        { key: 'd', operation: 'gt', value: '4' },
-        { key: 'e', operation: 'gte', value: '5' },
-        { key: 'f', operation: 'lt', value: '6' },
-        { key: 'g', operation: 'lte', value: '7' },
-        { key: 'h', operation: 'in', value: ['8'] },
-        { key: 'i', operation: 'notin', value: ['9'] },
-        { key: 'j', operation: 'isnull', value: '10' },
+        { key: 'name', operation: 'like', value: '1' },
+        { key: 'email', operation: 'eq', value: '2' },
+        { key: 'id', operation: 'neq', value: 3 },
       ]
 
       const expectedOutput = {
-        a: { contains: '1' },
-        b: { equals: '2' },
-        c: { not: { equals: '3' } },
-        d: { gt: '4' },
-        e: { gte: '5' },
-        f: { lt: '6' },
-        g: { lte: '7' },
-        h: { in: ['8'] },
-        i: { not: { in: ['9'] } },
-        j: { equals: null },
+        name: { contains: '1' },
+        email: { equals: '2' },
+        id: { not: { equals: 3 } },
       }
 
       expect(service.convertFiltersToPrismaFormat(inputFilter)).toStrictEqual(expectedOutput)

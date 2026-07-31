@@ -3,8 +3,8 @@ import { Test } from '@nestjs/testing'
 import { UsersController } from './users.controller'
 import { UsersService } from './users.service'
 import request from 'supertest'
+import { NotFoundException, ValidationPipe } from '@nestjs/common'
 import type { INestApplication } from '@nestjs/common'
-import { HttpException } from '@nestjs/common'
 import type { CreateUserDto } from './dto/create-user.dto'
 import type { UpdateUserDto } from './dto/update-user.dto'
 import type { UserDto } from './dto/user.dto'
@@ -28,6 +28,16 @@ describe('UserController', () => {
     usersService = module.get<UsersService>(UsersService)
     controller = module.get<UsersController>(UsersController)
     app = module.createNestApplication()
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+        transformOptions: {
+          enableImplicitConversion: true,
+        },
+      }),
+    )
     await app.init()
   })
   // Close the app after each test
@@ -76,21 +86,18 @@ describe('UserController', () => {
         email: 'John_Doe@gmail.com',
       }
       vi.spyOn(usersService, 'findOne').mockResolvedValue(result)
-      expect(await controller.findOne('1')).toBe(result)
+      expect(await controller.findOne(1)).toBe(result)
     })
     it('should throw error if user not found', async () => {
-      vi.spyOn(usersService, 'findOne').mockResolvedValue(undefined)
-      try {
-        await controller.findOne('1')
-      } catch (e) {
-        expect(e).toBeInstanceOf(HttpException)
-        expect(e.message).toBe('User not found.')
-      }
+      vi.spyOn(usersService, 'findOne').mockRejectedValue(
+        new NotFoundException('User #1 not found'),
+      )
+      await expect(controller.findOne(1)).rejects.toThrow('User #1 not found')
     })
   })
   describe('update', () => {
     it('should update and return a user object', async () => {
-      const id = '1'
+      const id = 1
       const updateUserDto: UpdateUserDto = {
         email: 'johndoe@example.com',
         name: 'John Doe',
@@ -103,16 +110,16 @@ describe('UserController', () => {
       vi.spyOn(usersService, 'update').mockResolvedValue(userDto)
 
       expect(await controller.update(id, updateUserDto)).toBe(userDto)
-      expect(usersService.update).toHaveBeenCalledWith(+id, updateUserDto)
+      expect(usersService.update).toHaveBeenCalledWith(id, updateUserDto)
     })
   })
   describe('remove', () => {
     it('should remove a user', async () => {
-      const id = '1'
-      vi.spyOn(usersService, 'remove').mockResolvedValue(undefined)
+      const id = 1
+      vi.spyOn(usersService, 'remove').mockResolvedValue({ deleted: true })
 
-      expect(await controller.remove(id)).toBeUndefined()
-      expect(usersService.remove).toHaveBeenCalledWith(+id)
+      expect(await controller.remove(id)).toEqual({ deleted: true })
+      expect(usersService.remove).toHaveBeenCalledWith(id)
     })
   })
   // Test the GET /users/search endpoint
@@ -157,16 +164,13 @@ describe('UserController', () => {
           limit: 'invalid',
         })
         .expect(400)
-        .expect({
-          statusCode: 400,
-          message: 'Invalid query parameters',
+        .expect((response) => {
+          expect(response.body.statusCode).toBe(400)
+          expect(response.body.message).toEqual(expect.any(Array))
         })
     })
     it('given sort and filter as invalid query parameters_should return a 400 status code with an error message', async () => {
       // Make a GET request with invalid query parameters and expect a 400 status code and an error message
-      vi.spyOn(usersService, 'searchUsers').mockImplementation(async () => {
-        throw new HttpException('Invalid query parameters', 400)
-      })
       return request(app.getHttpServer())
         .get('/users/search')
         .query({
@@ -176,9 +180,9 @@ describe('UserController', () => {
           filter: 'invalid',
         })
         .expect(400)
-        .expect({
-          statusCode: 400,
-          message: 'Invalid query parameters',
+        .expect((response) => {
+          expect(response.body.statusCode).toBe(400)
+          expect(response.body.message).toEqual(expect.any(Array))
         })
     })
   })

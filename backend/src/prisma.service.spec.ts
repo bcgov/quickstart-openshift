@@ -14,7 +14,7 @@ describe('PrismaService', () => {
   })
 
   afterEach(async () => {
-    await service.$disconnect()
+    await service.onModuleDestroy()
   })
 
   it('should be defined', () => {

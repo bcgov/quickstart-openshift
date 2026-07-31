@@ -21,13 +21,9 @@ const PrismaClientWithLogs = PrismaClient as unknown as new (
 
 @Injectable()
 class PrismaService extends PrismaClientWithLogs implements OnModuleInit, OnModuleDestroy {
-  private logger = new Logger('PRISMA')
-  private static instance: PrismaService
-  private pool!: Pool
+  private readonly logger = new Logger('PRISMA')
+  private readonly pool: Pool
   constructor() {
-    if (PrismaService.instance) {
-      return PrismaService.instance
-    }
     const pool = new Pool({ connectionString: dataSourceURL })
     const adapter = new PrismaPg(pool, { schema: DB_SCHEMA })
     super({
@@ -41,7 +37,6 @@ class PrismaService extends PrismaClientWithLogs implements OnModuleInit, OnModu
       ],
     })
     this.pool = pool
-    PrismaService.instance = this
   }
 
   async onModuleInit() {
@@ -59,6 +54,7 @@ class PrismaService extends PrismaClientWithLogs implements OnModuleInit, OnModu
 
   async onModuleDestroy() {
     await this.$disconnect()
+    await this.pool.end()
   }
 }
 

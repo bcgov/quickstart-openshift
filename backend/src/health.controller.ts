@@ -5,8 +5,8 @@ import type { PrismaClient } from '../generated/prisma/client.js'
 @Controller('health')
 export class HealthController {
   constructor(
-    private health: HealthCheckService,
-    private prisma: PrismaHealthIndicator,
+    private readonly health: HealthCheckService,
+    private readonly prisma: PrismaHealthIndicator,
     private readonly prismaService: PrismaService,
   ) {}
 
