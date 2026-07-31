@@ -1,0 +1,40 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: frontend-vanity-route
+  annotations:
+    description: "Injects TLS certificates into the secondary vanity route"
+parameters:
+  - name: NAME
+    required: true
+  - name: ZONE
+    required: true
+  - name: COMPONENT
+    value: frontend
+  - name: VANITY_URL
+    required: true
+  - name: TLS_CERTIFICATE
+    required: true
+  - name: TLS_PRIVATE_KEY
+    required: true
+  - name: TLS_CA_CERTIFICATE
+    required: true
+objects:
+  - apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}-vanity
+    spec:
+      host: ${VANITY_URL}
+      to:
+        kind: Service
+        name: ${NAME}-${ZONE}-${COMPONENT}
+        weight: 100
+      tls:
+        termination: edge
+        insecureEdgeTerminationPolicy: Redirect
+        certificate: "${TLS_CERTIFICATE}"
+        key: "${TLS_PRIVATE_KEY}"
+        caCertificate: "${TLS_CA_CERTIFICATE}"
