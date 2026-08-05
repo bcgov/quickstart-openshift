@@ -1,0 +1,14 @@
+{
+  "type": "PROMETHEUS",
+  "name": "__ALERT_NAME__",
+  "description": "__NAMESPACE__/__COMPONENT__ has had no available pods for over __DURATION_MINUTES__ minutes. Fires whatever the cause — crash, failed rollout, scaled to zero, or the Deployment no longer reporting at all.",
+  "severity": "high",
+  "enabled": true,
+  "config": {
+    "duration": 0,
+    "query": "kube_deployment_status_replicas_available{kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__APP__-__COMPONENT__-prod\"} == 0 or absent(kube_deployment_status_replicas_available{kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__APP__-__COMPONENT__-prod\"})"
+  },
+  "notificationChannelConfigList": [
+    { "type": "EMAIL", "channelId": 0 }
+  ]
+}

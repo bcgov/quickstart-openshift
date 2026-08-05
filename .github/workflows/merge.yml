@@ -76,7 +76,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
-      - uses: bcgov/action-sysdig-monitor@122c7672e37f97cf27c1b17d1c0738f152b1bcf7 # 0.0.2
+      # 0.0.3 is the first version with __APP__ template substitution, which
+      # monitoring/alerts/*.json depend on — don't downgrade this pin.
+      - uses: bcgov/action-sysdig-monitor@6806bcb6b427359881848a62508402f5c1bb0dc9 # 0.0.3
         with:
           sysdig_api_token: ${{ secrets.SYSDIG_API_TOKEN }}
           oc_namespace: ${{ secrets.oc_namespace }}

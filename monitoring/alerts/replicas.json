@@ -6,7 +6,7 @@
   "enabled": true,
   "config": {
     "duration": 0,
-    "query": "min(kube_deployment_status_replicas_available{kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__COMPONENT__\"}) < max(kube_deployment_spec_replicas{kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__COMPONENT__\"})"
+    "query": "kube_deployment_status_replicas_available{kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__APP__-__COMPONENT__-prod\"} < on (kube_namespace_name, kube_deployment_name) kube_deployment_spec_replicas{kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__APP__-__COMPONENT__-prod\"}"
   },
   "notificationChannelConfigList": [
     { "type": "EMAIL", "channelId": 0 }
