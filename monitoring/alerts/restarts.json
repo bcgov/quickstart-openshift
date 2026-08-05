@@ -6,7 +6,7 @@
   "enabled": true,
   "config": {
     "duration": 0,
-    "query": "sum(rate(kube_pod_container_status_restarts_total{kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__COMPONENT__\"}[5m])) * 60 > 1"
+    "query": "sum by (kube_deployment_name, kube_pod_name) (rate(kube_pod_container_status_restarts_total{kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__APP__-__COMPONENT__-prod\"}[5m])) * 60 > 1"
   },
   "notificationChannelConfigList": [
     { "type": "EMAIL", "channelId": 0 }

@@ -6,7 +6,7 @@
   "enabled": true,
   "config": {
     "duration": 0,
-    "query": "max(kube_pod_container_status_waiting_reason{reason=\"CrashLoopBackOff\", kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__COMPONENT__\"}) > 0"
+    "query": "max by (kube_deployment_name, kube_pod_name) (kube_pod_container_status_waiting_reason{reason=\"CrashLoopBackOff\", kube_namespace_name=\"__NAMESPACE__\", kube_deployment_name=\"__APP__-__COMPONENT__-prod\"}) > 0"
   },
   "notificationChannelConfigList": [
     { "type": "EMAIL", "channelId": 0 }
