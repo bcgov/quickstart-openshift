@@ -111,9 +111,23 @@ jobs:
       - name: Validate vanity route inputs
         if: ${{ matrix.name == 'frontend' && inputs.vanity_url != '' }}
         shell: bash
+        env:
+          TLS_CERT: ${{ secrets.tls_certificate }}
+          TLS_KEY: ${{ secrets.tls_private_key }}
         run: |
-          if [ -z "${{ secrets.tls_certificate }}" ] || [ -z "${{ secrets.tls_private_key }}" ]; then
+          if [ -z "$TLS_CERT" ] || [ -z "$TLS_KEY" ]; then
             echo "::error::vanity_url is set but tls_certificate and/or tls_private_key secrets were not provided to this workflow_call."
+            exit 1
+          fi
+          
+          echo "$TLS_CERT" > /tmp/cert.pem
+          echo "$TLS_KEY" > /tmp/key.pem
+          
+          CERT_MOD=$(openssl x509 -noout -modulus -in /tmp/cert.pem 2>/dev/null)
+          KEY_MOD=$(openssl rsa -noout -modulus -in /tmp/key.pem 2>/dev/null)
+          
+          if [ -z "$CERT_MOD" ] || [ -z "$KEY_MOD" ] || [ "$CERT_MOD" != "$KEY_MOD" ]; then
+            echo "::error::The provided TLS certificate and private key are either invalid or do not mathematically match."
             exit 1
           fi
       - name: Deploy Vanity Route
