@@ -108,6 +108,14 @@ jobs:
             -p NAME="${{ github.event.repository.name }}"
             ${{ matrix.parameters }}
           triggers: ${{ inputs.triggers }}
+      - name: Validate vanity route inputs
+        if: ${{ matrix.name == 'frontend' && inputs.vanity_url != '' }}
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.tls_certificate }}" ] || [ -z "${{ secrets.tls_private_key }}" ]; then
+            echo "::error::vanity_url is set but tls_certificate and/or tls_private_key secrets were not provided to this workflow_call."
+            exit 1
+          fi
       - name: Deploy Vanity Route
         if: ${{ matrix.name == 'frontend' && inputs.vanity_url != '' }}
         uses: bcgov/action-deployer-openshift@27a85b7b157bfc9c3c9bf0aca53bcd288d4d2506 # v4.2.1

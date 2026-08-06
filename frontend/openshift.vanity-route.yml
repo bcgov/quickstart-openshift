@@ -18,7 +18,8 @@ parameters:
   - name: TLS_PRIVATE_KEY
     required: true
   - name: TLS_CA_CERTIFICATE
-    required: true
+    required: false
+    value: ""
 objects:
   - apiVersion: route.openshift.io/v1
     kind: Route
