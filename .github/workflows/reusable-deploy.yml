@@ -151,7 +151,8 @@ jobs:
             OLD_KEY=$(kubectl get route "$ROUTE_NAME" -o jsonpath='{.spec.tls.key}')
             
             if [ -n "$OLD_KEY" ]; then
-              BACKUP_NAME="${ROUTE_NAME}-backup-$(date +%Y-%m-%d)"
+              CERT_HASH=$(echo "$OLD_CERT" | md5sum | cut -d' ' -f1)
+              BACKUP_NAME="${ROUTE_NAME}-backup-${CERT_HASH:0:8}"
               
               kubectl create secret generic "$BACKUP_NAME" \
                 --from-literal=tls.crt="$OLD_CERT" \
