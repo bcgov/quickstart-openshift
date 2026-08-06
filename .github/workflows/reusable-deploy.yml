@@ -108,74 +108,16 @@ jobs:
             -p NAME="${{ github.event.repository.name }}"
             ${{ matrix.parameters }}
           triggers: ${{ inputs.triggers }}
-      - name: Validate vanity route inputs
+      - name: Provision Vanity Route
         if: ${{ matrix.name == 'frontend' && inputs.vanity_url != '' }}
-        shell: bash
-        env:
-          TLS_CERT: ${{ secrets.tls_certificate }}
-          TLS_KEY: ${{ secrets.tls_private_key }}
-        run: |
-          if [ -z "$TLS_CERT" ] || [ -z "$TLS_KEY" ]; then
-            echo "::error::vanity_url is set but tls_certificate and/or tls_private_key secrets were not provided to this workflow_call."
-            exit 1
-          fi
-          
-          echo "$TLS_CERT" > /tmp/cert.pem
-          echo "$TLS_KEY" > /tmp/key.pem
-          
-          CERT_MOD=$(openssl x509 -noout -modulus -in /tmp/cert.pem 2>/dev/null)
-          KEY_MOD=$(openssl rsa -noout -modulus -in /tmp/key.pem 2>/dev/null)
-          
-          if [ -z "$CERT_MOD" ] || [ -z "$KEY_MOD" ] || [ "$CERT_MOD" != "$KEY_MOD" ]; then
-            echo "::error::The provided TLS certificate and private key are either invalid or do not mathematically match."
-            exit 1
-          fi
-      - name: Archive Existing Certificates
-        if: ${{ matrix.name == 'frontend' && inputs.vanity_url != '' }}
-        shell: bash
-        run: |
-          # Configure kubectl for OpenShift API access
-          kubectl config set-cluster cluster --server=${{ vars.oc_server }} --insecure-skip-tls-verify=true > /dev/null
-          kubectl config set-credentials user --token=${{ secrets.oc_token }} > /dev/null
-          kubectl config set-context context --cluster=cluster --user=user --namespace=${{ secrets.oc_namespace }} > /dev/null
-          kubectl config use-context context > /dev/null
-          
-          ROUTE_NAME="${{ github.event.repository.name }}-${{ inputs.target }}-frontend-vanity"
-          
-          # Check if the route already exists in the cluster
-          if kubectl get route "$ROUTE_NAME" > /dev/null 2>&1; then
-            echo "Existing route found. Creating archival backup..."
-            
-            # Extract current certs directly from the live OpenShift object
-            OLD_CERT=$(kubectl get route "$ROUTE_NAME" -o jsonpath='{.spec.tls.certificate}')
-            OLD_KEY=$(kubectl get route "$ROUTE_NAME" -o jsonpath='{.spec.tls.key}')
-            
-            if [ -n "$OLD_KEY" ]; then
-              CERT_HASH=$(echo "$OLD_CERT" | md5sum | cut -d' ' -f1)
-              BACKUP_NAME="${ROUTE_NAME}-backup-${CERT_HASH:0:8}"
-              
-              kubectl create secret generic "$BACKUP_NAME" \
-                --from-literal=tls.crt="$OLD_CERT" \
-                --from-literal=tls.key="$OLD_KEY" \
-                --dry-run=client -o yaml | kubectl apply -f -
-                
-              echo "Certificates archived to secret: $BACKUP_NAME"
-            fi
-          else
-            echo "No existing route found to backup. Skipping archive."
-          fi
-      - name: Deploy Vanity Route
-        if: ${{ matrix.name == 'frontend' && inputs.vanity_url != '' }}
-        uses: bcgov/action-deployer-openshift@27a85b7b157bfc9c3c9bf0aca53bcd288d4d2506 # v4.2.1
+        uses: bcgov/actions-openshift/tls-route-provisioner@main
         with:
-          file: frontend/openshift.vanity-route.yml
+          vanity_url: ${{ inputs.vanity_url }}
+          target_service: "${{ github.event.repository.name }}-${{ inputs.target }}-frontend"
+          route_name: "${{ github.event.repository.name }}-${{ inputs.target }}-frontend-vanity"
+          tls_certificate: ${{ secrets.tls_certificate }}
+          tls_private_key: ${{ secrets.tls_private_key }}
+          tls_ca_certificate: ${{ secrets.tls_ca_certificate }}
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
-          overwrite: true
-          parameters: -p ZONE="${{ inputs.target }}"
-            -p NAME="${{ github.event.repository.name }}"
-            -p VANITY_URL="${{ inputs.vanity_url }}"
-            -p TLS_CERTIFICATE="${{ secrets.tls_certificate }}"
-            -p TLS_PRIVATE_KEY="${{ secrets.tls_private_key }}"
-            -p TLS_CA_CERTIFICATE="${{ secrets.tls_ca_certificate }}"
