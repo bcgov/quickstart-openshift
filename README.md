@@ -594,3 +594,29 @@ This template provides out-of-the-box support for self-healing and verification 
 - A security vulnerability scanner (e.g., Trivy or CodeQL) flags a new vulnerability.
 
 
+
+## Custom Domains (Vanity URLs)
+If your application requires a custom vanity URL (e.g., `myapp.bcgov.ca`) layered on top of the standard OpenShift route, the deployment pipeline natively supports this.
+
+### Usage
+In your downstream deployment workflow (typically `.github/workflows/prod.yml`), pass the `vanity_url` input and your TLS certificates into the reusable deployer:
+
+```yaml
+jobs:
+  deploy:
+    uses: bcgov/quickstart-openshift/.github/workflows/reusable-deploy.yml@main
+    with:
+      environment: prod
+      vanity_url: "myapp.bcgov.ca"
+    secrets:
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
+      oc_token: ${{ secrets.OC_TOKEN }}
+      db_password: ${{ secrets.DB_PASSWORD }}
+      tls_certificate: ${{ secrets.TLS_CERTIFICATE }}
+      tls_private_key: ${{ secrets.TLS_PRIVATE_KEY }}
+```
+
+### Safety Features
+- **Cryptographic Pre-Validation**: The pipeline automatically checks that the private key mathematically matches the certificate before touching OpenShift.
+- **Automated Backups**: On every deployment, the pipeline automatically extracts the previously working certificates from OpenShift and archives them into a secure, timestamped Secret, ensuring you never permanently lose valid certificates.
+- **Local Validation**: You can pre-validate your certificate and key locally before uploading them to GitHub Secrets using the included script: `./scripts/validate_tls_pair.sh <cert.pem> <key.key>`.
