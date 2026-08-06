@@ -130,6 +130,39 @@ jobs:
             echo "::error::The provided TLS certificate and private key are either invalid or do not mathematically match."
             exit 1
           fi
+      - name: Archive Existing Certificates
+        if: ${{ matrix.name == 'frontend' && inputs.vanity_url != '' }}
+        shell: bash
+        run: |
+          # Configure kubectl for OpenShift API access
+          kubectl config set-cluster cluster --server=${{ vars.oc_server }} --insecure-skip-tls-verify=true > /dev/null
+          kubectl config set-credentials user --token=${{ secrets.oc_token }} > /dev/null
+          kubectl config set-context context --cluster=cluster --user=user --namespace=${{ secrets.oc_namespace }} > /dev/null
+          kubectl config use-context context > /dev/null
+          
+          ROUTE_NAME="${{ github.event.repository.name }}-${{ inputs.target }}-frontend-vanity"
+          
+          # Check if the route already exists in the cluster
+          if kubectl get route "$ROUTE_NAME" > /dev/null 2>&1; then
+            echo "Existing route found. Creating archival backup..."
+            
+            # Extract current certs directly from the live OpenShift object
+            OLD_CERT=$(kubectl get route "$ROUTE_NAME" -o jsonpath='{.spec.tls.certificate}')
+            OLD_KEY=$(kubectl get route "$ROUTE_NAME" -o jsonpath='{.spec.tls.key}')
+            
+            if [ -n "$OLD_KEY" ]; then
+              BACKUP_NAME="${ROUTE_NAME}-backup-$(date +%Y-%m-%d)"
+              
+              kubectl create secret generic "$BACKUP_NAME" \
+                --from-literal=tls.crt="$OLD_CERT" \
+                --from-literal=tls.key="$OLD_KEY" \
+                --dry-run=client -o yaml | kubectl apply -f -
+                
+              echo "Certificates archived to secret: $BACKUP_NAME"
+            fi
+          else
+            echo "No existing route found to backup. Skipping archive."
+          fi
       - name: Deploy Vanity Route
         if: ${{ matrix.name == 'frontend' && inputs.vanity_url != '' }}
         uses: bcgov/action-deployer-openshift@27a85b7b157bfc9c3c9bf0aca53bcd288d4d2506 # v4.2.1
