@@ -20,6 +20,10 @@ on:
         description: Triggers for deployment
         default: ""
         type: string
+      vanity_url:
+        description: Custom vanity URL
+        default: ""
+        type: string
 
     secrets:
       db_password:
@@ -31,6 +35,15 @@ on:
       oc_token:
         description: OpenShift token
         required: true
+      tls_certificate:
+        description: TLS certificate
+        required: false
+      tls_private_key:
+        description: TLS private key
+        required: false
+      tls_ca_certificate:
+        description: TLS CA certificate
+        required: false
 
     outputs:
       triggered:
@@ -95,3 +108,16 @@ jobs:
             -p NAME="${{ github.event.repository.name }}"
             ${{ matrix.parameters }}
           triggers: ${{ inputs.triggers }}
+      - name: Provision Vanity Route
+        if: ${{ matrix.name == 'frontend' && inputs.vanity_url != '' }}
+        uses: bcgov/actions-openshift/tls-route-provisioner@main
+        with:
+          vanity_url: ${{ inputs.vanity_url }}
+          target_service: "${{ github.event.repository.name }}-${{ inputs.target }}-frontend"
+          route_name: "${{ github.event.repository.name }}-${{ inputs.target }}-frontend-vanity"
+          tls_certificate: ${{ secrets.tls_certificate }}
+          tls_private_key: ${{ secrets.tls_private_key }}
+          tls_ca_certificate: ${{ secrets.tls_ca_certificate }}
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
