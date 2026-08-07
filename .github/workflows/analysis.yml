@@ -98,25 +98,49 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - id: diff
+        uses: bcgov/actions/diff-triggers@main
+        with:
+          triggers: |
+            backend/**
+            frontend/**
+            common/**
+            package*.json
+            Containerfile*
+            compose*.yml
+            .github/**
+
       - name: Cache Trivy DB
+        if: steps.diff.outputs.triggered == 'true'
         uses: actions/cache@v6
         with:
           path: .trivycache
-          key: ${{ runner.os }}-trivy-v0.36.0-cache-v1
+          key: ${{ runner.os }}-trivy-${{ hashFiles('.github/workflows/analysis.yml') }}
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-      # Reports every severity to the Security tab for triage.  Findings are not a merge
-      # gate: advisories are published on their own schedule, not the contributor's, and
-      # committed secrets are already blocked at push time by GitHub secret scanning.
+      - name: Scan for secrets and misconfigurations
+        if: steps.diff.outputs.triggered == 'true'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          ignore-unfixed: true
+          scan-type: "fs"
+          scanners: "secret,misconfig"
+          severity: "CRITICAL,HIGH"
+          trivyignores: ".github/.trivyignore"
+          cache-dir: .trivycache
+          skip-dirs: "**/node_modules,**/coverage,**/dist,.git"
+          exit-code: "1"
+
       - name: Run Trivy vulnerability scanner in repo mode
+        if: steps.diff.outputs.triggered == 'true' && (success() || failure())
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           format: "sarif"
           output: "trivy-results.sarif"
           ignore-unfixed: true
           scan-type: "fs"
-          scanners: "vuln,secret,misconfig"
+          scanners: "vuln"
           severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
           trivyignores: ".github/.trivyignore"
           cache-dir: .trivycache
@@ -124,7 +148,7 @@ jobs:
           exit-code: "0"
 
       - name: Upload Trivy scan results to GitHub Security tab
-        if: always()
+        if: steps.diff.outputs.triggered == 'true' && (success() || failure())
         uses: github/codeql-action/upload-sarif@v4
         with:
           category: "trivy"
