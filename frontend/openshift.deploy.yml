@@ -157,8 +157,8 @@ objects:
                 failureThreshold: 3
               livenessProbe:
                 httpGet:
-                  path: /
-                  port: http
+                  path: /health
+                  port: health
                 periodSeconds: 10
                 failureThreshold: 3
               lifecycle:
