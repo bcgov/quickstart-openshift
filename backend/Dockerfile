@@ -17,7 +17,7 @@ ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
 RUN npm ci --ignore-scripts --no-update-notifier --omit=dev
 
 # Deploy using minimal Distroless image
-FROM gcr.io/distroless/nodejs22-debian12:nonroot
+FROM gcr.io/distroless/nodejs24-debian12:nonroot
 ENV NODE_ENV=production
 
 # Copy app and dependencies
