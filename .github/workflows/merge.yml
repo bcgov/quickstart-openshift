@@ -49,9 +49,13 @@ jobs:
     with:
       target: test
 
+  analysis:
+    name: Analysis
+    uses: ./.github/workflows/reusable-analysis.yml
+
   deploy-prod:
     name: PROD Deploys (${{ needs.init.outputs.pr }})
-    needs: [tests, init]
+    needs: [tests, init, analysis]
     uses: ./.github/workflows/reusable-deploy.yml
     secrets:
       db_password: ${{ secrets.db_password }}

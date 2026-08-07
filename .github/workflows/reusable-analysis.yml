@@ -1,24 +1,13 @@
-name: Analysis
+name: Reusable Analysis
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
-  schedule:
-    - cron: "0 11 * * 0" # 3 AM PST = 12 PM UDT, runs sundays
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
 
 permissions: {}
 
 jobs:
   backend-tests:
     name: Backend Tests
-    if: (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     services:
@@ -59,7 +48,6 @@ jobs:
 
   frontend-tests:
     name: Frontend Tests
-    if: (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -86,10 +74,8 @@ jobs:
           supply_scan: true
           triggers: ('frontend/')
 
-  # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
     name: Trivy Security Scan
-    if: (! github.event.pull_request.draft)
     permissions:
       contents: read
       security-events: write
@@ -115,7 +101,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .trivycache
-          key: ${{ runner.os }}-trivy-${{ hashFiles('.github/workflows/analysis.yml') }}
+          key: ${{ runner.os }}-trivy-${{ hashFiles('.github/workflows/reusable-analysis.yml') }}
           restore-keys: |
             ${{ runner.os }}-trivy-
 
@@ -159,10 +145,10 @@ jobs:
   # If you add a new job to this workflow, you MUST add its ID to the 'needs'
   # array below, otherwise its failure or cancellation will not block the PR!
   # ==========================================================================
-  results:
+  analysis-results:
     name: Analysis Results
     needs: [backend-tests, frontend-tests, trivy]
-    if: always() && (! github.event.pull_request.draft)
+    if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 1
     steps:
