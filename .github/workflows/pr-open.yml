@@ -48,6 +48,13 @@ jobs:
      needs: [deploys]
      uses: ./.github/workflows/reusable-tests.yml
 
+  analysis:
+    name: Analysis
+    permissions:
+      contents: read
+      security-events: write
+    uses: ./.github/workflows/reusable-analysis.yml
+
   # ==========================================================================
   # WARNING: This job acts as the required merge gate for this workflow.
   # If you add a new job to this workflow, you MUST add its ID to the 'needs'
@@ -55,7 +62,7 @@ jobs:
   # ==========================================================================
   results:
     name: PR Results
-    needs: [builds, deploys, tests]
+    needs: [analysis, builds, deploys, tests]
     if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 1

@@ -12,6 +12,13 @@ concurrency:
 permissions: {}
 
 jobs:
+  analysis:
+    name: Analysis
+    permissions:
+      contents: read
+      security-events: write
+    uses: ./.github/workflows/reusable-analysis.yml
+
   stale-branches:
     name: Close Stale Branches & PRs
     runs-on: ubuntu-slim

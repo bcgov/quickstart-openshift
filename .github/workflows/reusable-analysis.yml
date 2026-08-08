@@ -1,24 +1,13 @@
-name: Analysis
+name: Reusable Analysis
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
-  schedule:
-    - cron: "0 11 * * 0" # 3 AM PST = 12 PM UDT, runs sundays
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
 
 permissions: {}
 
 jobs:
   backend-tests:
     name: Backend Tests
-    if: (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     services:
@@ -59,7 +48,6 @@ jobs:
 
   frontend-tests:
     name: Frontend Tests
-    if: (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -86,10 +74,8 @@ jobs:
           supply_scan: true
           triggers: ('frontend/')
 
-  # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
     name: Trivy Security Scan
-    if: (! github.event.pull_request.draft)
     permissions:
       contents: read
       security-events: write
@@ -102,14 +88,11 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .trivycache
-          key: ${{ runner.os }}-trivy-v0.36.0-cache-v1
+          key: ${{ runner.os }}-trivy-v0.36.0
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-      # Reports every severity to the Security tab for triage.  Findings are not a merge
-      # gate: advisories are published on their own schedule, not the contributor's, and
-      # committed secrets are already blocked at push time by GitHub secret scanning.
-      - name: Run Trivy vulnerability scanner in repo mode
+      - name: Run Trivy Security Scan
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           format: "sarif"
@@ -124,7 +107,7 @@ jobs:
           exit-code: "0"
 
       - name: Upload Trivy scan results to GitHub Security tab
-        if: always()
+        if: success() || failure()
         uses: github/codeql-action/upload-sarif@v4
         with:
           category: "trivy"
@@ -135,10 +118,10 @@ jobs:
   # If you add a new job to this workflow, you MUST add its ID to the 'needs'
   # array below, otherwise its failure or cancellation will not block the PR!
   # ==========================================================================
-  results:
+  analysis-results:
     name: Analysis Results
     needs: [backend-tests, frontend-tests, trivy]
-    if: always() && (! github.event.pull_request.draft)
+    if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 1
     steps:
