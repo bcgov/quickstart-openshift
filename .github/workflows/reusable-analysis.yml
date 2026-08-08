@@ -78,27 +78,13 @@ jobs:
     name: Trivy Security Scan
     permissions:
       contents: read
-      pull-requests: read
       security-events: write
     runs-on: ubuntu-slim
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
 
-      - id: diff
-        uses: bcgov/actions/diff-triggers@4ad61a784f1c17765b03d8d6de9737c1d3f4c0f2 # v0.5.0
-        with:
-          triggers: |
-            backend/**
-            frontend/**
-            common/**
-            package*.json
-            Containerfile*
-            compose*.yml
-            .github/**
-
       - name: Cache Trivy DB
-        if: steps.diff.outputs.triggered == 'true'
         uses: actions/cache@v6
         with:
           path: .trivycache
@@ -107,7 +93,6 @@ jobs:
             ${{ runner.os }}-trivy-
 
       - name: Scan for secrets and misconfigurations
-        if: steps.diff.outputs.triggered == 'true'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           ignore-unfixed: true
@@ -120,7 +105,7 @@ jobs:
           exit-code: "1"
 
       - name: Run Trivy vulnerability scanner in repo mode
-        if: steps.diff.outputs.triggered == 'true' && (success() || failure())
+        if: success() || failure()
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           format: "sarif"
@@ -135,7 +120,7 @@ jobs:
           exit-code: "0"
 
       - name: Upload Trivy scan results to GitHub Security tab
-        if: steps.diff.outputs.triggered == 'true' && (success() || failure())
+        if: success() || failure()
         uses: github/codeql-action/upload-sarif@v4
         with:
           category: "trivy"
