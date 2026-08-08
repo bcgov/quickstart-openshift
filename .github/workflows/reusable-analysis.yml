@@ -92,20 +92,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-      - name: Scan for secrets and misconfigurations
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          ignore-unfixed: true
-          scan-type: "fs"
-          scanners: "secret,misconfig"
-          severity: "CRITICAL,HIGH"
-          trivyignores: ".github/.trivyignore"
-          cache-dir: .trivycache
-          skip-dirs: "**/node_modules,**/coverage,**/dist,.git"
-          exit-code: "1"
-
-      - name: Run Trivy vulnerability scanner in repo mode
-        if: success() || failure()
+      - name: Run Trivy Security Scan
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           format: "sarif"
@@ -113,11 +100,11 @@ jobs:
           ignore-unfixed: true
           scan-type: "fs"
           scanners: "vuln,secret,misconfig"
-          severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+          severity: "CRITICAL,HIGH"
           trivyignores: ".github/.trivyignore"
           cache-dir: .trivycache
           skip-dirs: "**/node_modules,**/coverage,**/dist,.git"
-          exit-code: "0"
+          exit-code: "1"
 
       - name: Upload Trivy scan results to GitHub Security tab
         if: success() || failure()
