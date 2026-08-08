@@ -78,6 +78,7 @@ jobs:
     name: Trivy Security Scan
     permissions:
       contents: read
+      pull-requests: read
       security-events: write
     runs-on: ubuntu-slim
     timeout-minutes: 5
@@ -85,7 +86,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - id: diff
-        uses: bcgov/actions/diff-triggers@main
+        uses: bcgov/actions/diff-triggers@4ad61a784f1c17765b03d8d6de9737c1d3f4c0f2 # v0.5.0
         with:
           triggers: |
             backend/**
