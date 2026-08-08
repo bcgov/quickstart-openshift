@@ -112,7 +112,7 @@ jobs:
           output: "trivy-results.sarif"
           ignore-unfixed: true
           scan-type: "fs"
-          scanners: "vuln"
+          scanners: "vuln,secret,misconfig"
           severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
           trivyignores: ".github/.trivyignore"
           cache-dir: .trivycache
