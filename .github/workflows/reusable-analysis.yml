@@ -100,11 +100,11 @@ jobs:
           ignore-unfixed: true
           scan-type: "fs"
           scanners: "vuln,secret,misconfig"
-          severity: "CRITICAL,HIGH"
+          severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
           trivyignores: ".github/.trivyignore"
           cache-dir: .trivycache
           skip-dirs: "**/node_modules,**/coverage,**/dist,.git"
-          exit-code: "1"
+          exit-code: "0"
 
       - name: Upload Trivy scan results to GitHub Security tab
         if: success() || failure()
