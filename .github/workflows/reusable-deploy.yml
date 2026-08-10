@@ -21,7 +21,16 @@ on:
         default: ""
         type: string
 
-
+    secrets:
+      db_password:
+        description: Database password
+        required: true
+      oc_namespace:
+        description: OpenShift namespace
+        required: true
+      oc_token:
+        description: OpenShift token
+        required: true
     outputs:
       triggered:
         description: Has deployment been triggered?
