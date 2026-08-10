@@ -34,10 +34,7 @@ jobs:
     name: Deploys (${{ github.event.number }})
     needs: [builds]
     uses: ./.github/workflows/reusable-deploy.yml
-    secrets:
-      db_password: ${{ secrets.db_password }}
-      oc_namespace: ${{ secrets.oc_namespace }}
-      oc_token: ${{ secrets.oc_token }}
+    secrets: inherit
     with:
       target: ${{ github.event.number }}
       triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/pr-open.yml')
