@@ -33,7 +33,10 @@ jobs:
     name: TEST Deploys (${{ needs.init.outputs.pr }})
     needs: [init]
     uses: ./.github/workflows/reusable-deploy.yml
-    secrets: inherit
+    secrets:
+      db_password: ${{ secrets.db_password }}
+      oc_namespace: ${{ secrets.oc_namespace }}
+      oc_token: ${{ secrets.oc_token }}
     with:
       environment: test
       target: test
@@ -50,7 +53,10 @@ jobs:
     name: PROD Deploys (${{ needs.init.outputs.pr }})
     needs: [tests, init]
     uses: ./.github/workflows/reusable-deploy.yml
-    secrets: inherit
+    secrets:
+      db_password: ${{ secrets.db_password }}
+      oc_namespace: ${{ secrets.oc_namespace }}
+      oc_token: ${{ secrets.oc_token }}
     with:
       environment: prod
       target: prod
