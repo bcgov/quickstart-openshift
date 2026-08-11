@@ -30,6 +30,6 @@ COPY --from=build /app/dist ./dist
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3000/api
 
-# Nonroot user, limit heap size to 150 MB
+# Nonroot user; Node 24 automatically respects cgroup memory limits
 USER nonroot
-CMD ["--max-old-space-size=150", "/app/dist/main"]
+CMD ["/app/dist/main"]
