@@ -102,6 +102,8 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .trivycache
+          # Hashing the workflow file ensures the cache is automatically busted whenever
+          # Dependabot bumps the aquasecurity/trivy-action version, preventing DB schema crashes.
           key: ${{ runner.os }}-trivy-${{ hashFiles('.github/workflows/analysis.yml') }}
           restore-keys: |
             ${{ runner.os }}-trivy-
