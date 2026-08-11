@@ -44,7 +44,7 @@ jobs:
 
   pr-update:
     name: Update PR
-    if: needs.deploys.outputs.triggered == 'true' && github.event.pull_request.user.type != 'Bot'
+    if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
     permissions:
       pull-requests: write
