@@ -42,6 +42,33 @@ jobs:
       target: ${{ github.event.number }}
       triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/pr-open.yml')
 
+  pr-update:
+    name: Update PR
+    if: needs.deploys.outputs.triggered == 'true'
+    needs: [deploys]
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Add Sticky PR Comment
+        uses: marocchino/sticky-pull-request-comment@331f8f5b4215f0445d3c07b4967662a32a2d3e31 # v2.9.0
+        with:
+          header: deploy-links
+          message: |
+            ---
+
+            Thanks for the PR!
+
+            Deployments, as required, will be available below:
+            - [Frontend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca)
+            - [Backend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/api)
+
+            Please create PRs in draft mode.  Mark as ready to enable:
+            - [Analysis Workflow](https://github.com/${{ github.repository }}/actions/workflows/analysis.yml)
+
+            After merge, new images are deployed in:
+            - [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
+
   tests:
      name: Tests
      if: needs.deploys.outputs.triggered == 'true'
