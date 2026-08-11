@@ -45,11 +45,11 @@ jobs:
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     runs-on: ubuntu-24.04
-    env:
-      DB_PASSWORD: ${{ secrets.db_password }}
     steps:
       - uses: bcgov/action-deployer-openshift@27a85b7b157bfc9c3c9bf0aca53bcd288d4d2506 # v4.2.1
         id: deploy
+        env:
+          DB_PASSWORD: ${{ secrets.db_password }}
         with:
           file: common/openshift.init.yml
           oc_namespace: ${{ secrets.oc_namespace }}
