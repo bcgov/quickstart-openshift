@@ -16,6 +16,17 @@ concurrency:
 permissions: {}
 
 jobs:
+  actionlint:
+    name: Actionlint
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Lint Workflows
+        uses: bcgov/actions/actionlint@v0.5.0
+
   backend-tests:
     name: Backend Tests
     if: (! github.event.pull_request.draft)
@@ -137,7 +148,7 @@ jobs:
   # ==========================================================================
   results:
     name: Analysis Results
-    needs: [backend-tests, frontend-tests, trivy]
+    needs: [actionlint, backend-tests, frontend-tests, trivy]
     if: always() && (! github.event.pull_request.draft)
     runs-on: ubuntu-slim
     timeout-minutes: 1
