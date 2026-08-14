@@ -26,7 +26,12 @@ jobs:
       - uses: bcgov/action-builder-ghcr@cb2629351c87dd1c2130073e4ebb7233a9653a63 # v4.4.1
         with:
           package: ${{ matrix.package }}
-          tags: ${{ github.event.number }}
+          # The PR tag is mutable (reused every push) and is what merge.yml
+          # deploys/promotes; the head SHA tag is immutable and is what PR
+          # deploys use, so each push changes the pod spec and forces a rollout.
+          tags: |
+            ${{ github.event.number }}
+            ${{ github.event.pull_request.head.sha }}
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/', '.github/workflows/pr-open.yml')
 
@@ -40,6 +45,7 @@ jobs:
       oc_token: ${{ secrets.oc_token }}
     with:
       target: ${{ github.event.number }}
+      tag: ${{ github.event.pull_request.head.sha }}
       triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/pr-open.yml')
 
   tests:
