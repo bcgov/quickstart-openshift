@@ -10,9 +10,21 @@ concurrency:
 permissions: {}
 
 jobs:
+  preflight:
+    name: Preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - name: Lint Workflows
+        uses: bcgov/actions/actionlint@4ad61a784f1c17765b03d8d6de9737c1d3f4c0f2 # v0.5.0
+
   # https://github.com/bcgov/action-builder-ghcr
   builds:
     name: Builds
+    needs: [preflight]
     permissions:
       attestations: write
       id-token: write
@@ -61,7 +73,7 @@ jobs:
   # ==========================================================================
   results:
     name: PR Results
-    needs: [builds, deploys, tests]
+    needs: [preflight, builds, deploys, tests]
     if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 1
