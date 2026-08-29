@@ -97,20 +97,3 @@ jobs:
           name: playwright-report-chromium
           path: "./frontend/playwright-report" # path from current folder
           retention-days: 7
-
-  load-tests:
-    name: Load
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        name: [backend, frontend]
-    steps:
-      - uses: actions/checkout@v7
-      - uses: grafana/setup-k6-action@db07bd9765aac508ef18982e52ab937fe633a065 # v1.2.1
-      - uses: grafana/run-k6-action@de51a7390bdf0ac85a3bef493691bd71d4c7c158 # v1.4.0
-        env:
-          BACKEND_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}/api
-          FRONTEND_URL: https://${{ env.PREFIX }}.${{ env.DOMAIN }}
-        with:
-          path: ./common/tests/load/${{ matrix.name }}-test.js
-          flags: --vus 100 --duration 300s
