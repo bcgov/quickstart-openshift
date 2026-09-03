@@ -39,8 +39,10 @@ on:
 permissions: {}
 
 jobs:
-  init:
-    name: Deploy (init)
+  # Postgres only reads POSTGRES_PASSWORD on first empty PGDATA. oc apply of this
+  # Secret (overwrite: true) desyncs Flyway from the PVC and crash-loops migrations.
+  secret:
+    name: Deploy (secret)
     environment: ${{ inputs.environment }}
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
@@ -51,13 +53,34 @@ jobs:
         env:
           DB_PASSWORD: ${{ secrets.db_password }}
         with:
+          file: common/openshift.secret.yml
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          overwrite: false
+          parameters: -p DB_PASSWORD="$DB_PASSWORD"
+            -p ZONE="${{ inputs.target }}"
+            -p NAME="${{ github.event.repository.name }}"
+          triggers: ${{ inputs.triggers }}
+          debug: true
+
+  init:
+    name: Deploy (init)
+    environment: ${{ inputs.environment }}
+    needs: [secret]
+    outputs:
+      triggered: ${{ steps.deploy.outputs.triggered }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: bcgov/action-deployer-openshift@27a85b7b157bfc9c3c9bf0aca53bcd288d4d2506 # v4.2.1
+        id: deploy
+        with:
           file: common/openshift.init.yml
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
           overwrite: true
-          parameters: -p DB_PASSWORD="$DB_PASSWORD"
-            -p ZONE="${{ inputs.target }}"
+          parameters: -p ZONE="${{ inputs.target }}"
             -p NAME="${{ github.event.repository.name }}"
           triggers: ${{ inputs.triggers }}
           debug: true
