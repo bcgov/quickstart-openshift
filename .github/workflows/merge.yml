@@ -30,7 +30,7 @@ jobs:
       - id: pr
         uses: bcgov/action-get-pr@28b0adf8e4d40720d41f9c87356ce24b0a4bd6af # v0.3.1
   deploy-test:
-    name: TEST Deploys (${{ needs.init.outputs.pr || 'latest' }})
+    name: TEST Deploys (${{ needs.init.outputs.pr }})
     needs: [init]
     uses: ./.github/workflows/reusable-deploy.yml
     secrets:
@@ -40,7 +40,7 @@ jobs:
     with:
       environment: test
       target: test
-      tag: ${{ needs.init.outputs.pr || 'latest' }}
+      tag: ${{ needs.init.outputs.pr }}
       triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/merge.yml', '.github/workflows/reusable-deploy.yml')
 
   tests:
@@ -52,7 +52,7 @@ jobs:
       target: test
 
   deploy-prod:
-    name: PROD Deploys (${{ needs.init.outputs.pr || 'latest' }})
+    name: PROD Deploys (${{ needs.init.outputs.pr }})
     needs: [tests, init, deploy-test]
     if: needs.deploy-test.outputs.triggered == 'true'
     uses: ./.github/workflows/reusable-deploy.yml
@@ -63,7 +63,7 @@ jobs:
     with:
       environment: prod
       target: prod
-      tag: ${{ needs.init.outputs.pr || 'latest' }}
+      tag: ${{ needs.init.outputs.pr }}
       triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/merge.yml', '.github/workflows/reusable-deploy.yml')
 
   # Sync Sysdig email alerts for PROD. No-ops cleanly if SYSDIG_API_TOKEN is
@@ -105,5 +105,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.init.outputs.pr || 'latest' }}
+          target: ${{ needs.init.outputs.pr }}
           tags: prod
