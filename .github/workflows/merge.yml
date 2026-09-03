@@ -30,7 +30,7 @@ jobs:
       - id: pr
         uses: bcgov/action-get-pr@28b0adf8e4d40720d41f9c87356ce24b0a4bd6af # v0.3.1
   deploy-test:
-    name: TEST Deploys (${{ needs.init.outputs.pr }})
+    name: TEST Deploys (${{ needs.init.outputs.pr || 'latest' }})
     needs: [init]
     uses: ./.github/workflows/reusable-deploy.yml
     secrets:
@@ -40,18 +40,21 @@ jobs:
     with:
       environment: test
       target: test
-      tag: ${{ needs.init.outputs.pr }}
+      tag: ${{ needs.init.outputs.pr || 'latest' }}
+      triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/merge.yml', '.github/workflows/reusable-deploy.yml')
 
   tests:
     name: Tests
     needs: [deploy-test]
+    if: needs.deploy-test.outputs.triggered == 'true'
     uses: ./.github/workflows/reusable-tests.yml
     with:
       target: test
 
   deploy-prod:
-    name: PROD Deploys (${{ needs.init.outputs.pr }})
-    needs: [tests, init]
+    name: PROD Deploys (${{ needs.init.outputs.pr || 'latest' }})
+    needs: [tests, init, deploy-test]
+    if: needs.deploy-test.outputs.triggered == 'true'
     uses: ./.github/workflows/reusable-deploy.yml
     secrets:
       db_password: ${{ secrets.db_password }}
@@ -60,7 +63,8 @@ jobs:
     with:
       environment: prod
       target: prod
-      tag: ${{ needs.init.outputs.pr }}
+      tag: ${{ needs.init.outputs.pr || 'latest' }}
+      triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/merge.yml', '.github/workflows/reusable-deploy.yml')
 
   # Sync Sysdig email alerts for PROD. No-ops cleanly if SYSDIG_API_TOKEN is
   # unset or monitoring/alerts/ is empty — adoption is gradual. Alert
@@ -68,7 +72,8 @@ jobs:
   # there to customize the alert set.
   monitor-prod:
     name: Sysdig Monitor (PROD)
-    needs: [deploy-prod]
+    needs: [deploy-prod, deploy-test]
+    if: needs.deploy-test.outputs.triggered == 'true'
     runs-on: ubuntu-24.04
     environment: prod
     permissions:
@@ -86,7 +91,8 @@ jobs:
 
   promote:
     name: Promote Images
-    needs: [deploy-prod, init]
+    needs: [deploy-prod, init, deploy-test]
+    if: needs.deploy-test.outputs.triggered == 'true'
     runs-on: ubuntu-slim
     permissions:
       packages: write
@@ -99,5 +105,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.init.outputs.pr }}
+          target: ${{ needs.init.outputs.pr || 'latest' }}
           tags: prod
