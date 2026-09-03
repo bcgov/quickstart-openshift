@@ -4,7 +4,8 @@ on:
   pull_request:
 
 concurrency:
-  group: ${{ github.event.number }}
+  # Separate from pr-close.yml so closing a PR does not cancel in-flight image tags.
+  group: ${{ github.workflow }}-${{ github.event.number }}
   cancel-in-progress: true
 
 permissions: {}
@@ -15,10 +16,12 @@ jobs:
     name: Builds
     permissions:
       attestations: write
+      contents: read
       id-token: write
       packages: write
     runs-on: ubuntu-24.04
     strategy:
+      fail-fast: false
       matrix:
         package: [backend, frontend, migrations]
     timeout-minutes: 10

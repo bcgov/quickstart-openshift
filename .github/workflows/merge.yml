@@ -41,9 +41,11 @@ jobs:
       environment: test
       target: test
       tag: ${{ needs.init.outputs.pr }}
+      triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/merge.yml', '.github/workflows/reusable-deploy.yml')
 
   tests:
     name: Tests
+    if: needs.deploy-test.outputs.triggered == 'true'
     needs: [deploy-test]
     uses: ./.github/workflows/reusable-tests.yml
     with:
@@ -51,6 +53,7 @@ jobs:
 
   deploy-prod:
     name: PROD Deploys (${{ needs.init.outputs.pr }})
+    if: needs.deploy-test.outputs.triggered == 'true'
     needs: [tests, init]
     uses: ./.github/workflows/reusable-deploy.yml
     secrets:
@@ -61,6 +64,7 @@ jobs:
       environment: prod
       target: prod
       tag: ${{ needs.init.outputs.pr }}
+      triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/merge.yml', '.github/workflows/reusable-deploy.yml')
 
   # Sync Sysdig email alerts for PROD. No-ops cleanly if SYSDIG_API_TOKEN is
   # unset or monitoring/alerts/ is empty — adoption is gradual. Alert
@@ -68,7 +72,8 @@ jobs:
   # there to customize the alert set.
   monitor-prod:
     name: Sysdig Monitor (PROD)
-    needs: [deploy-prod]
+    # Alert templates can change without an app deploy; do not require deploy-prod.
+    needs: [init]
     runs-on: ubuntu-24.04
     environment: prod
     permissions:
@@ -86,9 +91,11 @@ jobs:
 
   promote:
     name: Promote Images
+    if: needs.deploy-prod.result == 'success'
     needs: [deploy-prod, init]
     runs-on: ubuntu-slim
     permissions:
+      contents: read
       packages: write
     strategy:
       matrix:

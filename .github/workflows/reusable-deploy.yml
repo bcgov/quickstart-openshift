@@ -62,37 +62,62 @@ jobs:
           triggers: ${{ inputs.triggers }}
           debug: true
 
-  deploy:
-    name: Deploy (${{ matrix.name }})
+  # Database, backend, and frontend are sequential: backend init runs Flyway
+  # against the database, and frontend init waits on backend /api/health.
+  # Parallel apply (strategy.matrix) races a StatefulSet restart with Flyway.
+  database:
+    name: Deploy (database)
     environment: ${{ inputs.environment }}
     needs: [init]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    strategy:
-      matrix:
-        name: [database, backend, frontend]
-        include:
-          - name: database
-            file: common/openshift.database.yml
-            parameters: -p DB_PVC_SIZE="256Mi"
-          - name: backend
-            file: backend/openshift.deploy.yml
-            parameters: -p IMAGE_TAG="${{ inputs.tag }}"
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            parameters: -p IMAGE_TAG="${{ inputs.tag }}"
-    outputs:
-      triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
       - uses: bcgov/action-deployer-openshift@27a85b7b157bfc9c3c9bf0aca53bcd288d4d2506 # v4.2.1
-        id: deploy
         with:
-          file: ${{ matrix.file }}
+          file: common/openshift.database.yml
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
           debug: true
           parameters: -p ZONE="${{ inputs.target }}"
             -p NAME="${{ github.event.repository.name }}"
-            ${{ matrix.parameters }}
+            -p DB_PVC_SIZE="256Mi"
+          triggers: ${{ inputs.triggers }}
+
+  backend:
+    name: Deploy (backend)
+    environment: ${{ inputs.environment }}
+    needs: [database]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: bcgov/action-deployer-openshift@27a85b7b157bfc9c3c9bf0aca53bcd288d4d2506 # v4.2.1
+        with:
+          file: backend/openshift.deploy.yml
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          debug: true
+          parameters: -p ZONE="${{ inputs.target }}"
+            -p NAME="${{ github.event.repository.name }}"
+            -p IMAGE_TAG="${{ inputs.tag }}"
+          triggers: ${{ inputs.triggers }}
+
+  frontend:
+    name: Deploy (frontend)
+    environment: ${{ inputs.environment }}
+    needs: [backend]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: bcgov/action-deployer-openshift@27a85b7b157bfc9c3c9bf0aca53bcd288d4d2506 # v4.2.1
+        with:
+          file: frontend/openshift.deploy.yml
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          debug: true
+          parameters: -p ZONE="${{ inputs.target }}"
+            -p NAME="${{ github.event.repository.name }}"
+            -p IMAGE_TAG="${{ inputs.tag }}"
           triggers: ${{ inputs.triggers }}

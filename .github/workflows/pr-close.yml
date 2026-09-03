@@ -5,17 +5,19 @@ on:
     types: [closed]
 
 concurrency:
-  # PR open and close use the same group, allowing only one at a time
-  group: ${{ github.event.number }}
+  # Separate from pr-open.yml so close does not cancel PR image builds/retags.
+  group: ${{ github.workflow }}-${{ github.event.number }}
   cancel-in-progress: true
 
-permissions: {}
+permissions:
+  packages: write
 
 jobs:
   cleanup:
     name: Cleanup and Image Promotion
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-close.yml@a11ad3d1b9288fb40757c4314a62eb86ff227931 # v1.2.1
     permissions:
+      contents: read
       packages: write
     secrets:
       oc_namespace: ${{ secrets.oc_namespace }}
