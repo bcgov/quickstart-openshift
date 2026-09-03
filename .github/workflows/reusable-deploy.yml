@@ -55,7 +55,10 @@ jobs:
           oc_namespace: ${{ secrets.oc_namespace }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
-          overwrite: true
+          # Secret + NetworkPolicies: create if missing. Postgres ignores
+          # POSTGRES_PASSWORD after first boot; restamping the Secret desyncs Flyway.
+          # New NetworkPolicy names still apply; existing NP specs do not update.
+          overwrite: false
           parameters: -p DB_PASSWORD="$DB_PASSWORD"
             -p ZONE="${{ inputs.target }}"
             -p NAME="${{ github.event.repository.name }}"
