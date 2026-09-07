@@ -44,7 +44,7 @@ jobs:
             npm run format:check
             npm run test:cov
           dir: backend
-          node_version: "22"
+          node_version: "24"
           sonar_args: >
             -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
             -Dsonar.organization=bcgov-sonarcloud
@@ -73,7 +73,7 @@ jobs:
             npm run format:check
             npm run test:cov
           dir: frontend
-          node_version: "22"
+          node_version: "24"
           sonar_args: >
             -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts,**/*test.tsx,**/routeTree.gen.ts
             -Dsonar.organization=bcgov-sonarcloud
