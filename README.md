@@ -109,6 +109,10 @@ Here is the arrangement of secrets, variables and environments for this reposito
 | prod        | `secrets.oc_namespace` | PROD namespace (environment-level)              |
 | prod        | `secrets.oc_token`     | PROD service token (environment-level)          |
 | prod        | `secrets.db_password`  | PROD database password (environment-level)       |
+| prod (opt)  | `vars.ROUTE_HOST`      | Vanity URL hostname (repository or environment) |
+| prod (opt)  | `secrets.TLS_CERTIFICATE` | Leaf certificate PEM for vanity URL          |
+| prod (opt)  | `secrets.TLS_PRIVATE_KEY` | Private key PEM for vanity URL               |
+| prod (opt)  | `secrets.TLS_CA_CERTIFICATE` | Issuing CA PEM for vanity URL            |
 
 ### Secret Values
 
@@ -180,6 +184,12 @@ Sysdig API token used to sync the PROD email-alert set on every merge. Sourced f
 * Reference: `${{ secrets.SYSDIG_API_TOKEN }}`
 * Alert templates live in [`monitoring/alerts/`](./monitoring/alerts/). Add or remove files to customize the alert set per app — see [`bcgov/action-sysdig-monitor`](https://github.com/bcgov/action-sysdig-monitor) for the template schema and placeholder vocabulary.
 
+**`TLS_CERTIFICATE`, `TLS_PRIVATE_KEY`, `TLS_CA_CERTIFICATE`**
+
+PEM-formatted certificates and private key for custom vanity URL TLS on the PROD frontend OpenShift Route. Optional — required only when `vars.ROUTE_HOST` is configured. If `vars.ROUTE_HOST` is unset, the `route-tls` step is safely skipped.
+* References: `${{ secrets.TLS_CERTIFICATE }}`, `${{ secrets.TLS_PRIVATE_KEY }}`, `${{ secrets.TLS_CA_CERTIFICATE }}`
+* Validated and applied via [`bcgov/actions-openshift/route-tls`](https://github.com/bcgov/actions-openshift/tree/main/route-tls), which checks key matching, CA chain, expiration, and archives previous certificates to an OpenShift secret.
+
 ### Variable Values
 
 >  Click Settings > Secrets and Variables > Actions > Variables > New repository variable
@@ -190,6 +200,11 @@ OpenShift server address (API endpoint for your OpenShift cluster).
 * Reference: `${{ vars.oc_server }}`
 * BCGov: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 * Others: Use your cluster's API server address (e.g. `https://api.<cluster-domain>:6443`)
+
+**`ROUTE_HOST`**
+
+Vanity URL hostname for the application (e.g., `myapp.gov.bc.ca` — hostname only, no scheme). Optional — can be set as a repository variable or environment variable on `prod`. When set, `merge.yml` configures an OpenShift Route with custom TLS for the frontend service.
+* Reference: `${{ vars.ROUTE_HOST }}`
 
 ## Updating Dependencies
 
