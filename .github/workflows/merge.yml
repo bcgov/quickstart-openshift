@@ -21,20 +21,14 @@ jobs:
     name: Initialize
     permissions:
       contents: read
-      packages: read
       pull-requests: read
     outputs:
-      pr: ${{ steps.tracker.outputs.pr }}
+      pr: ${{ steps.pr.outputs.pr }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-
-      # Resolve PR number and images for squash merges to main
-      - name: Resolve Images & PR
-        id: tracker
-        uses: bcgov/actions/image-tracker@v0.6.0
-        with:
-          package: backend, frontend, migrations
+      # Get PR number for squash merges to main
+      - id: pr
+        uses: bcgov/action-get-pr@28b0adf8e4d40720d41f9c87356ce24b0a4bd6af # v0.3.1
   deploy-test:
     name: TEST Deploys (${{ needs.init.outputs.pr }})
     needs: [init]
