@@ -341,7 +341,7 @@ This is required to prevent direct pushes and merges to the default branch.  The
                 * This is our default set, yours may differ:
                     * `Analysis Results`
                     * `PR Results`
-                    * `Validate PR`
+                    * `Validate Results`
     * `[x] Block force pushes`
     * `[x] Require code scanning results`
         * Click `+ Add tool`
