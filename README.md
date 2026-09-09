@@ -517,7 +517,6 @@ Runs on pull request submission or merge to the default branch.
 Runs on pull request close or merge.
 
 * Cleans up OpenShift objects/artifacts
-* Cleans up deployment links sticky comment
 * Merge retags successful build images as `latest`
 
 ![](.github/graphics/pr-close.png)
