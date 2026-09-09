@@ -488,6 +488,7 @@ Runs on pull request submission.
 * Deploy only when changes are made
 * Deployment includes curl checks and optional penetration tests
 * Run tests (e2e, load, integration) when changes are made
+* Posts sticky comment with deployment links when deployments occur
 * Other checks and updates as required
 
 ![](.github/graphics/pr-open.png)
@@ -497,7 +498,6 @@ Runs on pull request submission.
 Runs on pull request submission.
 
 * Enforces conventional commits in PR title
-* Adds greetings/directions to PR descriptions
 
 ![](.github/graphics/pr-validate.png)
 

@@ -12,20 +12,13 @@ permissions: {}
 
 jobs:
   validate:
-    name: Validate PR
-    if: (! github.event.pull_request.draft)
-    permissions:
-      pull-requests: write
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@a11ad3d1b9288fb40757c4314a62eb86ff227931 # v1.2.1
-    with:
-      markdown_links: |
-        - [Frontend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca)
-        - [Backend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/api)
-
-  results:
     name: Validate Results
-    if: always()
-    needs: [validate]
-    runs-on: ubuntu-slim
+    if: (! github.event.pull_request.draft)
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
-      - run: echo "Success!"
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

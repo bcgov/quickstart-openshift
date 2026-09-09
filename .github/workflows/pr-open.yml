@@ -49,10 +49,27 @@ jobs:
       triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/pr-open.yml')
 
   tests:
-     name: Tests
-     if: needs.deploys.outputs.triggered == 'true'
-     needs: [deploys]
-     uses: ./.github/workflows/reusable-tests.yml
+    name: Tests
+    if: needs.deploys.outputs.triggered == 'true'
+    needs: [deploys]
+    uses: ./.github/workflows/reusable-tests.yml
+
+  comment:
+    name: Deployment Links
+    needs: [deploys]
+    if: needs.deploys.outputs.triggered == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Post Deploy Links
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: pr-deployment-links
+          message: |
+            ### 🚀 Deployments Available
+            - [Frontend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca)
+            - [Backend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/api)
 
   # ==========================================================================
   # WARNING: This job acts as the required merge gate for this workflow.
@@ -61,7 +78,7 @@ jobs:
   # ==========================================================================
   results:
     name: PR Results
-    needs: [builds, deploys, tests]
+    needs: [builds, deploys, tests, comment]
     if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 1
