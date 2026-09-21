@@ -102,7 +102,7 @@ jobs:
       - uses: actions/checkout@v7
       # 0.0.3 is the first version with __APP__ template substitution, which
       # monitoring/alerts/*.json depend on — don't downgrade this pin.
-      - uses: bcgov/actions/sysdig-monitor@4ad61a784f1c17765b03d8d6de9737c1d3f4c0f2 # v0.5.0
+      - uses: bcgov/actions/sysdig-monitor@ac9d89eede94f5f58d3446784c94cff634d98eac # v0.6.0
         with:
           sysdig_api_token: ${{ secrets.SYSDIG_API_TOKEN }}
           oc_namespace: ${{ secrets.oc_namespace }}
