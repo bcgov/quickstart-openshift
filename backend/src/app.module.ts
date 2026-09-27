@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import type { MiddlewareConsumer } from '@nestjs/common'
 import { Module, RequestMethod } from '@nestjs/common'
 import { HTTPLoggerMiddleware } from './middleware/req.res.logger'
