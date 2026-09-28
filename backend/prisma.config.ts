@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { defineConfig } from 'prisma/config'
 
 const DB_HOST = process.env.POSTGRES_HOST || 'localhost'
