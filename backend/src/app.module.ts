@@ -11,7 +11,7 @@ import { TerminusModule } from '@nestjs/terminus'
 import { HealthController } from './health.controller'
 
 @Module({
-  imports: [ConfigModule.forRoot(), TerminusModule, UsersModule],
+  imports: [ConfigModule.forRoot({ ignoreEnvFile: true }), TerminusModule, UsersModule],
   controllers: [AppController, MetricsController, HealthController],
   providers: [AppService, PrismaService],
 })
