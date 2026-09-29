@@ -74,7 +74,7 @@ jobs:
       contents: read
     timeout-minutes: 10
     steps:
-      - uses: bcgov/actions-openshift/route-tls@9d7230d1b1533eb02e98b9bd23fe89825d5c8b41
+      - uses: bcgov/actions-openshift/route-tls@ea9651011c0bf9d15aad22cf5aa2fae93c096edf # v0.3.2
         if: ${{ vars.ROUTE_HOST != '' }}
         with:
           hostname: ${{ vars.ROUTE_HOST }}
