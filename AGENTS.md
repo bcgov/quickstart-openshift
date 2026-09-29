@@ -10,7 +10,7 @@ Repository facts for automated coding assistants. Teams may edit or remove this 
 ## Build, test, run
 - Full stack locally: `docker compose up` (optional profiles: `schemaspy`, `caddy`)
 - Backend (`cd backend`): `npm ci`, `npm run build`, `npm run lint`, `npm test`, `npm run test:cov`
-- Frontend (`cd frontend`): `npm ci`, `npm run build`, `npm run lint`, `npm run test:unit`; e2e: `npx playwright test`
+- Frontend (`cd frontend`): `npm ci`, `npm run build`, `npm run lint`, `npm run test:unit`; e2e: `npx playwright install --with-deps chromium`, then `npx playwright test --project="chromium"`
 - Deploys to OpenShift run from GitHub Actions (PR open, merge), not from a workstation
 
 ## Shared actions
