@@ -15,7 +15,7 @@ Repository facts for automated coding assistants. Teams may edit or remove this 
 
 ## Shared actions
 - Uses bcgov shared actions and workflows (`bcgov/action-*`, `bcgov/actions/*`, `bcgov/actions-openshift/*`, `bcgov/quickstart-openshift-helpers`). Use them as provided; don't copy or fork them.
-- Never pin `@main`. Pin third-party and bcgov actions to a published release SHA with a `# vX.Y.Z` comment.
+- Never pin `@main`. Pin bcgov shared actions to a published release SHA with a `# vX.Y.Z` comment.
 
 ## Settings
 - Automated agents must not change repository or organization settings. Settings changes are made by a person on the team (team-run setup scripts: see #2858).
