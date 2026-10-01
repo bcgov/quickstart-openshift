@@ -13,6 +13,11 @@ describe('Dashboard', () => {
     expect(screen.getByText(/Employee ID/i)).toBeInTheDocument()
   })
 
+  test('names the actions column', () => {
+    render(<Dashboard />)
+    expect(screen.getByRole('columnheader', { name: /actions/i })).toBeInTheDocument()
+  })
+
   test('opens and closes the row details modal', async () => {
     const user = userEvent.setup()
     render(<Dashboard />)
