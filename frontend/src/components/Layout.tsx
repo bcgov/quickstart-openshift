@@ -11,7 +11,7 @@ const Layout: FC<Props> = ({ children }) => {
     <div className="d-flex flex-column min-vh-100">
       <Header title="QuickStart OpenShift" titleElement="h1">
         {' '}
-        <Link aria-label="Home" className="btn btn-light btn-lg" to="/">
+        <Link aria-label="Dashboard" className="btn btn-light btn-lg" to="/">
           <i aria-hidden="true" className="bi bi-house-door-fill" />
         </Link>
       </Header>

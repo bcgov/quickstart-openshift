@@ -33,8 +33,8 @@ describe('Layout', () => {
     ).toBeInTheDocument()
 
     const header = screen.getByRole('banner')
-    expect(within(header).getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/')
-    expect(within(header).queryByRole('button', { name: 'Home' })).not.toBeInTheDocument()
+    expect(within(header).getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/')
+    expect(within(header).queryByRole('button')).not.toBeInTheDocument()
     expect(
       within(header).getByRole('link', { name: 'Government of British Columbia' }),
     ).toBeInTheDocument()
