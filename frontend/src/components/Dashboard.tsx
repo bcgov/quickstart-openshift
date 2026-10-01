@@ -68,7 +68,9 @@ const Dashboard: FC = () => {
             <th>Employee ID</th>
             <th>Employee Name</th>
             <th>Employee Email</th>
-            <th />
+            <th>
+              <span className="visually-hidden">Actions</span>
+            </th>
           </tr>
         </thead>
         <tbody>
