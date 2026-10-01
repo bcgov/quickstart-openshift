@@ -1,7 +1,6 @@
 import type { FC } from 'react'
 import { Footer, Header } from '@bcgov/design-system-react-components'
 import { Link } from '@tanstack/react-router'
-import { Button } from 'react-bootstrap'
 
 type Props = {
   children: React.ReactNode
@@ -12,10 +11,8 @@ const Layout: FC<Props> = ({ children }) => {
     <div className="d-flex flex-column min-vh-100">
       <Header title="QuickStart OpenShift" titleElement="h1">
         {' '}
-        <Link aria-label="Home" to="/">
-          <Button aria-label="Home" size="lg" variant="light">
-            <i aria-hidden="true" className="bi bi-house-door-fill" />
-          </Button>
+        <Link aria-label="Home" className="btn btn-light btn-lg" to="/">
+          <i aria-hidden="true" className="bi bi-house-door-fill" />
         </Link>
       </Header>
       <main
