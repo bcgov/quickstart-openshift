@@ -56,6 +56,10 @@ if [[ "$cmd" == "api" ]]; then
 fi
 if [[ "$cmd" == "secret" && "$sub" == "list" ]]; then
   where=$(env_from_args "$@")
+  if [[ -n "$where" && ! -f "$BOOTSTRAP_FAKE_STATE/env-$where" ]]; then
+    printf '%s\n' "gh: Not Found (HTTP 404)" >&2
+    exit 1
+  fi
   [[ -n "$where" ]] || where=repository
   if [[ -f "$BOOTSTRAP_FAKE_STATE/secrets-$where" ]]; then
     cat "$BOOTSTRAP_FAKE_STATE/secrets-$where"
@@ -65,6 +69,10 @@ fi
 if [[ "$cmd" == "secret" && "$sub" == "set" ]]; then
   name=$3
   where=$(env_from_args "$@")
+  if [[ -n "$where" && ! -f "$BOOTSTRAP_FAKE_STATE/env-$where" ]]; then
+    printf '%s\n' "gh: Not Found (HTTP 404)" >&2
+    exit 1
+  fi
   [[ -n "$where" ]] || where=repository
   bytes=$(wc -c | awk '{print $1}')
   printf '%s\n' "stdin_bytes=${bytes} secret=${where}/${name}" >>"$BOOTSTRAP_FAKE_LOG"

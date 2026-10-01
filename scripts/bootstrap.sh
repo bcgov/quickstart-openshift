@@ -115,6 +115,11 @@ say() {
 list_secrets() {
   local env_name=${1:-}
   if [[ -n "$env_name" ]]; then
+    # A missing environment has no secrets. Listing them 404s, which would
+    # abort a dry run before the environment is created.
+    if ! environment_exists "$env_name"; then
+      return 0
+    fi
     gh secret list --repo "$REPO" --env "$env_name" --app actions --json name --jq '.[].name'
     return
   fi
