@@ -43,10 +43,10 @@
 		Strict-Transport-Security "max-age=31536000"
 		Content-Security-Policy "default-src 'self' https://*.gov.bc.ca;
 			script-src 'self' https://*.gov.bc.ca;
-			style-src 'self' https://fonts.googleapis.com https://use.fontawesome.com 'unsafe-inline'; 
-			font-src 'self' https://fonts.gstatic.com; 
+			style-src 'self' https://fonts.googleapis.com https://use.fontawesome.com 'unsafe-inline';
+			font-src 'self' https://fonts.gstatic.com;
 			img-src 'self' data: https://fonts.googleapis.com https://www.w3.org https://*.gov.bc.ca https://*.tile.openstreetmap.org;
-			frame-ancestors 'self'; 
+			frame-ancestors 'self';
 			form-action 'self';
 			block-all-mixed-content;
 			connect-src 'self' https://*.gov.bc.ca wss://*.gov.bc.ca;"
@@ -54,6 +54,9 @@
 		Permissions-Policy "fullscreen=(self), camera=(), microphone=()"
 		Cross-Origin-Resource-Policy "same-origin"
 		Cross-Origin-Opener-Policy "same-origin"
+		# credentialless clears ZAP 90004. require-corp would block no-cors
+		# cross-origin assets still allowed by the CSP (fonts, map tiles).
+		Cross-Origin-Embedder-Policy "credentialless"
 	}
 }
 :3001 {

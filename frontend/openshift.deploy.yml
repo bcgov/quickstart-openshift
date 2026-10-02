@@ -190,6 +190,9 @@ objects:
   - apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
+      annotations:
+        # Router sticky cookie defaults to SameSite=None (ZAP 10054).
+        router.openshift.io/cookie-same-site: Lax
       labels:
         app: ${NAME}-${ZONE}
       name: ${NAME}-${ZONE}-${COMPONENT}
