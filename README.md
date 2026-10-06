@@ -189,6 +189,18 @@ Sysdig API token used to sync the PROD email-alert set on every merge. Sourced f
 PEM-formatted certificates and private key for custom vanity URL TLS on the PROD frontend OpenShift Route. Optional — required only when `vars.ROUTE_HOST` is configured. If `vars.ROUTE_HOST` is unset, the `route-tls` step is safely skipped.
 * References: `${{ secrets.TLS_CERTIFICATE }}`, `${{ secrets.TLS_PRIVATE_KEY }}`, `${{ secrets.TLS_CA_CERTIFICATE }}`
 * Validated and applied via [`bcgov/actions-openshift/route-tls`](https://github.com/bcgov/actions-openshift/tree/main/route-tls), which checks key matching, CA chain, expiration, and archives previous certificates to an OpenShift secret.
+* Store these as `prod` environment secrets (not repository secrets) so pull requests cannot read them.
+* Do not pass PEMs or private keys as `workflow_dispatch` inputs—dispatch inputs are recorded in plaintext in workflow run logs. Rotation is handled by updating the `prod` secrets (the next merge or re-running only the `route-tls` job will re-read and apply the updated certificates).
+
+When receiving a certificate package from Entrust, map the files to GitHub secrets as follows:
+
+| Secret | File in package | Notes |
+| --- | --- | --- |
+| `TLS_CERTIFICATE` | `<host>.pem` | Leaf certificate only (CN/SAN matches hostname). |
+| `TLS_PRIVATE_KEY` | `<host>.key` | Unencrypted private key (`BEGIN PRIVATE KEY`). Never commit this. |
+| `TLS_CA_CERTIFICATE` | `Entrust OV TLS Issuing RSA CA 2.pem` | Issuing intermediate CA only (one PEM). |
+
+Leave out root certificates (e.g. `Sectigo Public Server Authentication Root R46.pem` or `USERTrust RSA Certification Authority.pem`) because clients already have them in their trust stores. Omit `<host>.csr` (the signing request is finished).
 
 ### Variable Values
 
