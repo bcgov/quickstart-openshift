@@ -91,8 +91,18 @@ Environments provide a [number of features](https://docs.github.com/en/actions/d
 
 * Required reviewers
 * Wait timer
-* Deployment branches (e.g. limit `prod` access to `main` so feature-branch PRs cannot request production secrets)
+* Deployment branches and tags
 * Limit TEST/PROD values to post-merge workflows
+
+#### Deployment Branches and Tags
+
+By default, an environment allows deployments from any branch or tag ("No restriction"). To ensure pull requests and untrusted branches cannot access production secrets without adding human approval gates, configure deployment restrictions:
+
+1. Select `Settings > Environments > prod`
+2. Under **Deployment branches and tags**, change the dropdown to **Selected branches and tags**
+3. Click **Add deployment branch or tag rule**:
+    * To gate by branch: select **Branch** and enter `main` (or your protected release branch).
+    * To gate by release tag: select **Tag** and enter a pattern like `v*.*.*` or `v*` so only release tags can trigger deployment.
 
 ### Example
 
@@ -190,7 +200,7 @@ Sysdig API token used to sync the PROD email-alert set on every merge. Sourced f
 PEM-formatted certificates and private key for custom vanity URL TLS on the PROD frontend OpenShift Route. Optional — required only when `vars.ROUTE_HOST` is configured. If `vars.ROUTE_HOST` is unset, the `route-tls` step is safely skipped.
 * References: `${{ secrets.TLS_CERTIFICATE }}`, `${{ secrets.TLS_PRIVATE_KEY }}`, `${{ secrets.TLS_CA_CERTIFICATE }}`
 * Validated and applied via [`bcgov/actions-openshift/route-tls`](https://github.com/bcgov/actions-openshift/tree/main/route-tls), which checks key matching, CA chain, expiration, and archives previous certificates to an OpenShift secret.
-* Store these as `prod` environment secrets (not repository secrets), and configure the `prod` environment's deployment branches to allow only `main`; environment scoping alone does not prevent a pull-request job from requesting these secrets.
+* Store these as `prod` environment secrets (not repository secrets), and configure the `prod` environment's deployment branches and tags to restrict access (e.g. to `main` or release tags); environment scoping alone does not prevent a pull-request job from requesting these secrets.
 * Do not pass PEMs or private keys as `workflow_dispatch` inputs—dispatch inputs are recorded in plaintext in workflow run logs. Rotation is handled by updating the `prod` secrets (the next merge or re-running only the `route-tls` job will re-read and apply the updated certificates).
 
 When receiving a certificate package from Entrust, map the files to GitHub secrets as follows:
@@ -386,28 +396,6 @@ Note: Required status checks will only be available to select after the relevant
 #### Required tools and alerts example
 ![](./.github/graphics/branch-code-results.png)
 
-### Tag Protection Rules
-
-If your team tags releases (e.g., `v*.*.*` or `v*`), by default any contributor with repository `Write` access can push tags or publish releases. To ensure only administrators can create or modify release tags, configure a Tag Ruleset:
-
-1. Select `Settings` (gear, top right) > `Rules` > `Rulesets` (under Code and Automation)
-2. Click `New ruleset` > `New tag ruleset`
-3. Setup Ruleset:
-    * Ruleset Name: `release-tags`
-    * Enforcement status: `Active`
-    * Bypass list:
-        * Click `+ Add bypass`
-        * Select `Repository admin` (only users in the bypass list can create/modify matching tags)
-        * Click `Add selected`
-    * Target tags:
-        * Click `Add target` > `Include by pattern`
-        * Enter `v*.*.*` (or `v*`)
-    * Tag protections:
-        * `[x] Restrict creations` (only users on the bypass list can create matching tags)
-        * `[x] Restrict updates` (prevents moving or replacing existing tags)
-        * `[x] Restrict deletions` (prevents deleting tags)
-        * `[x] Block force pushes`
-    * Click `Create`
 
 ### Adding Team Members
 
