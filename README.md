@@ -197,11 +197,11 @@ Sysdig API token used to sync the PROD email-alert set on every merge. Sourced f
 
 **`TLS_CERTIFICATE`, `TLS_PRIVATE_KEY`, `TLS_CA_CERTIFICATE`**
 
-PEM-formatted certificates and private key for custom vanity URL TLS on the PROD frontend OpenShift Route. Optional — required only when `vars.ROUTE_HOST` is configured. If `vars.ROUTE_HOST` is unset, the `route-tls` step is safely skipped.
+PEM-formatted certificates and private key for custom vanity URL TLS on the PROD frontend OpenShift Route. Optional — required only when `vars.ROUTE_HOST` is configured.
 * References: `${{ secrets.TLS_CERTIFICATE }}`, `${{ secrets.TLS_PRIVATE_KEY }}`, `${{ secrets.TLS_CA_CERTIFICATE }}`
-* Validated and applied via [`bcgov/actions-openshift/route-tls`](https://github.com/bcgov/actions-openshift/tree/main/route-tls), which checks key matching, CA chain, expiration, and archives previous certificates to an OpenShift secret.
+* Validated and applied on-demand via the standalone [`.github/workflows/route-tls.yml`](./.github/workflows/route-tls.yml) workflow using [`bcgov/actions-openshift/route-tls`](https://github.com/bcgov/actions-openshift/tree/main/route-tls), which checks key matching, CA chain, expiration, and archives previous certificates to an OpenShift secret.
 * Store these as `prod` environment secrets (not repository secrets), and configure the `prod` environment's deployment branches and tags to restrict access (e.g. to `main` or release tags); environment scoping alone does not prevent a pull-request job from requesting these secrets.
-* Do not pass PEMs or private keys as `workflow_dispatch` inputs—dispatch inputs are recorded in plaintext in workflow run logs. Rotation is handled by updating the `prod` secrets (the next merge or re-running only the `route-tls` job will re-read and apply the updated certificates).
+* Do not pass PEMs or private keys as `workflow_dispatch` inputs—dispatch inputs are recorded in plaintext in workflow run logs. Rotation is handled by updating the `prod` secrets and triggering the `Route TLS` workflow with `dry_run=true` to validate, then `dry_run=false` to apply.
 
 When receiving a certificate package from Entrust, map the files to GitHub secrets as follows:
 
@@ -212,6 +212,14 @@ When receiving a certificate package from Entrust, map the files to GitHub secre
 | `TLS_CA_CERTIFICATE` | `Entrust OV TLS Issuing RSA CA 2.pem` | Issuing intermediate CA only (one PEM). |
 
 Leave out root certificates (e.g. `Sectigo Public Server Authentication Root R46.pem` or `USERTrust RSA Certification Authority.pem`) because clients already have them in their trust stores. Omit `<host>.csr` (the signing request is finished).
+
+Upload these secrets to the `prod` environment via GitHub CLI:
+
+```bash
+gh secret set TLS_CERTIFICATE --env prod < <host>.pem
+gh secret set TLS_PRIVATE_KEY --env prod < <host>.key
+gh secret set TLS_CA_CERTIFICATE --env prod < 'Entrust OV TLS Issuing RSA CA 2.pem'
+```
 
 ### Variable Values
 
@@ -226,7 +234,7 @@ OpenShift server address (API endpoint for your OpenShift cluster).
 
 **`ROUTE_HOST`**
 
-Vanity URL hostname for the application (e.g., `myapp.gov.bc.ca` — hostname only, no scheme). Optional — can be set as a repository variable or environment variable on `prod`. When set, `merge.yml` configures an OpenShift Route with custom TLS for the frontend service.
+Vanity URL hostname for the application (e.g., `myapp.gov.bc.ca` — hostname only, no scheme). Optional — can be set as a repository variable or environment variable on `prod`. When set, the standalone `Route TLS` workflow (`.github/workflows/route-tls.yml`) configures an OpenShift Route with custom TLS for the frontend service.
 * Reference: `${{ vars.ROUTE_HOST }}`
 
 ## Updating Dependencies
