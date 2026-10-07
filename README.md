@@ -216,8 +216,9 @@ Leave out root certificates (e.g. `Sectigo Public Server Authentication Root R46
 Upload these secrets to the `prod` environment via GitHub CLI:
 
 ```bash
-gh secret set TLS_CERTIFICATE --env prod < <host>.pem
-gh secret set TLS_PRIVATE_KEY --env prod < <host>.key
+CERT_HOST='myapp.gov.bc.ca' # Replace with the certificate filename prefix
+gh secret set TLS_CERTIFICATE --env prod < "${CERT_HOST}.pem"
+gh secret set TLS_PRIVATE_KEY --env prod < "${CERT_HOST}.key"
 gh secret set TLS_CA_CERTIFICATE --env prod < 'Entrust OV TLS Issuing RSA CA 2.pem'
 ```
 
