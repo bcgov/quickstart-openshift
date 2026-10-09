@@ -111,15 +111,15 @@ Here is the arrangement of secrets, variables and environments for this reposito
 | Environment | Name                   | Description                                     |
 |-------------|------------------------|-------------------------------------------------|
 | none        | `vars.oc_server`       | Common server address (repository-level)        |
-| none        | `secrets.oc_namespace` | PR namespace (repository-level)                 |
-| none        | `secrets.oc_token`     | PR service token (repository-level)             |
-| none        | `secrets.db_password`  | PR database password (repository-level)         |
-| test        | `secrets.oc_namespace` | TEST namespace (environment-level)              |
-| test        | `secrets.oc_token`     | TEST service token (environment-level)          |
-| test        | `secrets.db_password`  | TEST database password (environment-level)       |
-| prod        | `secrets.oc_namespace` | PROD namespace (environment-level)              |
-| prod        | `secrets.oc_token`     | PROD service token (environment-level)          |
-| prod        | `secrets.db_password`  | PROD database password (environment-level)       |
+| none        | `secrets.OC_NAMESPACE` | PR namespace (repository-level)                 |
+| none        | `secrets.OC_TOKEN`     | PR service token (repository-level)             |
+| none        | `secrets.DB_PASSWORD`  | PR database password (repository-level)         |
+| test        | `secrets.OC_NAMESPACE` | TEST namespace (environment-level)              |
+| test        | `secrets.OC_TOKEN`     | TEST service token (environment-level)          |
+| test        | `secrets.DB_PASSWORD`  | TEST database password (environment-level)       |
+| prod        | `secrets.OC_NAMESPACE` | PROD namespace (environment-level)              |
+| prod        | `secrets.OC_TOKEN`     | PROD service token (environment-level)          |
+| prod        | `secrets.DB_PASSWORD`  | PROD database password (environment-level)       |
 | prod (opt)  | `vars.ROUTE_HOST`      | Vanity URL hostname (repository or environment) |
 | prod (opt)  | `secrets.TLS_CERTIFICATE` | Leaf certificate PEM for vanity URL          |
 | prod (opt)  | `secrets.TLS_PRIVATE_KEY` | Private key PEM for vanity URL               |
@@ -127,7 +127,7 @@ Here is the arrangement of secrets, variables and environments for this reposito
 
 ### Secret Values
 
-**`oc_token`** 
+**`OC_TOKEN`** 
 
 Create separate tokens for each of the DEV, TEST and PROD namespaces.  
 
@@ -162,13 +162,13 @@ Create separate tokens for each of the DEV, TEST and PROD namespaces.
 
 * Alternate steps using an inline template can be found [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
 * In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
-* Reference: `${{ secrets.oc_token }}`
+* Reference: `${{ secrets.OC_TOKEN }}`
 
-**`oc_namespace`** 
+**`OC_NAMESPACE`** 
 
 Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and PROD.  TOOLS namespaces (e.g. Jenkins, shared Oracle resources) are not used here.  Provided by your OpenShift platform team.
 
-* Reference: `${{ secrets.oc_namespace }}`
+* Reference: `${{ secrets.OC_NAMESPACE }}`
 * E.g.: `abc123-dev`
 
 **`SONAR_TOKEN_BACKEND`, `SONAR_TOKEN_FRONTEND`** (optional)
@@ -177,11 +177,11 @@ SonarCloud analysis requires two distinct tokens—one per monorepo component. A
 
 * References: `${{ secrets.SONAR_TOKEN_BACKEND }}`, `${{ secrets.SONAR_TOKEN_FRONTEND }}`
 
-**db_password**
+**`DB_PASSWORD`**
 
 The password used for the PostgreSQL database. This **MUST** be a strong, unique password and **DISTINCT** across all environments (pr, test, prod). Reusing the same password in development/PRs as in production is a critical security risk.
 
-* Reference: `${{ secrets.db_password }}`
+* Reference: `${{ secrets.DB_PASSWORD }}`
 * Minimum 12 characters recommended for production.
 * **Pro-tip**: Use a password manager (like BitWarden, 1Password, or KeePass) to generate and store long, random, and unique passwords for each environment. Avoid simple, guessable passwords like `password` or `secure`.
 
