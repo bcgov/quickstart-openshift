@@ -178,7 +178,23 @@ If SonarCloud is being used each application will have its own token.  Single-ap
 * Reference (standalone): `${{ secrets.SONAR_TOKEN }}`
 * Reference (monorepo): `${{ secrets.SONAR_TOKEN_BACKEND }}`, `${{ secrets.SONAR_TOKEN_FRONTEND }}`, etc
 
-BC Government employees can request SonarCloud projects by creating an [issue](https://github.com/bcgov/devops-requests/issues/new/choose) with the platform team.  Please make sure to request a monorepo with component names (e.g. backend, frontend), which may not be explained in their directions.
+BC Government employees can request SonarCloud projects via [devops-requests](https://github.com/bcgov/devops-requests/issues/new/choose) (select **Request for import GitHub repository on SonarCloud**) or directly through the [CITZ Service Desk](https://citz-do.atlassian.net/servicedesk/customer/portal/2/group/9/create/594).
+
+Before submitting the request, ensure the designated project administrator has logged in to the [SonarCloud console under bcgov-sonarcloud](https://sonarcloud.io/organizations/bcgov-sonarcloud/projects) using their GitHub account.
+
+Fill out the intake form using the following selections:
+
+| Field | Selection | Notes |
+| --- | --- | --- |
+| **GitHub username** | `<admin-username>` | Must be the user who logged into SonarCloud above; will be assigned project administrator. |
+| **GitHub Repo URL** | `https://github.com/bcgov/<repo>` | Full repository URL. |
+| **New Code Definition** | **Previous version** | Quality gates evaluate changes relative to previous releases rather than a rolling day count. |
+| **Setup as a monorepo** | **Yes** | Quickstart repositories contain both `backend` and `frontend`. |
+| **Additional Comments** | `backend, frontend` | Explicitly list component names so separate SonarCloud sub-projects are created. |
+
+Once the platform team provisions the projects:
+1. Generate analysis tokens in SonarCloud for each component and save them as repository secrets: `SONAR_TOKEN_BACKEND` and `SONAR_TOKEN_FRONTEND`.
+2. Update `-Dsonar.projectKey` in [`.github/workflows/analysis.yml`](./.github/workflows/analysis.yml) for both jobs to match your repository (e.g. `<repo>_backend` and `<repo>_frontend` instead of `quickstart-openshift_*`).
 
 **db_password**
 
