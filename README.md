@@ -110,7 +110,7 @@ Here is the arrangement of secrets, variables and environments for this reposito
 
 | Environment | Name                   | Description                                     |
 |-------------|------------------------|-------------------------------------------------|
-| none        | `vars.oc_server`       | Common server address (repository-level)        |
+| none        | `vars.OC_SERVER`       | Common server address (repository-level)        |
 | none        | `secrets.OC_NAMESPACE` | PR namespace (repository-level)                 |
 | none        | `secrets.OC_TOKEN`     | PR service token (repository-level)             |
 | none        | `secrets.DB_PASSWORD`  | PR database password (repository-level)         |
@@ -223,10 +223,10 @@ gh secret set TLS_CA_CERTIFICATE --env prod < 'Entrust OV TLS Issuing RSA CA 2.p
 
 >  Click Settings > Secrets and Variables > Actions > Variables > New repository variable
 
-**`oc_server`** 
+**`OC_SERVER`** 
 
 OpenShift server address (API endpoint for your OpenShift cluster).
-* Reference: `${{ vars.oc_server }}`
+* Reference: `${{ vars.OC_SERVER }}`
 * BCGov: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 * Others: Use your cluster's API server address (e.g. `https://api.<cluster-domain>:6443`)
 
