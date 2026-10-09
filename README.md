@@ -241,12 +241,12 @@ Dependabot and Mend Renovate can both provide dependency updates using pull requ
 
 ### Renovate
 
-A config file (`renovate.json`) is included with this template.  It can source config from our [renovate repository](https://github.com/bcgov/renovate-config).  Renovate can be [self-hosted](https://github.com/renovatebot/github-action) or run using the GitHub App managed at the organization level.
+A configuration file (`renovate.json`) is included with this template that sources configuration from our [renovate repository](https://github.com/bcgov/renovate-config).
 
 > [!TIP]
 > Once Renovate is set up, you can enable **Maintenance Mode Automation** by following the checklist in the [Maintenance Mode Automation](#maintenance-mode-automation) section of this README. This will let Renovate auto‑merge safe updates after all CI checks pass.
 
-BC Government employees can request adding the Renovate GitHub App to their repository via [devops-requests](https://github.com/bcgov/devops-requests/issues/new/choose) (select **Request to have a GitHub Application added to a repository in a BC gov-managed GitHub organization**) or directly through the [CITZ Service Desk](https://citz-do.atlassian.net/servicedesk/customer/portal/2/group/9/create/10).
+BC Government employees can request having the Renovate GitHub App installed on their repository through the [CITZ Service Desk](https://citz-do.atlassian.net/servicedesk/customer/portal/2/group/9/create/10).
 
 ### Dependabot
 
