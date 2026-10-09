@@ -53,8 +53,6 @@ If you're using BC Government's OpenShift platform, you'll also need:
     - Join the bcgov organization using [these instructions](https://developer.gov.bc.ca/docs/default/component/bc-developer-guide/use-github-in-bcgov/bc-government-organizations-in-github/#directions-to-sign-up-and-link-your-account-for-bcgov).
 - [ ] BCGov OpenShift project namespaces:
     - [BCGov signup](https://registry.developer.gov.bc.ca)
-- [ ] Access to [bcgov/devops-requests](https://github.com/bcgov/devops-requests):
-    - Central intake hub for platform service requests (Artifactory access, GitHub Apps, SonarCloud, private repos, and volume/secret restores).
 
 ## Using this Template
 
