@@ -15,7 +15,7 @@ This repository provides a template to rapidly deploy a modern web application s
 * Gated/controlled production deployments (optional)
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure, and container scan tools
-* Out-of-the-box alignment with **OWASP ASVS** Level 1 & 2 controls (see [SECURITY.md](file:///home/derek/Repos/quickstart-openshift/SECURITY.md#owasp-asvs-alignment))
+* Out-of-the-box alignment with **OWASP ASVS** Level 1 & 2 controls (see [SECURITY.md](./SECURITY.md#owasp-asvs-alignment))
 * Automatic dependency patching via [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
 * Maintenance Mode Automation (hands‑off updates, low‑dev mode) via the same Renovate config
 * Enforced code reviews and workflow jobs (pass|fail)
@@ -241,22 +241,12 @@ Dependabot and Mend Renovate can both provide dependency updates using pull requ
 
 ### Renovate
 
-A config file (`renovate.json`) is included with this template.  It can source config from our [renovate repository](https://github.com/bcgov/renovate-config).  Renovate can be [self-hosted](https://github.com/renovatebot/github-action) or run using the GitHub App managed at the organization level.  For BC Government the OCIO controls this application, so please opt in with them using a GitHub issue.
+A config file (`renovate.json`) is included with this template.  It can source config from our [renovate repository](https://github.com/bcgov/renovate-config).  Renovate can be [self-hosted](https://github.com/renovatebot/github-action) or run using the GitHub App managed at the organization level.
 
 > [!TIP]
 > Once Renovate is set up, you can enable **Maintenance Mode Automation** by following the checklist in the [Maintenance Mode Automation](#maintenance-mode-automation) section of this README. This will let Renovate auto‑merge safe updates after all CI checks pass.
 
-To opt-in:
-* Visit the [Renovate GitHub App](https://github.com/apps/renovate/)
-* Click `Configure` and set up your repository
-* Visit [BCDevOps Requests](https://github.com/BCDevOps/devops-requests)
-* Select [Issues](https://github.com/BCDevOps/devops-requests/issues)
-* Select [New Issue](https://github.com/BCDevOps/devops-requests/issues/new/choose)
-* Select [Request for integrating a GitHub App](https://github.com/BCDevOps/devops-requests/issues/new?assignees=MonicaG%2C+oomIRL%2C+SHIHO-I&labels=github-app%2C+pending&projects=&template=github_integration_request.md&title=)
-* Create a meaningful title, e.g. `Request to add X repo to Renovate App`
-* Fill out the description providing a repository name
-* Select "Submit new issue"
-* Wait for Renovate to start sending pull requests to your repository
+BC Government employees can request adding the Renovate GitHub App to their repository via [devops-requests](https://github.com/bcgov/devops-requests/issues/new/choose) (select **Request to have a GitHub Application added to a repository in a BC gov-managed GitHub organization**) or directly through the [CITZ Service Desk](https://citz-do.atlassian.net/servicedesk/customer/portal/2/group/9/create/10).
 
 ### Dependabot
 
@@ -441,7 +431,7 @@ Don't forget to add your team members!
 
 ## Security & OWASP ASVS Alignment
 
-This repository is architected and hardened out-of-the-box to align with Levels 1 and 2 of the **OWASP Application Security Verification Standard (ASVS) v4.0.3**. A detailed security mapping matrix is documented in [SECURITY.md](file:///home/derek/Repos/quickstart-openshift/SECURITY.md#owasp-asvs-alignment), detailing our implementation of:
+This repository is architected and hardened out-of-the-box to align with Levels 1 and 2 of the **OWASP Application Security Verification Standard (ASVS) v4.0.3**. A detailed security mapping matrix is documented in [SECURITY.md](./SECURITY.md#owasp-asvs-alignment), detailing our implementation of:
 * **Active WAF Defense:** Inline Coraza WAF running inside the Caddy reverse proxy.
 * **Tiered Isolation:** NetworkPolicies enforcing network boundaries between the frontend, backend, and database tiers.
 * **Platform/Container Hardening:** Read-only root filesystems, non-root execution, privilege escalation blocks, default seccomp profiles, and drop capabilities.
