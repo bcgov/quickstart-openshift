@@ -246,7 +246,7 @@ A configuration file (`renovate.json`) is included with this template that sourc
 > [!TIP]
 > Once Renovate is set up, you can enable **Maintenance Mode Automation** by following the checklist in the [Maintenance Mode Automation](#maintenance-mode-automation) section of this README. This will let Renovate auto‑merge safe updates after all CI checks pass.
 
-BC Government employees can request having the Renovate and renovate-approve GitHub Apps installed on their repository through the [CITZ Service Desk](https://citz-do.atlassian.net/servicedesk/customer/portal/2/group/9/create/10). Most others can add their repositories directly from the [Renovate](https://github.com/apps/renovate) and [renovate-approve](https://github.com/apps/renovate-approve) GitHub Apps.
+BC Government employees can request having the Renovate and Renovate Approve GitHub Apps installed on their repository through the [CITZ Service Desk](https://citz-do.atlassian.net/servicedesk/customer/portal/2/group/9/create/10). Most others can add their repositories directly from the [Renovate](https://github.com/apps/renovate) and [Renovate Approve](https://github.com/apps/renovate-approve) GitHub Apps.
 
 ### Dependabot
 
