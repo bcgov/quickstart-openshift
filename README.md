@@ -171,12 +171,11 @@ Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and 
 * Reference: `${{ secrets.oc_namespace }}`
 * E.g.: `abc123-dev`
 
-**`SONAR_TOKEN(s)`** (optional)
+**`SONAR_TOKEN_BACKEND`, `SONAR_TOKEN_FRONTEND`** (optional)
 
-If SonarCloud code quality analysis is enabled, each component requires an analysis token. Single-application repositories typically use `SONAR_TOKEN`, while monorepos append component names. See [Code Quality with SonarCloud](#code-quality-with-sonarcloud) for intake and configuration instructions.
+SonarCloud analysis requires two distinct tokens—one per monorepo component. A single shared `SONAR_TOKEN` is not used because backend and frontend are tracked as separate SonarCloud projects. See [Code Quality with SonarCloud](#code-quality-with-sonarcloud) for onboarding and token generation instructions.
 
-* Reference (standalone): `${{ secrets.SONAR_TOKEN }}`
-* Reference (monorepo): `${{ secrets.SONAR_TOKEN_BACKEND }}`, `${{ secrets.SONAR_TOKEN_FRONTEND }}`
+* References: `${{ secrets.SONAR_TOKEN_BACKEND }}`, `${{ secrets.SONAR_TOKEN_FRONTEND }}`
 
 **db_password**
 
@@ -285,8 +284,8 @@ Fill out the intake form using the following selections:
 
 ### Post-Provisioning Configuration
 
-Once the platform team provisions the projects:
-1. Generate analysis tokens in SonarCloud for each component and save them as repository secrets: `SONAR_TOKEN_BACKEND` and `SONAR_TOKEN_FRONTEND`.
+Once the platform team provisions the projects, two separate SonarCloud projects are created (one for `backend` and one for `frontend`):
+1. Generate analysis tokens in SonarCloud for both projects and save them as repository secrets: `SONAR_TOKEN_BACKEND` and `SONAR_TOKEN_FRONTEND`. Both tokens are required; this repository does not use a single shared `SONAR_TOKEN`.
 2. Update `-Dsonar.projectKey` in [`.github/workflows/analysis.yml`](./.github/workflows/analysis.yml) for both jobs to match your repository (e.g. `<repo>_backend` and `<repo>_frontend` instead of `quickstart-openshift_*`).
 
 ## Dependency Scanning with Knip
