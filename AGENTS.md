@@ -5,6 +5,7 @@ Repository facts for automated coding assistants. Teams may edit or remove this 
 ## Layout
 - `backend/` (NestJS, Prisma), `frontend/` (Vite, React, Caddy), `migrations/` (Flyway SQL in `migrations/sql/`)
 - OpenShift templates (not Helm): `common/openshift.init.yml`, `common/openshift.database.yml`, `backend/openshift.deploy.yml`, `frontend/openshift.deploy.yml`
+- Team-run scripts: `scripts/` (dry run by default, `--apply` to change; bats tests in `scripts/tests/`)
 - Workflows: `.github/workflows/` (PR deploys via `reusable-deploy.yml`, tests via `reusable-tests.yml`); integration and load tests in `common/tests/`
 
 ## Build, test, run
@@ -19,4 +20,4 @@ Repository facts for automated coding assistants. Teams may edit or remove this 
 - Vanity Route TLS (`bcgov/actions-openshift/route-tls`) is strictly managed via the standalone on-demand workflow (`.github/workflows/route-tls.yml` with `workflow_dispatch`). Never embed `route-tls` into `merge.yml`, `release.yml`, or continuous deployment pipelines.
 
 ## Settings
-- Automated agents must not change repository or organization settings. Settings changes are made by a person on the team (team-run setup scripts: see #2858).
+- Automated agents must not change repository or organization settings. Settings changes are made by a person on the team, using team-run scripts in `scripts/` (e.g. `scripts/ruleset.sh`). Point the team to the script; never run it against someone else's repo.

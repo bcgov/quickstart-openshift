@@ -1,0 +1,32 @@
+name: Scripts
+
+# Tests for the team-run scripts in scripts/; runs only when they change
+on:
+  pull_request:
+    paths: ["scripts/**", ".github/workflows/scripts.yml"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  tests:
+    name: Script Tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: ShellCheck and bats
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq bats shellcheck
+          shellcheck scripts/*.sh
+          bats scripts/tests

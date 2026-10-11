@@ -390,6 +390,15 @@ E.g. https://github.com/bcgov/quickstart-openshift/packages
 
 This is required to prevent direct pushes and merges to the default branch.  These steps must be run after one full pull request pipeline has been run to populate the required status checks.
 
+To set it up from a terminal instead, a repo admin can run [`scripts/ruleset.sh`](scripts/ruleset.sh) under their own login.  It's a dry run by default, printing the planned ruleset or the differences; add `--apply` to create or update it.  It's safe to re-run, and edit the settings at the top of the script to suit your team.
+
+```bash
+scripts/ruleset.sh            # dry run
+scripts/ruleset.sh --apply    # create or update
+```
+
+Or, in the GitHub UI:
+
 1. Select `Settings` (gear, top right) > `Rules` > `Rulesets` (under Code and Automation)
 2. Click `New ruleset` > `New branch ruleset`
 3. Setup Ruleset:
