@@ -235,6 +235,21 @@ OpenShift server address (API endpoint for your OpenShift cluster).
 Vanity URL hostname for the application (e.g., `myapp.gov.bc.ca` — hostname only, no scheme). Optional — can be set as a repository variable or environment variable on `prod`. When set, the standalone `Route TLS` workflow (`.github/workflows/route-tls.yml`) configures an OpenShift Route with custom TLS for the frontend service.
 * Reference: `${{ vars.ROUTE_HOST }}`
 
+## Releases (optional)
+
+Two workflows can deploy PROD, and both are active by default:
+
+* `merge.yml` deploys every merge to TEST, runs the tests, then deploys PROD by PR number.
+* `release.yml` deploys a published [GitHub release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository) to PROD. It finds the PR that the release's commit came from and deploys that PR's images, the same ones `merge.yml` deployed. Nothing is rebuilt.
+
+To make PROD release-only, comment out the `deploy-prod`, `monitor-prod` and `promote` jobs in `merge.yml`. Merges then go to TEST and stop, and PROD changes only when you publish a release.
+
+Notes:
+
+* Publish releases from a commit on `main` that was merged from a PR. Commits pushed straight to `main` have no PR images to deploy.
+* If the `prod` environment limits deployment branches and tags, add a tag rule for your release tags (e.g. `v*`), or releases can't deploy.
+* Both workflows share a concurrency group, so they never deploy PROD at the same time.
+
 ## Updating Dependencies
 
 Dependabot and Mend Renovate can both provide dependency updates using pull requests.  Dependabot is simpler to configure, while Renovate is much more configurable and lighter on resources.

@@ -49,6 +49,8 @@ jobs:
     with:
       target: test
 
+  # PROD on every merge. For PROD only on releases, comment out deploy-prod,
+  # monitor-prod and promote below; release.yml then handles PROD.
   deploy-prod:
     name: PROD Deploys (${{ needs.init.outputs.pr }})
     needs: [tests, init]
