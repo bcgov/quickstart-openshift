@@ -125,11 +125,26 @@ Here is the arrangement of secrets, variables and environments for this reposito
 | prod (opt)  | `secrets.TLS_PRIVATE_KEY` | Private key PEM for vanity URL               |
 | prod (opt)  | `secrets.TLS_CA_CERTIFICATE` | Issuing CA PEM for vanity URL            |
 
+### Bootstrap
+
+[`scripts/bootstrap.sh`](scripts/bootstrap.sh) fills `oc_namespace`, `oc_token`, and `db_password` for a new checkout. It creates the `test` and `prod` GitHub environments with no required reviewers, then creates a `github-actions` service account and token in each OpenShift namespace. Pull-request values are repository secrets, taken from the dev namespace. `test` and `prod` values are environment secrets.
+
+It prints the plan unless you pass `--apply`. An environment that already exists is left alone, including its reviewers. A secret that is already set is left alone.
+
+```bash
+scripts/bootstrap.sh \
+  --dev-namespace abc123-dev \
+  --test-namespace abc123-test \
+  --prod-namespace abc123-prod
+```
+
+Run it from a checkout. `gh` must be logged in with admin on that repository, and `oc` must be logged in to a cluster that has all three namespaces.
+
 ### Secret Values
 
 **`OC_TOKEN`** 
 
-Create separate tokens for each of the DEV, TEST and PROD namespaces.  
+Create separate tokens for each of the DEV, TEST and PROD namespaces. [`scripts/bootstrap.sh`](scripts/bootstrap.sh) runs these steps. The commands below are the same ones, by hand.  
 
 1. Login to your OpenShift console, e.g. [Silver](https://console.apps.silver.devops.gov.bc.ca/) or [Gold](https://console.apps.gold.devops.gov.bc.ca/).
 1. Select the pulldown with your username in the top right corner.
