@@ -34,6 +34,11 @@ jobs:
         ports:
           - 5432:5432
     steps:
+      # Audit only: records outbound network calls, blocks nothing
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
       - uses: bcgov/action-test-and-analyse@8f699e3fd3fadd9a6adf6f4b1f2638ef7ecfefb9 # v2.0.0
         env:
           sonar_token: ${{ secrets.sonar_token_backend }}
@@ -63,6 +68,11 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
+      # Audit only: records outbound network calls, blocks nothing
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
       - uses: bcgov/action-test-and-analyse@8f699e3fd3fadd9a6adf6f4b1f2638ef7ecfefb9 # v2.0.0
         env:
           sonar_token: ${{ secrets.sonar_token_frontend }}
