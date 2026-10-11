@@ -1,0 +1,40 @@
+name: Route TLS
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run. True = validate only, false = apply."
+        required: true
+        type: choice
+        default: "true"
+        options:
+          - "true"
+          - "false"
+
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  route-tls:
+    name: Route TLS (dry_run=${{ inputs.dry_run }})
+    environment: prod
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: bcgov/actions-openshift/route-tls@ea9651011c0bf9d15aad22cf5aa2fae93c096edf # v0.3.2
+        with:
+          hostname: ${{ vars.ROUTE_HOST }}
+          target_service: ${{ github.event.repository.name }}-prod-frontend
+          tls_certificate: ${{ secrets.TLS_CERTIFICATE }}
+          tls_private_key: ${{ secrets.TLS_PRIVATE_KEY }}
+          tls_ca_certificate: ${{ secrets.TLS_CA_CERTIFICATE }}
+          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          dry_run: ${{ inputs.dry_run }}

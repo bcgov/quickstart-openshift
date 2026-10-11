@@ -15,7 +15,7 @@ This repository provides a template to rapidly deploy a modern web application s
 * Gated/controlled production deployments (optional)
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure, and container scan tools
-* Out-of-the-box alignment with **OWASP ASVS** Level 1 & 2 controls (see [SECURITY.md](file:///home/derek/Repos/quickstart-openshift/SECURITY.md#owasp-asvs-alignment))
+* Out-of-the-box alignment with **OWASP ASVS** Level 1 & 2 controls (see [SECURITY.md](./SECURITY.md#owasp-asvs-alignment))
 * Automatic dependency patching via [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
 * Maintenance Mode Automation (hands‑off updates, low‑dev mode) via the same Renovate config
 * Enforced code reviews and workflow jobs (pass|fail)
@@ -91,7 +91,18 @@ Environments provide a [number of features](https://docs.github.com/en/actions/d
 
 * Required reviewers
 * Wait timer
+* Deployment branches and tags
 * Limit TEST/PROD values to post-merge workflows
+
+#### Deployment Branches and Tags
+
+By default, an environment allows deployments from any branch or tag ("No restriction"). To ensure pull requests and untrusted branches cannot access production secrets without adding human approval gates, configure deployment restrictions:
+
+1. Select `Settings > Environments > prod`
+2. Under **Deployment branches and tags**, change the dropdown to **Selected branches and tags**
+3. Click **Add deployment branch or tag rule**:
+    * To gate by branch: select **Branch** and enter `main` (or your protected release branch).
+    * To gate by release tag: select **Tag** and enter a pattern like `v*.*.*` or `v*` so only release tags can trigger deployment.
 
 ### Example
 
@@ -99,16 +110,16 @@ Here is the arrangement of secrets, variables and environments for this reposito
 
 | Environment | Name                   | Description                                     |
 |-------------|------------------------|-------------------------------------------------|
-| none        | `vars.oc_server`       | Common server address (repository-level)        |
-| none        | `secrets.oc_namespace` | PR namespace (repository-level)                 |
-| none        | `secrets.oc_token`     | PR service token (repository-level)             |
-| none        | `secrets.db_password`  | PR database password (repository-level)         |
-| test        | `secrets.oc_namespace` | TEST namespace (environment-level)              |
-| test        | `secrets.oc_token`     | TEST service token (environment-level)          |
-| test        | `secrets.db_password`  | TEST database password (environment-level)       |
-| prod        | `secrets.oc_namespace` | PROD namespace (environment-level)              |
-| prod        | `secrets.oc_token`     | PROD service token (environment-level)          |
-| prod        | `secrets.db_password`  | PROD database password (environment-level)       |
+| none        | `vars.OC_SERVER`       | Common server address (repository-level)        |
+| none        | `secrets.OC_NAMESPACE` | PR namespace (repository-level)                 |
+| none        | `secrets.OC_TOKEN`     | PR service token (repository-level)             |
+| none        | `secrets.DB_PASSWORD`  | PR database password (repository-level)         |
+| test        | `secrets.OC_NAMESPACE` | TEST namespace (environment-level)              |
+| test        | `secrets.OC_TOKEN`     | TEST service token (environment-level)          |
+| test        | `secrets.DB_PASSWORD`  | TEST database password (environment-level)       |
+| prod        | `secrets.OC_NAMESPACE` | PROD namespace (environment-level)              |
+| prod        | `secrets.OC_TOKEN`     | PROD service token (environment-level)          |
+| prod        | `secrets.DB_PASSWORD`  | PROD database password (environment-level)       |
 | prod (opt)  | `vars.ROUTE_HOST`      | Vanity URL hostname (repository or environment) |
 | prod (opt)  | `secrets.TLS_CERTIFICATE` | Leaf certificate PEM for vanity URL          |
 | prod (opt)  | `secrets.TLS_PRIVATE_KEY` | Private key PEM for vanity URL               |
@@ -131,7 +142,7 @@ Run it from a checkout. `gh` must be logged in with admin on that repository, an
 
 ### Secret Values
 
-**`oc_token`** 
+**`OC_TOKEN`** 
 
 Create separate tokens for each of the DEV, TEST and PROD namespaces. [`scripts/bootstrap.sh`](scripts/bootstrap.sh) runs these steps. The commands below are the same ones, by hand.  
 
@@ -166,29 +177,26 @@ Create separate tokens for each of the DEV, TEST and PROD namespaces. [`scripts/
 
 * Alternate steps using an inline template can be found [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
 * In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
-* Reference: `${{ secrets.oc_token }}`
+* Reference: `${{ secrets.OC_TOKEN }}`
 
-**`oc_namespace`** 
+**`OC_NAMESPACE`** 
 
 Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and PROD.  TOOLS namespaces (e.g. Jenkins, shared Oracle resources) are not used here.  Provided by your OpenShift platform team.
 
-* Reference: `${{ secrets.oc_namespace }}`
+* Reference: `${{ secrets.OC_NAMESPACE }}`
 * E.g.: `abc123-dev`
 
-**`SONAR_TOKEN(s)`** 
+**`SONAR_TOKEN_BACKEND`, `SONAR_TOKEN_FRONTEND`** (optional)
 
-If SonarCloud is being used each application will have its own token.  Single-application repositories typically use `SONAR_TOKEN`, while monorepos append component names.
+SonarCloud analysis requires two distinct tokens—one per monorepo component. A single shared `SONAR_TOKEN` is not used because backend and frontend are tracked as separate SonarCloud projects. See [Code Quality with SonarCloud](#code-quality-with-sonarcloud) for onboarding and token generation instructions.
 
-* Reference (standalone): `${{ secrets.SONAR_TOKEN }}`
-* Reference (monorepo): `${{ secrets.SONAR_TOKEN_BACKEND }}`, `${{ secrets.SONAR_TOKEN_FRONTEND }}`, etc
+* References: `${{ secrets.SONAR_TOKEN_BACKEND }}`, `${{ secrets.SONAR_TOKEN_FRONTEND }}`
 
-BC Government employees can request SonarCloud projects by creating an [issue](https://github.com/bcgov/devops-requests/issues/new/choose) with the platform team.  Please make sure to request a monorepo with component names (e.g. backend, frontend), which may not be explained in their directions.
-
-**db_password**
+**`DB_PASSWORD`**
 
 The password used for the PostgreSQL database. This **MUST** be a strong, unique password and **DISTINCT** across all environments (pr, test, prod). Reusing the same password in development/PRs as in production is a critical security risk.
 
-* Reference: `${{ secrets.db_password }}`
+* Reference: `${{ secrets.DB_PASSWORD }}`
 * Minimum 12 characters recommended for production.
 * **Pro-tip**: Use a password manager (like BitWarden, 1Password, or KeePass) to generate and store long, random, and unique passwords for each environment. Avoid simple, guessable passwords like `password` or `secure`.
 
@@ -201,25 +209,61 @@ Sysdig API token used to sync the PROD email-alert set on every merge. Sourced f
 
 **`TLS_CERTIFICATE`, `TLS_PRIVATE_KEY`, `TLS_CA_CERTIFICATE`**
 
-PEM-formatted certificates and private key for custom vanity URL TLS on the PROD frontend OpenShift Route. Optional — required only when `vars.ROUTE_HOST` is configured. If `vars.ROUTE_HOST` is unset, the `route-tls` step is safely skipped.
+PEM-formatted certificates and private key for custom vanity URL TLS on the PROD frontend OpenShift Route. Optional — required only when `vars.ROUTE_HOST` is configured.
 * References: `${{ secrets.TLS_CERTIFICATE }}`, `${{ secrets.TLS_PRIVATE_KEY }}`, `${{ secrets.TLS_CA_CERTIFICATE }}`
-* Validated and applied via [`bcgov/actions-openshift/route-tls`](https://github.com/bcgov/actions-openshift/tree/main/route-tls), which checks key matching, CA chain, expiration, and archives previous certificates to an OpenShift secret.
+* Validated and applied on-demand via the standalone [`.github/workflows/route-tls.yml`](./.github/workflows/route-tls.yml) workflow using [`bcgov/actions-openshift/route-tls`](https://github.com/bcgov/actions-openshift/tree/main/route-tls), which checks key matching, CA chain, expiration, and archives previous certificates to an OpenShift secret.
+* Store these as `prod` environment secrets (not repository secrets), and configure the `prod` environment's deployment branches and tags to restrict access (e.g. to `main` or release tags); environment scoping alone does not prevent a pull-request job from requesting these secrets.
+* Do not pass PEMs or private keys as `workflow_dispatch` inputs—dispatch inputs are recorded in plaintext in workflow run logs. Rotation is handled by updating the `prod` secrets and triggering the `Route TLS` workflow with `dry_run=true` to validate, then `dry_run=false` to apply.
+
+When receiving a certificate package from Entrust, map the files to GitHub secrets as follows:
+
+| Secret | File in package | Notes |
+| --- | --- | --- |
+| `TLS_CERTIFICATE` | `<host>.pem` | Leaf certificate only (CN/SAN matches hostname). |
+| `TLS_PRIVATE_KEY` | `<host>.key` | Unencrypted private key (`BEGIN PRIVATE KEY`). Never commit this. |
+| `TLS_CA_CERTIFICATE` | `Entrust OV TLS Issuing RSA CA 2.pem` | Issuing intermediate CA only (one PEM). |
+
+Leave out root certificates (e.g. `Sectigo Public Server Authentication Root R46.pem` or `USERTrust RSA Certification Authority.pem`) because clients already have them in their trust stores. Omit `<host>.csr` (the signing request is finished).
+
+Upload these secrets to the `prod` environment via GitHub CLI:
+
+```bash
+CERT_HOST='myapp.gov.bc.ca' # Replace with the certificate filename prefix
+gh secret set TLS_CERTIFICATE --env prod < "${CERT_HOST}.pem"
+gh secret set TLS_PRIVATE_KEY --env prod < "${CERT_HOST}.key"
+gh secret set TLS_CA_CERTIFICATE --env prod < 'Entrust OV TLS Issuing RSA CA 2.pem'
+```
 
 ### Variable Values
 
 >  Click Settings > Secrets and Variables > Actions > Variables > New repository variable
 
-**`oc_server`** 
+**`OC_SERVER`** 
 
 OpenShift server address (API endpoint for your OpenShift cluster).
-* Reference: `${{ vars.oc_server }}`
+* Reference: `${{ vars.OC_SERVER }}`
 * BCGov: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
 * Others: Use your cluster's API server address (e.g. `https://api.<cluster-domain>:6443`)
 
 **`ROUTE_HOST`**
 
-Vanity URL hostname for the application (e.g., `myapp.gov.bc.ca` — hostname only, no scheme). Optional — can be set as a repository variable or environment variable on `prod`. When set, `merge.yml` configures an OpenShift Route with custom TLS for the frontend service.
+Vanity URL hostname for the application (e.g., `myapp.gov.bc.ca` — hostname only, no scheme). Optional — can be set as a repository variable or environment variable on `prod`. When set, the standalone `Route TLS` workflow (`.github/workflows/route-tls.yml`) configures an OpenShift Route with custom TLS for the frontend service.
 * Reference: `${{ vars.ROUTE_HOST }}`
+
+## Releases (optional)
+
+Two workflows can deploy PROD, and both are active by default:
+
+* `merge.yml` deploys every merge to TEST, runs the tests, then deploys PROD by PR number.
+* `release.yml` deploys a published [GitHub release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository) to PROD. It finds the PR that the release's commit came from and deploys that PR's images, the same ones `merge.yml` deployed. Nothing is rebuilt.
+
+To make PROD release-only, comment out the `deploy-prod`, `monitor-prod` and `promote` jobs in `merge.yml`. Merges then go to TEST and stop, and PROD changes only when you publish a release.
+
+Notes:
+
+* Publish releases from a commit on `main` that was merged from a PR. Commits pushed straight to `main` have no PR images to deploy.
+* If the `prod` environment limits deployment branches and tags, add a tag rule for your release tags (e.g. `v*`), or releases can't deploy.
+* Both workflows share a concurrency group, so they never deploy PROD at the same time.
 
 ## Updating Dependencies
 
@@ -227,26 +271,42 @@ Dependabot and Mend Renovate can both provide dependency updates using pull requ
 
 ### Renovate
 
-A config file (`renovate.json`) is included with this template.  It can source config from our [renovate repository](https://github.com/bcgov/renovate-config).  Renovate can be [self-hosted](https://github.com/renovatebot/github-action) or run using the GitHub App managed at the organization level.  For BC Government the OCIO controls this application, so please opt in with them using a GitHub issue.
+A configuration file (`renovate.json`) is included with this template that sources configuration from our [renovate repository](https://github.com/bcgov/renovate-config).
 
 > [!TIP]
 > Once Renovate is set up, you can enable **Maintenance Mode Automation** by following the checklist in the [Maintenance Mode Automation](#maintenance-mode-automation) section of this README. This will let Renovate auto‑merge safe updates after all CI checks pass.
 
-To opt-in:
-* Visit the [Renovate GitHub App](https://github.com/apps/renovate/)
-* Click `Configure` and set up your repository
-* Visit [BCDevOps Requests](https://github.com/BCDevOps/devops-requests)
-* Select [Issues](https://github.com/BCDevOps/devops-requests/issues)
-* Select [New Issue](https://github.com/BCDevOps/devops-requests/issues/new/choose)
-* Select [Request for integrating a GitHub App](https://github.com/BCDevOps/devops-requests/issues/new?assignees=MonicaG%2C+oomIRL%2C+SHIHO-I&labels=github-app%2C+pending&projects=&template=github_integration_request.md&title=)
-* Create a meaningful title, e.g. `Request to add X repo to Renovate App`
-* Fill out the description providing a repository name
-* Select "Submit new issue"
-* Wait for Renovate to start sending pull requests to your repository
+BC Government employees can request having the Renovate and Renovate Approve GitHub Apps installed on their repository through the [CITZ Service Desk](https://citz-do.atlassian.net/servicedesk/customer/portal/2/group/9/create/10). Most others can add their repositories directly from the [Renovate](https://github.com/apps/renovate) and [Renovate Approve](https://github.com/apps/renovate-approve) GitHub Apps.
 
 ### Dependabot
 
 Dependabot is no longer recommended as an alternative to Renovate for generating security, vulnerability and dependency pull requests.  It can still be used to generate warnings under the GitHub Security tab, which is only viewable by repository administrators.
+
+## Code Quality with SonarCloud
+
+SonarCloud performs static code analysis, test coverage tracking, and quality gate checks via the `bcgov/action-test-and-analyse` action in [`.github/workflows/analysis.yml`](./.github/workflows/analysis.yml). SonarCloud integration is optional—the test suites and CI pipeline run successfully without it.
+
+BC Government employees can request SonarCloud projects via [devops-requests](https://github.com/bcgov/devops-requests/issues/new/choose) (select **Request for import GitHub repository on SonarCloud**) or directly through the [CITZ Service Desk](https://citz-do.atlassian.net/servicedesk/customer/portal/2/group/9/create/594).
+
+### Onboarding Steps
+
+Before submitting the request, ensure the designated project administrator has logged in to the [SonarCloud console under bcgov-sonarcloud](https://sonarcloud.io/organizations/bcgov-sonarcloud/projects) using their GitHub account.
+
+Fill out the intake form using the following selections:
+
+| Field | Selection | Notes |
+| --- | --- | --- |
+| **GitHub username** | `<admin-username>` | Must be the user who logged into SonarCloud above; will be assigned project administrator. |
+| **GitHub Repo URL** | `https://github.com/bcgov/<repo>` | Full repository URL. |
+| **New Code Definition** | **Previous version** | Quality gates evaluate changes relative to previous releases rather than a rolling day count. |
+| **Setup as a monorepo** | **Yes** | Quickstart repositories contain both `backend` and `frontend`. |
+| **Additional Comments** | `backend, frontend` | Explicitly list component names so separate SonarCloud sub-projects are created. |
+
+### Post-Provisioning Configuration
+
+Once the platform team provisions the projects, two separate SonarCloud projects are created (one for `backend` and one for `frontend`):
+1. Generate analysis tokens in SonarCloud for both projects and save them as repository secrets: `SONAR_TOKEN_BACKEND` and `SONAR_TOKEN_FRONTEND`. Both tokens are required; this repository does not use a single shared `SONAR_TOKEN`.
+2. Update `-Dsonar.projectKey` in [`.github/workflows/analysis.yml`](./.github/workflows/analysis.yml) for both jobs to match your repository (e.g. `<repo>_backend` and `<repo>_frontend` instead of `quickstart-openshift_*`).
 
 ## Dependency Scanning with Knip
 
@@ -401,7 +461,7 @@ Don't forget to add your team members!
 
 ## Security & OWASP ASVS Alignment
 
-This repository is architected and hardened out-of-the-box to align with Levels 1 and 2 of the **OWASP Application Security Verification Standard (ASVS) v4.0.3**. A detailed security mapping matrix is documented in [SECURITY.md](file:///home/derek/Repos/quickstart-openshift/SECURITY.md#owasp-asvs-alignment), detailing our implementation of:
+This repository is architected and hardened out-of-the-box to align with Levels 1 and 2 of the **OWASP Application Security Verification Standard (ASVS) v4.0.3**. A detailed security mapping matrix is documented in [SECURITY.md](./SECURITY.md#owasp-asvs-alignment), detailing our implementation of:
 * **Active WAF Defense:** Inline Coraza WAF running inside the Caddy reverse proxy.
 * **Tiered Isolation:** NetworkPolicies enforcing network boundaries between the frontend, backend, and database tiers.
 * **Platform/Container Hardening:** Read-only root filesystems, non-root execution, privilege escalation blocks, default seccomp profiles, and drop capabilities.

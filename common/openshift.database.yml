@@ -10,8 +10,11 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: DB_IMAGE
+    description: Database image repository, e.g. postgres, or postgis/postgis for spatial (GIS) support
+    value: postgres
   - name: PG_VERSION
-    description: PostgreSQL version tag for the Docker Hub postgres image
+    description: Tag for DB_IMAGE, e.g. 17 for postgres or 17-3.5 for postgis/postgis
     value: "17"
   - name: DB_PVC_SIZE
     description: Volume space available for data
@@ -46,7 +49,7 @@ objects:
           terminationGracePeriodSeconds: 60
           containers:
             - name: ${NAME}-${ZONE}
-              image: postgres:${PG_VERSION}
+              image: ${DB_IMAGE}:${PG_VERSION}
               imagePullPolicy: Always
               ports:
                 - containerPort: 5432
