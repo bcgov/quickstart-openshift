@@ -46,7 +46,7 @@ jobs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov/action-deployer-openshift@e2d60eb9cacceb89c3b97d8dcf0a2c460eea5eab # v4.2.3
+      - uses: bcgov/actions-openshift/deployer@97cb3f8a5a6d134594c85224d3f593e3c0e90647 # v0.4.0
         id: deploy
         env:
           DB_PASSWORD: ${{ secrets.db_password }}
@@ -87,7 +87,7 @@ jobs:
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
-      - uses: bcgov/action-deployer-openshift@e2d60eb9cacceb89c3b97d8dcf0a2c460eea5eab # v4.2.3
+      - uses: bcgov/actions-openshift/deployer@97cb3f8a5a6d134594c85224d3f593e3c0e90647 # v0.4.0
         id: deploy
         with:
           file: ${{ matrix.file }}

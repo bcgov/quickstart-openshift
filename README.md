@@ -269,7 +269,7 @@ Dependabot is no longer recommended as an alternative to Renovate for generating
 
 ## Code Quality with SonarCloud
 
-SonarCloud performs static code analysis, test coverage tracking, and quality gate checks via the `bcgov/action-test-and-analyse` action in [`.github/workflows/analysis.yml`](./.github/workflows/analysis.yml). SonarCloud integration is optional—the test suites and CI pipeline run successfully without it.
+SonarCloud performs static code analysis, test coverage tracking, and quality gate checks via the `bcgov/actions/test-and-analyse` action in [`.github/workflows/analysis.yml`](./.github/workflows/analysis.yml). SonarCloud integration is optional—the test suites and CI pipeline run successfully without it.
 
 BC Government employees can request SonarCloud projects via [devops-requests](https://github.com/bcgov/devops-requests/issues/new/choose) (select **Request for import GitHub repository on SonarCloud**) or directly through the [CITZ Service Desk](https://citz-do.atlassian.net/servicedesk/customer/portal/2/group/9/create/594).
 
@@ -295,7 +295,7 @@ Once the platform team provisions the projects, two separate SonarCloud projects
 
 ## Dependency Scanning with Knip
 
-This repository uses [Knip](https://knip.dev/) for dependency scanning to identify unused dependencies and exports. Knip runs automatically as part of the Analysis workflow via the `bcgov/action-test-and-analyse` action.
+This repository uses [Knip](https://knip.dev/) for dependency scanning to identify unused dependencies and exports. Knip runs automatically as part of the Analysis workflow via the `bcgov/actions/test-and-analyse` action.
 
 **Note:** As a template repository, Knip runs in **warning mode** (non-blocking) to allow teams to customize dependencies without build failures. Teams can optionally change `dep_scan: warning` to `dep_scan: error` in their forks to enforce dependency scanning as a blocking check.
 
@@ -319,8 +319,8 @@ If you encounter a false positive (a dependency that is used but flagged as unus
    - Is it used in configuration files that Knip doesn't analyze?
 
 2. **Open a PR to the upstream repository:**
-   - Repository: [`bcgov/action-test-and-analyse`](https://github.com/bcgov/action-test-and-analyse)
-   - File: `.knip.json`
+   - Repository: [`bcgov/actions`](https://github.com/bcgov/actions)
+   - File: `test-and-analyse/.knip.json`
    - Add the dependency to the `ignoreDependencies` array
 
 3. **Include justification** in your PR:
@@ -332,7 +332,7 @@ If you encounter a false positive (a dependency that is used but flagged as unus
 
 If `@testing-library/user-event` is flagged but exported from `test-utils.tsx`:
 
-**Upstream PR to `bcgov/action-test-and-analyse/.knip.json`:**
+**Upstream PR to `bcgov/actions/test-and-analyse/.knip.json`:**
 ```json
 {
   "ignoreDependencies": [
