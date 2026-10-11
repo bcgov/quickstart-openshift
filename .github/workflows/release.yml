@@ -1,0 +1,100 @@
+name: Release
+
+# Publishing a GitHub release deploys that release to PROD. It reuses the
+# images merge.yml deployed for the release's commit (tagged with the merged
+# PR number by pr-open.yml) and does not rebuild anything. Pre-releases only
+# resolve and check the images; they don't deploy.
+
+on:
+  release:
+    types: [published]
+
+# Same group as merge.yml (its workflow name), so the two never deploy PROD at once
+concurrency:
+  group: Merge
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  init:
+    name: Initialize
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      pr: ${{ steps.pr.outputs.pr }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # PR number for the release's commit (a squash merge to main)
+      - id: pr
+        uses: bcgov/action-get-pr@28b0adf8e4d40720d41f9c87356ce24b0a4bd6af # v0.3.1
+
+      - name: Check images
+        env:
+          PR: ${{ steps.pr.outputs.pr }}
+          REPO: ${{ github.repository }}
+          RELEASE: ${{ github.event.release.tag_name }}
+        run: |
+          if [ -z "${PR}" ]; then
+            echo "::error::No merged PR found for ${RELEASE} (${GITHUB_SHA}). Release from a commit on main that came from a PR."
+            exit 1
+          fi
+          for package in migrations backend frontend; do
+            image="ghcr.io/${REPO}/${package}:${PR}"
+            if ! digest=$(docker buildx imagetools inspect "${image}" --format '{{.Manifest.Digest}}'); then
+              echo "::error::Image ${image} not found. Packages must be public, and the release's commit must come from a PR that built images."
+              exit 1
+            fi
+            echo "${RELEASE}: ${image} (${digest})" | tee -a "${GITHUB_STEP_SUMMARY}"
+          done
+
+  deploy-prod:
+    name: PROD Deploys (${{ needs.init.outputs.pr }})
+    if: (! github.event.release.prerelease)
+    needs: [init]
+    uses: ./.github/workflows/reusable-deploy.yml
+    secrets:
+      db_password: ${{ secrets.db_password }}
+      oc_namespace: ${{ secrets.oc_namespace }}
+      oc_token: ${{ secrets.oc_token }}
+    with:
+      environment: prod
+      target: prod
+      tag: ${{ needs.init.outputs.pr }}
+
+  # Same as merge.yml's monitor-prod; no-ops if SYSDIG_API_TOKEN is unset
+  monitor-prod:
+    name: Sysdig Monitor (PROD)
+    needs: [deploy-prod]
+    runs-on: ubuntu-24.04
+    environment: prod
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: bcgov/actions/sysdig-monitor@4026bfd276b8a5839029106099b13edfb594b2c3 # v0.8.0
+        with:
+          sysdig_api_token: ${{ secrets.SYSDIG_API_TOKEN }}
+          oc_namespace: ${{ secrets.oc_namespace }}
+          app: ${{ github.event.repository.name }}
+
+  promote:
+    name: Promote Images
+    needs: [deploy-prod, init]
+    runs-on: ubuntu-slim
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [migrations, backend, frontend]
+    timeout-minutes: 1
+    steps:
+      - uses: shrink/actions-docker-registry-tag@e6aaef25c595b6e0edd18bf4c7dbfea3abd43299 # v5
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.package }}
+          target: ${{ needs.init.outputs.pr }}
+          tags: prod
