@@ -2,8 +2,7 @@ name: Release
 
 # Publishing a GitHub release deploys that release to PROD. It reuses the
 # images merge.yml deployed for the release's commit (tagged with the merged
-# PR number by pr-open.yml) and does not rebuild anything. Pre-releases only
-# resolve and check the images; they don't deploy.
+# PR number by pr-open.yml) and does not rebuild anything.
 
 on:
   release:
@@ -52,7 +51,6 @@ jobs:
 
   deploy-prod:
     name: PROD Deploys (${{ needs.init.outputs.pr }})
-    if: (! github.event.release.prerelease)
     needs: [init]
     uses: ./.github/workflows/reusable-deploy.yml
     secrets:

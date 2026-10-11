@@ -247,7 +247,6 @@ To make PROD release-only, comment out the `deploy-prod`, `monitor-prod` and `pr
 Notes:
 
 * Publish releases from a commit on `main` that was merged from a PR. Commits pushed straight to `main` have no PR images to deploy.
-* Pre-releases check that the release's images exist but don't deploy. Use one to test `release.yml` safely.
 * If the `prod` environment limits deployment branches and tags, add a tag rule for your release tags (e.g. `v*`), or releases can't deploy.
 * Both workflows share a concurrency group, so they never deploy PROD at the same time.
 
