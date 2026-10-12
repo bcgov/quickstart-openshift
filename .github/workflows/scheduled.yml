@@ -42,11 +42,6 @@ jobs:
     runs-on: ubuntu-slim
     timeout-minutes: 10
     steps:
-      - name: Check OC_NAMESPACE
-        if: vars.OC_NAMESPACE == ''
-        run: |
-          echo "::error::OC_NAMESPACE variable not set; run scripts/setup-environments.sh"
-          exit 1
       - name: Clean up PR Deployments
         uses: bcgov/action-oc-runner@111868d1fc50db0a40417ba321d865ef5c931bbd # v1.7.0
         with:

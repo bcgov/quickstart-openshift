@@ -35,6 +35,7 @@ jobs:
     uses: ./.github/workflows/reusable-deploy.yml
     secrets:
       db_password: ${{ secrets.db_password }}
+      # oc_namespace: reusable-deploy.yml reads vars.OC_NAMESPACE from the job's environment
       oc_token: ${{ secrets.oc_token }}
     with:
       environment: test
@@ -56,6 +57,7 @@ jobs:
     uses: ./.github/workflows/reusable-deploy.yml
     secrets:
       db_password: ${{ secrets.db_password }}
+      # oc_namespace: reusable-deploy.yml reads vars.OC_NAMESPACE from the job's environment
       oc_token: ${{ secrets.oc_token }}
     with:
       environment: prod

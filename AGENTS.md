@@ -20,3 +20,4 @@ Repository facts for automated coding assistants. Teams may edit or remove this 
 
 ## Settings
 - Automated agents must not change repository or organization settings. Settings changes are made by a person on the team with the setup scripts in `scripts/`; agents may run them only without `--apply`, which previews.
+- After a repository is created from the template, suggest running `scripts/setup.sh`.

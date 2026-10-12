@@ -46,6 +46,10 @@ Setup takes an hour or less.  Scripts in [`scripts/`](./scripts/) do the GitHub 
     ![](./.github/graphics/template.png)
 
 4. **Log in** (by hand): `gh auth login`, then in the OpenShift console select your name (top right) > `Copy login command` and paste it into a shell (`oc login --token=... --server=...`).  You need admin rights on the repo and edit rights in all three namespaces.
+    Then run steps 5 to 7 with one command, which previews by default and exits non-zero if anything needs changing; add `--apply` to make the changes:
+    ```bash
+    scripts/setup.sh --plate abc123 --reviewers alice,bcgov/my-team   # preview, then add --apply
+    ```
 5. **OpenShift deploy account**: creates the `github-actions` service account, `edit` role binding and token Secret in each namespace.
     ```bash
     scripts/setup-openshift.sh --plate abc123          # preview, then add --apply
@@ -86,7 +90,7 @@ Workflows read these values.  Repository-level values are used by pull request d
 
 `DB_PASSWORD` is generated separately for each environment.  Don't change it after the first deploy: PostgreSQL keeps its first password.
 
-**Copied the template before `OC_NAMESPACE` became a variable?**  Move it: `gh variable set OC_NAMESPACE --body <plate>-dev`, and the same with `--env test` / `--env prod` (or run `scripts/setup-environments.sh --apply`).  Deploys stop with `OC_NAMESPACE variable not set` until it's there.  The old secret is unused and can be deleted.
+**Copied the template before `OC_NAMESPACE` became a variable?**  Move it: `gh variable set OC_NAMESPACE --body <plate>-dev`, and the same with `--env test` / `--env prod` (or run `scripts/setup-environments.sh --apply`).  The old secret is unused and can be deleted.
 
 ### Optional Values
 

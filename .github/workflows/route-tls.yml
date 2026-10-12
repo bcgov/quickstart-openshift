@@ -27,11 +27,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - name: Check OC_NAMESPACE
-        if: vars.OC_NAMESPACE == ''
-        run: |
-          echo "::error::OC_NAMESPACE variable not set; run scripts/setup-environments.sh"
-          exit 1
       - uses: bcgov/actions-openshift/route-tls@ea9651011c0bf9d15aad22cf5aa2fae93c096edf # v0.3.2
         with:
           hostname: ${{ vars.ROUTE_HOST }}
