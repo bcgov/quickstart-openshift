@@ -7,9 +7,10 @@
 # straight into `gh secret set`; secret values are never printed or saved.
 # DB_PASSWORD is generated, different for each environment.
 #
-# Uses your own `gh` (repo admin) and `oc` logins.  Preview by default; --apply
-# makes the changes.  Safe to re-run: secrets that are already set are never
-# overwritten (GitHub can't show them), so a database keeps its password.
+# Uses your own `gh` (repo admin) and `oc` logins.  Without --apply it checks the
+# setup and exits non-zero if anything is missing; it confirms secrets exist but
+# can't verify their values.  --apply makes the changes.  Safe to re-run: secrets
+# that are already set are never overwritten, so a database keeps its password.
 #
 # Usage: scripts/setup-environments.sh [--plate abc123] [--reviewers user,org/team] [--repo OWNER/NAME] [--apply]
 set -euo pipefail
@@ -24,7 +25,7 @@ while [ $# -gt 0 ]; do
     --plate) PLATE="${2:-}"; shift ;;
     --reviewers) REVIEWERS="${2:-}"; shift ;;
     --repo) REPO="${2:-}"; shift ;;
-    -h|--help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
   shift
@@ -43,11 +44,19 @@ fi
 SERVER="$(oc whoami --show-server)"
 echo "Repository: ${REPO}, OpenShift: ${SERVER}"
 
-# status <item> <ok|change> [details]
+CHANGES=0
+# status <item> <ok|change> [details]; counts each change
 status() {
-  if [ "$2" = ok ]; then echo "  $1: ok${3:+ ($3)}"
-  elif [ "$APPLY" = true ]; then echo "  $1: changed${3:+ ($3)}"
+  if [ "$2" = ok ]; then echo "  $1: ok${3:+ ($3)}"; return; fi
+  CHANGES=$((CHANGES + 1))
+  if [ "$APPLY" = true ]; then echo "  $1: changed${3:+ ($3)}"
   else echo "  $1: would change${3:+ ($3)}"; fi
+}
+# Verdict; a preview exits 1 when anything needs changing, so it works as a check
+summary() {
+  if [ "$APPLY" = true ]; then echo "Done: ${CHANGES} changed."
+  elif [ "$CHANGES" -eq 0 ]; then echo "All set: nothing to change."
+  else echo "${CHANGES} to change; re-run with --apply to make these changes."; exit 1; fi
 }
 
 has_secret() { # <scope> <name>
@@ -77,6 +86,7 @@ reviewer_ids() {
   done | jq -sc 'sort_by(.type, .id)'
 }
 wanted="$( [ -z "$REVIEWERS" ] || reviewer_ids )"
+prod_env=""
 for env in test prod; do
   if ! current="$(gh api "repos/${REPO}/environments/${env}" 2>/dev/null)"; then
     body='{}'
@@ -97,9 +107,16 @@ for env in test prod; do
     fi
   else
     status "environment ${env}" ok
+    [ "$env" = test ] || prod_env="$current"
   fi
 done
-[ -n "$REVIEWERS" ] || echo "  environment prod reviewers: skipped (no --reviewers given; PROD deploys won't wait for approval)"
+# No --reviewers: report the current ones; none isn't counted as a change
+if [ -n "$prod_env" ]; then
+  names="$(jq -r --arg org "${REPO%%/*}" '[.protection_rules[]? | select(.type == "required_reviewers") | .reviewers[]
+    | if .type == "Team" then "\($org)/\(.reviewer.slug)" else .reviewer.login end] | join(",")' <<< "$prod_env")"
+  [ -n "$names" ] || names="none; PROD deploys won't wait for approval"
+  status "environment prod reviewers" ok "$names"
+fi
 
 # 2. Secrets (only when missing) and the OC_SERVER variable
 #
@@ -114,6 +131,7 @@ secret() {
     echo "  ${name} for ${scope}: ok (already set)"
     return
   fi
+  CHANGES=$((CHANGES + 1))
   if [ "$APPLY" = false ]; then
     echo "  ${name} for ${scope}: would set"
     return
@@ -141,4 +159,4 @@ else
   status "OC_SERVER variable for repo" change "${have:-unset} -> ${SERVER}"
   [ "$APPLY" = false ] || gh variable set OC_SERVER -R "$REPO" --body "$SERVER" >/dev/null
 fi
-[ "$APPLY" = true ] || echo "Preview only; re-run with --apply to make these changes."
+summary

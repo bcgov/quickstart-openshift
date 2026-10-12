@@ -3,8 +3,9 @@
 # service account `github-actions`, `edit` role binding and a long-lived
 # token Secret (`github-actions-token`), which setup-environments.sh reads.
 #
-# Uses your own `oc login`.  Preview by default; --apply makes the changes.
-# Safe to re-run: existing objects are left alone.
+# Uses your own `oc login`.  Without --apply it checks the setup and exits
+# non-zero if anything is missing; --apply makes the changes.  Safe to re-run:
+# existing objects are left alone.
 #
 # Usage: scripts/setup-openshift.sh [--plate abc123] [--apply]
 #   --plate  licence plate; namespaces are <plate>-dev, <plate>-test, <plate>-prod
@@ -16,7 +17,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --apply) APPLY=true ;;
     --plate) PLATE="${2:-}"; shift ;;
-    -h|--help) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
   shift
@@ -51,15 +52,29 @@ if [ "$failed" = true ]; then
   exit 1
 fi
 
+CHANGES=0
+# status <item> <ok|change> [details]; counts each change
+status() {
+  if [ "$2" = ok ]; then echo "  $1: ok${3:+ ($3)}"; return; fi
+  CHANGES=$((CHANGES + 1))
+  if [ "$APPLY" = true ]; then echo "  $1: changed${3:+ ($3)}"
+  else echo "  $1: would change${3:+ ($3)}"; fi
+}
+# Verdict; a preview exits 1 when anything needs changing, so it works as a check
+summary() {
+  if [ "$APPLY" = true ]; then echo "Done: ${CHANGES} changed."
+  elif [ "$CHANGES" -eq 0 ]; then echo "All set: nothing to change."
+  else echo "${CHANGES} to change; re-run with --apply to make these changes."; exit 1; fi
+}
+
 # report <namespace> <object> <exists: true|false> <command...>
 report() {
   local ns="$1" obj="$2" exists="$3"; shift 3
   if [ "$exists" = true ]; then
-    echo "  ${ns} ${obj}: ok"
-  elif [ "$APPLY" = true ]; then
-    "$@" >/dev/null && echo "  ${ns} ${obj}: created"
+    status "${ns} ${obj}" ok
   else
-    echo "  ${ns} ${obj}: would create"
+    [ "$APPLY" = false ] || "$@" >/dev/null
+    status "${ns} ${obj}" change create
   fi
 }
 
@@ -83,4 +98,4 @@ for ns in "${NAMESPACES[@]}"; do
     oc create rolebinding "${SA}-edit" --clusterrole=edit --serviceaccount="${ns}:${SA}" -n "$ns"
   report "$ns" "secret/${SA}-token" "$(exists secret "${SA}-token" -n "$ns")" token_secret "$ns"
 done
-[ "$APPLY" = true ] || echo "Preview only; re-run with --apply to make these changes."
+summary

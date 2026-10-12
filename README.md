@@ -35,7 +35,7 @@ This repository provides a template to rapidly deploy a modern web application s
 
 # Setup
 
-Setup takes an hour or less.  Scripts in [`scripts/`](./scripts/) do the GitHub and OpenShift parts.  Each one previews its changes by default, makes them only with `--apply`, and is safe to re-run: it changes only what differs and leaves everything else alone.  Run them yourself, with your own logins.
+Setup takes an hour or less.  Scripts in [`scripts/`](./scripts/) do the GitHub and OpenShift parts.  Each one previews its changes by default, makes them only with `--apply`, and is safe to re-run: it changes only what differs and leaves everything else alone.  Running any of them without `--apply` verifies the setup: it ends with `All set: nothing to change.`, or exits non-zero with the number of things to change.  It confirms secrets exist but can't verify their values.  Run them yourself, with your own logins.
 
 ## Checklist
 
@@ -50,7 +50,7 @@ Setup takes an hour or less.  Scripts in [`scripts/`](./scripts/) do the GitHub 
     ```bash
     scripts/setup-openshift.sh --plate abc123          # preview, then add --apply
     ```
-6. **GitHub environments, secrets and variables**: creates the `test` and `prod` environments (PROD with required reviewers if you name them), and sets `OC_NAMESPACE`, `OC_TOKEN` and `DB_PASSWORD` for pull requests (repository level), TEST and PROD, plus the `OC_SERVER` variable.  Secrets that are already set are never overwritten.  Secret values are piped from `oc` or `openssl` straight into `gh secret set`; they're never printed or written to disk, and previews show only the secret's name.
+6. **GitHub environments, secrets and variables**: creates the `test` and `prod` environments (PROD with required reviewers if you name them; without `--reviewers` it reports the current ones), and sets `OC_NAMESPACE`, `OC_TOKEN` and `DB_PASSWORD` for pull requests (repository level), TEST and PROD, plus the `OC_SERVER` variable.  Secrets that are already set are never overwritten.  Secret values are piped from `oc` or `openssl` straight into `gh secret set`; they're never printed or written to disk, and previews show only the secret's name.
     ```bash
     scripts/setup-environments.sh --plate abc123 --reviewers alice,bcgov/my-team   # preview, then add --apply
     ```
