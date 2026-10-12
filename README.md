@@ -270,12 +270,12 @@ If `@testing-library/user-event` is flagged but exported from `test-utils.tsx`:
 
 `scripts/setup-github.sh` (checklist step 7) sets:
 
-* **Ruleset `main`** on the default branch: no deletions or force pushes, linear history, a pull request with 1 approval and resolved conversations, code scanning results from CodeQL and Trivy, and these required status checks, which must be up to date with `main`:
+* **Ruleset `main`** on the default branch: blocks deletion and force pushes; requires a pull request with 1 approval and resolved conversations, merged by squash only; requires CodeQL code scanning results with no alerts at high or higher; and requires these status checks, which must be up to date with `main`:
     * `PR Results` (PR workflow)
     * `Analysis Results` (Analysis workflow)
     * `Validate Results` (PR Validate workflow)
 
-  Each is the summary job of a workflow that runs on every pull request.  The jobs they summarize (builds, deploys, tests, scans) are left out because they're skipped when their paths don't change, which would block merges.  Repository admins may bypass the ruleset only by merging a pull request.
+  Each is the summary job of a workflow that runs on every pull request.  The jobs they summarize (builds, deploys, tests, scans) are left out because they're skipped when their paths don't change, which would block merges.  Repository admins may bypass the ruleset only by merging a pull request.  Trivy results are still reported to the Security tab, but Trivy is deliberately not a merge gate because it fails often.  Other rules already in the ruleset (e.g. Copilot code review) are kept.
 * **Pull requests**: squash merging only, defaulting to the pull request title; suggest updating branches; allow auto-merge; delete head branches after merge.
 * **Private vulnerability reporting**, which [SECURITY.md](./SECURITY.md) points reporters to.
 

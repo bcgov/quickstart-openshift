@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # GitHub repository setup: main-branch ruleset, pull request settings and
-# private vulnerability reporting, as described in README.md.
+# private vulnerability reporting, as described in README.md.  The ruleset
+# blocks deletion and force-push, and requires a pull request (1 approval,
+# resolved threads, squash only), the PR / Analysis / Validate Results checks
+# (up to date with main) and CodeQL code scanning at high or higher.  Trivy
+# results are reported but deliberately not a merge gate; it fails too often.
 #
 # Run it with your own `gh` login and admin rights on the repo.  Without --apply
 # it checks the setup and exits non-zero if anything differs; --apply makes the
@@ -12,7 +16,7 @@ set -euo pipefail
 
 # Required checks: the summary job of each workflow that runs on every PR
 REQUIRED_CHECKS='["PR Results", "Analysis Results", "Validate Results"]'
-CODE_SCANNING_TOOLS='["CodeQL", "Trivy"]'
+CODE_SCANNING_TOOLS='["CodeQL"]'
 SETTINGS='{"allow_merge_commit": false, "allow_squash_merge": true, "allow_rebase_merge": false,
   "squash_merge_commit_title": "PR_TITLE",
   "allow_update_branch": true, "allow_auto_merge": true, "delete_branch_on_merge": true}'
@@ -23,7 +27,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --apply) APPLY=true ;;
     --repo) REPO="${2:-}"; shift ;;
-    -h|--help) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
   shift
@@ -56,16 +60,19 @@ desired="$(jq -n --argjson checks "$REQUIRED_CHECKS" --argjson tools "$CODE_SCAN
   name: "main", target: "branch", enforcement: "active",
   conditions: {ref_name: {include: ["~DEFAULT_BRANCH"], exclude: []}},
   bypass_actors: [{actor_id: 5, actor_type: "RepositoryRole", bypass_mode: "pull_request"}],
-  rules: [{type: "deletion"}, {type: "required_linear_history"}, {type: "non_fast_forward"},
+  rules: [{type: "deletion"}, {type: "non_fast_forward"},
     {type: "pull_request", parameters: {required_approving_review_count: 1, required_review_thread_resolution: true,
-      dismiss_stale_reviews_on_push: false, require_code_owner_review: false, require_last_push_approval: false}},
+      dismiss_stale_reviews_on_push: false, require_code_owner_review: false, require_last_push_approval: false,
+      allowed_merge_methods: ["squash"]}},
     {type: "required_status_checks", parameters: {strict_required_status_checks_policy: true,
-      required_status_checks: ($checks | map({context: .}))}},
+      required_status_checks: ($checks | map({context: ., integration_id: 15368}))}},
     {type: "code_scanning", parameters: {code_scanning_tools:
       ($tools | map({tool: ., security_alerts_threshold: "high_or_higher", alerts_threshold: "errors"}))}}]}')"
+# integration_id 15368 is GitHub Actions, so only workflow jobs satisfy the checks
 # Only the fields managed here, in a comparable order
 NORMALIZE='def rule: if .type == "pull_request" then {type, parameters: (.parameters | {required_approving_review_count,
-      required_review_thread_resolution, dismiss_stale_reviews_on_push, require_code_owner_review, require_last_push_approval})}
+      required_review_thread_resolution, dismiss_stale_reviews_on_push, require_code_owner_review, require_last_push_approval,
+      allowed_merge_methods: (.allowed_merge_methods // [] | sort)})}
     elif .type == "required_status_checks" then {type, parameters: {strict: .parameters.strict_required_status_checks_policy,
       checks: ([.parameters.required_status_checks[].context] | sort)}}
     elif .type == "code_scanning" then {type, tools: (.parameters.code_scanning_tools | map({tool, security_alerts_threshold, alerts_threshold}) | sort_by(.tool))}
@@ -78,8 +85,10 @@ if [ -z "$id" ]; then
   [ "$APPLY" = false ] || gh api -X POST "repos/${REPO}/rulesets" --input - <<< "$desired" >/dev/null
 else
   current="$(gh api "repos/${REPO}/rulesets/${id}")"
-  # Keep rule types and bypass actors not managed here
-  planned="$(jq -n --argjson d "$desired" --argjson c "$current" '($d.rules | map(.type)) as $m | $d
+  # Keep rule types, rule parameters and bypass actors not managed here
+  planned="$(jq -n --argjson d "$desired" --argjson c "$current" '($d.rules | map(.type)) as $m
+    | ([$c.rules[]? | {(.type): (.parameters // {})}] | add // {}) as $cp | $d
+    | .rules |= map(if .parameters then .parameters = ($cp[.type] // {}) + .parameters else . end)
     | .rules += [$c.rules[]? | select(.type as $t | $m | index($t) | not)]
     | .bypass_actors += [$c.bypass_actors[]? | select(.actor_id != 5) | {actor_id, actor_type, bypass_mode}]')"
   changes="$(jq -rn --argjson c "$(jq "$NORMALIZE" <<< "$current")" --argjson p "$(jq "$NORMALIZE" <<< "$planned")" '
