@@ -3,7 +3,8 @@
 #   repository (pull requests): OC_NAMESPACE=<plate>-dev, OC_TOKEN, DB_PASSWORD; variable OC_SERVER
 #   test: OC_NAMESPACE=<plate>-test, OC_TOKEN, DB_PASSWORD
 #   prod: OC_NAMESPACE=<plate>-prod, OC_TOKEN, DB_PASSWORD; required reviewers from --reviewers
-# OC_TOKEN is read from the `github-actions-token` Secret made by setup-openshift.sh.
+# OC_TOKEN is piped from the `github-actions-token` Secret made by setup-openshift.sh
+# straight into `gh secret set`; secret values are never printed or saved.
 # DB_PASSWORD is generated, different for each environment.
 #
 # Uses your own `gh` (repo admin) and `oc` logins.  Preview by default; --apply
@@ -101,23 +102,33 @@ done
 [ -n "$REVIEWERS" ] || echo "  environment prod reviewers: skipped (no --reviewers given; PROD deploys won't wait for approval)"
 
 # 2. Secrets (only when missing) and the OC_SERVER variable
+#
+# Secret values are never printed, kept in variables or written to disk: each
+# one is piped from its source (oc, openssl) straight into `gh secret set` on
+# stdin, which stops on any failure (pipefail).  Previews name the secret only.  Don't add `set -x` here.
 # secret <scope: repo|test|prod> <name> <namespace>
 secret() {
-  local scope="$1" name="$2" ns="$3" args=() value
+  local scope="$1" name="$2" ns="$3" args=()
   [ "$scope" = repo ] || args=(--env "$scope")
   if has_secret "$scope" "$name"; then
-    status "${scope} ${name}" ok "already set"
+    echo "  ${name} for ${scope}: ok (already set)"
     return
   fi
-  status "${scope} ${name}" change "set"
-  [ "$APPLY" = true ] || return 0
+  if [ "$APPLY" = false ]; then
+    echo "  ${name} for ${scope}: would set"
+    return
+  fi
+  # Count the token's bytes only, so an empty one fails before anything is set
+  if [ "$name" = OC_TOKEN ] && [ "$(oc get secret github-actions-token -n "$ns" -o jsonpath='{.data.token}' | wc -c)" -eq 0 ]; then
+    echo "  ${name} for ${scope}: the token Secret in ${ns} has no token yet; re-run shortly" >&2
+    exit 1
+  fi
   case "$name" in
-    OC_NAMESPACE) value="$ns" ;;
-    OC_TOKEN) value="$(oc get secret github-actions-token -n "$ns" -o jsonpath='{.data.token}' | base64 -d)" ;;
-    DB_PASSWORD) value="$(openssl rand -base64 32 | tr -dc 'A-Za-z0-9' | head -c 32)" ;;
-  esac
-  [ -n "$value" ] || { echo "  Empty value for ${scope} ${name}" >&2; exit 1; }
-  printf '%s' "$value" | gh secret set "$name" -R "$REPO" "${args[@]}" >/dev/null
+    OC_NAMESPACE) printf '%s' "$ns" ;;
+    OC_TOKEN) oc get secret github-actions-token -n "$ns" -o jsonpath='{.data.token}' | base64 -d ;;
+    DB_PASSWORD) openssl rand -hex 16 ;;
+  esac | gh secret set "$name" -R "$REPO" "${args[@]}" >/dev/null
+  echo "  ${name} for ${scope}: set"
 }
 for scope in repo test prod; do
   ns="$(namespace "$scope")"
@@ -125,9 +136,9 @@ for scope in repo test prod; do
 done
 have="$(gh variable get OC_SERVER -R "$REPO" 2>/dev/null || true)"
 if [ "$have" = "$SERVER" ]; then
-  status "repo OC_SERVER" ok
+  status "OC_SERVER variable for repo" ok
 else
-  status "repo OC_SERVER" change "${have:-unset} -> ${SERVER}"
+  status "OC_SERVER variable for repo" change "${have:-unset} -> ${SERVER}"
   [ "$APPLY" = false ] || gh variable set OC_SERVER -R "$REPO" --body "$SERVER" >/dev/null
 fi
 [ "$APPLY" = true ] || echo "Preview only; re-run with --apply to make these changes."

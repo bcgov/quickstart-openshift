@@ -50,7 +50,7 @@ Setup takes an hour or less.  Scripts in [`scripts/`](./scripts/) do the GitHub 
     ```bash
     scripts/setup-openshift.sh --plate abc123          # preview, then add --apply
     ```
-6. **GitHub environments, secrets and variables**: creates the `test` and `prod` environments (PROD with required reviewers if you name them), and sets `OC_NAMESPACE`, `OC_TOKEN` and `DB_PASSWORD` for pull requests (repository level), TEST and PROD, plus the `OC_SERVER` variable.  Secrets that are already set are never overwritten.
+6. **GitHub environments, secrets and variables**: creates the `test` and `prod` environments (PROD with required reviewers if you name them), and sets `OC_NAMESPACE`, `OC_TOKEN` and `DB_PASSWORD` for pull requests (repository level), TEST and PROD, plus the `OC_SERVER` variable.  Secrets that are already set are never overwritten.  Secret values are piped from `oc` or `openssl` straight into `gh secret set`; they're never printed or written to disk, and previews show only the secret's name.
     ```bash
     scripts/setup-environments.sh --plate abc123 --reviewers alice,bcgov/my-team   # preview, then add --apply
     ```
