@@ -14,7 +14,7 @@ REQUIRED_CHECKS='["PR Results", "Analysis Results", "Validate Results"]'
 CODE_SCANNING_TOOLS='["CodeQL", "Trivy"]'
 SETTINGS='{"allow_merge_commit": false, "allow_squash_merge": true, "allow_rebase_merge": false,
   "squash_merge_commit_title": "PR_TITLE",
-  "allow_update_branch": true, "allow_auto_merge": false, "delete_branch_on_merge": true}'
+  "allow_update_branch": true, "allow_auto_merge": true, "delete_branch_on_merge": true}'
 
 APPLY=false
 REPO=""

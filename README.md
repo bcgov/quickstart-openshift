@@ -276,7 +276,7 @@ If `@testing-library/user-event` is flagged but exported from `test-utils.tsx`:
     * `Validate Results` (PR Validate workflow)
 
   Each is the summary job of a workflow that runs on every pull request.  The jobs they summarize (builds, deploys, tests, scans) are left out because they're skipped when their paths don't change, which would block merges.  Repository admins may bypass the ruleset only by merging a pull request.
-* **Pull requests**: squash merging only, defaulting to the pull request title; suggest updating branches; delete head branches after merge; no auto-merge.
+* **Pull requests**: squash merging only, defaulting to the pull request title; suggest updating branches; allow auto-merge; delete head branches after merge.
 * **Private vulnerability reporting**, which [SECURITY.md](./SECURITY.md) points reporters to.
 
 ### Packages
