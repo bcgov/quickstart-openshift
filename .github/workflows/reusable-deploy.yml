@@ -25,9 +25,6 @@ on:
       db_password:
         description: Database password
         required: true
-      oc_namespace:
-        description: OpenShift namespace
-        required: true
       oc_token:
         description: OpenShift token
         required: true
@@ -46,13 +43,18 @@ jobs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
+      - name: Check OC_NAMESPACE
+        if: vars.OC_NAMESPACE == ''
+        run: |
+          echo "::error::OC_NAMESPACE variable not set; run scripts/setup-environments.sh"
+          exit 1
       - uses: bcgov/action-deployer-openshift@e2d60eb9cacceb89c3b97d8dcf0a2c460eea5eab # v4.2.3
         id: deploy
         env:
           DB_PASSWORD: ${{ secrets.db_password }}
         with:
           file: common/openshift.init.yml
-          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
           # Secret + NetworkPolicies: create if missing. Postgres ignores
@@ -91,7 +93,7 @@ jobs:
         id: deploy
         with:
           file: ${{ matrix.file }}
-          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
           debug: true

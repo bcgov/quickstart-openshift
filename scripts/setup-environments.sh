@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 # GitHub environments, secrets and variables for the deploy workflows:
-#   repository (pull requests): OC_NAMESPACE=<plate>-dev, OC_TOKEN, DB_PASSWORD; variable OC_SERVER
-#   test: OC_NAMESPACE=<plate>-test, OC_TOKEN, DB_PASSWORD
-#   prod: OC_NAMESPACE=<plate>-prod, OC_TOKEN, DB_PASSWORD; required reviewers from --reviewers
+#   repository (pull requests): variables OC_NAMESPACE=<plate>-dev, OC_SERVER; secrets OC_TOKEN, DB_PASSWORD
+#   test: variable OC_NAMESPACE=<plate>-test; secrets OC_TOKEN, DB_PASSWORD
+#   prod: variable OC_NAMESPACE=<plate>-prod; secrets OC_TOKEN, DB_PASSWORD; required reviewers from --reviewers
 # OC_TOKEN is piped from the `github-actions-token` Secret made by setup-openshift.sh
 # straight into `gh secret set`; secret values are never printed or saved.
 # DB_PASSWORD is generated, different for each environment.
 #
 # Uses your own `gh` (repo admin) and `oc` logins.  Without --apply it checks the
 # setup and exits non-zero if anything is missing; it confirms secrets exist but
-# can't verify their values.  --apply makes the changes.  Safe to re-run: secrets
-# that are already set are never overwritten, so a database keeps its password.
+# can't verify their values.  --apply makes the changes.  Without --plate, the
+# plate comes from existing OC_NAMESPACE variables.  Safe to re-run: secrets that
+# are already set are never overwritten, so a database keeps its password.
 #
 # Usage: scripts/setup-environments.sh [--plate abc123] [--reviewers user,org/team] [--repo OWNER/NAME] [--apply]
 set -euo pipefail
@@ -25,14 +26,37 @@ while [ $# -gt 0 ]; do
     --plate) PLATE="${2:-}"; shift ;;
     --reviewers) REVIEWERS="${2:-}"; shift ;;
     --repo) REPO="${2:-}"; shift ;;
-    -h|--help) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
   shift
 done
-[ -n "$PLATE" ] || read -rp "Licence plate (e.g. abc123): " PLATE
-[[ "$PLATE" =~ ^[a-z0-9]+$ ]] || { echo "Invalid licence plate: '${PLATE}'" >&2; exit 1; }
 [ -n "$REPO" ] || REPO="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+get_var() { # <scope: repo|test|prod> <name>; empty if unset
+  local args=(); [ "$1" = repo ] || args=(--env "$1")
+  gh variable get "$2" -R "$REPO" "${args[@]}" 2>/dev/null || true
+}
+# No --plate: use the plate from existing OC_NAMESPACE variables, which must agree
+if [ -z "$PLATE" ]; then
+  found=""
+  for scope in repo test prod; do
+    v="$(get_var "$scope" OC_NAMESPACE)"
+    v="${v%-dev}"; v="${v%-test}"; v="${v%-prod}"
+    [ -n "$v" ] || continue
+    if [ -n "$found" ] && [ "$v" != "$found" ]; then
+      echo "OC_NAMESPACE variables disagree (${found} vs ${v}); pass --plate abc123." >&2
+      exit 1
+    fi
+    found="$v"
+  done
+  if [ -n "$found" ]; then
+    PLATE="$found"
+    echo "Licence plate: ${PLATE} (from OC_NAMESPACE variables)"
+  else
+    read -rp "Licence plate (e.g. abc123): " PLATE
+  fi
+fi
+[[ "$PLATE" =~ ^[a-z0-9]+$ ]] || { echo "Invalid licence plate: '${PLATE}'" >&2; exit 1; }
 if [ "$(gh api "repos/${REPO}" --jq .permissions.admin)" != true ]; then
   echo "You need admin rights on ${REPO} to manage environments and secrets; ask a repo admin to run this." >&2
   exit 1
@@ -65,11 +89,26 @@ has_secret() { # <scope> <name>
 }
 namespace() { if [ "$1" = repo ]; then echo "${PLATE}-dev"; else echo "${PLATE}-$1"; fi; }
 
+# A database deployed by quickstart (StatefulSet <repo>-<zone>-database, or its
+# data-...-0 volume) already has a password; a new DB_PASSWORD would lock it out
+has_database() { # <namespace>
+  oc get statefulsets,pvc -n "$1" -o name 2>/dev/null \
+    | grep -qE "/(data-)?${REPO#*/}-[a-z0-9]+-database(-0)?$"
+}
+db_blocked() { # <scope> <namespace>
+  ! has_secret "$1" DB_PASSWORD && has_database "$2"
+}
+
 # Tokens come from setup-openshift.sh; check before changing anything
 for scope in repo test prod; do
   ns="$(namespace "$scope")"
   if ! has_secret "$scope" OC_TOKEN && ! oc get secret github-actions-token -n "$ns" >/dev/null 2>&1; then
     echo "No github-actions-token Secret in ${ns} (or no access to it); run scripts/setup-openshift.sh --apply first." >&2
+    exit 1
+  fi
+  if [ "$APPLY" = true ] && db_blocked "$scope" "$ns"; then
+    echo "${ns} already has a database but ${scope} has no DB_PASSWORD; a new one would lock the app out." >&2
+    echo "Set the existing password (gh secret set DB_PASSWORD$([ "$scope" = repo ] || echo " --env ${scope}")), or delete the old volume if the namespace is throwaway.  Nothing changed." >&2
     exit 1
   fi
 done
@@ -118,7 +157,7 @@ if [ -n "$prod_env" ]; then
   status "environment prod reviewers" ok "$names"
 fi
 
-# 2. Secrets (only when missing) and the OC_SERVER variable
+# 2. Variables, secrets (only when missing)
 #
 # Secret values are never printed, kept in variables or written to disk: each
 # one is piped from its source (oc, openssl) straight into `gh secret set` on
@@ -132,6 +171,11 @@ secret() {
     return
   fi
   CHANGES=$((CHANGES + 1))
+  if [ "$name" = DB_PASSWORD ] && [ "$APPLY" = false ] && has_database "$ns"; then
+    echo "  ${name} for ${scope}: blocked (${ns} already has a database; a new password would lock the app out of it."
+    echo "    Set the existing one with gh secret set DB_PASSWORD$([ "$scope" = repo ] || echo " --env ${scope}"), or delete the old volume if the namespace is throwaway)"
+    return
+  fi
   if [ "$APPLY" = false ]; then
     echo "  ${name} for ${scope}: would set"
     return
@@ -142,7 +186,6 @@ secret() {
     exit 1
   fi
   case "$name" in
-    OC_NAMESPACE) printf '%s' "$ns" ;;
     OC_TOKEN) oc get secret github-actions-token -n "$ns" -o jsonpath='{.data.token}' | base64 -d ;;
     DB_PASSWORD) openssl rand -hex 16 ;;
   esac | gh secret set "$name" -R "$REPO" "${args[@]}" >/dev/null
@@ -150,7 +193,19 @@ secret() {
 }
 for scope in repo test prod; do
   ns="$(namespace "$scope")"
-  for name in OC_NAMESPACE OC_TOKEN DB_PASSWORD; do secret "$scope" "$name" "$ns"; done
+  have="$(get_var "$scope" OC_NAMESPACE)"
+  if [ "$have" = "$ns" ]; then
+    status "OC_NAMESPACE variable for ${scope}" ok "$ns"
+  else
+    status "OC_NAMESPACE variable for ${scope}" change "${have:-unset} -> ${ns}"
+    args=(); [ "$scope" = repo ] || args=(--env "$scope")
+    [ "$APPLY" = false ] || gh variable set OC_NAMESPACE -R "$REPO" "${args[@]}" --body "$ns" >/dev/null
+  fi
+  # Older setups kept OC_NAMESPACE as a secret; workflows now read the variable
+  if has_secret "$scope" OC_NAMESPACE; then
+    echo "  note: old OC_NAMESPACE secret for ${scope} is no longer used; delete it when you like"
+  fi
+  for name in OC_TOKEN DB_PASSWORD; do secret "$scope" "$name" "$ns"; done
 done
 have="$(gh variable get OC_SERVER -R "$REPO" 2>/dev/null || true)"
 if [ "$have" = "$SERVER" ]; then

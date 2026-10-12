@@ -4,7 +4,8 @@
 # token Secret (`github-actions-token`), which setup-environments.sh reads.
 #
 # Uses your own `oc login`.  Without --apply it checks the setup and exits
-# non-zero if anything is missing; --apply makes the changes.  Safe to re-run:
+# non-zero if anything is missing; --apply makes the changes.  Without --plate,
+# the plate comes from the repo's OC_NAMESPACE variable.  Safe to re-run:
 # existing objects are left alone.
 #
 # Usage: scripts/setup-openshift.sh [--plate abc123] [--apply]
@@ -17,11 +18,17 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --apply) APPLY=true ;;
     --plate) PLATE="${2:-}"; shift ;;
-    -h|--help) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
   shift
 done
+# No --plate: use the plate from this repo's OC_NAMESPACE variable (see setup-environments.sh)
+if [ -z "$PLATE" ] && command -v gh >/dev/null; then
+  PLATE="$(gh variable get OC_NAMESPACE 2>/dev/null || true)"
+  PLATE="${PLATE%-dev}"
+  [ -z "$PLATE" ] || echo "Licence plate: ${PLATE} (from the OC_NAMESPACE variable)"
+fi
 [ -n "$PLATE" ] || read -rp "Licence plate (e.g. abc123): " PLATE
 [[ "$PLATE" =~ ^[a-z0-9]+$ ]] || { echo "Invalid licence plate: '${PLATE}'" >&2; exit 1; }
 NAMESPACES=("${PLATE}-dev" "${PLATE}-test" "${PLATE}-prod")
