@@ -55,7 +55,6 @@ jobs:
     uses: ./.github/workflows/reusable-deploy.yml
     secrets:
       db_password: ${{ secrets.db_password }}
-      oc_namespace: ${{ secrets.oc_namespace }}
       oc_token: ${{ secrets.oc_token }}
     with:
       environment: prod
@@ -76,7 +75,7 @@ jobs:
       - uses: bcgov/actions/sysdig-monitor@4026bfd276b8a5839029106099b13edfb594b2c3 # v0.8.0
         with:
           sysdig_api_token: ${{ secrets.SYSDIG_API_TOKEN }}
-          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
           app: ${{ github.event.repository.name }}
 
   promote:
