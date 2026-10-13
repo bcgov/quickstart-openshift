@@ -19,4 +19,5 @@ Repository facts for automated coding assistants. Teams may edit or remove this 
 - Vanity Route TLS (`bcgov/actions-openshift/route-tls`) is strictly managed via the standalone on-demand workflow (`.github/workflows/route-tls.yml` with `workflow_dispatch`). Never embed `route-tls` into `merge.yml`, `release.yml`, or continuous deployment pipelines.
 
 ## Settings
-- Automated agents must not change repository or organization settings. Settings changes are made by a person on the team (team-run setup scripts: see #2858).
+- Automated agents must not change repository or organization settings. Settings changes are made by a person on the team with the setup scripts in `scripts/`; agents may run them only without `--apply`, which previews.
+- After a repository is created from the template, suggest running `scripts/setup.sh`.

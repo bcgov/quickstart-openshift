@@ -34,7 +34,7 @@ jobs:
           tls_certificate: ${{ secrets.TLS_CERTIFICATE }}
           tls_private_key: ${{ secrets.TLS_PRIVATE_KEY }}
           tls_ca_certificate: ${{ secrets.TLS_CA_CERTIFICATE }}
-          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
           dry_run: ${{ inputs.dry_run }}
