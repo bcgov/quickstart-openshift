@@ -35,155 +35,66 @@ This repository provides a template to rapidly deploy a modern web application s
 
 # Setup
 
-Initial setup is intended to take an hour or less.  This depends greatly on intended complexity, features selected/excluded and outside cooperation.
+Setup takes an hour or less.  Scripts in [`scripts/`](./scripts/) do the GitHub and OpenShift parts.  Each one previews its changes by default, makes them only with `--apply`, and is safe to re-run: it changes only what differs and leaves everything else alone.  Running any of them without `--apply` verifies the setup: it ends with `All set: nothing to change.`, or exits non-zero with the number of things to change.  It confirms secrets exist but can't verify their values.  Run them yourself, with your own logins.
 
-## Prerequisites
+## Checklist
 
-The following are required for all users:
+1. **Accounts** (by hand): [GitHub accounts](https://github.com/signup) for the team.  For BC Government, also IDIR accounts and membership in the bcgov GitHub organization ([instructions](https://developer.gov.bc.ca/docs/default/component/bc-developer-guide/use-github-in-bcgov/bc-government-organizations-in-github/#directions-to-sign-up-and-link-your-account-for-bcgov)).
+2. **OpenShift namespaces** (by hand): request a project set (DEV, TEST and PROD) from Platform Services at the [registry](https://registry.developer.gov.bc.ca).  You get a licence plate, e.g. `abc123`, and namespaces `abc123-dev`, `abc123-test` and `abc123-prod`.
+3. **Create the repository** (by hand): use this repository as a template, with `bcgov/quickstart-openshift` selected under Repository template.
 
-- [ ] [GitHub accounts](https://github.com/signup) for all participating team members
-- [ ] An OpenShift cluster with project namespaces (DEV, TEST, PROD)
+    ![](./.github/graphics/template.png)
 
-### Additional Requirements for BC Government OpenShift
-
-If you're using BC Government's OpenShift platform, you'll also need:
-
-- [ ] BC Government IDIR accounts for anyone submitting requests
-- [ ] Membership in the BCGov GitHub organization
-    - Join the bcgov organization using [these instructions](https://developer.gov.bc.ca/docs/default/component/bc-developer-guide/use-github-in-bcgov/bc-government-organizations-in-github/#directions-to-sign-up-and-link-your-account-for-bcgov).
-- [ ] BCGov OpenShift project namespaces:
-    - [BCGov signup](https://registry.developer.gov.bc.ca)
-
-## Using this Template
-
-Create a new repository using this repository as a template.
-
-* Verify bcgov/quickstart-openshift is selected under Repository template
-
-![](./.github/graphics/template.png)
+4. **Log in** (by hand): `gh auth login`, then in the OpenShift console select your name (top right) > `Copy login command` and paste it into a shell (`oc login --token=... --server=...`).  You need admin rights on the repo and edit rights in all three namespaces.
+    Then run steps 5 to 7 with one command, which previews by default and exits non-zero if anything needs changing; add `--apply` to make the changes:
+    ```bash
+    scripts/setup.sh --plate abc123 --reviewers alice,bcgov/my-team   # preview, then add --apply
+    ```
+5. **OpenShift deploy account**: creates the `github-actions` service account, `edit` role binding and token Secret in each namespace.
+    ```bash
+    scripts/setup-openshift.sh --plate abc123          # preview, then add --apply
+    ```
+6. **GitHub environments, secrets and variables**: creates the `test` and `prod` environments (PROD with required reviewers if you name them; without `--reviewers` it reports the current ones), and sets the `OC_NAMESPACE` variable and `OC_TOKEN` and `DB_PASSWORD` secrets for pull requests (repository level), TEST and PROD, plus the `OC_SERVER` variable.  Without `--plate` it reads the plate from existing `OC_NAMESPACE` variables.  It won't generate a `DB_PASSWORD` for a namespace that already has a database, since a new password would lock the app out.  Secrets that are already set are never overwritten.  Secret values are piped from `oc` or `openssl` straight into `gh secret set`; they're never printed or written to disk, and previews show only the secret's name.
+    ```bash
+    scripts/setup-environments.sh --plate abc123 --reviewers alice,bcgov/my-team   # preview, then add --apply
+    ```
+7. **GitHub repository settings**: the `main` ruleset, pull request settings and private vulnerability reporting (see [Repository Configuration](#repository-configuration)).
+    ```bash
+    scripts/setup-github.sh                              # preview, then add --apply
+    ```
+8. **First pull request**: open one to run the pipeline, then make the packages public (see [Packages](#packages)).
+9. **Optional** (by hand): [SonarCloud](#code-quality-with-sonarcloud), [Renovate](#renovate), Sysdig, a vanity URL with TLS, PROD deployment rules and team members, all described below.
 
 ## Secrets, Variables and Environments
 
-### Secrets and Variables
-
-Variables and secrets are consumed by workflows.  Variables are visible in workflows and logs, while secrets are hidden/redacted.
-
-**Repository-level vs Environment-specific:**
-
-- **Repository-level** (shown as `<none>` in the environment column): These are available to all workflows and environments. They're created at the repository level and apply globally unless overridden by environment-specific values.
-- **Environment-specific**: These are scoped to a particular environment (e.g., TEST, PROD) and override repository-level values when that environment is used.
-
-To create new secrets from GitHub.com click:
-
-* `Settings > Secrets and Variables > Actions > Secrets > New repository secret`
-
-Note: Dependabot, which we don't recommend as highly as Renovate, requires its own set of values.
-
-### Environments
-
-Environments are groups of secrets and variables with optional access controls.  This includes limiting access to certain users or requiring manual approval before a requesting workflow can run.  Environment values add to or override any repository-level values.
-
-To create new environments from GitHub.com click:
-
-* `Settings > Environments > New environment`
-
-Environments provide a [number of features](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment), including:
-
-* Required reviewers
-* Wait timer
-* Deployment branches and tags
-* Limit TEST/PROD values to post-merge workflows
-
-#### Deployment Branches and Tags
-
-By default, an environment allows deployments from any branch or tag ("No restriction"). To ensure pull requests and untrusted branches cannot access production secrets without adding human approval gates, configure deployment restrictions:
-
-1. Select `Settings > Environments > prod`
-2. Under **Deployment branches and tags**, change the dropdown to **Selected branches and tags**
-3. Click **Add deployment branch or tag rule**:
-    * To gate by branch: select **Branch** and enter `main` (or your protected release branch).
-    * To gate by release tag: select **Tag** and enter a pattern like `v*.*.*` or `v*` so only release tags can trigger deployment.
-
-### Example
-
-Here is the arrangement of secrets, variables and environments for this repository.
+Workflows read these values.  Repository-level values are used by pull request deploys; `test` and `prod` environment values override them for those deploys.  Steps 5 and 6 set the required ones.
 
 | Environment | Name                   | Description                                     |
 |-------------|------------------------|-------------------------------------------------|
-| none        | `vars.OC_SERVER`       | Common server address (repository-level)        |
-| none        | `secrets.OC_NAMESPACE` | PR namespace (repository-level)                 |
-| none        | `secrets.OC_TOKEN`     | PR service token (repository-level)             |
-| none        | `secrets.DB_PASSWORD`  | PR database password (repository-level)         |
-| test        | `secrets.OC_NAMESPACE` | TEST namespace (environment-level)              |
-| test        | `secrets.OC_TOKEN`     | TEST service token (environment-level)          |
-| test        | `secrets.DB_PASSWORD`  | TEST database password (environment-level)       |
-| prod        | `secrets.OC_NAMESPACE` | PROD namespace (environment-level)              |
-| prod        | `secrets.OC_TOKEN`     | PROD service token (environment-level)          |
-| prod        | `secrets.DB_PASSWORD`  | PROD database password (environment-level)       |
+| none        | `vars.OC_SERVER`       | OpenShift API server (repository-level)         |
+| none        | `vars.OC_NAMESPACE`    | PR namespace, `<plate>-dev`                     |
+| none        | `secrets.OC_TOKEN`     | PR service token                                |
+| none        | `secrets.DB_PASSWORD`  | PR database password                            |
+| test        | `vars.OC_NAMESPACE`    | TEST namespace, `<plate>-test`                  |
+| test        | `secrets.OC_TOKEN`     | TEST service token                              |
+| test        | `secrets.DB_PASSWORD`  | TEST database password                          |
+| prod        | `vars.OC_NAMESPACE`    | PROD namespace, `<plate>-prod`                  |
+| prod        | `secrets.OC_TOKEN`     | PROD service token                              |
+| prod        | `secrets.DB_PASSWORD`  | PROD database password                          |
 | prod (opt)  | `vars.ROUTE_HOST`      | Vanity URL hostname (repository or environment) |
 | prod (opt)  | `secrets.TLS_CERTIFICATE` | Leaf certificate PEM for vanity URL          |
 | prod (opt)  | `secrets.TLS_PRIVATE_KEY` | Private key PEM for vanity URL               |
 | prod (opt)  | `secrets.TLS_CA_CERTIFICATE` | Issuing CA PEM for vanity URL            |
+| none (opt)  | `secrets.SONAR_TOKEN_BACKEND`, `secrets.SONAR_TOKEN_FRONTEND` | See [SonarCloud](#code-quality-with-sonarcloud) |
+| none (opt)  | `secrets.SYSDIG_API_TOKEN` | PROD alert sync                             |
 
-### Secret Values
+`DB_PASSWORD` is generated separately for each environment.  Don't change it after the first deploy: PostgreSQL keeps its first password.
 
-**`OC_TOKEN`** 
+**Copied the template before `OC_NAMESPACE` became a variable?**  Move it: `gh variable set OC_NAMESPACE --body <plate>-dev`, and the same with `--env test` / `--env prod` (or run `scripts/setup-environments.sh --apply`).  The old secret is unused and can be deleted.
 
-Create separate tokens for each of the DEV, TEST and PROD namespaces.  
+### Optional Values
 
-1. Login to your OpenShift console, e.g. [Silver](https://console.apps.silver.devops.gov.bc.ca/) or [Gold](https://console.apps.gold.devops.gov.bc.ca/).
-1. Select the pulldown with your username in the top right corner.
-1. Select `Copy login command`.
-1. Follow the UI to access a one-time login with token.
-1. Paste the login command into a shell, e.g.:
-    ```
-    oc login --token=... --server=...
-    ```
-1. View available projects:
-    ```
-    oc projects
-    ```
-1. Switch to a namespace:
-    ```
-    oc project <abc123-name>
-    ```
-1. Create a service account:
-    ```
-    oc create sa github-actions
-    ```
-1. Create a role binding:
-    ```
-    oc create rolebinding github-actions-edit --clusterrole=edit --serviceaccount=$(oc project -q):github-actions
-    ```
-1. Create and copy a token.  It cannot be retrieved again:
-    ```
-    oc create token github-actions --duration=87600h
-    ```
-
-* Alternate steps using an inline template can be found [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750). 
-* In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace. 
-* Reference: `${{ secrets.OC_TOKEN }}`
-
-**`OC_NAMESPACE`** 
-
-Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and PROD.  TOOLS namespaces (e.g. Jenkins, shared Oracle resources) are not used here.  Provided by your OpenShift platform team.
-
-* Reference: `${{ secrets.OC_NAMESPACE }}`
-* E.g.: `abc123-dev`
-
-**`SONAR_TOKEN_BACKEND`, `SONAR_TOKEN_FRONTEND`** (optional)
-
-SonarCloud analysis requires two distinct tokens—one per monorepo component. A single shared `SONAR_TOKEN` is not used because backend and frontend are tracked as separate SonarCloud projects. See [Code Quality with SonarCloud](#code-quality-with-sonarcloud) for onboarding and token generation instructions.
-
-* References: `${{ secrets.SONAR_TOKEN_BACKEND }}`, `${{ secrets.SONAR_TOKEN_FRONTEND }}`
-
-**`DB_PASSWORD`**
-
-The password used for the PostgreSQL database. This **MUST** be a strong, unique password and **DISTINCT** across all environments (pr, test, prod). Reusing the same password in development/PRs as in production is a critical security risk.
-
-* Reference: `${{ secrets.DB_PASSWORD }}`
-* Minimum 12 characters recommended for production.
-* **Pro-tip**: Use a password manager (like BitWarden, 1Password, or KeePass) to generate and store long, random, and unique passwords for each environment. Avoid simple, guessable passwords like `password` or `secure`.
+Set these by hand with `gh secret set` / `gh variable set` when you need them.
 
 **`SYSDIG_API_TOKEN`**
 
@@ -219,21 +130,20 @@ gh secret set TLS_PRIVATE_KEY --env prod < "${CERT_HOST}.key"
 gh secret set TLS_CA_CERTIFICATE --env prod < 'Entrust OV TLS Issuing RSA CA 2.pem'
 ```
 
-### Variable Values
-
->  Click Settings > Secrets and Variables > Actions > Variables > New repository variable
-
-**`OC_SERVER`** 
-
-OpenShift server address (API endpoint for your OpenShift cluster).
-* Reference: `${{ vars.OC_SERVER }}`
-* BCGov: `https://api.gold.devops.gov.bc.ca:6443` or `https://api.silver.devops.gov.bc.ca:6443`
-* Others: Use your cluster's API server address (e.g. `https://api.<cluster-domain>:6443`)
-
 **`ROUTE_HOST`**
 
 Vanity URL hostname for the application (e.g., `myapp.gov.bc.ca` — hostname only, no scheme). Optional — can be set as a repository variable or environment variable on `prod`. When set, the standalone `Route TLS` workflow (`.github/workflows/route-tls.yml`) configures an OpenShift Route with custom TLS for the frontend service.
 * Reference: `${{ vars.ROUTE_HOST }}`
+
+### PROD Deployment Branches and Tags (optional)
+
+By default, an environment allows deployments from any branch or tag ("No restriction"). To ensure pull requests and untrusted branches cannot access production secrets without adding human approval gates, configure deployment restrictions:
+
+1. Select `Settings > Environments > prod`
+2. Under **Deployment branches and tags**, change the dropdown to **Selected branches and tags**
+3. Click **Add deployment branch or tag rule**:
+    * To gate by branch: select **Branch** and enter `main` (or your protected release branch).
+    * To gate by release tag: select **Tag** and enter a pattern like `v*.*.*` or `v*` so only release tags can trigger deployment.
 
 ## Releases (optional)
 
@@ -364,75 +274,22 @@ If `@testing-library/user-event` is flagged but exported from `test-utils.tsx`:
 
 ## Repository Configuration
 
-### Pull Request Handling
+`scripts/setup-github.sh` (checklist step 7) sets:
 
-Squash merging is recommended for simplified history and ease of rollback.  Cleaning up merged branches is recommended for your DevOps Specialist's fragile sanity.
+* **Ruleset `main`** on the default branch: blocks deletion and force pushes; requires a pull request with 1 approval and resolved conversations, merged by squash only; requires CodeQL code scanning results with no alerts at high or higher; and requires these status checks, which must be up to date with `main`:
+    * `PR Results` (PR workflow)
+    * `Analysis Results` (Analysis workflow)
+    * `Validate Results` (PR Validate workflow)
 
-> Click Settings > General (selected automatically)
-
-Pull Requests:
-
-* `[uncheck] Allow merge commits`
-* `[check] Allow squash merging`
-   * `Default to pull request title`
-* `[uncheck] Allow rebase merging`
-* `[check] Always suggest updating pull request branches`
-* `[uncheck] Allow auto-merge`
-* `[check] Automatically delete head branches`
+  Each is the summary job of a workflow that runs on every pull request.  The jobs they summarize (builds, deploys, tests, scans) are left out because they're skipped when their paths don't change, which would block merges.  Repository admins may bypass the ruleset only by merging a pull request.  Trivy results are still reported to the Security tab, but Trivy is deliberately not a merge gate because it fails often.  Other rules already in the ruleset (e.g. Copilot code review) are kept.
+* **Pull requests**: squash merging only, defaulting to the pull request title; suggest updating branches; allow auto-merge; delete head branches after merge.
+* **Private vulnerability reporting**, which [SECURITY.md](./SECURITY.md) points reporters to.
 
 ### Packages
 
 Packages are available from your repository (link on right).  All should have visibility set to public for the workflows to run successfully.
 
 E.g. https://github.com/bcgov/quickstart-openshift/packages
-
-### Branch Protection Rules
-
-This is required to prevent direct pushes and merges to the default branch.  These steps must be run after one full pull request pipeline has been run to populate the required status checks.
-
-1. Select `Settings` (gear, top right) > `Rules` > `Rulesets` (under Code and Automation)
-2. Click `New ruleset` > `New branch ruleset`
-3. Setup Ruleset:
-    * Ruleset Name: `main`
-    * Enforcement status: `Active`
-    * Bypass list:
-        * Click `+ Add bypass`
-        * Check `[x] Repository admin`
-        * Click `Add selected`
-    * Target branches:
-        * Click `Add target`
-        * Select `Include default branch`
-    * Branch protections:
-        * `[x] Restrict deletions`
-        * `[x] Require linear history`
-        * `[x] Require a pull request before merging`
-            * Additional settings:
-                * `Require approvals: 1` (or more!)
-                * `[x] Require conversation resolution before merging`
-        * `[x] Require status checks to pass`
-            * `[x] Require branches to be up to date before merging`
-            * Required checks: *These will be populated after a full pull request pipeline run!*
-                * Click `+Add checks`
-                * This is our default set, yours may differ:
-                    * `Analysis Results`
-                    * `PR Results`
-                    * `Validate Results`
-    * `[x] Block force pushes`
-    * `[x] Require code scanning results`
-        * Click `+ Add tool`
-        * This is our default set, yours may differ:
-            * `CodeQL`
-            * `Trivy`
-    * Click `Create`
-
-Note: Required status checks will only be available to select after the relevant workflows have run at least once on a pull request.
-
-#### Status checks example
-![](./.github/graphics/branch-protection.png)
-
-#### Required tools and alerts example
-![](./.github/graphics/branch-code-results.png)
-
 
 ### Adding Team Members
 

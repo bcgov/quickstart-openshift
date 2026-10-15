@@ -25,9 +25,6 @@ on:
       db_password:
         description: Database password
         required: true
-      oc_namespace:
-        description: OpenShift namespace
-        required: true
       oc_token:
         description: OpenShift token
         required: true
@@ -52,7 +49,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.db_password }}
         with:
           file: common/openshift.init.yml
-          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
           # Secret + NetworkPolicies: create if missing. Postgres ignores
@@ -91,7 +88,7 @@ jobs:
         id: deploy
         with:
           file: ${{ matrix.file }}
-          oc_namespace: ${{ secrets.oc_namespace }}
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
           debug: true
