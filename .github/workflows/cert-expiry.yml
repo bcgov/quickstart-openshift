@@ -11,6 +11,8 @@ permissions: {}
 jobs:
   cert-expiry:
     name: TLS Certificate Expiry
+    # Only vanity hosts we manage; *.apps.silver.devops.gov.bc.ca certs are platform-managed
+    if: vars.ROUTE_HOST != '' && !endsWith(vars.ROUTE_HOST, '.apps.silver.devops.gov.bc.ca')
     runs-on: ubuntu-slim
     timeout-minutes: 10
     permissions:
@@ -26,9 +28,7 @@ jobs:
         id: check
         uses: bcgov/actions-openshift/cert-expiry@97cb3f8a5a6d134594c85224d3f593e3c0e90647 # v0.4.0
         with:
-          hosts: |
-            ${{ github.event.repository.name }}-prod.apps.silver.devops.gov.bc.ca
-            ${{ vars.ROUTE_HOST }}
+          hosts: ${{ vars.ROUTE_HOST }}
           days: "30"
 
       - name: Notify CODEOWNERS
