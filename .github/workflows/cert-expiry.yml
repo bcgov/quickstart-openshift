@@ -1,0 +1,40 @@
+name: Cert Expiry
+
+on:
+  schedule:
+    # Monday 08:17 PT (15:17 UTC)
+    - cron: "17 15 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  cert-expiry:
+    name: TLS Certificate Expiry
+    if: vars.ROUTE_HOST != ''
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      # workflow-notifier reads CODEOWNERS from the workspace
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Check certificate expiry
+        id: check
+        uses: bcgov/actions-openshift/cert-expiry@97cb3f8a5a6d134594c85224d3f593e3c0e90647 # v0.4.0
+        with:
+          hosts: ${{ vars.ROUTE_HOST }}
+          days: "30"
+
+      - name: Notify CODEOWNERS
+        if: failure() && steps.check.outputs.findings != '' && steps.check.outputs.findings != '[]'
+        uses: bcgov/actions/workflow-notifier@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
+        with:
+          title: "TLS certificate expiring or unreadable"
+          labels: ""
+          notify_author: "false"
+          notify_codeowners: "true"
