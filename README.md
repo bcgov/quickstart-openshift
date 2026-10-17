@@ -134,6 +134,19 @@ gh secret set TLS_CA_CERTIFICATE --env prod < 'Entrust OV TLS Issuing RSA CA 2.p
 
 Vanity URL hostname for the application (e.g., `myapp.gov.bc.ca` — hostname only, no scheme). Optional — can be set as a repository variable or environment variable on `prod`. When set, the standalone `Route TLS` workflow (`.github/workflows/route-tls.yml`) configures an OpenShift Route with custom TLS for the frontend service.
 * Reference: `${{ vars.ROUTE_HOST }}`
+* Set as a repository variable: `gh variable set ROUTE_HOST --body 'myapp.gov.bc.ca'` (or `Settings > Secrets and variables > Actions > Variables`). The `Cert Expiry` check reads only the repository variable.
+
+Two standalone workflows use it:
+
+* `Route TLS` ([`route-tls.yml`](./.github/workflows/route-tls.yml)) validates (`dry_run=true`) or applies (`dry_run=false`) the PROD vanity Route certificate. Manual only.
+* `Cert Expiry` ([`cert-expiry.yml`](./.github/workflows/cert-expiry.yml)) checks the `ROUTE_HOST` certificate and notifies CODEOWNERS if it expires within 30 days or can't be read. Runs weekly (Monday) or by hand, and is skipped when `ROUTE_HOST` is unset. `*.apps.silver.devops.gov.bc.ca` hosts are also skipped: the platform manages those certificates.
+
+Run either by hand from `Actions > <workflow> > Run workflow`, or:
+
+```bash
+gh workflow run route-tls.yml -f dry_run=true
+gh workflow run cert-expiry.yml
+```
 
 ### PROD Deployment Branches and Tags (optional)
 
