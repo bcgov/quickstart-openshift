@@ -11,8 +11,7 @@ permissions: {}
 jobs:
   cert-expiry:
     name: TLS Certificate Expiry
-    # Only vanity hosts we manage; *.apps.silver.devops.gov.bc.ca certs are platform-managed
-    if: vars.ROUTE_HOST != '' && !endsWith(vars.ROUTE_HOST, '.apps.silver.devops.gov.bc.ca')
+    if: vars.ROUTE_HOST != ''
     runs-on: ubuntu-slim
     timeout-minutes: 10
     permissions:
