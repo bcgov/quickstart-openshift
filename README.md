@@ -173,6 +173,13 @@ Notes:
 * If the `prod` environment limits deployment branches and tags, add a tag rule for your release tags (e.g. `v*`), or releases can't deploy.
 * Both workflows share a concurrency group, so they never deploy PROD at the same time.
 
+### Why release-to-prod
+
+* **Promote what was tested.** PROD gets the same images, by digest, that TEST ran; nothing is rebuilt. Google's SRE book describes builds that are reproducible and releases cut from the last revision that passed all tests ([Release Engineering](https://sre.google/sre-book/release-engineering/)).
+* **Approve the change, not the deploy.** Review happens on the PR, and publishing a release is the decision to ship. DORA's research found that peer review in the development process, backed by automated testing, works better than external approval, and that more formal review was not linked to fewer failed changes ([Streamlining change approval](https://dora.dev/capabilities/streamlining-change-approval/)).
+* **No required-reviewer gates on `prod`.** A job waiting on environment approval can sit for up to 30 days before it ends ([Actions limits](https://docs.github.com/en/actions/reference/limits)), leaving stuck runs and junk failures. Keep the `prod` environment for its secrets, which only jobs that reference it can read, and use its deployment branch and tag rules to choose what may deploy ([Deployments and environments](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments)).
+* **Check, then roll back fast.** Merges run the tests on TEST before anything reaches PROD, and smoke-check PROD after a release. If a release misbehaves, re-run the `Release` workflow for the previous release; it redeploys that release's images without a rebuild. DORA recommends automated testing and monitoring to quickly detect and correct bad changes (same DORA page).
+
 ## Updating Dependencies
 
 Dependabot and Mend Renovate can both provide dependency updates using pull requests.  Dependabot is simpler to configure, while Renovate is much more configurable and lighter on resources.
