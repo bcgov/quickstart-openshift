@@ -33,19 +33,54 @@ jobs:
             ${{ github.event.number }}
             ${{ github.event.pull_request.head.sha }}
           tag_fallback: latest
-          triggers: ('${{ matrix.package }}/', '.github/workflows/pr-open.yml')
+          triggers: |
+            ${{ matrix.package }}/
+            .github/workflows/pr-open.yml
+
+  # One image-tracker call: every package's digest for this PR, by OCI label
+  images:
+    name: Images
+    needs: [builds]
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: read
+    outputs:
+      images: ${{ steps.tracker.outputs.images }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: tracker
+        uses: bcgov/actions/image-tracker@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
+        with:
+          # Unchanged packages reuse an earlier image, so walk back far enough to find it
+          max_depth: 100
+          packages: |
+            migrations
+            backend
+            frontend
+          revision: ${{ github.event.pull_request.head.sha }}
 
   deploys:
     name: Deploys (${{ github.event.number }})
-    needs: [builds]
+    needs: [images]
     uses: ./.github/workflows/reusable-deploy.yml
     secrets:
       db_password: ${{ secrets.db_password }}
       oc_token: ${{ secrets.oc_token }}
     with:
       target: ${{ github.event.number }}
-      tag: ${{ github.event.pull_request.head.sha }}
-      triggers: ('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/pr-open.yml')
+      images: ${{ needs.images.outputs.images }}
+      triggers: |
+        backend/
+        frontend/
+        migrations/
+        common/
+        .github/workflows/pr-open.yml
 
   tests:
     name: Tests
@@ -77,7 +112,7 @@ jobs:
   # ==========================================================================
   results:
     name: PR Results
-    needs: [builds, deploys, tests, comment]
+    needs: [builds, images, deploys, tests, comment]
     if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 1
