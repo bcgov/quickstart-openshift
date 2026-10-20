@@ -2,7 +2,7 @@
 # GitHub environments, secrets and variables for the deploy workflows:
 #   repository (pull requests): variables OC_NAMESPACE=<plate>-dev, OC_SERVER; secrets OC_TOKEN, DB_PASSWORD
 #   test: variable OC_NAMESPACE=<plate>-test; secrets OC_TOKEN, DB_PASSWORD
-#   prod: variable OC_NAMESPACE=<plate>-prod; secrets OC_TOKEN, DB_PASSWORD; required reviewers from --reviewers
+#   prod: variable OC_NAMESPACE=<plate>-prod; secrets OC_TOKEN, DB_PASSWORD
 # OC_TOKEN is piped from the `github-actions-token` Secret made by setup-openshift.sh
 # straight into `gh secret set`; secret values are never printed or saved.
 # DB_PASSWORD is generated, different for each environment.
@@ -13,18 +13,16 @@
 # plate comes from existing OC_NAMESPACE variables.  Safe to re-run: secrets that
 # are already set are never overwritten, so a database keeps its password.
 #
-# Usage: scripts/setup-environments.sh [--plate abc123] [--reviewers user,org/team] [--repo OWNER/NAME] [--apply]
+# Usage: scripts/setup-environments.sh [--plate abc123] [--repo OWNER/NAME] [--apply]
 set -euo pipefail
 
 APPLY=false
 PLATE=""
-REVIEWERS=""
 REPO=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --apply) APPLY=true ;;
     --plate) PLATE="${2:-}"; shift ;;
-    --reviewers) REVIEWERS="${2:-}"; shift ;;
     --repo) REPO="${2:-}"; shift ;;
     -h|--help) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
@@ -113,49 +111,15 @@ for scope in repo test prod; do
   fi
 done
 
-# 1. Environments, with PROD reviewers when given
-reviewer_ids() {
-  local r
-  for r in ${REVIEWERS//,/ }; do
-    if [[ "$r" == */* ]]; then
-      gh api "orgs/${r%%/*}/teams/${r#*/}" --jq '{type: "Team", id}'
-    else
-      gh api "users/${r}" --jq '{type: "User", id}'
-    fi
-  done | jq -sc 'sort_by(.type, .id)'
-}
-wanted="$( [ -z "$REVIEWERS" ] || reviewer_ids )"
-prod_env=""
+# 1. Environments
 for env in test prod; do
-  if ! current="$(gh api "repos/${REPO}/environments/${env}" 2>/dev/null)"; then
-    body='{}'
-    [ "$env" = prod ] && [ -n "$wanted" ] && body="$(jq -nc --argjson r "$wanted" '{reviewers: $r}')"
-    status "environment ${env}" change "create$([ "$body" = '{}' ] || echo ", reviewers ${REVIEWERS}")"
-    [ "$APPLY" = false ] || gh api -X PUT "repos/${REPO}/environments/${env}" --input - <<< "$body" >/dev/null
-  elif [ "$env" = prod ] && [ -n "$wanted" ]; then
-    have="$(jq -c '[.protection_rules[] | select(.type == "required_reviewers") | .reviewers[]
-      | {type, id: .reviewer.id}] | sort_by(.type, .id)' <<< "$current")"
-    if [ "$have" = "$wanted" ]; then
-      status "environment prod reviewers" ok
-    else
-      status "environment prod reviewers" change "set to ${REVIEWERS}"
-      # Keep the existing wait timer and deployment branch policy
-      body="$(jq -c --argjson r "$wanted" '{reviewers: $r, deployment_branch_policy,
-        wait_timer: ([.protection_rules[] | select(.type == "wait_timer") | .wait_timer][0] // 0)}' <<< "$current")"
-      [ "$APPLY" = false ] || gh api -X PUT "repos/${REPO}/environments/prod" --input - <<< "$body" >/dev/null
-    fi
-  else
+  if gh api "repos/${REPO}/environments/${env}" >/dev/null 2>&1; then
     status "environment ${env}" ok
-    [ "$env" = test ] || prod_env="$current"
+  else
+    status "environment ${env}" change create
+    [ "$APPLY" = false ] || gh api -X PUT "repos/${REPO}/environments/${env}" --input - <<< '{}' >/dev/null
   fi
 done
-# No --reviewers: report the current ones; none isn't counted as a change
-if [ -n "$prod_env" ]; then
-  names="$(jq -r --arg org "${REPO%%/*}" '[.protection_rules[]? | select(.type == "required_reviewers") | .reviewers[]
-    | if .type == "Team" then "\($org)/\(.reviewer.slug)" else .reviewer.login end] | join(",")' <<< "$prod_env")"
-  [ -n "$names" ] || names="none; PROD deploys won't wait for approval"
-  status "environment prod reviewers" ok "$names"
-fi
 
 # 2. Variables, secrets (only when missing)
 #
