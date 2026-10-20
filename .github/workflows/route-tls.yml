@@ -24,7 +24,7 @@ jobs:
     environment: prod
     permissions:
       contents: read
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     steps:
       - uses: bcgov/actions-openshift/route-tls@97cb3f8a5a6d134594c85224d3f593e3c0e90647 # v0.4.0
