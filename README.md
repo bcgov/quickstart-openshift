@@ -12,7 +12,6 @@ This repository provides a template to rapidly deploy a modern web application s
 **Includes:**
 * Pull Request-based pipeline
 * Sandboxed development environments
-* Gated/controlled production deployments (optional)
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure, and container scan tools
 * Out-of-the-box alignment with **OWASP ASVS** Level 1 & 2 controls (see [SECURITY.md](./SECURITY.md#owasp-asvs-alignment))
@@ -48,15 +47,15 @@ Setup takes an hour or less.  Scripts in [`scripts/`](./scripts/) do the GitHub 
 4. **Log in** (by hand): `gh auth login`, then in the OpenShift console select your name (top right) > `Copy login command` and paste it into a shell (`oc login --token=... --server=...`).  You need admin rights on the repo and edit rights in all three namespaces.
     Then run steps 5 to 7 with one command, which previews by default and exits non-zero if anything needs changing; add `--apply` to make the changes:
     ```bash
-    scripts/setup.sh --plate abc123 --reviewers alice,bcgov/my-team   # preview, then add --apply
+    scripts/setup.sh --plate abc123   # preview, then add --apply
     ```
 5. **OpenShift deploy account**: creates the `github-actions` service account, `edit` role binding and token Secret in each namespace.
     ```bash
     scripts/setup-openshift.sh --plate abc123          # preview, then add --apply
     ```
-6. **GitHub environments, secrets and variables**: creates the `test` and `prod` environments (PROD with required reviewers if you name them; without `--reviewers` it reports the current ones), and sets the `OC_NAMESPACE` variable and `OC_TOKEN` and `DB_PASSWORD` secrets for pull requests (repository level), TEST and PROD, plus the `OC_SERVER` variable.  Without `--plate` it reads the plate from existing `OC_NAMESPACE` variables.  It won't generate a `DB_PASSWORD` for a namespace that already has a database, since a new password would lock the app out.  Secrets that are already set are never overwritten.  Secret values are piped from `oc` or `openssl` straight into `gh secret set`; they're never printed or written to disk, and previews show only the secret's name.
+6. **GitHub environments, secrets and variables**: creates the `test` and `prod` environments, and sets the `OC_NAMESPACE` variable and `OC_TOKEN` and `DB_PASSWORD` secrets for pull requests (repository level), TEST and PROD, plus the `OC_SERVER` variable.  Without `--plate` it reads the plate from existing `OC_NAMESPACE` variables.  It won't generate a `DB_PASSWORD` for a namespace that already has a database, since a new password would lock the app out.  Secrets that are already set are never overwritten.  Secret values are piped from `oc` or `openssl` straight into `gh secret set`; they're never printed or written to disk, and previews show only the secret's name.
     ```bash
-    scripts/setup-environments.sh --plate abc123 --reviewers alice,bcgov/my-team   # preview, then add --apply
+    scripts/setup-environments.sh --plate abc123   # preview, then add --apply
     ```
 7. **GitHub repository settings**: the `main` ruleset, pull request settings and private vulnerability reporting (see [Repository Configuration](#repository-configuration)).
     ```bash
