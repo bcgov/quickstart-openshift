@@ -41,7 +41,7 @@ jobs:
     environment: ${{ inputs.environment }}
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: bcgov/actions-openshift/deployer@97cb3f8a5a6d134594c85224d3f593e3c0e90647 # v0.4.0
         id: deploy
@@ -66,7 +66,7 @@ jobs:
     name: Deploy (${{ matrix.name }})
     environment: ${{ inputs.environment }}
     needs: [init]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     strategy:
       matrix:

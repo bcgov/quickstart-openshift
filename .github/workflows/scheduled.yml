@@ -101,7 +101,7 @@ jobs:
     name: ZAP Scans
     permissions:
       issues: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@3c58388149901b9a03b7718852c5ba889646c27c # v0.13.0
@@ -113,7 +113,7 @@ jobs:
 
   load-tests:
     name: Load
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         name: [backend, frontend]

@@ -4,16 +4,15 @@
 # script checks the setup and the combined result exits non-zero if anything
 # differs.  With --apply it stops at the first script that fails.
 #
-# Usage: scripts/setup.sh [--plate abc123] [--reviewers alice,org/team] [--repo OWNER/NAME] [--apply]
+# Usage: scripts/setup.sh [--plate abc123] [--repo OWNER/NAME] [--apply]
 set -euo pipefail
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APPLY=() PLATE=() REVIEWERS=() REPO=()
+APPLY=() PLATE=() REPO=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --apply) APPLY=(--apply) ;;
     --plate) PLATE=(--plate "${2:-}"); shift ;;
-    --reviewers) REVIEWERS=(--reviewers "${2:-}"); shift ;;
     --repo) REPO=(--repo "${2:-}"); shift ;;
     -h|--help) sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
@@ -33,7 +32,7 @@ run() {
 }
 run setup-github.sh "${REPO[@]}" "${APPLY[@]}"
 run setup-openshift.sh "${PLATE[@]}" "${APPLY[@]}"
-run setup-environments.sh "${PLATE[@]}" "${REVIEWERS[@]}" "${REPO[@]}" "${APPLY[@]}"
+run setup-environments.sh "${PLATE[@]}" "${REPO[@]}" "${APPLY[@]}"
 
 if [ "$failed" -eq 0 ]; then
   echo "All set: every script passed."
