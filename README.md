@@ -49,11 +49,11 @@ Setup takes an hour or less.  Scripts in [`scripts/`](./scripts/) do the GitHub 
     ```bash
     scripts/setup.sh --plate abc123   # preview, then add --apply
     ```
-5. **OpenShift deploy account**: creates the `github-actions` service account, `edit` role binding and token Secret in each namespace.
+5. **OpenShift deploy account** (optional helper; see [by hand](#secrets-and-variables-by-hand)): creates the `github-actions` service account, `edit` role binding and token Secret in each namespace.
     ```bash
     scripts/setup-openshift.sh --plate abc123          # preview, then add --apply
     ```
-6. **GitHub environments, secrets and variables**: creates the `test` and `prod` environments, and sets the `OC_NAMESPACE` variable and `OC_TOKEN` and `DB_PASSWORD` secrets for pull requests (repository level), TEST and PROD, plus the `OC_SERVER` variable.  Without `--plate` it reads the plate from existing `OC_NAMESPACE` variables.  It won't generate a `DB_PASSWORD` for a namespace that already has a database, since a new password would lock the app out.  Secrets that are already set are never overwritten.  Secret values are piped from `oc` or `openssl` straight into `gh secret set`; they're never printed or written to disk, and previews show only the secret's name.
+6. **GitHub environments, secrets and variables** (optional helper; see [by hand](#secrets-and-variables-by-hand)): creates the `test` and `prod` environments, and sets the `OC_NAMESPACE` variable and `OC_TOKEN` and `DB_PASSWORD` secrets for pull requests (repository level), TEST and PROD, plus the `OC_SERVER` variable.  Without `--plate` it reads the plate from existing `OC_NAMESPACE` variables.  It won't generate a `DB_PASSWORD` for a namespace that already has a database, since a new password would lock the app out.  Secrets that are already set are never overwritten.  Secret values are piped from `oc` or `openssl` straight into `gh secret set`; they're never printed or written to disk, and previews show only the secret's name.
     ```bash
     scripts/setup-environments.sh --plate abc123   # preview, then add --apply
     ```
@@ -91,36 +91,86 @@ Workflows read these values.  Repository-level values are used by pull request d
 
 **Copied the template before `OC_NAMESPACE` became a variable?**  Move it: `gh variable set OC_NAMESPACE --body <plate>-dev`, and the same with `--env test` / `--env prod` (or run `scripts/setup-environments.sh --apply`).  The old secret is unused and can be deleted.
 
-### Deploy Account by Hand
+### Secrets and Variables by Hand
 
-`scripts/setup-openshift.sh` and `scripts/setup-environments.sh` (steps 5 and 6) do this for you.  To do it by hand, log in with `oc` (step 4) and repeat for each namespace: `<plate>-dev` for pull requests (repository level), `<plate>-test` for the `test` environment and `<plate>-prod` for the `prod` environment.
+Steps 5 and 6 above are an optional helper.  Everything they do can be done by hand, as below.
 
-1. Create the service account and give it `edit` rights in the namespace:
-    ```bash
-    NS=abc123-dev
-    oc create sa github-actions -n $NS
-    oc create rolebinding github-actions-edit --clusterrole=edit --serviceaccount=$NS:github-actions -n $NS
-    ```
-2. Create a long-lived token Secret for it.  OpenShift fills in the token a few seconds later:
-    ```bash
-    oc apply -n $NS -f - <<YAML
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: github-actions-token
-      annotations:
-        kubernetes.io/service-account.name: github-actions
-    type: kubernetes.io/service-account-token
-    YAML
-    ```
-3. Pipe the token into `OC_TOKEN` and set `OC_NAMESPACE`, so the token is never printed.  Leave off `--env` for the `<plate>-dev` namespace (repository level, used by pull requests); use `--env test` or `--env prod` for the others:
-    ```bash
-    oc get secret github-actions-token -n $NS -o jsonpath='{.data.token}' | base64 -d | gh secret set OC_TOKEN
-    gh variable set OC_NAMESPACE --body $NS
-    ```
-4. Set the API server once, at repository level: `gh variable set OC_SERVER --body "$(oc whoami --show-server)"`.
+Variables and secrets are consumed by workflows.  Variables are visible in workflows and logs, while secrets are hidden/redacted.
 
-Pull requests must deploy to `<plate>-dev`; never point the repository-level `OC_NAMESPACE` or `OC_TOKEN` at TEST or PROD.  Each namespace gets its own token, so a token can only deploy where it was created.
+**Repository-level vs Environment-specific:**
+
+- **Repository-level** (shown as `<none>` in the environment column): These are available to all workflows and environments. They're created at the repository level and apply globally unless overridden by environment-specific values.
+- **Environment-specific**: These are scoped to a particular environment (e.g., TEST, PROD) and override repository-level values when that environment is used.
+
+To create new secrets from GitHub.com click:
+
+* `Settings > Secrets and Variables > Actions > Secrets > New repository secret`
+
+To create new environments from GitHub.com click:
+
+* `Settings > Environments > New environment`
+
+**`OC_TOKEN`**
+
+Create separate tokens for each of the DEV, TEST and PROD namespaces.
+
+1. Login to your OpenShift console, e.g. [Silver](https://console.apps.silver.devops.gov.bc.ca/) or [Gold](https://console.apps.gold.devops.gov.bc.ca/).
+1. Select the pulldown with your username in the top right corner.
+1. Select `Copy login command`.
+1. Follow the UI to access a one-time login with token.
+1. Paste the login command into a shell, e.g.:
+    ```
+    oc login --token=... --server=...
+    ```
+1. View available projects:
+    ```
+    oc projects
+    ```
+1. Switch to a namespace:
+    ```
+    oc project <abc123-name>
+    ```
+1. Create a service account:
+    ```
+    oc create sa github-actions
+    ```
+1. Create a role binding:
+    ```
+    oc create rolebinding github-actions-edit --clusterrole=edit --serviceaccount=$(oc project -q):github-actions
+    ```
+1. Create and copy a token.  It cannot be retrieved again:
+    ```
+    oc create token github-actions --duration=87600h
+    ```
+1. Save it as the `OC_TOKEN` secret: repository level for `<plate>-dev` (pull requests), or in the `test` / `prod` environment for those namespaces.  To pipe it straight in without printing it:
+    ```
+    oc create token github-actions --duration=87600h | gh secret set OC_TOKEN   # add --env test or --env prod for those namespaces
+    ```
+
+* Alternate steps using an inline template can be found [here](https://github.com/bcgov/gh-discussions-lab/discussions/3750).  `scripts/setup-openshift.sh` uses the same approach: a `github-actions-token` Secret of type `kubernetes.io/service-account-token`, which doesn't expire.
+* In earlier versions of OpenShift, a pipeline token secret was created automatically in each namespace.
+* Reference: `${{ secrets.OC_TOKEN }}`
+
+**`OC_NAMESPACE`**
+
+Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and PROD.  TOOLS namespaces (e.g. Jenkins, shared Oracle resources) are not used here.  Provided by your OpenShift platform team.
+
+* Reference: `${{ vars.OC_NAMESPACE }}`
+* E.g.: `abc123-dev`
+* Set it with `gh variable set OC_NAMESPACE --body abc123-dev` (repository level, for pull requests), and `--env test` / `--env prod` with `abc123-test` / `abc123-prod`.
+
+**`OC_SERVER`**
+
+* Reference: `${{ vars.OC_SERVER }}`
+* Set it once at repository level: `gh variable set OC_SERVER --body "$(oc whoami --show-server)"`
+
+**`DB_PASSWORD`**
+
+The password used for the PostgreSQL database. This **MUST** be a strong, unique password and **DISTINCT** across all environments (pr, test, prod). Reusing the same password in development/PRs as in production is a critical security risk.
+
+* Reference: `${{ secrets.DB_PASSWORD }}`
+* Minimum 12 characters recommended for production.
+* **Pro-tip**: Use a password manager (like BitWarden, 1Password, or KeePass) to generate and store long, random, and unique passwords for each environment. Avoid simple, guessable passwords like `password` or `secure`.
 
 ### Optional Values
 
