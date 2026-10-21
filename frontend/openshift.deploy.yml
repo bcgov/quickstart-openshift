@@ -10,15 +10,9 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
-  - name: IMAGE_TAG
-    description: Image tag to use
+  - name: FRONTEND_IMAGE
+    description: Frontend image by digest, e.g. ghcr.io/bcgov/<repo>/frontend@sha256:...
     required: true
-  - name: REGISTRY
-    description: Container registry to import from
-    value: ghcr.io
-  - name: ORG_NAME
-    description: Organization name
-    value: bcgov
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: MIN_REPLICAS
@@ -71,7 +65,7 @@ objects:
                     topologyKey: kubernetes.io/hostname
           initContainers:
             - name: wait-for-backend
-              image: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${IMAGE_TAG}
+              image: ${FRONTEND_IMAGE}
               command:
                 - /bin/sh
                 - -c
@@ -102,7 +96,7 @@ objects:
                   mountPath: /tmp/caddy
           containers:
             - name: ${NAME}
-              image: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${IMAGE_TAG}
+              image: ${FRONTEND_IMAGE}
               imagePullPolicy: Always
               ports:
                 - name: http

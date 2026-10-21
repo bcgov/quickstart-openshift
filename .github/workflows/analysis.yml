@@ -55,7 +55,7 @@ jobs:
           sonar_token: ${{ env.sonar_token }}
           dep_scan: warn
           supply_scan: true
-          triggers: ('backend/')
+          triggers: backend/
 
   frontend-tests:
     name: Frontend Tests
@@ -84,7 +84,7 @@ jobs:
           sonar_token: ${{ env.sonar_token }}
           dep_scan: warn
           supply_scan: true
-          triggers: ('frontend/')
+          triggers: frontend/
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:

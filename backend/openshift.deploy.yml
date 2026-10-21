@@ -10,15 +10,12 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
-  - name: IMAGE_TAG
-    description: Image tag to use
+  - name: BACKEND_IMAGE
+    description: Backend image by digest, e.g. ghcr.io/bcgov/<repo>/backend@sha256:...
     required: true
-  - name: REGISTRY
-    description: Container registry to import from
-    value: ghcr.io
-  - name: ORG_NAME
-    description: Organization name
-    value: bcgov
+  - name: MIGRATIONS_IMAGE
+    description: Migrations image by digest, e.g. ghcr.io/bcgov/<repo>/migrations@sha256:...
+    required: true
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: MIN_REPLICAS
@@ -71,7 +68,7 @@ objects:
                     topologyKey: kubernetes.io/hostname
           initContainers:
             - name: wait-for-db
-              image: ${REGISTRY}/${ORG_NAME}/${NAME}/migrations:${IMAGE_TAG}
+              image: ${MIGRATIONS_IMAGE}
               command:
                 - /bin/sh
                 - -c
@@ -101,7 +98,7 @@ objects:
                 - name: tmp
                   mountPath: /tmp
             - name: migrations
-              image: ${REGISTRY}/${ORG_NAME}/${NAME}/migrations:${IMAGE_TAG}
+              image: ${MIGRATIONS_IMAGE}
               imagePullPolicy: Always
               env:
                 - name: POSTGRES_DATABASE
@@ -142,7 +139,7 @@ objects:
                   mountPath: /tmp
           containers:
             - name: ${NAME}
-              image: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${IMAGE_TAG}
+              image: ${BACKEND_IMAGE}
               imagePullPolicy: Always
               ports:
                 - name: http

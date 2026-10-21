@@ -22,13 +22,29 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
+      packages: write # image-tracker tags
     outputs:
-      pr: ${{ steps.pr.outputs.pr }}
+      images: ${{ steps.tracker.outputs.images }}
+      pr: ${{ steps.tracker.outputs.pr }}
     runs-on: ubuntu-26.04
+    timeout-minutes: 5
     steps:
-      # Get PR number for squash merges to main
-      - id: pr
-        uses: bcgov/action-get-pr@28b0adf8e4d40720d41f9c87356ce24b0a4bd6af # v0.3.1
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # One call: every package's digest for this commit, plus the latest tag.
+      # A squash merge was never built, so walk back to the last image per package.
+      - id: tracker
+        uses: bcgov/actions/image-tracker@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
+        with:
+          max_depth: 100
+          packages: |
+            migrations
+            backend
+            frontend
+          tags: |
+            latest
   deploy-test:
     name: TEST Deploys (${{ needs.init.outputs.pr }})
     needs: [init]
@@ -39,7 +55,7 @@ jobs:
     with:
       environment: test
       target: test
-      tag: ${{ needs.init.outputs.pr }}
+      images: ${{ needs.init.outputs.images }}
 
   tests:
     name: Tests
@@ -48,8 +64,8 @@ jobs:
     with:
       target: test
 
-  # PROD on every merge. For PROD only on releases, comment out deploy-prod,
-  # monitor-prod and promote below; release.yml then handles PROD.
+  # PROD on every merge. For PROD only on releases, comment out deploy-prod
+  # and monitor-prod below; release.yml then handles PROD.
   deploy-prod:
     name: PROD Deploys (${{ needs.init.outputs.pr }})
     needs: [tests, init]
@@ -60,7 +76,7 @@ jobs:
     with:
       environment: prod
       target: prod
-      tag: ${{ needs.init.outputs.pr }}
+      images: ${{ needs.init.outputs.images }}
 
   # Sync Sysdig email alerts for PROD. No-ops cleanly if SYSDIG_API_TOKEN is
   # unset or monitoring/alerts/ is empty — adoption is gradual. Alert
@@ -83,21 +99,3 @@ jobs:
           sysdig_api_token: ${{ secrets.SYSDIG_API_TOKEN }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           app: ${{ github.event.repository.name }}
-
-  promote:
-    name: Promote Images
-    needs: [deploy-prod, init]
-    runs-on: ubuntu-slim
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        package: [migrations, backend, frontend]
-    timeout-minutes: 1
-    steps:
-      - uses: shrink/actions-docker-registry-tag@e6aaef25c595b6e0edd18bf4c7dbfea3abd43299 # v5
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.init.outputs.pr }}
-          tags: prod

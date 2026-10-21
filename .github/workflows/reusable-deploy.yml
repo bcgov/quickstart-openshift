@@ -12,9 +12,9 @@ on:
         description: Deployment target; usually PR number, test or prod
         default: ${{ github.event.number }}
         type: string
-      tag:
-        description: Container tag
-        default: ${{ github.event.number }}
+      images:
+        description: image-tracker `images` output, a JSON object of package to image digest reference
+        required: true
         type: string
       triggers:
         description: Triggers for deployment
@@ -77,10 +77,11 @@ jobs:
             parameters: -p DB_PVC_SIZE="256Mi"
           - name: backend
             file: backend/openshift.deploy.yml
-            parameters: -p IMAGE_TAG="${{ inputs.tag }}"
+            parameters: -p BACKEND_IMAGE="${{ fromJSON(inputs.images).backend }}"
+              -p MIGRATIONS_IMAGE="${{ fromJSON(inputs.images).migrations }}"
           - name: frontend
             file: frontend/openshift.deploy.yml
-            parameters: -p IMAGE_TAG="${{ inputs.tag }}"
+            parameters: -p FRONTEND_IMAGE="${{ fromJSON(inputs.images).frontend }}"
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
