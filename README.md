@@ -91,6 +91,37 @@ Workflows read these values.  Repository-level values are used by pull request d
 
 **Copied the template before `OC_NAMESPACE` became a variable?**  Move it: `gh variable set OC_NAMESPACE --body <plate>-dev`, and the same with `--env test` / `--env prod` (or run `scripts/setup-environments.sh --apply`).  The old secret is unused and can be deleted.
 
+### Deploy Account by Hand
+
+`scripts/setup-openshift.sh` and `scripts/setup-environments.sh` (steps 5 and 6) do this for you.  To do it by hand, log in with `oc` (step 4) and repeat for each namespace: `<plate>-dev` for pull requests (repository level), `<plate>-test` for the `test` environment and `<plate>-prod` for the `prod` environment.
+
+1. Create the service account and give it `edit` rights in the namespace:
+    ```bash
+    NS=abc123-dev
+    oc create sa github-actions -n $NS
+    oc create rolebinding github-actions-edit --clusterrole=edit --serviceaccount=$NS:github-actions -n $NS
+    ```
+2. Create a long-lived token Secret for it.  OpenShift fills in the token a few seconds later:
+    ```bash
+    oc apply -n $NS -f - <<YAML
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: github-actions-token
+      annotations:
+        kubernetes.io/service-account.name: github-actions
+    type: kubernetes.io/service-account-token
+    YAML
+    ```
+3. Pipe the token into `OC_TOKEN` and set `OC_NAMESPACE`, so the token is never printed.  Leave off `--env` for the `<plate>-dev` namespace (repository level, used by pull requests); use `--env test` or `--env prod` for the others:
+    ```bash
+    oc get secret github-actions-token -n $NS -o jsonpath='{.data.token}' | base64 -d | gh secret set OC_TOKEN
+    gh variable set OC_NAMESPACE --body $NS
+    ```
+4. Set the API server once, at repository level: `gh variable set OC_SERVER --body "$(oc whoami --show-server)"`.
+
+Pull requests must deploy to `<plate>-dev`; never point the repository-level `OC_NAMESPACE` or `OC_TOKEN` at TEST or PROD.  Each namespace gets its own token, so a token can only deploy where it was created.
+
 ### Optional Values
 
 Set these by hand with `gh secret set` / `gh variable set` when you need them.
