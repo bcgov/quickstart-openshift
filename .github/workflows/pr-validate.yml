@@ -19,9 +19,7 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: bcgov/actions/pr-validate@122a9b1c6c082b1b1f18c300020fbdc417b6b0b2 # v0.10.0
 
   results:
     name: Validate Results
