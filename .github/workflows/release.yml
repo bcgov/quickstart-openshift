@@ -107,19 +107,11 @@ jobs:
       issues: write
       pull-requests: read
     steps:
-      - uses: actions/checkout@v7
-        if: contains(needs.*.result, 'failure')
-        with:
-          persist-credentials: false
-
-      - name: Notify on Failure
-        if: contains(needs.*.result, 'failure')
-        uses: bcgov/actions/workflow-notifier@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
-        with:
-          title: "fix: failure in ${{ github.workflow }}"
-          labels: bug
-
-      - uses: bcgov/actions/workflow-results@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
+      - uses: bcgov/actions/workflow-results@122a9b1c6c082b1b1f18c300020fbdc417b6b0b2 # v0.10.0
         with:
           needs: ${{ toJson(needs) }}
           title: Release Results
+
+      - name: Notify on Failure
+        if: failure()
+        uses: bcgov/actions/workflow-notifier@122a9b1c6c082b1b1f18c300020fbdc417b6b0b2 # v0.10.0
