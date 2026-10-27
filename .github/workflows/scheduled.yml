@@ -127,3 +127,19 @@ jobs:
         with:
           path: ./common/tests/load/${{ matrix.name }}-test.js
           flags: --vus 100 --duration 300s
+
+  results:
+    name: Scheduled Results
+    needs: [stale-branches, ageOutPRs, schema-spy, zap, load-tests]
+    if: always()
+    runs-on: ubuntu-slim
+    timeout-minutes: 1
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    steps:
+      - uses: bcgov/actions/workflow-results@091f1da89c669d36bf4899830381e5b12d2c889a # v0.11.0
+        with:
+          needs: ${{ toJson(needs) }}
+          title: Scheduled Results

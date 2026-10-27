@@ -95,3 +95,19 @@ jobs:
           repository: ${{ github.repository }}/${{ matrix.package }}
           target: ${{ needs.init.outputs.pr }}
           tags: prod
+
+  results:
+    name: Release Results
+    needs: [init, deploy-prod, monitor-prod, promote]
+    if: always()
+    runs-on: ubuntu-slim
+    timeout-minutes: 1
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    steps:
+      - uses: bcgov/actions/workflow-results@091f1da89c669d36bf4899830381e5b12d2c889a # v0.11.0
+        with:
+          needs: ${{ toJson(needs) }}
+          title: Release Results
