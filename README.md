@@ -70,7 +70,7 @@ Workflows read these values.  Repository-level values are used by pull request d
 
 | Environment | Name                   | Description                                     |
 |-------------|------------------------|-------------------------------------------------|
-| none        | `vars.OC_SERVER`       | OpenShift API server (repository-level)         |
+| none        | `vars.OC_SERVER`       | OpenShift API server URL (repository-level)     |
 | none        | `vars.OC_NAMESPACE`    | PR namespace, `<plate>-dev`                     |
 | none        | `secrets.OC_TOKEN`     | PR service token                                |
 | none        | `secrets.DB_PASSWORD`  | PR database password                            |
@@ -161,8 +161,12 @@ Teams will receive a set of project namespaces, usually DEV (for PRs), TEST and 
 
 **`OC_SERVER`**
 
+OpenShift API server URL for your cluster.  One repository-level variable, shared by pull requests, TEST and PROD (not set per environment).
+
 * Reference: `${{ vars.OC_SERVER }}`
-* Set it once at repository level: `gh variable set OC_SERVER --body "$(oc whoami --show-server)"`
+* Silver: `https://api.silver.devops.gov.bc.ca:6443`
+* Gold: `https://api.gold.devops.gov.bc.ca:6443`
+* Set it once at repository level, while logged in to the right cluster: `gh variable set OC_SERVER --body "$(oc whoami --show-server)"`
 
 **`DB_PASSWORD`**
 
