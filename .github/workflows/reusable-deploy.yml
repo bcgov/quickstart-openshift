@@ -53,8 +53,6 @@ jobs:
         id: deploy
         env:
           DB_PASSWORD: ${{ secrets.db_password }}
-          S3_USER: ${{ secrets.s3_user }}
-          S3_PASSWORD: ${{ secrets.s3_password }}
         with:
           file: common/openshift.init.yml
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -65,7 +63,25 @@ jobs:
           # New NetworkPolicy names still apply; existing NP specs do not update.
           overwrite: false
           parameters: -p DB_PASSWORD="$DB_PASSWORD"
-            -p S3_BUCKET="${{ vars.S3_BUCKET }}"
+            -p ZONE="${{ inputs.target }}"
+            -p NAME="${{ github.event.repository.name }}"
+          triggers: ${{ inputs.triggers }}
+          debug: true
+
+      # S3 backup credentials secret: always updated (overwrite: true) so adding
+      # S3 variables or rotating credentials updates in-cluster Secrets immediately.
+      - uses: bcgov/action-deployer-openshift@e2d60eb9cacceb89c3b97d8dcf0a2c460eea5eab # v4.2.3
+        id: deploy-backup-secret
+        env:
+          S3_USER: ${{ secrets.s3_user }}
+          S3_PASSWORD: ${{ secrets.s3_password }}
+        with:
+          file: common/openshift.backup-secret.yml
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          overwrite: true
+          parameters: -p S3_BUCKET="${{ vars.S3_BUCKET }}"
             -p S3_ENDPOINT="${{ vars.S3_ENDPOINT }}"
             -p S3_USER="$S3_USER"
             -p S3_PASSWORD="$S3_PASSWORD"
