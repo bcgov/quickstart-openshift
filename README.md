@@ -84,6 +84,10 @@ Workflows read these values.  Repository-level values are used by pull request d
 | prod (opt)  | `secrets.TLS_CERTIFICATE` | Leaf certificate PEM for vanity URL          |
 | prod (opt)  | `secrets.TLS_PRIVATE_KEY` | Private key PEM for vanity URL               |
 | prod (opt)  | `secrets.TLS_CA_CERTIFICATE` | Issuing CA PEM for vanity URL            |
+| prod (opt)  | `vars.S3_BUCKET`       | S3 bucket name for offsite database backups     |
+| prod (opt)  | `vars.S3_ENDPOINT`     | S3 endpoint URL (e.g. `https://nrs.objectstore.gov.bc.ca`) |
+| prod (opt)  | `secrets.S3_USER`      | S3 access key ID for offsite database backups   |
+| prod (opt)  | `secrets.S3_PASSWORD`  | S3 secret access key for offsite database backups |
 | none (opt)  | `secrets.SONAR_TOKEN_BACKEND`, `secrets.SONAR_TOKEN_FRONTEND` | See [SonarCloud](#code-quality-with-sonarcloud) |
 | none (opt)  | `secrets.SYSDIG_API_TOKEN` | PROD alert sync                             |
 
@@ -231,6 +235,23 @@ Run either by hand from `Actions > <workflow> > Run workflow`, or:
 gh workflow run route-tls.yml -f dry_run=true
 gh workflow run cert-expiry.yml
 ```
+
+**`S3_BUCKET`, `S3_ENDPOINT`, `S3_USER`, `S3_PASSWORD` (Automated Offsite Backups)**
+
+Configures automated daily disaster-recovery database backups pushed to an offsite S3 / ObjectStore bucket (e.g. BC Gov ObjectStore or AWS S3).
+* References: `${{ vars.S3_BUCKET }}`, `${{ vars.S3_ENDPOINT }}`, `${{ secrets.S3_USER }}`, `${{ secrets.S3_PASSWORD }}`
+* Backups deploy everywhere as dormant Kubernetes `batch/v1` `CronJob`s (`common/openshift.backup.yml`). They run on an ephemeral `emptyDir: {}` scratch volume (zero PVC quota footprint) and only unsuspend in PROD when `vars.S3_BUCKET` is non-empty.
+* To enable offsite backups in PROD:
+  ```bash
+  gh variable set S3_BUCKET --env prod --body "my-backup-bucket"
+  gh variable set S3_ENDPOINT --env prod --body "https://nrs.objectstore.gov.bc.ca"  # Optional for AWS S3
+  gh secret set S3_USER --env prod                                                 # Prompts for Access Key ID
+  gh secret set S3_PASSWORD --env prod                                             # Prompts for Secret Access Key
+  ```
+* **Restore**: The restore CronJob (`common/openshift.restore.yml`) is deployed dormant (scheduled for Feb 31st). To restore a backup on-demand in OpenShift:
+  ```bash
+  oc create job --from=cronjob/<app>-<zone>-database-restore restore-manual -n <namespace>
+  ```
 
 ### PROD Deployment Branches and Tags (optional)
 

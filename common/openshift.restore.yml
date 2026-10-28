@@ -1,0 +1,194 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+parameters:
+  - name: NAME
+    description: Product name
+    required: true
+  - name: COMPONENT
+    description: Component name
+    value: database-restore
+  - name: DB_COMPONENT
+    description: Target database component name
+    value: database
+  - name: ZONE
+    description: Deployment zone, e.g. pr-###, test, or prod
+    required: true
+  - name: DB_IMAGE
+    description: Database image repository (matching the database StatefulSet)
+    value: postgres
+  - name: PG_VERSION
+    description: Tag for DB_IMAGE (matching the database StatefulSet)
+    value: "17"
+  - name: AWS_CLI_IMAGE
+    description: AWS CLI image used for fetching backup from S3
+    value: amazon/aws-cli:2.39.1
+  - name: BACKUP_FILE
+    description: Specific backup filename to restore (leave blank for latest backup in S3)
+    value: ""
+
+objects:
+  - apiVersion: batch/v1
+    kind: CronJob
+    metadata:
+      name: ${NAME}-${ZONE}-${COMPONENT}
+      labels:
+        app: ${NAME}-${ZONE}
+        cronjob: ${NAME}-${ZONE}-restore
+    spec:
+      schedule: "0 0 31 2 *" # Dormant schedule (Feb 31st never triggers automatically)
+      suspend: true
+      concurrencyPolicy: "Forbid"
+      successfulJobsHistoryLimit: 1
+      failedJobsHistoryLimit: 1
+      jobTemplate:
+        metadata:
+          labels:
+            app: ${NAME}-${ZONE}
+            cronjob: ${NAME}-${ZONE}-restore
+        spec:
+          backoffLimit: 0
+          template:
+            metadata:
+              labels:
+                app: ${NAME}-${ZONE}
+                cronjob: ${NAME}-${ZONE}-restore
+            spec:
+              restartPolicy: "Never"
+              terminationGracePeriodSeconds: 30
+              volumes:
+                - name: scratch
+                  emptyDir: {}
+              initContainers:
+                # 1. Fetch requested or latest backup from S3 to scratch emptyDir
+                - name: fetch-s3
+                  image: ${AWS_CLI_IMAGE}
+                  imagePullPolicy: IfNotPresent
+                  entrypoint: ["/bin/sh", "-c"]
+                  command:
+                    - |
+                      set -eu
+                      BACKUP_DIR="/backups"
+                      BACKUP_PREFIX="${NAME}/${ZONE}/"
+                      S3_TARGET="s3://${S3_BUCKET}/${BACKUP_PREFIX}"
+
+                      RESTORE_FILE="${BACKUP_FILE}"
+                      if [ -z "${RESTORE_FILE}" ]; then
+                        echo "Looking up latest backup in ${S3_TARGET}..."
+                        RESTORE_FILE=$(aws s3 ls "${S3_TARGET}" | grep ' backup_.*\.dump$' | sort | tail -n 1 | awk '{print $4}')
+                      fi
+
+                      if [ -z "${RESTORE_FILE}" ]; then
+                        echo "No backup file found in ${S3_TARGET} to restore!"
+                        exit 1
+                      fi
+
+                      echo "Downloading ${S3_TARGET}${RESTORE_FILE} to ${BACKUP_DIR}/restore.dump..."
+                      aws s3 cp "${S3_TARGET}${RESTORE_FILE}" "${BACKUP_DIR}/restore.dump"
+                      echo "Download completed."
+                  env:
+                    - name: S3_BUCKET
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-database-backup
+                          key: s3-bucket
+                    - name: AWS_ENDPOINT_URL
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-database-backup
+                          key: s3-endpoint
+                          optional: true
+                    - name: AWS_ACCESS_KEY_ID
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-database-backup
+                          key: s3-user
+                    - name: AWS_SECRET_ACCESS_KEY
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-database-backup
+                          key: s3-password
+                    - name: AWS_DEFAULT_REGION
+                      value: ca-central-1
+                    - name: BACKUP_FILE
+                      value: "${BACKUP_FILE}"
+                  volumeMounts:
+                    - name: scratch
+                      mountPath: /backups
+                  resources:
+                    requests:
+                      cpu: 50m
+                      memory: 128Mi
+                    limits:
+                      memory: 512Mi
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    runAsNonRoot: true
+                    capabilities:
+                      drop: ["ALL"]
+                    seccompProfile:
+                      type: RuntimeDefault
+              containers:
+                # 2. Restore dump into database via pg_restore
+                - name: restore
+                  image: ${DB_IMAGE}:${PG_VERSION}
+                  imagePullPolicy: IfNotPresent
+                  command: ["/bin/sh", "-c"]
+                  args:
+                    - |
+                      set -eu
+                      RESTORE_DUMP="/backups/restore.dump"
+
+                      if [ ! -f "${RESTORE_DUMP}" ]; then
+                        echo "Restore dump file not found: ${RESTORE_DUMP}"
+                        exit 1
+                      fi
+
+                      echo "Verifying archive readability..."
+                      pg_restore --list "${RESTORE_DUMP}" > /dev/null
+
+                      echo "Restoring database from ${RESTORE_DUMP} into ${NAME}-${ZONE}-${DB_COMPONENT}:${POSTGRES_DB}..."
+                      # --clean drops existing database objects before recreating them;
+                      # --if-exists avoids errors during drops if objects do not exist.
+                      pg_restore \
+                        -U "${POSTGRES_USER}" \
+                        -h "${NAME}-${ZONE}-${DB_COMPONENT}" \
+                        -d "${POSTGRES_DB}" \
+                        --clean \
+                        --if-exists \
+                        --no-owner \
+                        --no-privileges \
+                        "${RESTORE_DUMP}"
+
+                      echo "Database restore completed successfully."
+                  env:
+                    - name: POSTGRES_DB
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-database
+                          key: database-name
+                    - name: POSTGRES_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-database
+                          key: database-user
+                    - name: PGPASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-database
+                          key: database-password
+                  volumeMounts:
+                    - name: scratch
+                      mountPath: /backups
+                  resources:
+                    requests:
+                      cpu: 50m
+                      memory: 128Mi
+                    limits:
+                      memory: 512Mi
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    runAsNonRoot: true
+                    capabilities:
+                      drop: ["ALL"]
+                    seccompProfile:
+                      type: RuntimeDefault

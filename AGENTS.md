@@ -4,7 +4,7 @@ Repository facts for automated coding assistants. Teams may edit or remove this 
 
 ## Layout
 - `backend/` (NestJS, Prisma), `frontend/` (Vite, React, Caddy), `migrations/` (Flyway SQL in `migrations/sql/`)
-- OpenShift templates (not Helm): `common/openshift.init.yml`, `common/openshift.database.yml`, `backend/openshift.deploy.yml`, `frontend/openshift.deploy.yml`
+- OpenShift templates (not Helm): `common/openshift.init.yml`, `common/openshift.database.yml`, `common/openshift.backup.yml`, `common/openshift.restore.yml`, `backend/openshift.deploy.yml`, `frontend/openshift.deploy.yml`
 - Workflows: `.github/workflows/` (PR deploys via `reusable-deploy.yml`, tests via `reusable-tests.yml`); integration and load tests in `common/tests/`
 
 ## Build, test, run

@@ -28,6 +28,12 @@ on:
       oc_token:
         description: OpenShift token
         required: true
+      s3_user:
+        description: S3 access key ID for backups
+        required: false
+      s3_password:
+        description: S3 secret access key for backups
+        required: false
     outputs:
       triggered:
         description: Has deployment been triggered?
@@ -47,6 +53,8 @@ jobs:
         id: deploy
         env:
           DB_PASSWORD: ${{ secrets.db_password }}
+          S3_USER: ${{ secrets.s3_user }}
+          S3_PASSWORD: ${{ secrets.s3_password }}
         with:
           file: common/openshift.init.yml
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -57,6 +65,10 @@ jobs:
           # New NetworkPolicy names still apply; existing NP specs do not update.
           overwrite: false
           parameters: -p DB_PASSWORD="$DB_PASSWORD"
+            -p S3_BUCKET="${{ vars.S3_BUCKET }}"
+            -p S3_ENDPOINT="${{ vars.S3_ENDPOINT }}"
+            -p S3_USER="$S3_USER"
+            -p S3_PASSWORD="$S3_PASSWORD"
             -p ZONE="${{ inputs.target }}"
             -p NAME="${{ github.event.repository.name }}"
           triggers: ${{ inputs.triggers }}
@@ -70,7 +82,7 @@ jobs:
     timeout-minutes: 15
     strategy:
       matrix:
-        name: [database, backend, frontend]
+        name: [database, backend, frontend, backup, restore]
         include:
           - name: database
             file: common/openshift.database.yml
@@ -81,6 +93,12 @@ jobs:
           - name: frontend
             file: frontend/openshift.deploy.yml
             parameters: -p IMAGE_TAG="${{ inputs.tag }}"
+          - name: backup
+            file: common/openshift.backup.yml
+            parameters: -p BACKUP_SUSPEND="${{ (inputs.environment == 'prod' && vars.S3_BUCKET != '') && 'false' || 'true' }}"
+          - name: restore
+            file: common/openshift.restore.yml
+            parameters: ""
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:
