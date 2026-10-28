@@ -82,23 +82,17 @@ jobs:
     timeout-minutes: 15
     strategy:
       matrix:
-        name: [database, backend, frontend, backup, restore]
+        name: [database, backend, frontend]
         include:
           - name: database
             file: common/openshift.database.yml
-            parameters: -p DB_PVC_SIZE="256Mi"
+            parameters: -p DB_PVC_SIZE="256Mi" -p BACKUP_SUSPEND="${{ (inputs.environment == 'prod' && vars.S3_BUCKET != '') && 'false' || 'true' }}"
           - name: backend
             file: backend/openshift.deploy.yml
             parameters: -p IMAGE_TAG="${{ inputs.tag }}"
           - name: frontend
             file: frontend/openshift.deploy.yml
             parameters: -p IMAGE_TAG="${{ inputs.tag }}"
-          - name: backup
-            file: common/openshift.backup.yml
-            parameters: -p BACKUP_SUSPEND="${{ (inputs.environment == 'prod' && vars.S3_BUCKET != '') && 'false' || 'true' }}"
-          - name: restore
-            file: common/openshift.restore.yml
-            parameters: ""
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:

@@ -240,7 +240,7 @@ gh workflow run cert-expiry.yml
 
 Configures automated daily disaster-recovery database backups pushed to an offsite S3 / ObjectStore bucket (e.g. BC Gov ObjectStore or AWS S3).
 * References: `${{ vars.S3_BUCKET }}`, `${{ vars.S3_ENDPOINT }}`, `${{ secrets.S3_USER }}`, `${{ secrets.S3_PASSWORD }}`
-* Backups deploy everywhere as dormant Kubernetes `batch/v1` `CronJob`s (`common/openshift.backup.yml`). They run on an ephemeral `emptyDir: {}` scratch volume (zero PVC quota footprint) and only unsuspend in PROD when `vars.S3_BUCKET` is non-empty.
+* Backups deploy alongside the database StatefulSet as dormant Kubernetes `batch/v1` `CronJob`s (`common/openshift.database.yml`). They run on an ephemeral `emptyDir: {}` scratch volume (zero PVC quota footprint) and only unsuspend in PROD when `vars.S3_BUCKET` is non-empty.
 * To enable offsite backups in PROD:
   ```bash
   gh variable set S3_BUCKET --env prod --body "my-backup-bucket"
@@ -248,7 +248,7 @@ Configures automated daily disaster-recovery database backups pushed to an offsi
   gh secret set S3_USER --env prod                                                 # Prompts for Access Key ID
   gh secret set S3_PASSWORD --env prod                                             # Prompts for Secret Access Key
   ```
-* **Restore**: The restore CronJob (`common/openshift.restore.yml`) is deployed dormant (scheduled for Feb 31st). To restore a backup on-demand in OpenShift:
+* **Restore**: The restore CronJob is included in `common/openshift.database.yml` and deployed dormant (scheduled for Feb 31st). To restore a backup on-demand in OpenShift:
   ```bash
   oc create job --from=cronjob/<app>-<zone>-database-restore restore-manual -n <namespace>
   ```
