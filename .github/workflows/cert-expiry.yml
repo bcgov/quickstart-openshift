@@ -25,7 +25,7 @@ jobs:
 
       - name: Check certificate expiry
         id: check
-        uses: bcgov/actions-openshift/cert-expiry@4dbe4f6d25d14cbdb01e525a302e61e31f96c3ed # v0.5.0
+        uses: bcgov/actions-openshift/cert-expiry@46f2614322f7ba1a5ad88a7e4e1b98569c80dcf7 # v0.6.0
         with:
           hosts: ${{ vars.ROUTE_HOST }}
           days: "30"
