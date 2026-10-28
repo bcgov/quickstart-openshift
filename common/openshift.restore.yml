@@ -109,6 +109,8 @@ objects:
                           key: s3-password
                     - name: AWS_DEFAULT_REGION
                       value: ca-central-1
+                    - name: HOME
+                      value: /tmp
                     - name: BACKUP_FILE
                       value: "${BACKUP_FILE}"
                   volumeMounts:

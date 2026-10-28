@@ -200,6 +200,8 @@ objects:
                           key: s3-password
                     - name: AWS_DEFAULT_REGION
                       value: ca-central-1
+                    - name: HOME
+                      value: /tmp
                   volumeMounts:
                     - name: scratch
                       mountPath: /backups
