@@ -36,6 +36,8 @@ jobs:
     secrets:
       db_password: ${{ secrets.db_password }}
       oc_token: ${{ secrets.oc_token }}
+      s3_user: ${{ secrets.s3_user }}
+      s3_password: ${{ secrets.s3_password }}
     with:
       environment: test
       target: test
@@ -57,6 +59,8 @@ jobs:
     secrets:
       db_password: ${{ secrets.db_password }}
       oc_token: ${{ secrets.oc_token }}
+      s3_user: ${{ secrets.s3_user }}
+      s3_password: ${{ secrets.s3_password }}
     with:
       environment: prod
       target: prod
