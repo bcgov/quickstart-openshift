@@ -26,8 +26,8 @@ parameters:
     description: AWS CLI image used for S3 upload and retention pruning
     value: amazon/aws-cli:2.39.1
   - name: BACKUP_SUSPEND
-    description: Suspend backup CronJob execution (default true; set false to enable)
-    value: "true"
+    description: Suspend backup CronJob execution (default false; runs nightly)
+    value: "false"
   - name: BACKUP_SCHEDULE
     description: Cron expression for backup execution schedule
     value: "30 8 * * *" # Daily at 08:30 UTC
@@ -213,6 +213,20 @@ objects:
                     - |
                       set -eu
                       BACKUP_DIR="/backups"
+
+                      if [ -z "${S3_BUCKET:-}" ]; then
+                        echo "======================================================================"
+                        echo "NOTICE: Database backup skipped - S3_BUCKET is not configured."
+                        echo "To enable automated offsite database backups, provide S3 variables:"
+                        echo "  - vars.S3_BUCKET"
+                        echo "  - vars.S3_ENDPOINT (e.g. https://nrs.objectstore.gov.bc.ca)"
+                        echo "  - secrets.s3_user (Access Key ID)"
+                        echo "  - secrets.s3_password (Secret Access Key)"
+                        echo "======================================================================"
+                        touch "${BACKUP_DIR}/SKIPPED_NO_S3"
+                        exit 0
+                      fi
+
                       TARGET_DUMP="${BACKUP_DIR}/backup_$(date +%Y-%m-%d).dump"
                       TEMP_DUMP="${TARGET_DUMP}.tmp"
 
@@ -240,6 +254,12 @@ objects:
                       mv "${TEMP_DUMP}" "${TARGET_DUMP}"
                       echo "Dump created and verified successfully: ${TARGET_DUMP}"
                   env:
+                    - name: S3_BUCKET
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-database-backup
+                          key: s3-bucket
+                          optional: true
                     - name: POSTGRES_DB
                       valueFrom:
                         secretKeyRef:
@@ -281,6 +301,14 @@ objects:
                     - |
                       set -eu
                       BACKUP_DIR="/backups"
+
+                      if [ -f "${BACKUP_DIR}/SKIPPED_NO_S3" ] || [ -z "${S3_BUCKET:-}" ]; then
+                        echo "======================================================================"
+                        echo "NOTICE: S3 sync skipped - S3_BUCKET is not configured."
+                        echo "======================================================================"
+                        exit 0
+                      fi
+
                       BACKUP_PREFIX="${NAME}/${ZONE}/"
                       S3_TARGET="s3://${S3_BUCKET}/${BACKUP_PREFIX}"
 
@@ -312,6 +340,7 @@ objects:
                         secretKeyRef:
                           name: ${NAME}-${ZONE}-database-backup
                           key: s3-bucket
+                          optional: true
                     - name: AWS_ENDPOINT_URL
                       valueFrom:
                         secretKeyRef:
@@ -323,11 +352,13 @@ objects:
                         secretKeyRef:
                           name: ${NAME}-${ZONE}-database-backup
                           key: s3-user
+                          optional: true
                     - name: AWS_SECRET_ACCESS_KEY
                       valueFrom:
                         secretKeyRef:
                           name: ${NAME}-${ZONE}-database-backup
                           key: s3-password
+                          optional: true
                     - name: AWS_DEFAULT_REGION
                       value: ca-central-1
                     - name: HOME
@@ -412,6 +443,7 @@ objects:
                         secretKeyRef:
                           name: ${NAME}-${ZONE}-database-backup
                           key: s3-bucket
+                          optional: true
                     - name: AWS_ENDPOINT_URL
                       valueFrom:
                         secretKeyRef:
@@ -423,11 +455,13 @@ objects:
                         secretKeyRef:
                           name: ${NAME}-${ZONE}-database-backup
                           key: s3-user
+                          optional: true
                     - name: AWS_SECRET_ACCESS_KEY
                       valueFrom:
                         secretKeyRef:
                           name: ${NAME}-${ZONE}-database-backup
                           key: s3-password
+                          optional: true
                     - name: AWS_DEFAULT_REGION
                       value: ca-central-1
                     - name: HOME

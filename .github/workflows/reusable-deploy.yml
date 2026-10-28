@@ -86,7 +86,7 @@ jobs:
         include:
           - name: database
             file: common/openshift.database.yml
-            parameters: -p DB_PVC_SIZE="256Mi" -p BACKUP_SUSPEND="${{ (inputs.environment == 'prod' && vars.S3_BUCKET != '') && 'false' || 'true' }}"
+            parameters: -p DB_PVC_SIZE="256Mi" -p BACKUP_SUSPEND="${{ (inputs.environment == 'prod' || inputs.environment == 'test') && 'false' || 'true' }}"
           - name: backend
             file: backend/openshift.deploy.yml
             parameters: -p IMAGE_TAG="${{ inputs.tag }}"
