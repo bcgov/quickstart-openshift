@@ -1,5 +1,5 @@
 # Build static assets (SPA)
-FROM node:24-slim AS static
+FROM node:26-slim AS static
 
 # Copy, build static files; see .dockerignore for exclusions
 WORKDIR /app
