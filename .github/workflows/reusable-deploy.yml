@@ -68,28 +68,6 @@ jobs:
           triggers: ${{ inputs.triggers }}
           debug: true
 
-      # S3 backup credentials secret: always updated (overwrite: true) so adding
-      # S3 variables or rotating credentials updates in-cluster Secrets immediately.
-      - uses: bcgov/action-deployer-openshift@e2d60eb9cacceb89c3b97d8dcf0a2c460eea5eab # v4.2.3
-        id: deploy-backup-secret
-        env:
-          S3_USER: ${{ secrets.s3_user }}
-          S3_PASSWORD: ${{ secrets.s3_password }}
-        with:
-          file: common/openshift.backup-secret.yml
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.oc_server }}
-          oc_token: ${{ secrets.oc_token }}
-          overwrite: true
-          parameters: -p S3_BUCKET="${{ vars.S3_BUCKET }}"
-            -p S3_ENDPOINT="${{ vars.S3_ENDPOINT }}"
-            -p S3_USER="$S3_USER"
-            -p S3_PASSWORD="$S3_PASSWORD"
-            -p ZONE="${{ inputs.target }}"
-            -p NAME="${{ github.event.repository.name }}"
-          triggers: ${{ inputs.triggers }}
-          debug: true
-
   deploy:
     name: Deploy (${{ matrix.name }})
     environment: ${{ inputs.environment }}
@@ -102,7 +80,7 @@ jobs:
         include:
           - name: database
             file: common/openshift.database.yml
-            parameters: -p DB_PVC_SIZE="256Mi" -p BACKUP_SUSPEND="${{ (inputs.environment == 'prod' || inputs.environment == 'test') && 'false' || 'true' }}"
+            parameters: -p DB_PVC_SIZE="256Mi"
           - name: backend
             file: backend/openshift.deploy.yml
             parameters: -p IMAGE_TAG="${{ inputs.tag }}"
@@ -124,3 +102,33 @@ jobs:
             -p NAME="${{ github.event.repository.name }}"
             ${{ matrix.parameters }}
           triggers: ${{ inputs.triggers }}
+
+  # Disaster-recovery database backups and restore CronJobs for PROD environments.
+  # Deployed with overwrite: true so S3 credential rotation and schedule changes
+  # update in-cluster immediately without touching the core database StatefulSet.
+  backup:
+    name: Deploy (backup)
+    environment: ${{ inputs.environment }}
+    needs: [deploy]
+    if: inputs.environment == 'prod'
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: bcgov/action-deployer-openshift@e2d60eb9cacceb89c3b97d8dcf0a2c460eea5eab # v4.2.3
+        id: deploy
+        env:
+          S3_USER: ${{ secrets.s3_user }}
+          S3_PASSWORD: ${{ secrets.s3_password }}
+        with:
+          file: common/openshift.backup.yml
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          overwrite: true
+          parameters: -p S3_BUCKET="${{ vars.S3_BUCKET }}"
+            -p S3_ENDPOINT="${{ vars.S3_ENDPOINT }}"
+            -p S3_USER="$S3_USER"
+            -p S3_PASSWORD="$S3_PASSWORD"
+            -p ZONE="${{ inputs.target }}"
+            -p NAME="${{ github.event.repository.name }}"
+          triggers: ${{ inputs.triggers }}
+          debug: true
