@@ -66,6 +66,12 @@ jobs:
             # If deployments, then iterate
             if [ -n "${DEPLOYS}" ]; then
               while read -r name created; do
+                # Check if deployment still exists (may have been purged with a sibling deployment in this batch)
+                if ! oc get deploy "${name}" >/dev/null 2>&1; then
+                  echo -e "\nDeployment ${name} no longer exists; skipping"
+                  continue
+                fi
+
                 # Convert creation timestamp to epoch
                 UPDATED=$(date -d "${created}" +%s 2>/dev/null || :)
 
