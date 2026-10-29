@@ -57,6 +57,32 @@ objects:
       s3-user: ${S3_USER}
       s3-password: ${S3_PASSWORD}
 
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: ${NAME}-${ZONE}-database-backup-ingress
+      labels:
+        app: ${NAME}-${ZONE}
+    spec:
+      podSelector:
+        matchLabels:
+          deployment: ${NAME}-${ZONE}-${COMPONENT}
+      ingress:
+        - from:
+            - podSelector:
+                matchLabels:
+                  app: ${NAME}-${ZONE}
+                  cronjob: ${NAME}-${ZONE}-backup
+            - podSelector:
+                matchLabels:
+                  app: ${NAME}-${ZONE}
+                  cronjob: ${NAME}-${ZONE}-restore
+          ports:
+            - protocol: TCP
+              port: 5432
+      policyTypes:
+        - Ingress
+
   - apiVersion: batch/v1
     kind: CronJob
     metadata:
@@ -99,7 +125,7 @@ objects:
                       set -eu
                       BACKUP_DIR="/backups"
 
-                      if [ -z "${S3_BUCKET:-}" ]; then
+                      if [ -z "$S3_BUCKET" ]; then
                         echo "======================================================================"
                         echo "NOTICE: Database backup skipped - S3_BUCKET is not configured."
                         echo "To enable automated offsite database backups, provide S3 variables:"
@@ -108,22 +134,22 @@ objects:
                         echo "  - secrets.s3_user (Access Key ID)"
                         echo "  - secrets.s3_password (Secret Access Key)"
                         echo "======================================================================"
-                        touch "${BACKUP_DIR}/SKIPPED_NO_S3"
+                        touch "$BACKUP_DIR/SKIPPED_NO_S3"
                         exit 0
                       fi
 
-                      TARGET_DUMP="${BACKUP_DIR}/backup_$(date +%Y-%m-%d).dump"
-                      TEMP_DUMP="${TARGET_DUMP}.tmp"
+                      TARGET_DUMP="$BACKUP_DIR/backup_$(date +%Y-%m-%d).dump"
+                      TEMP_DUMP="$TARGET_DUMP.tmp"
 
                       cleanup() {
-                        rm -f "${TEMP_DUMP}" || true
+                        rm -f "$TEMP_DUMP" || true
                       }
                       trap cleanup EXIT
                       trap 'exit 130' INT
                       trap 'exit 143' TERM
 
                       echo "Cleaning stale temporary dumps in scratch..."
-                      find "${BACKUP_DIR}" -maxdepth 1 -type f -name "*.tmp" -exec rm -f {} \;
+                      find "$BACKUP_DIR" -maxdepth 1 -type f -name "*.tmp" -exec rm -f {} \;
 
                       echo "Creating database dump..."
                       pg_dump \
@@ -131,13 +157,13 @@ objects:
                         -h "${NAME}-${ZONE}-${COMPONENT}" \
                         -d "${POSTGRES_DB}" \
                         -Fc \
-                        --file="${TEMP_DUMP}"
+                        --file="$TEMP_DUMP"
 
                       echo "Verifying dump readability and archive integrity..."
-                      pg_restore --list "${TEMP_DUMP}" > /dev/null
+                      pg_restore --list "$TEMP_DUMP" > /dev/null
 
-                      mv "${TEMP_DUMP}" "${TARGET_DUMP}"
-                      echo "Dump created and verified successfully: ${TARGET_DUMP}"
+                      mv "$TEMP_DUMP" "$TARGET_DUMP"
+                      echo "Dump created and verified successfully: $TARGET_DUMP"
                   env:
                     - name: S3_BUCKET
                       valueFrom:
@@ -181,13 +207,13 @@ objects:
                 - name: s3-sync
                   image: ${AWS_CLI_IMAGE}
                   imagePullPolicy: IfNotPresent
-                  entrypoint: ["/bin/sh", "-c"]
-                  command:
+                  command: ["/bin/sh", "-c"]
+                  args:
                     - |
                       set -eu
                       BACKUP_DIR="/backups"
 
-                      if [ -f "${BACKUP_DIR}/SKIPPED_NO_S3" ] || [ -z "${S3_BUCKET:-}" ]; then
+                      if [ -f "$BACKUP_DIR/SKIPPED_NO_S3" ] || [ -z "$S3_BUCKET" ]; then
                         echo "======================================================================"
                         echo "NOTICE: S3 sync skipped - S3_BUCKET is not configured."
                         echo "======================================================================"
@@ -195,25 +221,25 @@ objects:
                       fi
 
                       BACKUP_PREFIX="${NAME}/${ZONE}/"
-                      S3_TARGET="s3://${S3_BUCKET}/${BACKUP_PREFIX}"
+                      S3_TARGET="s3://$S3_BUCKET/${BACKUP_PREFIX}"
 
-                      echo "Uploading database backup to ${S3_TARGET}..."
-                      for dump in "${BACKUP_DIR}"/backup_*.dump; do
-                        [ -f "${dump}" ] || continue
-                        aws s3 cp "${dump}" "${S3_TARGET}"
-                        echo "Uploaded $(basename "${dump}") to S3."
+                      echo "Uploading database backup to $S3_TARGET..."
+                      for dump in "$BACKUP_DIR"/backup_*.dump; do
+                        [ -f "$dump" ] || continue
+                        aws s3 cp "$dump" "$S3_TARGET"
+                        echo "Uploaded $(basename "$dump") to S3."
                       done
 
                       echo "Pruning S3 backups older than ${NUM_BACKUPS} days..."
                       PRUNE_CUTOFF_SEC=$(date -d "${NUM_BACKUPS} days ago" +%s)
-                      aws s3 ls "${S3_TARGET}" | while read -r date time size filename; do
-                        [ -n "${filename:-}" ] || continue
-                        case "${filename}" in
+                      aws s3 ls "$S3_TARGET" | while read -r date time size filename; do
+                        [ -n "$filename" ] || continue
+                        case "$filename" in
                           backup_*.dump)
-                            obj_sec=$(date -d "${date} ${time}" +%s 2>/dev/null || :)
-                            if [ -n "${obj_sec}" ] && [ "${obj_sec}" -lt "${PRUNE_CUTOFF_SEC}" ]; then
-                              echo "Pruning expired backup: ${S3_TARGET}${filename}"
-                              aws s3 rm "${S3_TARGET}${filename}"
+                            obj_sec=$(date -d "$date $time" +%s 2>/dev/null || :)
+                            if [ -n "$obj_sec" ] && [ "$obj_sec" -lt "$PRUNE_CUTOFF_SEC" ]; then
+                              echo "Pruning expired backup: $S3_TARGET$filename"
+                              aws s3 rm "$S3_TARGET$filename"
                             fi
                             ;;
                         esac
@@ -301,27 +327,27 @@ objects:
                 - name: fetch-s3
                   image: ${AWS_CLI_IMAGE}
                   imagePullPolicy: IfNotPresent
-                  entrypoint: ["/bin/sh", "-c"]
-                  command:
+                  command: ["/bin/sh", "-c"]
+                  args:
                     - |
                       set -eu
                       BACKUP_DIR="/backups"
                       BACKUP_PREFIX="${NAME}/${ZONE}/"
-                      S3_TARGET="s3://${S3_BUCKET}/${BACKUP_PREFIX}"
+                      S3_TARGET="s3://$S3_BUCKET/${BACKUP_PREFIX}"
 
                       RESTORE_FILE="${BACKUP_FILE}"
-                      if [ -z "${RESTORE_FILE}" ]; then
-                        echo "Looking up latest backup in ${S3_TARGET}..."
-                        RESTORE_FILE=$(aws s3 ls "${S3_TARGET}" | grep ' backup_.*\.dump$' | sort | tail -n 1 | awk '{print $4}')
+                      if [ -z "$RESTORE_FILE" ]; then
+                        echo "Looking up latest backup in $S3_TARGET..."
+                        RESTORE_FILE=$(aws s3 ls "$S3_TARGET" | grep ' backup_.*\.dump$' | sort | tail -n 1 | awk '{print $4}')
                       fi
 
-                      if [ -z "${RESTORE_FILE}" ]; then
-                        echo "No backup file found in ${S3_TARGET} to restore!"
+                      if [ -z "$RESTORE_FILE" ]; then
+                        echo "No backup file found in $S3_TARGET to restore!"
                         exit 1
                       fi
 
-                      echo "Downloading ${S3_TARGET}${RESTORE_FILE} to ${BACKUP_DIR}/restore.dump..."
-                      aws s3 cp "${S3_TARGET}${RESTORE_FILE}" "${BACKUP_DIR}/restore.dump"
+                      echo "Downloading $S3_TARGET$RESTORE_FILE to $BACKUP_DIR/restore.dump..."
+                      aws s3 cp "$S3_TARGET$RESTORE_FILE" "$BACKUP_DIR/restore.dump"
                       echo "Download completed."
                   env:
                     - name: S3_BUCKET
@@ -381,15 +407,15 @@ objects:
                       set -eu
                       RESTORE_DUMP="/backups/restore.dump"
 
-                      if [ ! -f "${RESTORE_DUMP}" ]; then
-                        echo "Restore dump file not found: ${RESTORE_DUMP}"
+                      if [ ! -f "$RESTORE_DUMP" ]; then
+                        echo "Restore dump file not found: $RESTORE_DUMP"
                         exit 1
                       fi
 
                       echo "Verifying archive readability..."
-                      pg_restore --list "${RESTORE_DUMP}" > /dev/null
+                      pg_restore --list "$RESTORE_DUMP" > /dev/null
 
-                      echo "Restoring database from ${RESTORE_DUMP} into ${NAME}-${ZONE}-${COMPONENT}:${POSTGRES_DB}..."
+                      echo "Restoring database from $RESTORE_DUMP into ${NAME}-${ZONE}-${COMPONENT}:${POSTGRES_DB}..."
                       # --clean drops existing database objects before recreating them;
                       # --if-exists avoids errors during drops if objects do not exist.
                       pg_restore \
@@ -400,7 +426,7 @@ objects:
                         --if-exists \
                         --no-owner \
                         --no-privileges \
-                        "${RESTORE_DUMP}"
+                        "$RESTORE_DUMP"
 
                       echo "Database restore completed successfully."
                   env:

@@ -109,7 +109,7 @@ jobs:
   backup:
     name: Deploy (backup)
     environment: ${{ inputs.environment }}
-    needs: [deploy]
+    needs: [init]
     if: inputs.environment == 'prod'
     runs-on: ubuntu-26.04
     steps:
