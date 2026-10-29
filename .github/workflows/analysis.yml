@@ -34,10 +34,9 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: bcgov/action-test-and-analyse@8f699e3fd3fadd9a6adf6f4b1f2638ef7ecfefb9 # v2.0.0
-        env:
-          sonar_token: ${{ secrets.sonar_token_backend }}
+      - uses: bcgov/actions/test-and-analyse@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
         with:
+          sonar_token: ${{ secrets.sonar_token_backend }}
           commands: |
             npm ci
             npm run lint
@@ -63,10 +62,9 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 5
     steps:
-      - uses: bcgov/action-test-and-analyse@8f699e3fd3fadd9a6adf6f4b1f2638ef7ecfefb9 # v2.0.0
-        env:
-          sonar_token: ${{ secrets.sonar_token_frontend }}
+      - uses: bcgov/actions/test-and-analyse@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
         with:
+          sonar_token: ${{ secrets.sonar_token_frontend }}
           commands: |
             npm ci
             npm run lint
