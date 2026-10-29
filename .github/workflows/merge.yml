@@ -85,6 +85,9 @@ jobs:
           sysdig_api_token: ${{ secrets.SYSDIG_API_TOKEN }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           app: ${{ github.event.repository.name }}
+          components: |
+            frontend
+            backend
 
   promote:
     name: Promote Images
