@@ -58,6 +58,10 @@ objects:
           labels:
             app: ${NAME}-${ZONE}
             deployment: ${NAME}-${ZONE}-${COMPONENT}
+          annotations:
+            prometheus.io/scrape: 'true'
+            prometheus.io/port: '3003'
+            prometheus.io/path: '/metrics'
         spec:
           terminationGracePeriodSeconds: 30
           affinity:
