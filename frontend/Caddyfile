@@ -29,7 +29,7 @@
 		}
 	}
 	rewrite @spa_router {http.matchers.file.relative}
-  # Handle backend metrics endpoint separately to avoid proxying it to the backend
+	# Handle backend metrics endpoint separately to avoid proxying it to the backend
 	@backend_metrics path /api/metrics /api/metrics/
 	respond @backend_metrics 404
 	# Proxy requests to API service
