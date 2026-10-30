@@ -11,6 +11,14 @@ on:
         options:
           - "true"
           - "false"
+      cert_set:
+        description: "Secret set. entrust = TLS_*; canary = TLS_CANARY_* (non-Entrust spike, #2928)."
+        required: true
+        type: choice
+        default: entrust
+        options:
+          - entrust
+          - canary
 
 concurrency:
   group: prod-deploy
@@ -20,7 +28,7 @@ permissions: {}
 
 jobs:
   route-tls:
-    name: Route TLS (dry_run=${{ inputs.dry_run }})
+    name: Route TLS (${{ inputs.cert_set }}, dry_run=${{ inputs.dry_run }})
     environment: prod
     permissions:
       contents: read
@@ -31,9 +39,9 @@ jobs:
         with:
           hostname: ${{ vars.ROUTE_HOST }}
           target_service: ${{ github.event.repository.name }}-prod-frontend
-          tls_certificate: ${{ secrets.TLS_CERTIFICATE }}
-          tls_private_key: ${{ secrets.TLS_PRIVATE_KEY }}
-          tls_ca_certificate: ${{ secrets.TLS_CA_CERTIFICATE }}
+          tls_certificate: ${{ inputs.cert_set == 'canary' && secrets.TLS_CANARY_CERTIFICATE || secrets.TLS_CERTIFICATE }}
+          tls_private_key: ${{ inputs.cert_set == 'canary' && secrets.TLS_CANARY_PRIVATE_KEY || secrets.TLS_PRIVATE_KEY }}
+          tls_ca_certificate: ${{ inputs.cert_set == 'canary' && secrets.TLS_CANARY_CA_CERTIFICATE || secrets.TLS_CA_CERTIFICATE }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
