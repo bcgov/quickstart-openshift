@@ -50,7 +50,7 @@ jobs:
 
       - name: Route TLS (canary)
         if: inputs.cert_set == 'canary'
-      - uses: bcgov/actions-openshift/route-tls@46f2614322f7ba1a5ad88a7e4e1b98569c80dcf7 # v0.6.0
+        uses: bcgov/actions-openshift/route-tls@46f2614322f7ba1a5ad88a7e4e1b98569c80dcf7 # v0.6.0
         with:
           hostname: ${{ vars.ROUTE_HOST }}
           target_service: ${{ github.event.repository.name }}-prod-frontend
@@ -64,7 +64,7 @@ jobs:
 
       - name: Route TLS (entrust)
         if: inputs.cert_set != 'canary'
-      - uses: bcgov/actions-openshift/route-tls@46f2614322f7ba1a5ad88a7e4e1b98569c80dcf7 # v0.6.0
+        uses: bcgov/actions-openshift/route-tls@46f2614322f7ba1a5ad88a7e4e1b98569c80dcf7 # v0.6.0
         with:
           hostname: ${{ vars.ROUTE_HOST }}
           target_service: ${{ github.event.repository.name }}-prod-frontend
