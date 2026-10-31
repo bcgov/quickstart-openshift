@@ -35,13 +35,42 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 5
     steps:
+      - name: Verify canary secrets
+        if: inputs.cert_set == 'canary'
+        env:
+          TLS_CANARY_CERTIFICATE: ${{ secrets.TLS_CANARY_CERTIFICATE }}
+          TLS_CANARY_PRIVATE_KEY: ${{ secrets.TLS_CANARY_PRIVATE_KEY }}
+          TLS_CANARY_CA_CERTIFICATE: ${{ secrets.TLS_CANARY_CA_CERTIFICATE }}
+        run: |
+          missing=0
+          for v in TLS_CANARY_CERTIFICATE TLS_CANARY_PRIVATE_KEY TLS_CANARY_CA_CERTIFICATE; do
+            if [ -z "${!v}" ]; then echo "::error::Missing secret $v"; missing=1; fi
+          done
+          exit "$missing"
+
+      - name: Route TLS (canary)
+        if: inputs.cert_set == 'canary'
       - uses: bcgov/actions-openshift/route-tls@46f2614322f7ba1a5ad88a7e4e1b98569c80dcf7 # v0.6.0
         with:
           hostname: ${{ vars.ROUTE_HOST }}
           target_service: ${{ github.event.repository.name }}-prod-frontend
-          tls_certificate: ${{ secrets[inputs.cert_set == 'canary' && 'TLS_CANARY_CERTIFICATE' || 'TLS_CERTIFICATE'] }}
-          tls_private_key: ${{ secrets[inputs.cert_set == 'canary' && 'TLS_CANARY_PRIVATE_KEY' || 'TLS_PRIVATE_KEY'] }}
-          tls_ca_certificate: ${{ secrets[inputs.cert_set == 'canary' && 'TLS_CANARY_CA_CERTIFICATE' || 'TLS_CA_CERTIFICATE'] }}
+          tls_certificate: ${{ secrets.TLS_CANARY_CERTIFICATE }}
+          tls_private_key: ${{ secrets.TLS_CANARY_PRIVATE_KEY }}
+          tls_ca_certificate: ${{ secrets.TLS_CANARY_CA_CERTIFICATE }}
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          dry_run: ${{ inputs.dry_run }}
+
+      - name: Route TLS (entrust)
+        if: inputs.cert_set != 'canary'
+      - uses: bcgov/actions-openshift/route-tls@46f2614322f7ba1a5ad88a7e4e1b98569c80dcf7 # v0.6.0
+        with:
+          hostname: ${{ vars.ROUTE_HOST }}
+          target_service: ${{ github.event.repository.name }}-prod-frontend
+          tls_certificate: ${{ secrets.TLS_CERTIFICATE }}
+          tls_private_key: ${{ secrets.TLS_PRIVATE_KEY }}
+          tls_ca_certificate: ${{ secrets.TLS_CA_CERTIFICATE }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
