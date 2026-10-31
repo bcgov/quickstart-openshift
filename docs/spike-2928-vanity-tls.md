@@ -1,48 +1,31 @@
-# Spike: non-Entrust TLS on a vanity route (#2928)
+# Spike #2928: self-signed vanity TLS on the PR deploy
 
-Canary for `quickstart.nrs.gov.bc.ca`. The question: can a team put **its own** (non-Entrust) certificate on an OpenShift vanity route, and could that become self-serve?
+**Test only, not for merge.** Intent: prove that a self-signed certificate on a
+PR-scoped Route can serve the vanity host `quickstart.nrs.gov.bc.ca` from the PR
+frontend in the dev namespace (`vars.OC_NAMESPACE`), without touching prod or
+the `route-tls.yml` workflow.
 
-## Findings so far (2026-10-30, read-only probes)
+## How it works
 
-| Probe | Result |
-| --- | --- |
-| DNS `quickstart.nrs.gov.bc.ca` | A `142.34.194.118` (no CNAME, TTL 300). No CAA on the host, `nrs.gov.bc.ca`, or `gov.bc.ca`, so DNS policy *allows* any public CA. |
-| `https://` today | Serves the default `*.apps.silver.devops.gov.bc.ca` Entrust wildcard, so no vanity route or cert is applied yet. |
-| `http://…/.well-known/acme-challenge/x` | `500` from `Server: Pingora`. An edge proxy sits in front of the host, so HTTP-01 can't reach the app yet. |
-| `route-tls` (actions-openshift v0.6.0) | CA-agnostic: it checks key match, expiry, chain order (`openssl verify`), and CN/SAN. A private CA chain passes (checked locally with `scripts/tls-canary-cert.sh`). |
+- `pr-open.yml` job `vanity` runs after `deploys` (only when deploys triggered)
+  and gates `PR Results`.
+- `scripts/tls-canary-cert.sh` mints a throwaway CA + leaf (7 days) for the
+  vanity host; the CA key is deleted immediately, the private key is masked and
+  never echoed.
+- `bcgov/actions-openshift/route-tls` (v0.6.0) applies Route
+  `quickstart-openshift-<PR>-vanity` → Service `quickstart-openshift-<PR>-frontend`
+  with `dry_run: false`. It fails if another Route already claims the host.
+- `pr-close.yml` job `vanity` deletes that Route when the PR closes (label
+  cleanup does not match it).
 
-## Options
+## Verify
 
-1. **Let's Encrypt HTTP-01**: blocked until the vanity route exists and the edge forwards `/.well-known/acme-challenge/` on port 80. Retest after option 3 lands the route.
-2. **Let's Encrypt / other ACME DNS-01**: needs write access to the `nrs.gov.bc.ca` zone, or a `_acme-challenge` CNAME delegated to a zone we control. That's an SD/DNS-team ask; a namespace can't do it.
-3. **Personal test CA (this PR)**: proves the route + `route-tls` path with no outside dependencies. Browsers will warn (untrusted CA). That's expected, and it's the signal that *our* cert is live.
-4. **`bcgov/cert-manager-proxy`**: experimental, DNS-01 only, and needs cluster-scoped cert-manager + approver-policy + a DNS webhook. A tenant namespace can't use it without platform admin. Revisit once the DNS question in option 2 is answered.
+- `curl -vk https://quickstart.nrs.gov.bc.ca` reaches the PR frontend and shows
+  the self-signed issuer `quickstart TLS canary CA (#2928)`.
+- Without `-k`, the browser/curl warns (expected: untrusted CA).
 
-## How to run the canary (Derek, by hand)
+## Caveats
 
-```bash
-scripts/tls-canary-cert.sh quickstart.nrs.gov.bc.ca 30      # writes ./tls-canary/{leaf,key,ca}.pem
-gh secret set TLS_CANARY_CERTIFICATE    --env prod --repo bcgov/quickstart-openshift < tls-canary/leaf.pem
-gh secret set TLS_CANARY_PRIVATE_KEY    --env prod --repo bcgov/quickstart-openshift < tls-canary/key.pem
-gh secret set TLS_CANARY_CA_CERTIFICATE --env prod --repo bcgov/quickstart-openshift < tls-canary/ca.pem
-rm -rf tls-canary
-gh variable list --env prod --repo bcgov/quickstart-openshift | grep ROUTE_HOST   # must be quickstart.nrs.gov.bc.ca
-gh workflow run route-tls.yml --repo bcgov/quickstart-openshift --ref feat/vanity-cert-canary -f cert_set=canary -f dry_run=true
-sleep 5; RUN=$(gh run list --repo bcgov/quickstart-openshift --workflow route-tls.yml --branch feat/vanity-cert-canary --event workflow_dispatch --limit 1 --json databaseId -q '.[0].databaseId')
-gh run watch "$RUN" --repo bcgov/quickstart-openshift --exit-status   # stop here if it fails
-gh workflow run route-tls.yml --repo bcgov/quickstart-openshift --ref feat/vanity-cert-canary -f cert_set=canary -f dry_run=false
-sleep 5; RUN=$(gh run list --repo bcgov/quickstart-openshift --workflow route-tls.yml --branch feat/vanity-cert-canary --event workflow_dispatch --limit 1 --json databaseId -q '.[0].databaseId')
-gh run watch "$RUN" --repo bcgov/quickstart-openshift --exit-status   # stop here if it fails
-echo | openssl s_client -connect quickstart.nrs.gov.bc.ca:443 -servername quickstart.nrs.gov.bc.ca 2>/dev/null | openssl x509 -noout -issuer -enddate
-```
-
-**Success:** the issuer is `CN=quickstart TLS canary CA (#2928)`. **Failure modes to record:** `gh workflow run` only dispatches, so each `gh run watch --exit-status` gates the next step. The dry run fails (a route-tls rule), the apply is refused (namespace RBAC or route admission), or the edge (`Pingora`) terminates TLS itself so the route cert is never served. After that, try HTTP-01 with `certbot certonly --manual` against the now-live route.
-
-Rollback: re-run with `cert_set=entrust`, or `oc -n <prod-namespace> delete route quickstart-openshift-vanity-url`. route-tls archives the previous cert in a backup Secret.
-
-## Notes for a reusable actions-openshift pattern
-
-- `route-tls` already works with any CA. The only Entrust coupling is the wording in its input descriptions and hints.
-- The missing piece is **issuance + renewal**, not install: a scheduled `acme-cert` step (lego/certbot, DNS-01 through a delegated `_acme-challenge` CNAME) that passes PEMs straight into `route-tls`. That avoids keeping 90-day PEMs as GitHub secrets.
-- Pair it with `bcgov/nr-cert-monitor` / `cert-expiry.yml` to trigger renewal when fewer than 30 days remain.
-- The in-cluster alternative is cert-manager (+ `cert-manager-proxy`), which needs the platform team to own it.
+- Requires DNS for the host to resolve to the Silver router; otherwise only
+  `curl --resolve` testing works.
+- Only one Route may hold the host; a second open PR (or prod route) will fail.
