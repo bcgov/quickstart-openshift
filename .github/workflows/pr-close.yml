@@ -24,3 +24,17 @@ jobs:
       cleanup: label
       packages: backend frontend migrations
 
+
+  # Test-only (#2928): label cleanup misses the PR-scoped vanity route
+  vanity:
+    name: Remove Vanity Route
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - uses: bcgov/actions-openshift/oc-runner@46f2614322f7ba1a5ad88a7e4e1b98569c80dcf7 # v0.6.0
+        with:
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          commands: |
+            oc delete route ${{ github.event.repository.name }}-${{ github.event.number }}-vanity --ignore-not-found
