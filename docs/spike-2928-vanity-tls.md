@@ -28,11 +28,15 @@ gh secret set TLS_CANARY_CA_CERTIFICATE --env prod --repo bcgov/quickstart-opens
 rm -rf tls-canary
 gh variable list --env prod --repo bcgov/quickstart-openshift | grep ROUTE_HOST   # must be quickstart.nrs.gov.bc.ca
 gh workflow run route-tls.yml --repo bcgov/quickstart-openshift --ref feat/vanity-cert-canary -f cert_set=canary -f dry_run=true
+sleep 5; RUN=$(gh run list --repo bcgov/quickstart-openshift --workflow route-tls.yml --branch feat/vanity-cert-canary --event workflow_dispatch --limit 1 --json databaseId -q '.[0].databaseId')
+gh run watch "$RUN" --repo bcgov/quickstart-openshift --exit-status   # stop here if it fails
 gh workflow run route-tls.yml --repo bcgov/quickstart-openshift --ref feat/vanity-cert-canary -f cert_set=canary -f dry_run=false
+sleep 5; RUN=$(gh run list --repo bcgov/quickstart-openshift --workflow route-tls.yml --branch feat/vanity-cert-canary --event workflow_dispatch --limit 1 --json databaseId -q '.[0].databaseId')
+gh run watch "$RUN" --repo bcgov/quickstart-openshift --exit-status   # stop here if it fails
 echo | openssl s_client -connect quickstart.nrs.gov.bc.ca:443 -servername quickstart.nrs.gov.bc.ca 2>/dev/null | openssl x509 -noout -issuer -enddate
 ```
 
-**Success:** the issuer is `CN=quickstart TLS canary CA (#2928)`. **Failure modes to record:** the dry run fails (a route-tls rule), the apply is refused (namespace RBAC or route admission), or the edge (`Pingora`) terminates TLS itself so the route cert is never served. After that, try HTTP-01 with `certbot certonly --manual` against the now-live route.
+**Success:** the issuer is `CN=quickstart TLS canary CA (#2928)`. **Failure modes to record:** `gh workflow run` only dispatches, so each `gh run watch --exit-status` gates the next step. The dry run fails (a route-tls rule), the apply is refused (namespace RBAC or route admission), or the edge (`Pingora`) terminates TLS itself so the route cert is never served. After that, try HTTP-01 with `certbot certonly --manual` against the now-live route.
 
 Rollback: re-run with `cert_set=entrust`, or `oc -n <prod-namespace> delete route quickstart-openshift-vanity-url`. route-tls archives the previous cert in a backup Secret.
 
