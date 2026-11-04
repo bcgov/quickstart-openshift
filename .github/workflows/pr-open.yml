@@ -70,22 +70,34 @@ jobs:
             - [Frontend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca)
             - [Backend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/api)
 
-  # Test-only (#2928): self-signed vanity host on the PR frontend; not for merge
+  # Test-only (#2928, bcgov/actions-openshift#153): Let's Encrypt STAGING via HTTP-01
+  # on the PR frontend vanity host; not for merge
   vanity:
-    name: Vanity TLS (self-signed)
+    name: Vanity TLS (ACME staging)
     needs: [deploys]
     if: needs.deploys.outputs.triggered == 'true'
     runs-on: ubuntu-26.04
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
         with:
           persist-credentials: false
 
-      - name: Mint self-signed cert
+      - name: ACME HTTP-01 (lego pod + challenge Route)
+        uses: bcgov/actions-openshift/oc-runner@46f2614322f7ba1a5ad88a7e4e1b98569c80dcf7 # v0.6.0
+        with:
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          timeout: 12m
+          commands: |
+            NAME=${{ github.event.repository.name }}-${{ github.event.number }} \
+            OUT="${RUNNER_TEMP}/tls" \
+              bash scripts/acme-http01-canary.sh quickstart.nrs.gov.bc.ca derek.roberts@gmail.com
+
+      - name: Read PEMs
         id: cert
         run: |
-          OUT="${RUNNER_TEMP}/tls" bash scripts/tls-canary-cert.sh quickstart.nrs.gov.bc.ca 7
           while IFS= read -r line; do
             [[ -n "$line" && "$line" != -----* ]] && echo "::add-mask::${line}"
           done < "${RUNNER_TEMP}/tls/key.pem"

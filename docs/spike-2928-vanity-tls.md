@@ -1,31 +1,58 @@
-# Spike #2928: self-signed vanity TLS on the PR deploy
+# Spike #2928: roll-our-own vanity TLS (ACME HTTP-01) on the PR deploy
 
-**Test only, not for merge.** Intent: prove that a self-signed certificate on a
-PR-scoped Route can serve the vanity host `quickstart.nrs.gov.bc.ca` from the PR
-frontend in the dev namespace (`vars.OC_NAMESPACE`), without touching prod or
-the `route-tls.yml` workflow.
+**Test only, not for merge.** Intent: prove we can get a public ACME certificate
+for `quickstart.nrs.gov.bc.ca` from inside a GitHub Actions job, with no Service
+Desk ticket and no Entrust order, then apply it with
+`bcgov/actions-openshift/route-tls`. The reusable action will land in
+[bcgov/actions-openshift#153](https://github.com/bcgov/actions-openshift/issues/153).
 
-## How it works
+Step 1 (done, earlier commits): a self-signed cert proved the Route path works;
+browsers reject the CA, so we need a public ACME CA.
 
-- `pr-open.yml` job `vanity` runs after `deploys` (only when deploys triggered)
-  and gates `PR Results`.
-- `scripts/tls-canary-cert.sh` mints a throwaway CA + leaf (7 days) for the
-  vanity host; the CA key is deleted immediately, the private key is masked and
-  never echoed.
-- `bcgov/actions-openshift/route-tls` (v0.6.0) applies Route
-  `quickstart-openshift-<PR>-vanity` → Service `quickstart-openshift-<PR>-frontend`
-  with `dry_run: false`. It fails if another Route already claims the host.
-- `pr-close.yml` job `vanity` deletes that Route when the PR closes (label
-  cleanup does not match it).
+## How it works (plain version)
+
+Let's Encrypt asks "prove you own this name" by fetching
+`http://quickstart.nrs.gov.bc.ca/.well-known/acme-challenge/<token>`.
+For a few minutes we answer that URL from our own namespace, then tear it down.
+
+1. `pr-open.yml` job `vanity` runs after `deploys`.
+2. `scripts/acme-http01-canary.sh` (via `oc-runner`) creates, labelled
+   `acme-canary=quickstart-openshift-<PR>-acme`:
+   - a Pod running `goacme/lego` (HTTP-01 server on :8080),
+   - a Service, a NetworkPolicy allowing the OpenShift router in,
+   - a plain-HTTP, **path-based** Route for `/.well-known/acme-challenge` on the
+     vanity host (path routes coexist with the main `/` route, so renewals can
+     run while the edge+Redirect vanity route stays up).
+3. lego completes the challenge, the script copies `leaf/key/issuer` PEMs out
+   with `oc exec`, and a trap deletes everything it created.
+4. `route-tls` (v0.6.0) applies Route `quickstart-openshift-<PR>-vanity` →
+   frontend with those PEMs.
+5. `pr-close.yml` deletes the vanity Route and any leftover `acme-canary` objects.
+
+## Staging vs prod
+
+- The canary uses **Let's Encrypt staging**
+  (`https://acme-staging-v02.api.letsencrypt.org/directory`): generous rate
+  limits, but the issuer is a fake root ("(STAGING) ..."), so browsers still warn.
+- Prod = pass `https://acme-v02.api.letsencrypt.org/directory` as the 3rd arg.
+  Only after staging is green; prod rate limits are 5 duplicate certs/week.
 
 ## Verify
 
-- `curl -vk https://quickstart.nrs.gov.bc.ca` reaches the PR frontend and shows
-  the self-signed issuer `quickstart TLS canary CA (#2928)`.
-- Without `-k`, the browser/curl warns (expected: untrusted CA).
+- Job log shows `ACME_OK` and the `openssl x509` line with a `(STAGING)` issuer.
+- `curl -vk https://quickstart.nrs.gov.bc.ca` → issuer `(STAGING) ...`
+  (without `-k` curl fails: expected for staging).
 
-## Caveats
+## Renewal story (why this scales as validity shrinks)
 
-- Requires DNS for the host to resolve to the Silver router; otherwise only
-  `curl --resolve` testing works.
-- Only one Route may hold the host; a second open PR (or prod route) will fail.
+Same job on a schedule (or on an `nr-cert-monitor` warning): new challenge,
+new PEMs, `route-tls` apply. No humans, no DNS change, as long as the host's
+DNS already points at Silver. Limits: one hostname per cert; wildcards
+(`*.nrs.gov.bc.ca`) need DNS-01 and therefore DNS write access once.
+
+## What could block it
+
+- Silver/ingress refusing plain HTTP on the path route, or the host already
+  claimed by a Route in another namespace (shows in the Route status line).
+- Egress from the namespace to `acme-staging-v02.api.letsencrypt.org`.
+- Docker Hub pull limits for `goacme/lego`.
