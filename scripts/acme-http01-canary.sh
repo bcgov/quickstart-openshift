@@ -46,7 +46,7 @@ items:
           args:
             - >-
               sleep 20 &&
-              lego --accept-tos --email "${EMAIL}" --server "${SERVER}"
+              /lego --accept-tos --email "${EMAIL}" --server "${SERVER}"
               --path /tmp/lego --domains "${HOST}" --http --http.port :8080 run
               && echo ACME_OK && sleep 600
               || { echo ACME_FAILED; sleep 120; exit 1; }
