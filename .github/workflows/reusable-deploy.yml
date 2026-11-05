@@ -12,8 +12,8 @@ on:
         description: Deployment target; usually PR number, test or prod
         default: ${{ github.event.number }}
         type: string
-      images:
-        description: image-tracker `images` output, a JSON object of package to image digest reference
+      digests:
+        description: image-tracker `digests` output, a JSON object of package to sha256 digest
         required: true
         type: string
       triggers:
@@ -83,11 +83,11 @@ jobs:
             parameters: -p DB_PVC_SIZE="256Mi"
           - name: backend
             file: backend/openshift.deploy.yml
-            parameters: -p BACKEND_IMAGE="${{ fromJSON(inputs.images).backend }}"
-              -p MIGRATIONS_IMAGE="${{ fromJSON(inputs.images).migrations }}"
+            parameters: -p BACKEND_IMAGE="ghcr.io/${{ github.repository }}/backend@${{ fromJSON(inputs.digests).backend }}"
+              -p MIGRATIONS_IMAGE="ghcr.io/${{ github.repository }}/migrations@${{ fromJSON(inputs.digests).migrations }}"
           - name: frontend
             file: frontend/openshift.deploy.yml
-            parameters: -p FRONTEND_IMAGE="${{ fromJSON(inputs.images).frontend }}"
+            parameters: -p FRONTEND_IMAGE="ghcr.io/${{ github.repository }}/frontend@${{ fromJSON(inputs.digests).frontend }}"
     outputs:
       triggered: ${{ steps.deploy.outputs.triggered }}
     steps:

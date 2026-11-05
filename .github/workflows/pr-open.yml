@@ -26,9 +26,9 @@ jobs:
       - uses: bcgov/action-builder-ghcr@cb2629351c87dd1c2130073e4ebb7233a9653a63 # v4.4.1
         with:
           package: ${{ matrix.package }}
-          # The PR tag is mutable (reused every push) and is what merge.yml
-          # deploys/promotes; the head SHA tag is immutable and is what PR
-          # deploys use, so each push changes the pod spec and forces a rollout.
+          # The PR tag is mutable (reused every push). PR deploys resolve the
+          # head SHA via image-tracker digests; the SHA tag is an immutable
+          # search hint so each push can force a rollout when digests change.
           tags: |
             ${{ github.event.number }}
             ${{ github.event.pull_request.head.sha }}
@@ -46,7 +46,7 @@ jobs:
       packages: read
       pull-requests: read
     outputs:
-      images: ${{ steps.tracker.outputs.images }}
+      digests: ${{ steps.tracker.outputs.digests }}
     runs-on: ubuntu-26.04
     timeout-minutes: 5
     steps:
@@ -55,7 +55,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - id: tracker
-        uses: bcgov/actions/image-tracker@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
+        uses: bcgov/actions/image-tracker@d209bb08aabe15e5e69aca53b24d338a7b2843d5 # v0.12.0
         with:
           # Unchanged packages reuse an earlier image, so walk back far enough to find it
           max_depth: 100
@@ -74,7 +74,7 @@ jobs:
       oc_token: ${{ secrets.oc_token }}
     with:
       target: ${{ github.event.number }}
-      images: ${{ needs.images.outputs.images }}
+      digests: ${{ needs.images.outputs.digests }}
       triggers: |
         backend/
         frontend/
@@ -117,6 +117,6 @@ jobs:
     runs-on: ubuntu-slim
     timeout-minutes: 1
     steps:
-      - uses: bcgov/actions/workflow-results@091f1da89c669d36bf4899830381e5b12d2c889a # v0.11.0
+      - uses: bcgov/actions/workflow-results@d209bb08aabe15e5e69aca53b24d338a7b2843d5 # v0.12.0
         with:
           needs: ${{ toJson(needs) }}

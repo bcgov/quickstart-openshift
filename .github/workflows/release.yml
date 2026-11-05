@@ -23,7 +23,7 @@ jobs:
       pull-requests: read
       packages: read
     outputs:
-      images: ${{ steps.tracker.outputs.images }}
+      digests: ${{ steps.tracker.outputs.digests }}
       pr: ${{ steps.tracker.outputs.pr }}
     runs-on: ubuntu-26.04
     timeout-minutes: 5
@@ -35,7 +35,7 @@ jobs:
       # One call: the digests merge.yml deployed for the release's commit.
       # A miss fails the release; nothing is rebuilt.
       - id: tracker
-        uses: bcgov/actions/image-tracker@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
+        uses: bcgov/actions/image-tracker@d209bb08aabe15e5e69aca53b24d338a7b2843d5 # v0.12.0
         with:
           max_depth: 100
           packages: |
@@ -55,7 +55,7 @@ jobs:
     with:
       environment: prod
       target: prod
-      images: ${{ needs.init.outputs.images }}
+      digests: ${{ needs.init.outputs.digests }}
 
   # Same as merge.yml's monitor-prod; no-ops if SYSDIG_API_TOKEN is unset
   monitor-prod:
@@ -88,7 +88,7 @@ jobs:
       issues: write
       pull-requests: read
     steps:
-      - uses: bcgov/actions/workflow-results@091f1da89c669d36bf4899830381e5b12d2c889a # v0.11.0
+      - uses: bcgov/actions/workflow-results@d209bb08aabe15e5e69aca53b24d338a7b2843d5 # v0.12.0
         with:
           needs: ${{ toJson(needs) }}
           title: Release Results

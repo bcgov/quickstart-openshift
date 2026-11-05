@@ -24,7 +24,7 @@ jobs:
       pull-requests: read
       packages: write # image-tracker tags
     outputs:
-      images: ${{ steps.tracker.outputs.images }}
+      digests: ${{ steps.tracker.outputs.digests }}
       pr: ${{ steps.tracker.outputs.pr }}
     runs-on: ubuntu-26.04
     timeout-minutes: 5
@@ -36,7 +36,7 @@ jobs:
       # One call: every package's digest for this commit, plus the latest tag.
       # A squash merge was never built, so walk back to the last image per package.
       - id: tracker
-        uses: bcgov/actions/image-tracker@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
+        uses: bcgov/actions/image-tracker@d209bb08aabe15e5e69aca53b24d338a7b2843d5 # v0.12.0
         with:
           max_depth: 100
           packages: |
@@ -55,7 +55,7 @@ jobs:
     with:
       environment: test
       target: test
-      images: ${{ needs.init.outputs.images }}
+      digests: ${{ needs.init.outputs.digests }}
 
   tests:
     name: Tests
@@ -78,7 +78,7 @@ jobs:
     with:
       environment: prod
       target: prod
-      images: ${{ needs.init.outputs.images }}
+      digests: ${{ needs.init.outputs.digests }}
 
   # Sync Sysdig email alerts for PROD. No-ops cleanly if SYSDIG_API_TOKEN is
   # unset or monitoring/alerts/ is empty — adoption is gradual. Alert
@@ -120,7 +120,7 @@ jobs:
       issues: write
       pull-requests: read
     steps:
-      - uses: bcgov/actions/workflow-results@091f1da89c669d36bf4899830381e5b12d2c889a # v0.11.0
+      - uses: bcgov/actions/workflow-results@d209bb08aabe15e5e69aca53b24d338a7b2843d5 # v0.12.0
         with:
           needs: ${{ toJson(needs) }}
           title: Merge Results
