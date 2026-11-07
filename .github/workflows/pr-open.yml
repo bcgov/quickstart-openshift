@@ -77,43 +77,30 @@ jobs:
     needs: [deploys]
     if: needs.deploys.outputs.triggered == 'true'
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      # Unreleased: head of bcgov/actions-openshift#155
+      - name: ACME HTTP-01
+        id: acme
+        uses: bcgov/actions-openshift/acme-http01@c98c6783ca9729a5a29eb893aef68c38bcf09fed # feat/acme-http01
         with:
-          persist-credentials: false
-
-      - name: ACME HTTP-01 (lego pod + challenge Route)
-        uses: bcgov/actions-openshift/oc-runner@46f2614322f7ba1a5ad88a7e4e1b98569c80dcf7 # v0.6.0
-        with:
+          hostname: quickstart.nrs.gov.bc.ca
+          email: derek.roberts@gmail.com
+          acme_server: staging
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
-          timeout: 12m
-          commands: |
-            NAME=${{ github.event.repository.name }}-${{ github.event.number }} \
-            OUT="${RUNNER_TEMP}/tls" \
-              bash scripts/acme-http01-canary.sh quickstart.nrs.gov.bc.ca derek.roberts@gmail.com
-
-      - name: Read PEMs
-        id: cert
-        run: |
-          while IFS= read -r line; do
-            [[ -n "$line" && "$line" != -----* ]] && echo "::add-mask::${line}"
-          done < "${RUNNER_TEMP}/tls/key.pem"
-          for f in leaf key ca; do
-            { echo "${f}<<PEM_EOF"; cat "${RUNNER_TEMP}/tls/${f}.pem"; echo "PEM_EOF"; } >> "$GITHUB_OUTPUT"
-          done
-          rm -rf "${RUNNER_TEMP}/tls"
 
       - uses: bcgov/actions-openshift/route-tls@46f2614322f7ba1a5ad88a7e4e1b98569c80dcf7 # v0.6.0
         with:
           hostname: quickstart.nrs.gov.bc.ca
           route_name: ${{ github.event.repository.name }}-${{ github.event.number }}-vanity
           target_service: ${{ github.event.repository.name }}-${{ github.event.number }}-frontend
-          tls_certificate: ${{ steps.cert.outputs.leaf }}
-          tls_private_key: ${{ steps.cert.outputs.key }}
-          tls_ca_certificate: ${{ steps.cert.outputs.ca }}
+          tls_certificate: ${{ steps.acme.outputs.tls_certificate }}
+          tls_private_key: ${{ steps.acme.outputs.tls_private_key }}
+          tls_ca_certificate: ${{ steps.acme.outputs.tls_ca_certificate }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}

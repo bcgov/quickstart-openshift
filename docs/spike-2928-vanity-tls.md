@@ -16,25 +16,21 @@ Let's Encrypt asks "prove you own this name" by fetching
 For a few minutes we answer that URL from our own namespace, then tear it down.
 
 1. `pr-open.yml` job `vanity` runs after `deploys`.
-2. `scripts/acme-http01-canary.sh` (via `oc-runner`) creates, labelled
-   `acme-canary=quickstart-openshift-<PR>-acme`:
-   - a Pod running `goacme/lego` (HTTP-01 server on :8080),
-   - a Service, a NetworkPolicy allowing the OpenShift router in,
-   - a plain-HTTP, **path-based** Route for `/.well-known/acme-challenge` on the
-     vanity host (path routes coexist with the main `/` route, so renewals can
-     run while the edge+Redirect vanity route stays up).
-3. lego completes the challenge, the script copies `leaf/key/issuer` PEMs out
-   with `oc exec`, and a trap deletes everything it created.
-4. `route-tls` (v0.6.0) applies Route `quickstart-openshift-<PR>-vanity` →
+2. `bcgov/actions-openshift/acme-http01`, pinned to the head of
+   [bcgov/actions-openshift#155](https://github.com/bcgov/actions-openshift/pull/155),
+   creates a lego Pod, Service, NetworkPolicy and a plain-HTTP, **path-based**
+   Route, gets the certificate, then deletes everything it created.
+3. `route-tls` (v0.6.0) applies Route `quickstart-openshift-<PR>-vanity` →
    frontend with those PEMs.
-5. `pr-close.yml` deletes the vanity Route and any leftover `acme-canary` objects.
+4. `pr-close.yml` deletes the vanity Route and any objects labelled
+   `app.kubernetes.io/managed-by=acme-http01`.
 
 ## Staging vs prod
 
 - The canary uses **Let's Encrypt staging**
   (`https://acme-staging-v02.api.letsencrypt.org/directory`): generous rate
   limits, but the issuer is a fake root ("(STAGING) ..."), so browsers still warn.
-- Prod = pass `https://acme-v02.api.letsencrypt.org/directory` as the 3rd arg.
+- Prod = set `acme_server: production` on the action.
   Only after staging is green; prod rate limits are 5 duplicate certs/week.
 
 ## Verify

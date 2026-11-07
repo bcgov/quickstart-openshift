@@ -38,4 +38,4 @@ jobs:
           oc_token: ${{ secrets.oc_token }}
           commands: |
             oc delete route ${{ github.event.repository.name }}-${{ github.event.number }}-vanity --ignore-not-found
-            oc delete pod,service,route,networkpolicy -l acme-canary=${{ github.event.repository.name }}-${{ github.event.number }}-acme --ignore-not-found
+            oc delete pod,service,route,networkpolicy -l app.kubernetes.io/managed-by=acme-http01 --ignore-not-found --wait=false
