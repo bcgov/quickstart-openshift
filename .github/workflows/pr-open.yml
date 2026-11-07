@@ -75,7 +75,8 @@ jobs:
   vanity:
     name: Vanity TLS (ACME staging)
     needs: [deploys]
-    if: needs.deploys.outputs.triggered == 'true'
+    # Off: a production certificate is live, and each run would replace it
+    if: false
     runs-on: ubuntu-26.04
     permissions:
       contents: read

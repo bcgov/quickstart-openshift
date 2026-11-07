@@ -25,6 +25,13 @@ For a few minutes we answer that URL from our own namespace, then tear it down.
 4. `pr-close.yml` deletes the vanity Route and any objects labelled
    `app.kubernetes.io/managed-by=acme-http01`.
 
+## Result
+
+Proven on 2026-11-07: `acme-http01` issued a production Let's Encrypt certificate
+and `route-tls` applied it, so `curl https://quickstart.nrs.gov.bc.ca` verifies
+without `-k`. It expires 2027-02-05 and nothing renews it yet. The `vanity` job is
+now off so later pushes can't replace it; closing this PR deletes the Route.
+
 ## Staging vs prod
 
 - The canary uses **Let's Encrypt staging**
