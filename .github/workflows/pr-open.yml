@@ -88,7 +88,7 @@ jobs:
         with:
           hostname: quickstart.nrs.gov.bc.ca
           email: derek.roberts@gmail.com
-          acme_server: staging
+          acme_server: production
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
