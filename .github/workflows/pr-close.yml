@@ -14,7 +14,7 @@ permissions: {}
 jobs:
   cleanup:
     name: Cleanup and Image Promotion
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-close.yml@a11ad3d1b9288fb40757c4314a62eb86ff227931 # v1.2.1
+    uses: bcgov/actions-openshift/.github/workflows/.pr-close.yml@4ad9f97c20e0e00454bfd35e54537ee8622fa166 # v0.7.0
     permissions:
       packages: write
     secrets:
@@ -22,5 +22,8 @@ jobs:
       oc_token: ${{ secrets.oc_token }}
     with:
       cleanup: label
-      packages: backend frontend migrations
+      packages: |
+        backend
+        frontend
+        migrations
 

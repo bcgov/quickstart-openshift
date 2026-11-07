@@ -22,13 +22,29 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
+      packages: write # image-tracker tags
     outputs:
-      pr: ${{ steps.pr.outputs.pr }}
+      digests: ${{ steps.tracker.outputs.digests }}
+      pr: ${{ steps.tracker.outputs.pr }}
     runs-on: ubuntu-26.04
+    timeout-minutes: 5
     steps:
-      # Get PR number for squash merges to main
-      - id: pr
-        uses: bcgov/action-get-pr@28b0adf8e4d40720d41f9c87356ce24b0a4bd6af # v0.3.1
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # One call: every package's digest for this commit, plus the latest tag.
+      # A squash merge was never built, so walk back to the last image per package.
+      - id: tracker
+        uses: bcgov/actions/image-tracker@d209bb08aabe15e5e69aca53b24d338a7b2843d5 # v0.12.0
+        with:
+          max_depth: 100
+          packages: |
+            migrations
+            backend
+            frontend
+          tags: |
+            latest
   deploy-test:
     name: TEST Deploys (${{ needs.init.outputs.pr }})
     needs: [init]
@@ -39,7 +55,7 @@ jobs:
     with:
       environment: test
       target: test
-      tag: ${{ needs.init.outputs.pr }}
+      digests: ${{ needs.init.outputs.digests }}
 
   tests:
     name: Tests
@@ -48,8 +64,8 @@ jobs:
     with:
       target: test
 
-  # PROD on every merge. For PROD only on releases, comment out deploy-prod,
-  # monitor-prod and promote below; release.yml then handles PROD.
+  # PROD on every merge. For PROD only on releases, comment out deploy-prod
+  # and monitor-prod below; release.yml then handles PROD.
   deploy-prod:
     name: PROD Deploys (${{ needs.init.outputs.pr }})
     needs: [tests, init]
@@ -62,7 +78,7 @@ jobs:
     with:
       environment: prod
       target: prod
-      tag: ${{ needs.init.outputs.pr }}
+      digests: ${{ needs.init.outputs.digests }}
 
   # Sync Sysdig email alerts for PROD. No-ops cleanly if SYSDIG_API_TOKEN is
   # unset or monitoring/alerts/ is empty — adoption is gradual. Alert
@@ -89,27 +105,13 @@ jobs:
             frontend
             backend
 
-  promote:
-    name: Promote Images
-    needs: [deploy-prod, init]
-    runs-on: ubuntu-slim
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        package: [migrations, backend, frontend]
-    timeout-minutes: 1
-    steps:
-      - uses: shrink/actions-docker-registry-tag@e6aaef25c595b6e0edd18bf4c7dbfea3abd43299 # v5
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.init.outputs.pr }}
-          tags: prod
+  # Promote/retag is handled by image-tracker `tags` in init (latest). The old
+  # mutable PR-tag → prod promote matrix is removed so PROD gets the same
+  # digests that were tested.
 
   results:
     name: Merge Results
-    needs: [init, deploy-test, tests, deploy-prod, monitor-prod, promote]
+    needs: [init, deploy-test, tests, deploy-prod, monitor-prod]
     if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 1
@@ -118,7 +120,7 @@ jobs:
       issues: write
       pull-requests: read
     steps:
-      - uses: bcgov/actions/workflow-results@091f1da89c669d36bf4899830381e5b12d2c889a # v0.11.0
+      - uses: bcgov/actions/workflow-results@d209bb08aabe15e5e69aca53b24d338a7b2843d5 # v0.12.0
         with:
           needs: ${{ toJson(needs) }}
           title: Merge Results
