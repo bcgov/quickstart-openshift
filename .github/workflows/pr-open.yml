@@ -88,12 +88,12 @@ jobs:
         with:
           hostname: quickstart.nrs.gov.bc.ca
           email: derek.roberts@gmail.com
-          acme_server: staging
+          acme_server: production
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
 
-      - uses: bcgov/actions-openshift/route-tls@46f2614322f7ba1a5ad88a7e4e1b98569c80dcf7 # v0.6.0
+      - uses: bcgov/actions-openshift/route-tls@6b43d38d1b7420bc69594202ad5c281dcda31d20 # fix/route-tls-api-retry
         with:
           hostname: quickstart.nrs.gov.bc.ca
           route_name: ${{ github.event.repository.name }}-${{ github.event.number }}-vanity
