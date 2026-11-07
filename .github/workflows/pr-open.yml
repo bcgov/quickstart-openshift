@@ -84,7 +84,7 @@ jobs:
       # Unreleased: head of bcgov/actions-openshift#155
       - name: ACME HTTP-01
         id: acme
-        uses: bcgov/actions-openshift/acme-http01@e90a99e437b2a38948da8b5b4dd125642978502a # feat/acme-http01
+        uses: bcgov/actions-openshift/acme-http01@5316d1e17852689bda229d7f0a54f6184df31d6f # feat/acme-http01
         with:
           hostname: quickstart.nrs.gov.bc.ca
           email: derek.roberts@gmail.com
