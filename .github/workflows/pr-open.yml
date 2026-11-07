@@ -70,6 +70,43 @@ jobs:
             - [Frontend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca)
             - [Backend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/api)
 
+  # Test-only (#2928, bcgov/actions-openshift#153): Let's Encrypt STAGING via HTTP-01
+  # on the PR frontend vanity host; not for merge
+  vanity:
+    name: Vanity TLS (ACME staging)
+    needs: [deploys]
+    # Off: a production certificate is live, and each run would replace it
+    if: false
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    timeout-minutes: 15
+    steps:
+      # Unreleased: head of bcgov/actions-openshift#155
+      - name: ACME HTTP-01
+        id: acme
+        uses: bcgov/actions-openshift/acme-http01@5316d1e17852689bda229d7f0a54f6184df31d6f # feat/acme-http01
+        with:
+          hostname: quickstart.nrs.gov.bc.ca
+          email: derek.roberts@gmail.com
+          acme_server: production
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+
+      - uses: bcgov/actions-openshift/route-tls@6b43d38d1b7420bc69594202ad5c281dcda31d20 # fix/route-tls-api-retry
+        with:
+          hostname: quickstart.nrs.gov.bc.ca
+          route_name: ${{ github.event.repository.name }}-${{ github.event.number }}-vanity
+          target_service: ${{ github.event.repository.name }}-${{ github.event.number }}-frontend
+          tls_certificate: ${{ steps.acme.outputs.tls_certificate }}
+          tls_private_key: ${{ steps.acme.outputs.tls_private_key }}
+          tls_ca_certificate: ${{ steps.acme.outputs.tls_ca_certificate }}
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          dry_run: false
+
   # ==========================================================================
   # WARNING: This job acts as the required merge gate for this workflow.
   # If you add a new job to this workflow, you MUST add its ID to the 'needs'
@@ -77,7 +114,7 @@ jobs:
   # ==========================================================================
   results:
     name: PR Results
-    needs: [builds, deploys, tests, comment]
+    needs: [builds, deploys, tests, comment, vanity]
     if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 1
