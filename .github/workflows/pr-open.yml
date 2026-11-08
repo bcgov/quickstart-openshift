@@ -91,7 +91,7 @@ jobs:
           route_name: ${{ github.event.repository.name }}-${{ github.event.number }}-vanity
           target_service: ${{ github.event.repository.name }}-${{ github.event.number }}-frontend
           ca: letsencrypt
-          force: "false"
+          force: "true"
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
