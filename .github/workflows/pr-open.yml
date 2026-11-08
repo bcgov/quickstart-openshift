@@ -84,14 +84,14 @@ jobs:
       # Unreleased: test branch combining bcgov/actions-openshift#155 and #156
       - name: Keep certificate valid
         id: keeper
-        uses: bcgov/actions-openshift/cert-keeper@abb8d7f2076d941cf8c022ffd6f10f8ef86cc9e7 # test/cert-keeper-live
+        uses: bcgov/actions-openshift/cert-keeper@6fbe32bf053ae1f90104ab1e4a084616cb6328b8 # test/cert-keeper-live-2
         with:
           hostname: quickstart.nrs.gov.bc.ca
           email: derek.roberts@gmail.com
           route_name: ${{ github.event.repository.name }}-${{ github.event.number }}-vanity
           target_service: ${{ github.event.repository.name }}-${{ github.event.number }}-frontend
           ca: letsencrypt
-          force: "false"
+          force: "true"
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.oc_server }}
           oc_token: ${{ secrets.oc_token }}
