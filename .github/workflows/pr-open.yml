@@ -84,7 +84,7 @@ jobs:
       # Unreleased: test branch combining bcgov/actions-openshift#155 and #156
       - name: Keep certificate valid
         id: keeper
-        uses: bcgov/actions-openshift/cert-keeper@6fbe32bf053ae1f90104ab1e4a084616cb6328b8 # test/cert-keeper-live-2
+        uses: bcgov/actions-openshift/cert-keeper@747484a6e5a8601599539d86105ac472818616b7 # feat/cert-keeper-single-action
         with:
           hostname: quickstart.nrs.gov.bc.ca
           email: derek.roberts@gmail.com
