@@ -33,7 +33,7 @@ jobs:
           persist-credentials: false
 
       - name: Keep the certificate valid
-        uses: bcgov/actions-openshift/cert-keeper@6b0840fb200317eb4c806caeef8a4fda42d528e6 # v0.8.0
+        uses: bcgov/actions-openshift/cert-keeper@f5322ce1729320d15d523877ad57b613816d1ba3 # v0.8.0
         with:
           hostname: ${{ vars.ROUTE_HOST }}
           email: ${{ vars.ACME_EMAIL }}
