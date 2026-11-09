@@ -25,10 +25,9 @@ jobs:
 
       - name: Check certificate expiry
         id: check
-        uses: bcgov/actions-openshift/cert-expiry@46f2614322f7ba1a5ad88a7e4e1b98569c80dcf7 # v0.6.0
+        uses: bcgov/actions-openshift/cert-expiry@6b0840fb200317eb4c806caeef8a4fda42d528e6 # v0.8.0
         with:
           hosts: ${{ vars.ROUTE_HOST }}
-          days: "30"
 
       - name: Notify CODEOWNERS
         if: failure() && steps.check.outputs.findings != '' && steps.check.outputs.findings != '[]'

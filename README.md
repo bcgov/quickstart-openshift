@@ -227,7 +227,7 @@ Vanity URL hostname for the application (e.g., `myapp.gov.bc.ca` — hostname on
 Two standalone workflows use it:
 
 * `Route TLS` ([`route-tls.yml`](./.github/workflows/route-tls.yml)) validates (`dry_run=true`) or applies (`dry_run=false`) the PROD vanity Route certificate. Manual only.
-* `Cert Expiry` ([`cert-expiry.yml`](./.github/workflows/cert-expiry.yml)) checks the `ROUTE_HOST` certificate and notifies CODEOWNERS if it expires within 30 days or can't be read. Runs weekly (Monday) or by hand, only when `ROUTE_HOST` is set.
+* `Cert Expiry` ([`cert-expiry.yml`](./.github/workflows/cert-expiry.yml)) checks the `ROUTE_HOST` certificate and notifies CODEOWNERS if a third of its lifetime or less is left, it doesn't cover the host, or it can't be read. Runs weekly (Monday) or by hand, only when `ROUTE_HOST` is set.
 
 Run either by hand from `Actions > <workflow> > Run workflow`, or:
 
