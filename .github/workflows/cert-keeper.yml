@@ -50,4 +50,4 @@ jobs:
           title: "Cert Keeper failed"
           labels: ""
           notify_author: "false"
-          notify_codeowners: "true"
+          notify_codeowners: "always"
