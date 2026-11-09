@@ -1,9 +1,16 @@
 # Spike #2928: roll-our-own vanity TLS (ACME HTTP-01) on the PR deploy
 
-**Test only, not for merge.** Intent: prove we can get a public ACME certificate
-for `quickstart.nrs.gov.bc.ca` from inside a GitHub Actions job, with no Service
+**Status: historical record.** The spike below proved the idea. It was merged by
+mistake and its per-PR `vanity` job and Route cleanup have since been removed.
+The real solution is [`bcgov/actions-openshift/cert-keeper`](https://github.com/bcgov/actions-openshift/blob/main/cert-keeper/README.md),
+run from [`.github/workflows/cert-keeper.yml`](../.github/workflows/cert-keeper.yml) on
+the `prod` environment. The names `acme-http01` and `route-tls` below are the
+pre-release names of what became `cert-keeper`.
+
+Original intent: prove we can get a public ACME certificate for
+`quickstart.nrs.gov.bc.ca` from inside a GitHub Actions job, with no Service
 Desk ticket and no Entrust order, then apply it with
-`bcgov/actions-openshift/route-tls`. The reusable action will land in
+`bcgov/actions-openshift/route-tls`. The reusable action landed as
 [bcgov/actions-openshift#153](https://github.com/bcgov/actions-openshift/issues/153).
 
 Step 1 (done, earlier commits): a self-signed cert proved the Route path works;

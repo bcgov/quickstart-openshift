@@ -70,32 +70,6 @@ jobs:
             - [Frontend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca)
             - [Backend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/api)
 
-  # Test-only (#2928, bcgov/actions-openshift#153): Let's Encrypt STAGING via HTTP-01
-  # on the PR frontend vanity host; not for merge
-  vanity:
-    name: Vanity TLS (cert-keeper)
-    needs: [deploys]
-    if: needs.deploys.outputs.triggered == 'true'
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-    timeout-minutes: 15
-    steps:
-      # Unreleased: test branch combining bcgov/actions-openshift#155 and #156
-      - name: Keep certificate valid
-        id: keeper
-        uses: bcgov/actions-openshift/cert-keeper@747484a6e5a8601599539d86105ac472818616b7 # feat/cert-keeper-single-action
-        with:
-          hostname: quickstart.nrs.gov.bc.ca
-          email: derek.roberts@gmail.com
-          route_name: ${{ github.event.repository.name }}-${{ github.event.number }}-vanity
-          target_service: ${{ github.event.repository.name }}-${{ github.event.number }}-frontend
-          ca: letsencrypt
-          force: "false"
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.oc_server }}
-          oc_token: ${{ secrets.oc_token }}
-
   # ==========================================================================
   # WARNING: This job acts as the required merge gate for this workflow.
   # If you add a new job to this workflow, you MUST add its ID to the 'needs'
@@ -103,7 +77,7 @@ jobs:
   # ==========================================================================
   results:
     name: PR Results
-    needs: [builds, deploys, tests, comment, vanity]
+    needs: [builds, deploys, tests, comment]
     if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 1

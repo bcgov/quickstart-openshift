@@ -16,7 +16,7 @@ Repository facts for automated coding assistants. Teams may edit or remove this 
 ## Shared actions
 - Uses bcgov shared actions and workflows (`bcgov/action-*`, `bcgov/actions/*`, `bcgov/actions-openshift/*`, `bcgov/quickstart-openshift-helpers`). Use them as provided; don't copy or fork them.
 - Never pin `@main`. Pin bcgov shared actions to a published release SHA with a `# vX.Y.Z` comment.
-- Vanity Route TLS (`bcgov/actions-openshift/route-tls`) is strictly managed via the standalone on-demand workflow (`.github/workflows/route-tls.yml` with `workflow_dispatch`). Never embed `route-tls` into `merge.yml`, `release.yml`, or continuous deployment pipelines.
+- Vanity Route TLS (`bcgov/actions-openshift/cert-keeper`) is strictly managed via the standalone workflow `.github/workflows/cert-keeper.yml` (daily schedule and `workflow_dispatch`, runs only when `vars.ROUTE_HOST` is set, uses the `prod` environment). Never embed `cert-keeper` into `pr-open.yml`, `merge.yml`, `release.yml`, or continuous deployment pipelines.
 
 ## Settings
 - Automated agents must not change repository or organization settings. Settings changes are made by a person on the team with the setup scripts in `scripts/`; agents may run them only without `--apply`, which previews.

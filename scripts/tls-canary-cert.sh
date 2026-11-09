@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Mint a short-lived personal test CA + leaf for a vanity host (issue #2928 canary).
-# Output is shaped for route-tls: leaf.pem, key.pem, ca.pem. Nothing is uploaded.
+# Writes leaf.pem, key.pem, ca.pem (browsers reject this CA). Nothing is uploaded.
 # Usage: scripts/tls-canary-cert.sh [hostname] [days]
 set -euo pipefail
 HOST="${1:-quickstart.nrs.gov.bc.ca}"

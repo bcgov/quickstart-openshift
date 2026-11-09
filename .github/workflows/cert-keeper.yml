@@ -1,0 +1,53 @@
+name: Cert Keeper
+
+# Keeps the PROD vanity host's SSL/TLS certificate valid (bcgov/actions-openshift#158).
+# Does nothing unless the repository variable ROUTE_HOST is set. Uses the prod
+# environment's OC_NAMESPACE, OC_TOKEN and the repository's OC_SERVER.
+
+on:
+  schedule:
+    # Daily 07:23 PT (14:23 UTC). Most days it only reads the certificate and stops.
+    - cron: "23 14 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  cert-keeper:
+    name: Cert Keeper (${{ vars.ROUTE_HOST }})
+    if: vars.ROUTE_HOST != ''
+    environment: prod
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      # workflow-notifier reads CODEOWNERS from the workspace
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Keep the certificate valid
+        uses: bcgov/actions-openshift/cert-keeper@f5322ce1729320d15d523877ad57b613816d1ba3 # v0.8.0
+        with:
+          hostname: ${{ vars.ROUTE_HOST }}
+          email: ${{ vars.ACME_EMAIL }}
+          route_name: ${{ github.event.repository.name }}-vanity-url
+          target_service: ${{ github.event.repository.name }}-prod-frontend
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+
+      - name: Notify CODEOWNERS
+        if: failure()
+        uses: bcgov/actions/workflow-notifier@091f1da89c669d36bf4899830381e5b12d2c889a # v0.11.0
+        with:
+          title: "Cert Keeper failed"
+          labels: ""
+          notify_author: "false"
+          notify_codeowners: "always"
