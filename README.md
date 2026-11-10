@@ -28,7 +28,7 @@ This repository provides a template to rapidly deploy a modern web application s
 * Self-healing through probes/checks (startup, readiness, liveness)
 * **Sample application stack:**
     * Database: Postgres, Flyway
-    * Frontend: TypeScript, Caddy Server with Coraza WAF
+    * Frontend: TypeScript, React, Caddy Server with Coraza WAF (prefers native `fetch` over Axios)
     * Backend: TypeScript, Nest.js
 
 

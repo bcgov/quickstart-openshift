@@ -1,4 +1,3 @@
-import axios from "axios";
 import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
@@ -39,17 +38,27 @@ async function performEachMethod(BASE_URL, testCase, method, id) {
   } else if (method === "PATCH") {
     payload = testCase.data?.patch_payload;
   }
-  const response = await axios({
+  const response = await fetch(url, {
     method: method,
-    url: url,
     headers: {
-      ...testCase.headers
+      ...testCase.headers,
     },
-    data: payload
+    body: payload !== undefined ? JSON.stringify(payload) : undefined,
   });
   console.info(`Response for ${method} ${url} : ${response.status}`);
   const methodAssertion = testCase.assertions.find(assertion => assertion.method === method);
-  const responseData = response.data?.data || response.data;
+  const text = await response.text();
+  let responseData;
+  if (text) {
+    try {
+      responseData = JSON.parse(text);
+    } catch {
+      responseData = text;
+    }
+  }
+  if (responseData && typeof responseData === "object" && "data" in responseData) {
+    responseData = responseData.data;
+  }
   if (methodAssertion) {
     if (methodAssertion.status_code) {
       assert(response.status === methodAssertion.status_code);
@@ -59,7 +68,7 @@ async function performEachMethod(BASE_URL, testCase, method, id) {
     }
   }
   if (method === "POST") {
-    return responseData[testCase.data.id_field];
+    return responseData?.[testCase.data.id_field];
   }
 }
 
