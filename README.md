@@ -81,7 +81,6 @@ Workflows read these values.  Repository-level values are used by pull request d
 | prod        | `secrets.OC_TOKEN`     | PROD service token                              |
 | prod        | `secrets.DB_PASSWORD`  | PROD database password                          |
 | none (opt)  | `vars.ROUTE_HOST`      | Vanity URL hostname (repository-level)          |
-| none (opt)  | `vars.ACME_EMAIL`      | Contact email for the free Let's Encrypt certificate |
 | prod (opt)  | `vars.S3_BUCKET`       | S3 bucket name for offsite database backups     |
 | prod (opt)  | `vars.S3_ENDPOINT`     | S3 endpoint URL (e.g. `https://nrs.objectstore.gov.bc.ca`) |
 | prod (opt)  | `secrets.S3_USER`      | S3 access key ID for offsite database backups   |
@@ -189,12 +188,12 @@ Sysdig API token used to sync the PROD email-alert set on every merge. Sourced f
 * Reference: `${{ secrets.SYSDIG_API_TOKEN }}`
 * Alert templates live in [`monitoring/alerts/`](./monitoring/alerts/). Add or remove files to customize the alert set per app — see [`bcgov/action-sysdig-monitor`](https://github.com/bcgov/action-sysdig-monitor) for the template schema and placeholder vocabulary.
 
-**`ROUTE_HOST`, `ACME_EMAIL` (vanity URL certificate)**
+**`ROUTE_HOST` (vanity URL certificate)**
 
-Vanity URL hostname for the application (e.g., `myapp.gov.bc.ca`, hostname only, no scheme) and a contact email for the certificate. Both are optional repository variables. While `ROUTE_HOST` is unset, the standalone `Cert Keeper` workflow ([`cert-keeper.yml`](./.github/workflows/cert-keeper.yml)) does nothing.
+Vanity URL hostname for the application (e.g., `myapp.gov.bc.ca`, hostname only, no scheme). Optional repository variable. While it is unset, the standalone `Cert Keeper` workflow ([`cert-keeper.yml`](./.github/workflows/cert-keeper.yml)) does nothing.
 
-* References: `${{ vars.ROUTE_HOST }}`, `${{ vars.ACME_EMAIL }}`
-* Set both as repository variables: `gh variable set ROUTE_HOST --body 'myapp.gov.bc.ca'` and `gh variable set ACME_EMAIL --body 'you@example.com'`. The workflow reads `ROUTE_HOST` at job level, so it must be a repository variable, not an environment one.
+* Reference: `${{ vars.ROUTE_HOST }}`
+* Set it as a repository variable: `gh variable set ROUTE_HOST --body 'myapp.gov.bc.ca'`. The workflow reads `ROUTE_HOST` at job level, so it must be a repository variable, not an environment one.
 * Once `ROUTE_HOST` is set, `Cert Keeper` runs daily and by hand. It reads the certificate the host serves. If the host has no valid certificate, or a third or less of its life is left, it gets a free [Let's Encrypt](https://letsencrypt.org/) certificate and installs it on the PROD vanity Route (`<repository>-vanity-url`). Otherwise it stops. If a run fails, it opens an issue and notifies CODEOWNERS.
 * It uses the `prod` environment's `OC_NAMESPACE` and `OC_TOKEN` and the repository's `OC_SERVER`, so no certificate files or private keys are stored in GitHub. Configure the `prod` environment's deployment branches and tags (e.g. `main` or release tags) so a pull-request job cannot request its secrets.
 * Before you set `ROUTE_HOST`: the hostname's DNS must already point at the cluster router, and port 80 must reach it, because Let's Encrypt checks ownership over plain HTTP. Let's Encrypt limits a hostname to 5 certificates a week, so avoid repeated forced runs. See the [cert-keeper README](https://github.com/bcgov/actions-openshift/blob/main/cert-keeper/README.md) for limits, staging rehearsals and common fixes.

@@ -33,10 +33,9 @@ jobs:
           persist-credentials: false
 
       - name: Keep the certificate valid
-        uses: bcgov/actions-openshift/cert-keeper@f5322ce1729320d15d523877ad57b613816d1ba3 # v0.8.0
+        uses: bcgov/actions-openshift/cert-keeper@a7a039ba45f9635c0bdbcc6b4cdbd2555811e100 # v0.8.0
         with:
           hostname: ${{ vars.ROUTE_HOST }}
-          email: ${{ vars.ACME_EMAIL }}
           route_name: ${{ github.event.repository.name }}-vanity-url
           target_service: ${{ github.event.repository.name }}-prod-frontend
           oc_namespace: ${{ vars.OC_NAMESPACE }}
