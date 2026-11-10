@@ -1,5 +1,4 @@
 import type { FC } from 'react'
-import type { AxiosResponse } from '~/axios'
 import type UserDto from '@/interfaces/UserDto'
 import { useEffect, useState } from 'react'
 import { Table, Modal, Button } from 'react-bootstrap'
@@ -37,11 +36,10 @@ const Dashboard: FC = () => {
 
   useEffect(() => {
     apiService
-      .getAxiosInstance()
-      .get('/v1/users')
-      .then((response: AxiosResponse) => {
+      .get<UserDto[]>('/v1/users')
+      .then((usersData) => {
         const users: UserDto[] = []
-        for (const user of response.data) {
+        for (const user of usersData) {
           const userDto = {
             id: user.id,
             name: user.name,
