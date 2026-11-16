@@ -125,8 +125,8 @@ jobs:
         name: [backend, frontend]
     steps:
       - uses: actions/checkout@v7
-      - uses: grafana/setup-k6-action@43b9fc21641a76002687994433dd586f56e791b1 # v1.2.2
-      - uses: grafana/run-k6-action@4082a08c7e40cf6d65863911077dfb60ae0a4f04 # v1.5.0
+      - uses: grafana/setup-k6-action@c47136d33d365efbeb9ae7266908b5dcf98cdece # v1.3.0
+      - uses: grafana/run-k6-action@54385d2a25c222a08b4a3aec6b653b8fb370a1ed # v1.6.0
         env:
           BACKEND_URL: https://${{ github.event.repository.name }}-test.apps.silver.devops.gov.bc.ca/api
           FRONTEND_URL: https://${{ github.event.repository.name }}-test.apps.silver.devops.gov.bc.ca
