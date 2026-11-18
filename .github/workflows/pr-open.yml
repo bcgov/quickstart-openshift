@@ -10,7 +10,7 @@ concurrency:
 permissions: {}
 
 jobs:
-  # https://github.com/bcgov/action-builder-ghcr
+  # https://github.com/bcgov/actions/tree/main/builder
   builds:
     name: Builds
     permissions:
@@ -23,7 +23,7 @@ jobs:
         package: [backend, frontend, migrations]
     timeout-minutes: 10
     steps:
-      - uses: bcgov/action-builder-ghcr@cb2629351c87dd1c2130073e4ebb7233a9653a63 # v4.4.1
+      - uses: bcgov/actions/builder@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
         with:
           package: ${{ matrix.package }}
           # The PR tag is mutable (reused every push) and is what merge.yml
