@@ -34,13 +34,19 @@ jobs:
         ports:
           - 5432:5432
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - uses: bcgov/actions/test-and-analyse@6c8ac0469fcf0d826533bc526c90119b8f149884 # v0.13.0
         with:
-          commands: |
+          commands: |-
+            (
+            set -e
             npm ci
             npm run lint
             npm run format:check
             npm run test:cov
+            )
           working_directory: backend
           node_version: "24"
           sonar_args: >
@@ -53,8 +59,8 @@ jobs:
           sonar_token: ${{ secrets.sonar_token_backend }}
           semgrep: true
           triggers: |
-            backend/
-            .github/workflows/analysis.yml
+            ${{ github.event_name == 'pull_request' && 'backend/' || '' }}
+            ${{ github.event_name == 'pull_request' && '.github/workflows/analysis.yml' || '' }}
 
   frontend-tests:
     name: Frontend Tests
@@ -62,13 +68,19 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - uses: bcgov/actions/test-and-analyse@6c8ac0469fcf0d826533bc526c90119b8f149884 # v0.13.0
         with:
-          commands: |
+          commands: |-
+            (
+            set -e
             npm ci
             npm run lint
             npm run format:check
             npm run test:cov
+            )
           working_directory: frontend
           node_version: "24"
           sonar_args: >
@@ -81,8 +93,8 @@ jobs:
           sonar_token: ${{ secrets.sonar_token_frontend }}
           semgrep: true
           triggers: |
-            frontend/
-            .github/workflows/analysis.yml
+            ${{ github.event_name == 'pull_request' && 'frontend/' || '' }}
+            ${{ github.event_name == 'pull_request' && '.github/workflows/analysis.yml' || '' }}
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
