@@ -20,7 +20,7 @@ jobs:
     name: Backend Tests
     if: (! github.event.pull_request.draft)
     runs-on: ubuntu-26.04
-    timeout-minutes: 5
+    timeout-minutes: 10
     services:
       postgres:
         image: postgres
@@ -34,16 +34,20 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: bcgov/action-test-and-analyse@8f699e3fd3fadd9a6adf6f4b1f2638ef7ecfefb9 # v2.0.0
-        env:
-          sonar_token: ${{ secrets.sonar_token_backend }}
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          commands: |
+          fetch-depth: 0
+      - uses: bcgov/actions/test-and-analyse@6c8ac0469fcf0d826533bc526c90119b8f149884 # v0.13.0
+        with:
+          commands: |-
+            (
+            set -e
             npm ci
             npm run lint
             npm run format:check
             npm run test:cov
-          dir: backend
+            )
+          working_directory: backend
           node_version: "24"
           sonar_args: >
             -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
@@ -52,27 +56,32 @@ jobs:
             -Dsonar.sources=src
             -Dsonar.test.inclusions=**/*spec.ts
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
-          sonar_token: ${{ env.sonar_token }}
-          dep_scan: warn
-          supply_scan: true
-          triggers: ('backend/')
+          sonar_token: ${{ secrets.sonar_token_backend }}
+          semgrep: true
+          triggers: |
+            ${{ github.event_name == 'pull_request' && 'backend/' || '' }}
+            ${{ github.event_name == 'pull_request' && '.github/workflows/analysis.yml' || '' }}
 
   frontend-tests:
     name: Frontend Tests
     if: (! github.event.pull_request.draft)
     runs-on: ubuntu-26.04
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
-      - uses: bcgov/action-test-and-analyse@8f699e3fd3fadd9a6adf6f4b1f2638ef7ecfefb9 # v2.0.0
-        env:
-          sonar_token: ${{ secrets.sonar_token_frontend }}
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          commands: |
+          fetch-depth: 0
+      - uses: bcgov/actions/test-and-analyse@6c8ac0469fcf0d826533bc526c90119b8f149884 # v0.13.0
+        with:
+          commands: |-
+            (
+            set -e
             npm ci
             npm run lint
             npm run format:check
             npm run test:cov
-          dir: frontend
+            )
+          working_directory: frontend
           node_version: "24"
           sonar_args: >
             -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts,**/*test.tsx,**/routeTree.gen.ts
@@ -81,10 +90,11 @@ jobs:
             -Dsonar.sources=src
             -Dsonar.test.inclusions=**/*spec.ts,**/*test.tsx
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
-          sonar_token: ${{ env.sonar_token }}
-          dep_scan: warn
-          supply_scan: true
-          triggers: ('frontend/')
+          sonar_token: ${{ secrets.sonar_token_frontend }}
+          semgrep: true
+          triggers: |
+            ${{ github.event_name == 'pull_request' && 'frontend/' || '' }}
+            ${{ github.event_name == 'pull_request' && '.github/workflows/analysis.yml' || '' }}
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
