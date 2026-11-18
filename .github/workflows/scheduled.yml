@@ -102,20 +102,19 @@ jobs:
       pages: write
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@a11ad3d1b9288fb40757c4314a62eb86ff227931 # v1.2.1
 
-  # Run sequentially to reduce chances of rate limiting
+  # Run weekly DAST (OWASP ZAP + Nuclei) against TEST and upload SARIF to Security tab
   zap:
-    name: ZAP Scans
+    name: ZAP & Nuclei Scans
     permissions:
-      issues: write
+      contents: read
+      security-events: write
     runs-on: ubuntu-26.04
     steps:
-      - name: ZAP Scan
-        uses: zaproxy/action-full-scan@3c58388149901b9a03b7718852c5ba889646c27c # v0.13.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Scan TEST URL
+        uses: bcgov/actions/scan-url@6c8ac0469fcf0d826533bc526c90119b8f149884 # v0.13.0
         with:
-          allow_issue_writing: true
-          issue_title: "ZAP Security Report"
-          token: ${{ secrets.GITHUB_TOKEN }}
-          target: https://${{ github.event.repository.name }}-test.apps.silver.devops.gov.bc.ca
+          url: https://${{ github.event.repository.name }}-test.apps.silver.devops.gov.bc.ca
 
   load-tests:
     name: Load
