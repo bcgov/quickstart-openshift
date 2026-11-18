@@ -36,64 +36,18 @@ jobs:
 
   ageOutPRs:
     name: PR Deployment Purge
-    env:
-      # https://tecadmin.net/getting-yesterdays-date-in-bash/
-      CUTOFF: "1 week ago"
     runs-on: ubuntu-slim
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
-      - name: Clean up PR Deployments
-        uses: bcgov/action-oc-runner@111868d1fc50db0a40417ba321d865ef5c931bbd # v1.7.0
+      - name: Clean up stale PR deployments
+        uses: bcgov/actions-openshift/pr-env-cleanup@510a8105fdffbb718094e8a093e638132e300975 # v0.10.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_token: ${{ secrets.oc_token }}
-          oc_server: ${{ vars.oc_server }}
-          commands: |
-            # Catch errors, unset variables, and pipe failures (e.g. grep || true )
-            set -euo pipefail
-
-            # Echos
-            echo "Delete stale PR deployments"
-            echo "Cutoff: ${{ env.CUTOFF }}"
-
-            # Before date
-            BEFORE=$(date +%s -d "${{ env.CUTOFF }}")
-            REPO="${{ github.event.repository.name }}"
-
-            # Get deployments matching the repo-PR naming pattern
-            DEPLOYS=$(oc get deploy --no-headers -o custom-columns=:metadata.name,:metadata.creationTimestamp 2>/dev/null | grep -E "${REPO}-[0-9]+" || :)
-
-            # If deployments, then iterate
-            if [ -n "${DEPLOYS}" ]; then
-              while read -r name created; do
-                # Check if deployment still exists (may have been purged with a sibling deployment in this batch)
-                if ! oc get deploy "${name}" >/dev/null 2>&1; then
-                  echo -e "\nDeployment ${name} no longer exists; skipping"
-                  continue
-                fi
-
-                # Convert creation timestamp to epoch
-                UPDATED=$(date -d "${created}" +%s 2>/dev/null || :)
-
-                # Compare to cutoff and delete as necessary
-                if [[ -n "${UPDATED}" ]] && [[ ${UPDATED} -lt ${BEFORE} ]]; then
-                  # Get the app label for this deployment
-                  LABEL=$(oc get deploy "${name}" -o jsonpath='{.metadata.labels.app}' 2>/dev/null || :)
-                  if [ -n "${LABEL}" ]; then
-                    echo -e "\nOlder than cutoff: ${name} (app=${LABEL})"
-                    oc delete all,secret,pvc,cm -l "app=${LABEL}" --ignore-not-found
-                  else
-                    echo -e "\nERROR: No app label found on deployment ${name}"
-                    exit 1
-                  fi
-                else
-                  echo -e "\nNewer than cutoff: ${name}"
-                  echo "No need to delete"
-                fi
-              done <<< "${DEPLOYS}"
-            else
-              echo "No PR deployments found for ${{ github.event.repository.name }}"
-            fi
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
 
   schema-spy:
     name: SchemaSpy
