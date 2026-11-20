@@ -21,16 +21,16 @@ See [ADR 0003](adr/0003-downstream-template-updates.md) for the full rationale. 
 
 - `bcgov/quickstart-openshift` serves as the golden-path reference ([ADR 0001](adr/0001-golden-path-example.md)) and validates new shared-action and Renovate-preset releases before wider adoption.
 - Always pin shared actions to a released commit SHA with a `# vX.Y.Z` comment—never `@main` (see [`AGENTS.md`](../AGENTS.md)).
-- When testing a shared-action change, release it in the action repo (or test in a PR first), verify the Renovate/manual bump PR passes all checks and deploys cleanly to OpenShift (`pr-open.yml`), then merge to verify `merge.yml` (`deploy-test`, `tests`, `deploy-prod`, `promote`).
+- When testing a shared-action change, release it in the action repo (or test in a PR first) and verify the target deploy/test jobs actually ran—not just a green `PR Results` summary. Because `pr-open.yml` skips `deploys` and `tests` unless changes match `('backend/', 'frontend/', 'migrations/', 'common/', '.github/workflows/pr-open.yml')`, a Renovate bump confined to a reusable workflow (such as `.github/workflows/reusable-deploy.yml`) will skip PR deployment unless a triggered path is also exercised during validation before merging to verify `merge.yml` (`deploy-test`, `tests`, `deploy-prod`, `promote`).
 
 ## How to Release
 
 Publishing a GitHub Release runs [`.github/workflows/release.yml`](../.github/workflows/release.yml), which deploys to **PROD**, syncs Sysdig alerts, and promotes GHCR images (`migrations`, `backend`, `frontend`) to `:prod`.
 
-Because `release.yml` reuses images built during a PR rather than rebuilding them:
+Because `release.yml` reuses PR-tagged images rather than rebuilding them:
 
-1. **Pick an image-building PR commit on `main`:** `release.yml`'s `init` job uses `bcgov/action-get-pr` to find the merged PR for the tagged commit and verifies that `ghcr.io/bcgov/quickstart-openshift/{migrations,backend,frontend}:<PR>` all exist and are public.
-   - **Do not** tag a release directly on a docs-only or workflow-only commit where `pr-open.yml` skipped image builds (`triggers: ('<package>/', '.github/workflows/pr-open.yml')`). Tag the most recent `main` commit from a PR that built all three packages, or wait until a build PR lands.
+1. **Pick a merged PR commit on `main` with public PR-tagged images:** `release.yml`'s `init` job uses `bcgov/action-get-pr` to resolve the merged PR for the tagged commit and verifies that `ghcr.io/bcgov/quickstart-openshift/{migrations,backend,frontend}:<PR>` all exist and are public (`pr-open.yml` builds changed packages and retags `tag_fallback: latest` to `:<PR>` for unchanged ones).
+   - **Do not** tag a direct commit on `main` that did not come from a PR, or a PR whose `:<PR>` images are missing or private—`Check images` will fail.
 2. **Verify `main` is healthy:** Confirm the target commit's `Merge` workflow run (`.github/workflows/merge.yml`) succeeded across `deploy-test`, `tests`, `deploy-prod`, and `promote`.
 3. **Choose a Semantic Version (`vX.Y.Z`):**
    - **Major (`vX.0.0`):** Breaking workflow, OpenShift template, secret/variable contract, or stack upgrades requiring manual action in downstream repos.
@@ -41,7 +41,7 @@ Because `release.yml` reuses images built during a PR rather than rebuilding the
 
 ## Common Pitfalls
 
-- **Releasing on a non-build commit:** `release.yml` fails in `init` (`Check images`) if `pr-open.yml` did not build and push all three packages (`migrations`, `backend`, `frontend`) for that commit's PR.
+- **Releasing on a commit without public PR-tagged images:** `release.yml` fails in `init` (`Check images`) if the tagged commit did not come from a merged PR (`bcgov/action-get-pr`), if any `migrations`/`backend`/`frontend` `:<PR>` tag is missing, or if the GHCR packages are private.
 - **`docs/` changes still run `merge.yml`:** `merge.yml`'s `paths-ignore` skips top-level `*.md` and `.github/**` (except `.github/workflows/**`), **not** `docs/**`. Merging changes under `docs/` triggers a `Merge` run (`deploy-test`, `tests`, `deploy-prod`, `promote`).
 - **Editing `.github/codeowners`:** Uncommenting owner entries affects every future repo created from this template and routes notifications (such as `cert-keeper.yml`'s `notify_codeowners: "always"`) to template maintainers. Keep it commented out ([ADR 0004](adr/0004-empty-codeowners.md)).
 - **Pinning `@main` on actions:** Breaks reproducibility and prevents Renovate from managing versioned SHA updates. Always use `@<commit-sha> # vX.Y.Z`.
