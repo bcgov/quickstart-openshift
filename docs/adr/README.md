@@ -46,8 +46,13 @@ Teams work in parallel, so two pull requests can pick the same number. If anothe
 
 ## Index
 
+Records `0001`–`0004` capture baseline template decisions inherited from `bcgov/quickstart-openshift`. Product teams creating a new repository from this template should start their own records at `0005` (or supersede inherited ones as needed).
+
 | ADR | Title | Status | Product team |
 |---|---|---|---|
-| _No records yet_ | | | |
+| [0001](0001-golden-path-example.md) | QuickStart Is the Shared Golden-Path Example | Accepted | Platform / QuickStart |
+| [0002](0002-secret-prevention.md) | Secret Prevention for Downstream Repositories | Accepted | Platform / QuickStart |
+| [0003](0003-downstream-template-updates.md) | How Template Changes Reach Downstream Repositories | Accepted | Platform / QuickStart |
+| [0004](0004-empty-codeowners.md) | Keep CODEOWNERS Empty in the Template Repository | Accepted | Platform / QuickStart |
 
 Add a row for each new ADR. Keep the table sorted by number.
