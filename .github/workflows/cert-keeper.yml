@@ -9,9 +9,14 @@ on:
     # Daily 07:23 PT (14:23 UTC). Most days it only reads the certificate and stops.
     - cron: "23 14 * * *"
   workflow_dispatch:
+    inputs:
+      force:
+        description: Get a new certificate even if the current one is not due
+        type: boolean
+        default: false
 
 concurrency:
-  group: prod-deploy
+  group: cert-keeper
   cancel-in-progress: false
 
 permissions: {}
@@ -27,26 +32,21 @@ jobs:
       contents: read
       issues: write
     steps:
-      # workflow-notifier reads CODEOWNERS from the workspace
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
       - name: Keep the certificate valid
         uses: bcgov/actions-openshift/cert-keeper@a7a039ba45f9635c0bdbcc6b4cdbd2555811e100 # v0.8.0
         with:
           hostname: ${{ vars.ROUTE_HOST }}
           route_name: ${{ github.event.repository.name }}-vanity-url
           target_service: ${{ github.event.repository.name }}-prod-frontend
+          force: ${{ inputs.force }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
 
       - name: Notify CODEOWNERS
         if: failure()
-        uses: bcgov/actions/workflow-notifier@d209bb08aabe15e5e69aca53b24d338a7b2843d5 # v0.12.0
+        uses: bcgov/actions/workflow-notifier@acc058abf85bb183dad21b839a92a40a4ff47af3 # v0.14.0
         with:
           title: "Cert Keeper failed"
-          labels: ""
           notify_author: "false"
           notify_codeowners: "always"
