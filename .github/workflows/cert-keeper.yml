@@ -33,7 +33,7 @@ jobs:
       issues: write
     steps:
       - name: Keep the certificate valid
-        uses: bcgov/actions-openshift/cert-keeper@45d8c7f7d0d5e3b15786cb99a83f410e01547133 # v0.9.0
+        uses: bcgov/actions-openshift/cert-keeper@510a8105fdffbb718094e8a093e638132e300975 # v0.10.0
         with:
           hostname: ${{ vars.ROUTE_HOST }}
           route_name: ${{ github.event.repository.name }}-vanity-url
