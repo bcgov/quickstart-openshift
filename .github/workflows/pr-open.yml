@@ -94,7 +94,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Scan
-        uses: bcgov/actions/scan-url@76967dc6028f69d17e7899092078d3bae1ab7f95 # TEMP bcgov/actions#378
+        uses: bcgov/actions/scan-url@e117ba37caf1385387ab9504e65ee19abc41aea6 # TEMP bcgov/actions#378
         with:
           url: https://${{ github.event.repository.name }}-${{ matrix.target == 'pr' && github.event.number || 'test' }}.apps.silver.devops.gov.bc.ca${{ matrix.path }}
           nuclei_rate_limit: ${{ matrix.rl }}
