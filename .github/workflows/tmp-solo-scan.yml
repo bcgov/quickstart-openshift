@@ -1,0 +1,24 @@
+# TEMP: one solo Nuclei scan of TEST (read-only), PR-scoped; this PR is closed unmerged
+name: TEMP Solo Scan
+
+on:
+  pull_request:
+    paths: [.github/workflows/tmp-solo-scan.yml]
+
+permissions: {}
+
+jobs:
+  scan:
+    name: TEMP Solo Nuclei Scan (TEST)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 75
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Scan
+        uses: bcgov/actions/scan-url@e117ba37caf1385387ab9504e65ee19abc41aea6 # TEMP bcgov/actions#378
+        with:
+          url: https://${{ github.event.repository.name }}-test.apps.silver.devops.gov.bc.ca
+          zap: "false"
