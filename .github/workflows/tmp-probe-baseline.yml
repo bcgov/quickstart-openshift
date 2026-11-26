@@ -1,0 +1,31 @@
+# TEMP: probe-only baseline of TEST (read-only curls, no scan); this PR is closed unmerged
+name: TEMP Probe Baseline
+
+on:
+  pull_request:
+    paths: [.github/workflows/tmp-probe-baseline.yml]
+
+permissions: {}
+
+jobs:
+  probe:
+    name: TEMP Probe ${{ matrix.n }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        n: [1, 2]
+    env:
+      TARGET: https://${{ github.event.repository.name }}-test.apps.silver.devops.gov.bc.ca
+    steps:
+      - name: Probe for 7 minutes
+        run: |
+          echo "probe ${{ matrix.n }} public IP $(curl -s --max-time 10 https://api.ipify.org) at $(date -u +%FT%TZ)"
+          end=$(( $(date +%s) + 7*60 ))
+          while (( $(date +%s) < end )); do
+            for p in / /api/health; do
+              printf "%s %s %s\n" "$(date -u +%FT%TZ)" "$p" "$(curl -s -o /dev/null --max-time 10 -w "%{http_code} %{time_total}" "${TARGET}${p}")"
+            done
+            sleep 3
+          done
+          echo "probe ${{ matrix.n }} public IP $(curl -s --max-time 10 https://api.ipify.org) at $(date -u +%FT%TZ)"
