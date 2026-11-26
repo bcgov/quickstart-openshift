@@ -1,0 +1,72 @@
+# TEMP: solo Nuclei scan of TEST (read-only) plus curl probes from another runner; this PR is closed unmerged
+name: TEMP IP vs Saturation
+
+on:
+  pull_request:
+    paths: [.github/workflows/tmp-ip-vs-saturation.yml]
+
+permissions: {}
+
+env:
+  TARGET: https://${{ github.event.repository.name }}-test.apps.silver.devops.gov.bc.ca
+
+jobs:
+  scan:
+    name: TEMP Solo Nuclei Scan (TEST)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 75
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Public IP
+        run: echo "scanner public IP $(curl -s --max-time 10 https://api.ipify.org) at $(date -u +%FT%TZ)"
+      # Same-IP control: light curls from the scanner's own address while it scans
+      - name: Start same-IP probe loop
+        run: |
+          nohup bash -c 'while true; do for p in / /api/health; do
+            printf "%s %s %s\n" "$(date -u +%FT%TZ)" "$p" "$(curl -s -o /dev/null --max-time 10 -w "%{http_code} %{time_total}" "${TARGET}${p}")"
+          done; sleep 3; done' > "$RUNNER_TEMP/sameip.log" 2>&1 &
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Scan
+        uses: bcgov/actions/scan-url@e117ba37caf1385387ab9504e65ee19abc41aea6 # TEMP bcgov/actions#378
+        with:
+          url: ${{ env.TARGET }}
+          zap: "false"
+          nuclei_rate_limit: "25"
+          nuclei_concurrency: "5"
+          nuclei_timeout: "30"
+      - name: Same-IP probe log
+        if: always()
+        run: |
+          echo "scanner public IP $(curl -s --max-time 10 https://api.ipify.org) at $(date -u +%FT%TZ)"
+          cat "$RUNNER_TEMP/sameip.log"
+
+  probe:
+    name: TEMP Probe From Other Runner
+    runs-on: ubuntu-26.04
+    timeout-minutes: 75
+    permissions:
+      actions: read
+    steps:
+      - name: Probe until the scan job finishes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          echo "probe public IP $(curl -s --max-time 10 https://api.ipify.org) at $(date -u +%FT%TZ)"
+          end=$(( $(date +%s) + 70*60 ))
+          i=0
+          while (( $(date +%s) < end )); do
+            for p in / /api/health; do
+              printf "%s %s %s\n" "$(date -u +%FT%TZ)" "$p" "$(curl -s -o /dev/null --max-time 10 -w "%{http_code} %{time_total}" "${TARGET}${p}")"
+            done
+            sleep 3
+            # Every ~30s, stop once the scan job is done
+            if (( ++i % 6 == 0 )); then
+              st=$(gh api "repos/${REPO}/actions/runs/${RUN_ID}/jobs" -q '.jobs[]|select(.name|startswith("TEMP Solo"))|.status')
+              [[ "$st" == completed ]] && { echo "scan job completed at $(date -u +%FT%TZ)"; break; }
+            fi
+          done
+          echo "probe public IP $(curl -s --max-time 10 https://api.ipify.org) at $(date -u +%FT%TZ)"
