@@ -7,21 +7,21 @@
 
 ## Security assessments (STRA / SoAR)
 
-A director-facing guide to how this template supports a Security Threat and Risk Assessment (STRA) and a Statement of Acceptable Risks (SoAR) is in [docs/stra-soar-devops.md](docs/stra-soar-devops.md).
+A plain-language guide for directors, product owners and Ministry Information Security Officers (MISOs) on how this template supports a Security Threat and Risk Assessment (STRA) and a Statement of Acceptable Risks (SoAR) is in [docs/stra-soar-devops.md](docs/stra-soar-devops.md).
 
 ## Pull Request-Based Workflows with Sample Stack
 
-This repository provides a template to rapidly deploy a modern web application stack to OpenShift using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability. By hitting the ground running we can save weeks‑to‑months of development time, receive regular updates, and built‑in **Maintenance Mode Automation**, which allows an app to go on autopilot for security and dependency updates.  This limits developmer involvement to critical issues only, drastically reducing labor costs and freeing up resources for higher priority work.
+This repository provides a template to rapidly deploy a modern web application stack to OpenShift using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability. By hitting the ground running we can save weeks‑to‑months of development time, receive regular updates, and built‑in **Maintenance Mode Automation**, which allows an app to go on autopilot for security and dependency updates.  This limits developer involvement to critical issues only, drastically reducing labor costs and freeing up resources for higher priority work.
 
 **Includes:**
 * Pull Request-based pipeline
 * Sandboxed development environments
 * Container publishing (ghcr.io) and importing (OpenShift)
 * Security, vulnerability, infrastructure, and container scan tools
-* Out-of-the-box alignment with **OWASP ASVS** Level 1 & 2 controls (see [SECURITY.md](./SECURITY.md#owasp-asvs-alignment))
+* A subset of **OWASP ASVS** Level 1 and 2 controls at the platform and pipeline layer (see [SECURITY.md](./SECURITY.md#owasp-asvs-alignment))
 * Automatic dependency patching via [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
 * Maintenance Mode Automation (hands‑off updates, low‑dev mode) via the same Renovate config
-* Enforced code reviews and workflow jobs (pass|fail)
+* Required PR review (one approval; admins can bypass) and workflow jobs (pass|fail)
 * OpenShift Templates
 * Prometheus Metrics export from Backend/Frontend
 * Resource Tuning with Horizontal Pod Autoscaler
@@ -396,12 +396,12 @@ Don't forget to add your team members!
 
 ## Security & OWASP ASVS Alignment
 
-This repository is architected and hardened out-of-the-box to align with Levels 1 and 2 of the **OWASP Application Security Verification Standard (ASVS) v4.0.3**. A detailed security mapping matrix is documented in [SECURITY.md](./SECURITY.md#owasp-asvs-alignment), detailing our implementation of:
-* **Active WAF Defense:** Inline Coraza WAF running inside the Caddy reverse proxy.
+This repository implements a subset of Level 1 and Level 2 controls from the **OWASP Application Security Verification Standard (ASVS) v4.0.3** at the platform and pipeline layer. It does not claim full L1 or L2 coverage. The mapping is in [SECURITY.md](./SECURITY.md#owasp-asvs-alignment):
+* **Active WAF defence:** An inline Coraza WAF in the Caddy reverse proxy, with custom rules (not the OWASP Core Rule Set). Rules 1001 (SQL injection), 1002 (XSS), 1003 (scanner user-agents), 1004 (sensitive paths), 1007 (path traversal), and 1008 (null byte) use `deny` and return 403. Rule 1005 (SQL keyword regex) only logs (`pass,log`), because its pattern matched ordinary text such as "please delete from my list"; SQL injection is still blocked by rule 1001. JSON request bodies are not inspected yet; a follow-up PR is in progress.
   * Tune one rule without editing the shipped ones: `SecRuleRemoveById` disables it, `SecRuleUpdateActionById <id> "pass"` makes it log only, and a phase 1 rule with `ctl:ruleRemoveById` skips it for one path. Examples are in the comments of [frontend/coraza.conf](frontend/coraza.conf).
-* **Tiered Isolation:** NetworkPolicies enforcing network boundaries between the frontend, backend, and database tiers.
-* **Platform/Container Hardening:** Read-only root filesystems, non-root execution, privilege escalation blocks, default seccomp profiles, and drop capabilities.
-* **Build-Time & Dynamic Testing:** Automated static analysis (Trivy, CodeQL), dependency auditing (Renovate, Knip), and weekly dynamic vulnerability scans (**OWASP ZAP**).
+* **Tiered isolation:** NetworkPolicies that restrict *ingress* between the frontend, backend, and database tiers. Egress is unrestricted.
+* **Platform/container hardening:** Read-only root filesystems, non-root execution, privilege escalation blocks, default seccomp profiles, and drop capabilities.
+* **Build-time and dynamic testing:** Automated static analysis (Trivy in Analysis; CodeQL via GitHub default setup), dependency auditing (Renovate, Knip, and Aikido Safe-Chain via `test-and-analyse`), and weekly dynamic scans (**OWASP ZAP** and **Nuclei**) whose SARIF is uploaded to the GitHub Security tab.
 
 ## Container Hardening & Writable Paths
 
@@ -533,8 +533,8 @@ Runs on pull request submission.
 Runs on pull request submission or merge to the default branch.
 
 * Unit tests (should include coverage)
-* CodeQL/GitHub security reporting (now handled as GitHub default!)
-* Trivy password, vulnerability and security scanning
+* CodeQL via GitHub's default code scanning setup (there is no CodeQL workflow in this repository)
+* Trivy filesystem scanning (vulnerabilities, secrets, and misconfiguration; `ignore-unfixed: true`, plus `.github/.trivyignore`)
 
 ![](.github/graphics/analysis.png)
 
@@ -549,12 +549,11 @@ Runs on pull request close or merge.
 
 ## Merge
 
-Runs on merge to main branch.
+Runs on merge to main branch. It does not run code scanning or penetration tests on TEST.
 
-* Code scanning and reporting to GitHub Security overview
 * Zero-downtime* TEST deployment
-* Penetration tests on TEST deployment (optional)
-* Zero-downtime* PROD deployment
+* Playwright end-to-end and integration tests against TEST (`.github/workflows/reusable-tests.yml`)
+* Zero-downtime* PROD deployment (the `prod` environment has no required reviewers, so a merge to `main` deploys PROD)
 * Labels successful deployment images as PROD
 * Sysdig email alerts synced to PROD (no-op if `SYSDIG_API_TOKEN` is unset)
 
@@ -566,9 +565,10 @@ Runs on merge to main branch.
 
 Runs on scheduled job (cronjob) or workflow dispatch.
 
-* PR environment purge
+* Label and close stale issues and pull requests (`actions/stale`; it does not delete Git branches), and clean up stale PR deployments on OpenShift
 * Generate SchemaSpy documentation
-* Tests (e2e, load, integration) on TEST deployment
+* OWASP ZAP and Nuclei scans against TEST, with SARIF uploaded to the GitHub Security tab
+* k6 load tests against TEST
 
 ![](.github/graphics/scheduled.png)
 
