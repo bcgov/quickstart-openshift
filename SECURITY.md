@@ -17,7 +17,7 @@ If you believe you have found a security vulnerability in this project, please r
 
 ## OWASP ASVS Alignment
 
-Out of the box, this QuickStart repository is hardened to satisfy Level 1 and Level 2 requirements of the **OWASP Application Security Verification Standard (ASVS) v4.0.3**. The table below outlines how this template implements and verifies specific security controls.
+Out of the box, this QuickStart repository is hardened to satisfy Level 1 and Level 2 requirements of the **OWASP Application Security Verification Standard (ASVS) v4.0.3**. The table below outlines how this template implements and verifies specific security controls. For a director-facing mapping of these practices to the Key STRA Control Areas Checklist and the Statement of Acceptable Risks (SoAR), see [docs/stra-soar-devops.md](docs/stra-soar-devops.md).
 
 | ASVS v4.0.3 Section | Category / Control | QuickStart Implementation | Verification / Automation |
 | :--- | :--- | :--- | :--- |
