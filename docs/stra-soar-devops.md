@@ -17,12 +17,12 @@ A companion OWASP ASVS mapping for the same template lives in [SECURITY.md](../S
 
 QuickStart gives a team a running DevSecOps path so a STRA is not starting from a blank sheet:
 
-- Pull requests are built, analysed, and (when application paths change) deployed to an isolated OpenShift namespace, then cleaned up when the PR is closed or ages out.
-- TEST and PROD are separate namespaces with separate GitHub Environments and distinct database passwords.
-- Static analysis, linting, unit tests, Semgrep, SonarCloud, Trivy, and Renovate run in GitHub Actions. Weekly scheduled jobs run OWASP ZAP and Nuclei against TEST, plus SchemaSpy and load tests.
-- The frontend Caddy reverse proxy runs an inline Coraza WAF with the OWASP Core Rule Set, and enforces CSP, HSTS, and related headers.
+- Pull requests are built, analysed, and (when application paths change) deployed as a separate set of resources, named by PR number, in the shared DEV namespace (`<plate>-dev`). Those resources are removed when the PR is closed or ages out.
+- TEST and PROD are separate namespaces (`<plate>-test`, `<plate>-prod`) deployed through the `test` and `prod` GitHub Environments, with distinct database passwords. PR deploys use repository-level credentials, not a GitHub Environment.
+- Linting, unit tests, Semgrep, and Trivy run in GitHub Actions. SonarCloud analysis runs once its projects and tokens are set up, and Renovate dependency updates run once the Renovate GitHub App is installed. Weekly scheduled jobs run OWASP ZAP and Nuclei against TEST, plus SchemaSpy and load tests.
+- The frontend Caddy reverse proxy runs an inline Coraza WAF with a small set of custom rules in `frontend/coraza.conf` (for example SQL injection, XSS, scanner, sensitive-path, path traversal, and null-byte checks; this is not the full OWASP Core Rule Set), and enforces CSP, HSTS, and related headers.
 - OpenShift templates harden containers (non-root, no privilege escalation, dropped capabilities, default seccomp; read-only root filesystem on the app containers) and isolate frontend, backend, and database traffic with NetworkPolicies.
-- Database backup CronJobs and optional S3 configuration are included. Vanity TLS is handled by a dedicated `cert-keeper` workflow. Sysdig alert sync can run on the PROD deploy path.
+- PROD database backup and restore CronJobs are included. They only produce off-cluster backups once S3 bucket and credentials are configured; otherwise the backup job exits without a dump. Vanity TLS is handled by a dedicated `cert-keeper` workflow. Sysdig alert sync can run on the PROD deploy path.
 
 What QuickStart does **not** do is replace the ministry STRA process, sign a SoAR, classify information, complete a Privacy Impact Assessment (PIA), or ship application-level sign-in. Those remain team and MISO responsibilities, with engagement through the Hub **Security Threat and Risk Assessment** page and the CSBC-approved STRA tool.
 
@@ -39,7 +39,7 @@ The Key STRA Control Areas Checklist uses a single status per control:
 | N | The stated standard does not apply |
 | X | Current status is not known |
 
-QuickStart can support a **1** or **2** on controls that are implemented and, where listed below, continuously tested in CI. It cannot honestly justify a **1** or **2** on controls the team has not yet implemented (for example application access control or a PIA). Use **N** only where the control truly does not apply (physical entry is the usual case for a cloud-hosted OpenShift app). This guide does not assign scores for any specific system.
+QuickStart can support a **1** or **2** on controls that are implemented and, where listed below, continuously tested in CI. It cannot honestly justify a **1** or **2** on controls the team has not yet implemented (for example application access control or a PIA). Use **N** only where the team and the MISO agree the control does not apply. This guide does not assign scores for any specific system.
 
 ---
 
@@ -51,7 +51,7 @@ A SoAR has three sections. QuickStart supplies evidence and platform defaults fo
 
 The form records the assessment reference, lite versus comprehensive STRA, system name, owner, primary risk evaluator (usually the MISO), ministry, whether the system is critical or handles confidential information, and a short description.
 
-**QuickStart provides:** a documented system shape to describe (NestJS/Prisma backend, React/Vite frontend served by Caddy, PostgreSQL, Flyway migrations, OpenShift templates in `common/`, `backend/`, and `frontend/`); named environments (pull-request namespaces, TEST, and PROD); and architecture notes in the root [README](../README.md).
+**QuickStart provides:** a documented system shape to describe (NestJS/Prisma backend, React/Vite frontend served by Caddy, PostgreSQL, Flyway migrations, OpenShift templates in `common/`, `backend/`, and `frontend/`); named environments (per-PR resource sets in the shared DEV namespace, TEST, and PROD); and architecture notes in the root [README](../README.md).
 
 **The team still owns:** the official system name and assessment number, business owner and MISO, criticality, information classification, lite versus comprehensive choice, and the executive summary. Those fields are not generated by the template.
 
@@ -59,7 +59,7 @@ The form records the assessment reference, lite versus comprehensive STRA, syste
 
 Each row is a risk name, type, rating, treatment (accept, remediate, mitigate, transfer, or avoid), and a short description. If no risks are listed, the form requires a justification in Section A.
 
-**QuickStart provides:** a set of already-running controls that commonly reduce residual risk for web applications: PR analysis (lint, tests, Semgrep, SonarCloud, Trivy), Renovate dependency updates, weekly DAST on TEST, the Coraza WAF and HTTP security headers, NetworkPolicies, container hardening, and database backups. As a high-level pattern, a “secure DevOps pipeline” risk is often treated by putting static and dynamic scanning into CI/CD — this template already does that. [IM/IT 6.14](https://www2.gov.bc.ca/assets/gov/government/services-for-government-and-broader-public-sector/information-technology-services/standards-files/imit_614_application_and_web_security_standard.pdf) also expects a STRA at each SDLC stage; the PR and merge pipelines are the hooks for that work, not the assessment itself.
+**QuickStart provides:** controls that commonly reduce residual risk for web applications. Shipped and running: PR analysis (lint, tests, Semgrep, Trivy), weekly DAST on TEST, the Coraza WAF and HTTP security headers, NetworkPolicies, and container hardening. Ready once onboarded or configured: SonarCloud (projects and tokens), Renovate (GitHub App), and off-cluster database backups (S3 bucket and credentials). As a high-level pattern, a “secure DevOps pipeline” risk is often treated by putting static and dynamic scanning into CI/CD — this template already does that. [IM/IT 6.14](https://www2.gov.bc.ca/assets/gov/government/services-for-government-and-broader-public-sector/information-technology-services/standards-files/imit_614_application_and_web_security_standard.pdf) also expects a STRA at each SDLC stage; the PR and merge pipelines are the hooks for that work, not the assessment itself.
 
 **The team still owns:** identifying risks that apply to *this* system, ratings, treatment plans, and residual risk. Trivy findings are written to the GitHub Security tab and are **not** a merge gate, so someone on the team must triage them against the windows in [SECURITY.md](../SECURITY.md#vulnerability-triage-slas). Application-specific risks (access control, personal information, integrations) will not be covered by the template alone.
 
@@ -91,7 +91,7 @@ For each control: what this template already ships, and what remains with the te
 
 ### CO.4.3 — Inventory of assets
 
-**QuickStart provides:** a partial technical inventory — container images in GitHub Container Registry, OpenShift labels on deployments, Renovate tracking of dependencies, and a weekly SchemaSpy schema publication.
+**QuickStart provides:** a partial technical inventory — container images in GitHub Container Registry, OpenShift labels on deployments, Renovate tracking of dependencies (once the Renovate GitHub App is installed), and a weekly SchemaSpy schema publication.
 
 **The team still owns:** the official information-asset register, lifecycle (including destruction), and classification of those assets.
 
@@ -123,11 +123,11 @@ For each control: what this template already ships, and what remains with the te
 
 **QuickStart provides:** none. The application is intended to run on the Province’s OpenShift platform in approved data centres.
 
-**The team still owns:** documenting that this control is typically **N** for a cloud-hosted service, plus any office or contractor-site physical controls that still apply.
+**The team still owns:** agreeing applicability with the MISO. Physical entry controls may be inherited from the OpenShift hosting provider rather than marked not applicable, and may need platform evidence. Office and contractor-site physical controls still apply.
 
 ### CO.8.9 — Separation of development, testing and operational environments
 
-**QuickStart provides:** separate OpenShift namespaces and GitHub Environments for pull requests (DEV), TEST, and PROD; PR deploys only when application or workflow paths change; PR environments cleaned up on close (`.github/workflows/pr-close.yml`) and by a scheduled purge; image promotion along that path rather than building PROD from an unreviewed commit.
+**QuickStart provides:** separate OpenShift namespaces for DEV, TEST, and PROD. Pull requests deploy a separate resource set per PR inside the shared DEV namespace, using repository-level credentials. TEST and PROD deploys use the `test` and `prod` GitHub Environments and their environment-scoped secrets. PR deploys run only when application or workflow paths change, and PR resources are removed on close (`.github/workflows/pr-close.yml`) and by a scheduled purge. QuickStart also provides image promotion along that path rather than building PROD from an unreviewed commit.
 
 **The team still owns:** not reusing database passwords across environments, controlling who can approve the `prod` environment, and keeping TEST data out of production backups and vice versa.
 
@@ -145,13 +145,13 @@ For each control: what this template already ships, and what remains with the te
 
 ### CO.8.35 — Management of technical vulnerabilities
 
-**QuickStart provides:** Mend Renovate (`renovate.json` extends `bcgov/renovate-config`) for dependency updates; Trivy on every non-draft PR and weekly via Analysis, uploading SARIF to the GitHub Security tab (`exit-code: 0`, not a merge gate); Semgrep and SonarCloud in `.github/workflows/analysis.yml` (via `bcgov/actions/test-and-analyse`); Knip unused-dependency scans in that same action (warning mode by default); weekly OWASP ZAP and Nuclei DAST against TEST (`.github/workflows/scheduled.yml`); private vulnerability reporting and triage SLAs in [SECURITY.md](../SECURITY.md); a `security-triage` issue template. The `main` ruleset also requires GitHub CodeQL results with no alerts at high or higher (`scripts/setup-github.sh`). The Hub **Web App Scanning** page describes the OCIO subsidized web-application vulnerability assessment (currently $1 per scan, ordered through iStore), which complements weekly ZAP.
+**QuickStart provides:** Mend Renovate configuration (`renovate.json` extends `bcgov/renovate-config`) for dependency updates once the Renovate GitHub App is installed; Trivy on every non-draft PR and weekly via Analysis, uploading SARIF to the GitHub Security tab (`exit-code: 0`, not a merge gate); Semgrep in `.github/workflows/analysis.yml` (via `bcgov/actions/test-and-analyse`), plus SonarCloud in the same jobs once its projects and tokens are set up; Knip unused-dependency scans in that same action (warning mode by default); weekly OWASP ZAP and Nuclei DAST against TEST (`.github/workflows/scheduled.yml`); private vulnerability reporting and triage SLAs in [SECURITY.md](../SECURITY.md); a `security-triage` issue template. The `main` ruleset also requires GitHub CodeQL results with no alerts at high or higher (`scripts/setup-github.sh`). The Hub **Web App Scanning** page describes the OCIO subsidized web-application vulnerability assessment (currently $1 per scan, ordered through iStore), which complements weekly ZAP.
 
 **The team still owns:** triaging Security tab and Sonar findings, enabling and keeping secret scanning push protection on, commissioning OCIO scans when the STRA or a change requires them, and meeting the remediation windows in SECURITY.md.
 
 ### CO.9.7 — Segregation in networks
 
-**QuickStart provides:** NetworkPolicies in `common/openshift.init.yml` so that only the platform ingress can reach the frontend, only the frontend can reach the backend, and only the backend can reach the database.
+**QuickStart provides:** NetworkPolicies in `common/openshift.init.yml` so that only the platform ingress can reach the frontend, only the frontend can reach the backend, and only the backend can reach the database. In PROD, `common/openshift.backup.yml` adds one more database ingress rule on port 5432 for the backup and restore CronJob pods.
 
 **The team still owns:** reviewing any extra ingress or egress they add (for example a new integration) and not weakening those policies.
 
@@ -175,7 +175,7 @@ For each control: what this template already ships, and what remains with the te
 
 ### CO.10.21 — Secure development environment
 
-**QuickStart provides:** local `docker compose` for the stack; isolated PR namespaces on OpenShift; GitHub Actions runners for CI rather than building production from a workstation.
+**QuickStart provides:** local `docker compose` for the stack; per-PR resource sets in the shared DEV namespace on OpenShift; GitHub Actions runners for CI rather than building production from a workstation.
 
 **The team still owns:** securing developer workstations, and any additional private package registries or secrets management the product needs.
 
@@ -187,7 +187,7 @@ For each control: what this template already ships, and what remains with the te
 
 ### CO.10.25 — System security testing
 
-**QuickStart provides:** backend and frontend lint, format check, and unit tests with coverage; Semgrep and SonarCloud on analysis; Playwright end-to-end tests and integration tests after a PR or TEST deploy (`.github/workflows/reusable-tests.yml`); weekly ZAP and Nuclei against TEST; weekly k6 load tests.
+**QuickStart provides:** backend and frontend lint, format check, and unit tests with coverage; Semgrep on analysis, plus SonarCloud once onboarded; Playwright end-to-end tests and integration tests after a PR or TEST deploy (`.github/workflows/reusable-tests.yml`); weekly ZAP and Nuclei against TEST; weekly k6 load tests.
 
 **The team still owns:** tests for authorization and sensitive business rules once those exist, and any OCIO or third-party assessment required by the STRA.
 
@@ -199,19 +199,19 @@ For each control: what this template already ships, and what remains with the te
 
 ### CO.13.5 — Implementing information security continuity
 
-**QuickStart provides:** a database backup CronJob and optional S3 configuration (`common/openshift.backup.yml`); rolling updates; health probes; scheduled cleanup of stale PR environments so leftover namespaces do not accumulate.
+**QuickStart provides:** PROD database backup and restore CronJobs (`common/openshift.backup.yml`). Off-cluster backups need an S3 bucket and credentials; if `S3_BUCKET` is unset, the backup job exits successfully without producing a dump. QuickStart also provides rolling updates, health probes, and scheduled cleanup of stale PR resources.
 
 **The team still owns:** business continuity and disaster-recovery plans, restore testing, setting `BACKUP_SCHEDULE` and S3 credentials, and RPO/RTO appropriate to the system’s criticality. The PostgreSQL container intentionally omits `readOnlyRootFilesystem` so the database can start; other hardening still applies (`common/openshift.database.yml`).
 
 ### CO.14.9 — Privacy and protection of personally identifiable information
 
-**QuickStart provides:** no PIA and no personal-information handling features in the sample app.
+**QuickStart provides:** no PIA and no privacy controls. The sample `users` API stores and returns names and email addresses (`backend/src/users/`) as demo data, with no sign-in or access control in front of it.
 
-**The team still owns:** determining whether PII is collected, completing a PIA, data minimization, and retention. If BC Services Card onboarding is in scope, IDIM will expect the PIA and STRA/SoAR alongside the checklist.
+**The team still owns:** replacing or securing the demo `users` endpoints before real data is entered, determining whether PII is collected, completing a PIA, data minimization, and retention. If BC Services Card onboarding is in scope, IDIM will expect the PIA and STRA/SoAR alongside the checklist.
 
 ### CO.14.15 — Independent review of information security
 
-**QuickStart provides:** required peer review on `main`, SonarCloud, Semgrep, Trivy SARIF on the Security tab, weekly DAST, and a ruleset requirement for CodeQL with no high-or-higher alerts.
+**QuickStart provides:** required peer review on `main`, Semgrep, SonarCloud (once onboarded), Trivy SARIF on the Security tab, weekly DAST, and a ruleset requirement for CodeQL with no high-or-higher alerts.
 
 **The team still owns:** engaging the MISO, commissioning independent review when the STRA requires it, and keeping review findings in the SoAR and risk register.
 
@@ -222,10 +222,10 @@ For each control: what this template already ships, and what remains with the te
 Bring this guide, plus:
 
 - The root [README](../README.md) and [SECURITY.md](../SECURITY.md) (ASVS table, triage SLAs, private reporting).
-- Recent GitHub Actions runs: Analysis, PR, Scheduled (ZAP/Nuclei), and Renovate pull requests.
-- The GitHub Security tab (Trivy / CodeQL) and SonarCloud projects created during setup.
+- Recent GitHub Actions runs: Analysis, PR, and Scheduled (ZAP/Nuclei), and Renovate pull requests if the app is installed.
+- The GitHub Security tab (Trivy / CodeQL) and, if onboarded, the SonarCloud projects.
 - OpenShift NetworkPolicies and security contexts as deployed from the templates.
-- Backup CronJob status and, if used, S3 configuration.
+- If backups are configured, retained backup objects in S3 and a tested restore, not CronJob status alone.
 - If identity is in scope, the FAM wiki pages linked above.
 
 Use the Hub **Security Threat and Risk Assessment** page to start or update the ministry STRA, and the Hub **Web App Scanning** page (or the weekly ZAP job already in this repo) when a web-application scan is required.
