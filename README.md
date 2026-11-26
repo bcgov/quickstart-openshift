@@ -21,7 +21,7 @@ This repository provides a template to rapidly deploy a modern web application s
 * A subset of **OWASP ASVS** Level 1 and 2 controls at the platform and pipeline layer (see [SECURITY.md](./SECURITY.md#owasp-asvs-alignment))
 * Automatic dependency patching via [bcgov/renovate-config](https://github.com/bcgov/renovate-config)
 * Maintenance Mode Automation (hands‑off updates, low‑dev mode) via the same Renovate config
-* Enforced code reviews and workflow jobs (pass|fail)
+* Required PR review (one approval; admins can bypass) and workflow jobs (pass|fail)
 * OpenShift Templates
 * Prometheus Metrics export from Backend/Frontend
 * Resource Tuning with Horizontal Pod Autoscaler
@@ -400,7 +400,7 @@ This repository implements a subset of Level 1 and Level 2 controls from the **O
 * **Active WAF defence:** An inline Coraza WAF in the Caddy reverse proxy, with custom rules (not the OWASP Core Rule Set). Scanner user-agent and sensitive-path rules (`deny`) return 403. SQL injection, XSS, path-traversal, and null-byte rules use `block` with no `SecDefaultAction`, so Coraza's phase-2 default is `pass` and those rules detect and log only.
 * **Tiered isolation:** NetworkPolicies that restrict *ingress* between the frontend, backend, and database tiers. Egress is unrestricted.
 * **Platform/container hardening:** Read-only root filesystems, non-root execution, privilege escalation blocks, default seccomp profiles, and drop capabilities.
-* **Build-time and dynamic testing:** Automated static analysis (Trivy in Analysis; CodeQL via GitHub default setup), dependency auditing (Renovate, Knip), and weekly dynamic scans (**OWASP ZAP** and **Nuclei**) whose SARIF is uploaded to the GitHub Security tab.
+* **Build-time and dynamic testing:** Automated static analysis (Trivy in Analysis; CodeQL via GitHub default setup), dependency auditing (Renovate, Knip, and Aikido Safe-Chain via `test-and-analyse`), and weekly dynamic scans (**OWASP ZAP** and **Nuclei**) whose SARIF is uploaded to the GitHub Security tab.
 
 ## Container Hardening & Writable Paths
 
