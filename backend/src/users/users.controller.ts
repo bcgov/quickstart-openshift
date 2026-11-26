@@ -53,12 +53,20 @@ export class UsersController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto)
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    const user = await this.usersService.update(+id, updateUserDto)
+    if (!user) {
+      throw new HttpException('User not found.', 404)
+    }
+    return user
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id)
+  async remove(@Param('id') id: string) {
+    const result = await this.usersService.remove(+id)
+    if (!result) {
+      throw new HttpException('User not found.', 404)
+    }
+    return result
   }
 }
