@@ -398,6 +398,7 @@ Don't forget to add your team members!
 
 This repository is architected and hardened out-of-the-box to align with Levels 1 and 2 of the **OWASP Application Security Verification Standard (ASVS) v4.0.3**. A detailed security mapping matrix is documented in [SECURITY.md](./SECURITY.md#owasp-asvs-alignment), detailing our implementation of:
 * **Active WAF Defense:** Inline Coraza WAF running inside the Caddy reverse proxy.
+  * Tune one rule without editing the shipped ones: `SecRuleRemoveById` disables it, `SecRuleUpdateActionById <id> "pass"` makes it log only, and a phase 1 rule with `ctl:ruleRemoveById` skips it for one path. Examples are in the comments of [frontend/coraza.conf](frontend/coraza.conf).
 * **Tiered Isolation:** NetworkPolicies enforcing network boundaries between the frontend, backend, and database tiers.
 * **Platform/Container Hardening:** Read-only root filesystems, non-root execution, privilege escalation blocks, default seccomp profiles, and drop capabilities.
 * **Build-Time & Dynamic Testing:** Automated static analysis (Trivy, CodeQL), dependency auditing (Renovate, Knip), and weekly dynamic vulnerability scans (**OWASP ZAP**).
