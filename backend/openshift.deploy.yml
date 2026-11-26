@@ -203,12 +203,16 @@ objects:
                   path: /api/health
                   port: http
                 periodSeconds: 5
+                # Default 1s; this check queries the database, which queues under load
+                timeoutSeconds: 3
                 failureThreshold: 3
               livenessProbe:
                 httpGet:
                   path: /api
                   port: http
                 periodSeconds: 10
+                # Default 1s; a busy pod should not be restarted for a slow answer
+                timeoutSeconds: 5
                 failureThreshold: 3
               lifecycle:
                 preStop:

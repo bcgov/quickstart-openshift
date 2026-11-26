@@ -158,12 +158,16 @@ objects:
                   path: /
                   port: http
                 periodSeconds: 5
+                # Default 1s; a WAF-inspected request under scan load can take longer
+                timeoutSeconds: 3
                 failureThreshold: 3
               livenessProbe:
                 httpGet:
                   path: /health
                   port: health
                 periodSeconds: 10
+                # Default 1s; a busy pod should not be restarted for a slow answer
+                timeoutSeconds: 5
                 failureThreshold: 3
               lifecycle:
                 preStop:
