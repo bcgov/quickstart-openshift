@@ -70,6 +70,37 @@ jobs:
             - [Frontend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca)
             - [Backend](https://${{ github.event.repository.name }}-${{ github.event.number }}.apps.silver.devops.gov.bc.ca/api)
 
+  # TEMP (removed before Ready): A/B scan for probe timeouts, this PR's deploy vs TEST
+  tmp-scan:
+    name: TEMP Scan (${{ matrix.target }} r${{ matrix.round }}${{ matrix.path }})
+    needs: [deploys, tests]
+    if: always() && needs.deploys.result == 'success'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        round: [1, 2, 3]
+        target: [pr, test]
+        path: ["", "/api"]
+        include:
+          - { round: 1, rl: "25", c: "5", t: "30" }
+          - { round: 2, rl: "25", c: "5", t: "30" }
+          - { round: 3, rl: "150", c: "25", t: "10" }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Scan
+        uses: bcgov/actions/scan-url@76967dc6028f69d17e7899092078d3bae1ab7f95 # TEMP bcgov/actions#378
+        with:
+          url: https://${{ github.event.repository.name }}-${{ matrix.target == 'pr' && github.event.number || 'test' }}.apps.silver.devops.gov.bc.ca${{ matrix.path }}
+          nuclei_rate_limit: ${{ matrix.rl }}
+          nuclei_concurrency: ${{ matrix.c }}
+          nuclei_timeout: ${{ matrix.t }}
+
   # ==========================================================================
   # WARNING: This job acts as the required merge gate for this workflow.
   # If you add a new job to this workflow, you MUST add its ID to the 'needs'
