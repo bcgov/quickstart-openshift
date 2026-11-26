@@ -5,6 +5,10 @@
 
 # QuickStart for OpenShift
 
+## Security assessments (STRA / SoAR)
+
+A director-facing guide to how this template supports a Security Threat and Risk Assessment (STRA) and a Statement of Acceptable Risks (SoAR) is in [docs/stra-soar-devops.md](docs/stra-soar-devops.md).
+
 ## Pull Request-Based Workflows with Sample Stack
 
 This repository provides a template to rapidly deploy a modern web application stack to OpenShift using [GitHub Actions](https://github.com/bcgov/quickstart-openshift/actions), incorporating best practices for CI/CD, security, and observability. By hitting the ground running we can save weeks‑to‑months of development time, receive regular updates, and built‑in **Maintenance Mode Automation**, which allows an app to go on autopilot for security and dependency updates.  This limits developmer involvement to critical issues only, drastically reducing labor costs and freeing up resources for higher priority work.
