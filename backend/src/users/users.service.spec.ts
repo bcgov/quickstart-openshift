@@ -97,11 +97,29 @@ describe('UserService', () => {
       expect(user).toEqual(updateUser)
       expect(prisma.users.update).toBeCalledTimes(1)
     })
+
+    it('should return null when Prisma reports the record was not found', async () => {
+      vi.spyOn(prisma.users, 'update').mockRejectedValueOnce(
+        Object.assign(new Error('Record to update not found.'), { code: 'P2025' }),
+      )
+      await expect(service.update(999, updateUser)).resolves.toBeNull()
+    })
+
+    it('should rethrow errors other than record-not-found', async () => {
+      vi.spyOn(prisma.users, 'update').mockRejectedValueOnce(new Error('connection failed'))
+      await expect(service.update(1, updateUser)).rejects.toThrow('connection failed')
+    })
   })
 
   describe('remove', () => {
     it('should return {deleted: true}', async () => {
       await expect(service.remove(2)).resolves.toEqual({ deleted: true })
+    })
+    it('should return null when Prisma reports the record was not found', async () => {
+      vi.spyOn(prisma.users, 'delete').mockRejectedValueOnce(
+        Object.assign(new Error('Record to delete does not exist.'), { code: 'P2025' }),
+      )
+      await expect(service.remove(999)).resolves.toBeNull()
     })
     it('should return {deleted: false, message: err.message}', async () => {
       const repoSpy = vi
