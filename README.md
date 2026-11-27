@@ -565,7 +565,7 @@ Runs on merge to main branch. It does not run code scanning or penetration tests
 
 Runs on scheduled job (cronjob) or workflow dispatch.
 
-* Label and close stale issues and pull requests (`actions/stale`; it does not delete Git branches), and clean up stale PR deployments on OpenShift
+* Clean up stale PR deployments on OpenShift
 * Generate SchemaSpy documentation
 * OWASP ZAP and Nuclei scans against TEST, with SARIF uploaded to the GitHub Security tab
 * k6 load tests against TEST

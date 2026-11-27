@@ -12,28 +12,6 @@ concurrency:
 permissions: {}
 
 jobs:
-  stale-branches:
-    name: Close Stale Branches & PRs
-    runs-on: ubuntu-slim
-    timeout-minutes: 10
-    steps:
-      - uses: actions/stale@v11
-        with:
-          days-before-stale: 14
-          days-before-close: 7
-          stale-label: stale
-          close-issue-message: >
-            This issue has been marked stale due to no activity for 14 days.
-            It will be closed in 7 days if no action is taken.
-            If you still need this, please reopen or comment to reset the timer.
-          close-pr-message: >
-            This PR has been marked stale due to no activity for 14 days.
-            It will be closed in 7 days if no action is taken.
-            If you still need this, please reopen or request review to reset the timer.
-          remove-stale-when-updated: true
-          operations-per-run: 100
-          debug-only: false
-
   ageOutPRs:
     name: PR Deployment Purge
     runs-on: ubuntu-slim
@@ -43,7 +21,7 @@ jobs:
       pull-requests: read
     steps:
       - name: Clean up stale PR deployments
-        uses: bcgov/actions-openshift/pr-env-cleanup@510a8105fdffbb718094e8a093e638132e300975 # v0.10.0
+        uses: bcgov/actions-openshift/pr-env-cleanup@47805d2fc4e919382757c1fbeb68d39313abe64f # v0.11.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -77,7 +55,7 @@ jobs:
       matrix:
         name: [backend, frontend]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: grafana/setup-k6-action@c47136d33d365efbeb9ae7266908b5dcf98cdece # v1.3.0
       - uses: grafana/run-k6-action@54385d2a25c222a08b4a3aec6b653b8fb370a1ed # v1.6.0
         env:
@@ -89,7 +67,7 @@ jobs:
 
   results:
     name: Scheduled Results
-    needs: [stale-branches, ageOutPRs, schema-spy, zap, load-tests]
+    needs: [ageOutPRs, schema-spy, zap, load-tests]
     if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 1
