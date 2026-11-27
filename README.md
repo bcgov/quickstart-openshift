@@ -401,7 +401,7 @@ This repository implements a subset of Level 1 and Level 2 controls from the **O
   * Tune one rule without editing the shipped ones: `SecRuleRemoveById` disables it, `SecRuleUpdateActionById <id> "pass"` makes it log only, and a phase 1 rule with `ctl:ruleRemoveById` skips it for one path. Examples are in the comments of [frontend/coraza.conf](frontend/coraza.conf).
 * **Tiered isolation:** NetworkPolicies that restrict *ingress* between the frontend, backend, and database tiers. Egress is unrestricted.
 * **Platform/container hardening:** Read-only root filesystems, non-root execution, privilege escalation blocks, default seccomp profiles, and drop capabilities.
-* **Build-time and dynamic testing:** Automated static analysis (Trivy in Analysis; CodeQL via GitHub default setup), dependency auditing (Renovate, Knip, and Aikido Safe-Chain via `test-and-analyse`), and weekly dynamic scans (**OWASP ZAP** and **Nuclei**) whose SARIF is uploaded to the GitHub Security tab.
+* **Build-time and dynamic testing:** Automated static analysis (Trivy in Analysis; CodeQL via GitHub default setup), dependency auditing (Renovate, Knip, and Aikido Safe-Chain via `test-and-analyse`), and weekly dynamic scans (**OWASP ZAP**; **Nuclei** is opt-in and off by default due to Silver connection throttling) whose SARIF is uploaded to the GitHub Security tab.
 
 ## Container Hardening & Writable Paths
 
@@ -567,7 +567,7 @@ Runs on scheduled job (cronjob) or workflow dispatch.
 
 * Clean up stale PR deployments on OpenShift
 * Generate SchemaSpy documentation
-* OWASP ZAP and Nuclei scans against TEST, with SARIF uploaded to the GitHub Security tab
+* OWASP ZAP scan against TEST (Nuclei opt-in), with SARIF uploaded to the GitHub Security tab
 * k6 load tests against TEST
 
 ![](.github/graphics/scheduled.png)
