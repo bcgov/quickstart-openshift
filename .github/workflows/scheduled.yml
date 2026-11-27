@@ -34,9 +34,9 @@ jobs:
       pages: write
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.schema-spy.yml@a11ad3d1b9288fb40757c4314a62eb86ff227931 # v1.2.1
 
-  # Run weekly DAST (OWASP ZAP + Nuclei) against TEST and upload SARIF to Security tab
+  # Run weekly DAST (OWASP ZAP by default; Nuclei is opt-in) against TEST and upload SARIF to Security tab
   zap:
-    name: ZAP & Nuclei Scans
+    name: ZAP Scan
     permissions:
       contents: read
       security-events: write
@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Scan TEST URL
-        uses: bcgov/actions/scan-url@a25c5f02d20139f29c17c3ceaa41c314ffe92ec9 # v0.16.0
+        uses: bcgov/actions/scan-url@01c3fa1c94c8ccea526ce718b40d8a93bb0a2279 # v0.16.0
         with:
           url: https://${{ github.event.repository.name }}-test.apps.silver.devops.gov.bc.ca
 
