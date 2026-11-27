@@ -105,14 +105,54 @@ describe('UserController', () => {
       expect(await controller.update(id, updateUserDto)).toBe(userDto)
       expect(usersService.update).toHaveBeenCalledWith(+id, updateUserDto)
     })
+    it('should throw error if user not found', async () => {
+      vi.spyOn(usersService, 'update').mockResolvedValue(null)
+      try {
+        await controller.update('999', { name: 'x', email: 'x@example.com' })
+        throw new Error('expected HttpException')
+      } catch (e) {
+        expect(e).toBeInstanceOf(HttpException)
+        expect(e.message).toBe('User not found.')
+        expect(e.getStatus()).toBe(404)
+      }
+    })
+    it('PUT /users/:id given a missing user should return 404', async () => {
+      vi.spyOn(usersService, 'update').mockResolvedValue(null)
+      return request(app.getHttpServer())
+        .put('/users/999')
+        .send({ name: 'x', email: 'x@example.com' })
+        .expect(404)
+        .expect({
+          statusCode: 404,
+          message: 'User not found.',
+        })
+    })
   })
   describe('remove', () => {
     it('should remove a user', async () => {
       const id = '1'
-      vi.spyOn(usersService, 'remove').mockResolvedValue(undefined)
+      vi.spyOn(usersService, 'remove').mockResolvedValue({ deleted: true })
 
-      expect(await controller.remove(id)).toBeUndefined()
+      expect(await controller.remove(id)).toEqual({ deleted: true })
       expect(usersService.remove).toHaveBeenCalledWith(+id)
+    })
+    it('should throw error if user not found', async () => {
+      vi.spyOn(usersService, 'remove').mockResolvedValue(null)
+      try {
+        await controller.remove('999')
+        throw new Error('expected HttpException')
+      } catch (e) {
+        expect(e).toBeInstanceOf(HttpException)
+        expect(e.message).toBe('User not found.')
+        expect(e.getStatus()).toBe(404)
+      }
+    })
+    it('DELETE /users/:id given a missing user should return 404', async () => {
+      vi.spyOn(usersService, 'remove').mockResolvedValue(null)
+      return request(app.getHttpServer()).delete('/users/999').expect(404).expect({
+        statusCode: 404,
+        message: 'User not found.',
+      })
     })
   })
   // Test the GET /users/search endpoint

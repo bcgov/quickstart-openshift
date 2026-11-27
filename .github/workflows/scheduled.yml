@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Scan TEST URL
-        uses: bcgov/actions/scan-url@6c8ac0469fcf0d826533bc526c90119b8f149884 # v0.13.0
+        uses: bcgov/actions/scan-url@a25c5f02d20139f29c17c3ceaa41c314ffe92ec9 # v0.16.0
         with:
           url: https://${{ github.event.repository.name }}-test.apps.silver.devops.gov.bc.ca
 

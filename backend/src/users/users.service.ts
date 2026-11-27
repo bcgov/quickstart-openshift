@@ -53,24 +53,31 @@ export class UsersService {
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserDto> {
-    const user = await this.prisma.users.update({
-      where: {
-        id: new Prisma.Decimal(id),
-      },
-      data: {
-        name: updateUserDto.name,
-        email: updateUserDto.email,
-      },
-    })
-    return {
-      id: user.id.toNumber(),
-      name: user.name,
-      email: user.email,
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserDto | null> {
+    try {
+      const user = await this.prisma.users.update({
+        where: {
+          id: new Prisma.Decimal(id),
+        },
+        data: {
+          name: updateUserDto.name,
+          email: updateUserDto.email,
+        },
+      })
+      return {
+        id: user.id.toNumber(),
+        name: user.name,
+        email: user.email,
+      }
+    } catch (err) {
+      if (isRecordNotFound(err)) {
+        return null
+      }
+      throw err
     }
   }
 
-  async remove(id: number): Promise<{ deleted: boolean; message?: string }> {
+  async remove(id: number): Promise<{ deleted: boolean; message?: string } | null> {
     try {
       await this.prisma.users.delete({
         where: {
@@ -79,6 +86,9 @@ export class UsersService {
       })
       return { deleted: true }
     } catch (err) {
+      if (isRecordNotFound(err)) {
+        return null
+      }
       const message = err instanceof Error ? err.message : String(err)
       return { deleted: false, message }
     }
@@ -156,4 +166,13 @@ export class UsersService {
     }
     return prismaFilterObj
   }
+}
+
+function isRecordNotFound(err: unknown): boolean {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'code' in err &&
+    (err as { code: unknown }).code === 'P2025'
+  )
 }
