@@ -31,7 +31,7 @@
     "@nestjs/terminus": "^12.0.0",
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
-    "express-prom-bundle": "^8.0.0",
+    "express-prom-bundle": "^9.0.0",
     "helmet": "^8.0.0",
     "nest-winston": "^2.0.0",
     "pg": "^8.13.1",
